@@ -1,0 +1,10 @@
+{
+  "name": "sandbox",
+  "scripts": {
+    "gulp": "gulp",
+    "postinstall": "gulp build"
+  },
+  "dependencies": {
+    "gulp": "github:gulpjs/gulp#4.0"
+  }
+}
