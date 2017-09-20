@@ -9,5 +9,5 @@ import {Component} from "@angular/core";
   `
 })
 export class RootComponent {
-  name: string = "Root Component 2"
+  name: string = "Root Component"
 }

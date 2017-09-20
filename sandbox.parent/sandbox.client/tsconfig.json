@@ -1,7 +1,7 @@
 {
   "compileOnSave": false,
   "compilerOptions": {
-    "outDir": "./build/public/js",
+    "outDir": "./build/public",
     "sourceMap": true,
     "declaration": false,
     "moduleResolution": "node",

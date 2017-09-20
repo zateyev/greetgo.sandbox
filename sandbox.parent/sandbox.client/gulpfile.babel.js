@@ -50,8 +50,9 @@ function outDir() {
 task('clean', () => del(['build']));
 
 task("webpack", (done) => {
+  //noinspection JSUnresolvedFunction
   let options = {
-    entry  : [path.resolve('.', 'front', 'ts', 'boot.ts')],
+    entry  : path.resolve('.', 'front', 'ts', 'boot.ts'),
     output : {
       path             : outDir(),
       publicPath       : '/',
@@ -110,6 +111,7 @@ task("webpack", (done) => {
     }
 
     if (err) {
+      //noinspection JSUnresolvedFunction
       notifier.notify({
         title  : 'Webpack',
         message: err
@@ -204,6 +206,7 @@ task('pug', function () {
     }
   }));
 
+  //noinspection ES6ModulesDependencies
   p = p.on("error", console.log);
 
   if (!isStand) {
@@ -277,6 +280,7 @@ task('sass', function () {
 
   p = p.pipe(sourceMaps.init());
 
+  //noinspection JSUnresolvedFunction
   p = p.pipe(sass({
     importer: moduleImporter(),
   }).on('error', sass.logError));
@@ -319,7 +323,7 @@ task('server', () => {
     server: path.resolve('build', 'public')
   });
 
-  browser.watch('build/public/**/*.*').on('change', browser.reload);
+  browser.watch("build/public/**/*.*").on('change', browser.reload);
 });
 
 task('start', ser('clean',
