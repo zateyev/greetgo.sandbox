@@ -1,0 +1,25 @@
+dependencies {
+  compile project(':sandbox.controller')
+
+  compile "kz.greetgo.depinject:greetgo.depinject.gen:$depinjectVersion"
+  compile "kz.greetgo.mvc:greetgo.mvc:$greetgoMvcVersion"
+  compile "kz.greetgo.mvc:greetgo.mvc.jetty:$greetgoMvcVersion"
+  compile "kz.greetgo.mvc:greetgo.mvc.war:$greetgoMvcVersion"
+
+  compile "com.fasterxml.jackson.core:jackson-databind:$jacksonVersion"
+
+  compile "org.eclipse.jetty:jetty-server:$jettyVersion"
+  compile "org.eclipse.jetty:jetty-servlet:$jettyVersion"
+  compile "org.eclipse.jetty:jetty-webapp:$jettyVersion"
+  compile "org.eclipse.jetty:jetty-plus:$jettyVersion"
+  compile "org.eclipse.jetty:jetty-annotations:$jettyVersion"
+  compile "org.eclipse.jetty:apache-jsp:$jettyVersion"
+
+  compile "com.google.guava:guava:$guavaVersion"
+
+  compile "cglib:cglib:3.2.2"
+
+  compile 'jstl:jstl:1.2'
+
+  testCompile "kz.greetgo.depinject:greetgo.depinject.testng:$depinjectVersion"
+}
