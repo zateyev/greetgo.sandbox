@@ -1,0 +1,9 @@
+extends _page
+
+block head
+  title Access Stand
+  script window.urlPrefix = 'http://' + location.hostname + ':1313/access/api';
+
+block body
+  access-app
+  script(src="boot.js", type="text/javascript")

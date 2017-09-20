@@ -8,3 +8,8 @@ task cleanLibs(type: Delete) {
 }
 
 clean.dependsOn cleanLibs
+
+build.dependsOn npm_install
+build.dependsOn gulp_build
+
+gulp_build.shouldRunAfter npm_install
