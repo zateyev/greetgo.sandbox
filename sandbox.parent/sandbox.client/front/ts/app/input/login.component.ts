@@ -1,5 +1,9 @@
-import {Component} from "@angular/core";
+import {Component, EventEmitter, Output} from "@angular/core";
 import {HttpService} from "../HttpService";
+import "rxjs/add/operator/catch";
+import "rxjs/add/operator/map";
+import "rxjs/add/operator/toPromise";
+
 @Component({
   selector: 'login-component',
   template: require('./login-component.html'),
@@ -9,8 +13,14 @@ export class LoginComponent {
   registration: boolean = false;
   enterButtonEnabled: boolean = false;
 
+  errorMessage: string | null = null;
+
+  disabled: boolean = false;
+
   fieldEnterLogin: string = '';
   fieldEnterPassword: string = '';
+
+  @Output() finish = new EventEmitter<void>();
 
   constructor(private httpService: HttpService) {}
 
@@ -24,6 +34,31 @@ export class LoginComponent {
   }
 
   enterButtonClicked() {
-    window.alert("Войти");
+    this.disabled = true;
+    this.enterButtonEnabled = false;
+
+    this.httpService.post("/auth/login", {
+      accountName: this.fieldEnterLogin,
+      password: this.fieldEnterPassword,
+    }).toPromise().then(res => {
+      this.disabled = false;
+      this.httpService.token = res.text();
+      this.errorMessage = null;
+      if (this.fieldEnterLogin == 'root') {
+        localStorage.removeItem("lastGoodLogin");
+      } else {
+        localStorage.setItem("lastGoodLogin", this.fieldEnterLogin);
+      }
+      this.finish.emit();
+    }, error => {
+      this.disabled = false;
+      this.enterButtonEnabled = true;
+      if (error.status == 470) {
+        this.errorMessage = error.text();
+      } else {
+        console.error("AUTHENTICATION_UNKNOWN_ERROR", error);
+        this.errorMessage = error;
+      }
+    });
   }
 }

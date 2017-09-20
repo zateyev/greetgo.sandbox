@@ -45,7 +45,7 @@ subprojects {
     ext.jacksonVersion = "2.7.3"
     ext.depinjectVersion = '1.1.2'
     ext.greetgoDbVersion = '0.0.19'
-    ext.greetgoMvcVersion = "1.0.2"
+    ext.greetgoMvcVersion = "2.0.4"
     ext.jettyVersion = '9.4.0.v20161208'
     ext.guavaVersion = '23.0'
 
