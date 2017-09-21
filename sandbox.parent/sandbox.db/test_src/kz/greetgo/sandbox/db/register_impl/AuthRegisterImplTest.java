@@ -4,6 +4,7 @@ import kz.greetgo.depinject.core.BeanGetter;
 import kz.greetgo.sandbox.controller.errors.IllegalLoginOrPassword;
 import kz.greetgo.sandbox.controller.errors.NoAccountName;
 import kz.greetgo.sandbox.controller.errors.NoPassword;
+import kz.greetgo.sandbox.controller.errors.NotFound;
 import kz.greetgo.sandbox.controller.model.AuthInfo;
 import kz.greetgo.sandbox.controller.register.AuthRegister;
 import kz.greetgo.sandbox.controller.register.model.SessionInfo;
@@ -12,7 +13,6 @@ import kz.greetgo.sandbox.controller.security.SecurityError;
 import kz.greetgo.sandbox.db.test.dao.AuthTestDao;
 import kz.greetgo.sandbox.db.test.util.ParentTestNg;
 import kz.greetgo.util.RND;
-import org.omg.CosNaming.NamingContextPackage.NotFound;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
@@ -359,7 +359,7 @@ public class AuthRegisterImplTest extends ParentTestNg {
 
     assertThat(userInfo).isNotNull();
     assertThat(userInfo.pageSize).isEqualTo(50);
-    assertThat(userInfo.appTitle).isEqualTo(accountName + " - greetgo! Access");
+    assertThat(userInfo.appTitle).isEqualTo(accountName + " - Sandbox");
   }
 
   @Test(expectedExceptions = NotFound.class)
