@@ -61,4 +61,9 @@ export class LoginComponent {
       }
     });
   }
+
+  registrationButtonClicked() {
+    window.alert("Регистрация ещё не работает");
+    this.registration = false;
+  }
 }
