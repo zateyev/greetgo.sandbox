@@ -1,8 +1,8 @@
-package kz.greetgo.sandbox.stand.stand_register_impls.db;
+package kz.greetgo.sandbox.stand_db;
 
 import kz.greetgo.depinject.core.Bean;
 import kz.greetgo.depinject.core.HasAfterInject;
-import kz.greetgo.sandbox.stand.stand_register_impls.model.PersonDot;
+import kz.greetgo.sandbox.stand_db.model.PersonDot;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
@@ -10,13 +10,13 @@ import java.util.HashMap;
 import java.util.Map;
 
 @Bean
-public class Db implements HasAfterInject {
+public class StandDb implements HasAfterInject {
   public final Map<String, PersonDot> personStorage = new HashMap<>();
 
   @Override
   public void afterInject() throws Exception {
     try (BufferedReader br = new BufferedReader(
-      new InputStreamReader(getClass().getResourceAsStream("DbInitData.txt"), "UTF-8"))) {
+      new InputStreamReader(getClass().getResourceAsStream("StandDbInitData.txt"), "UTF-8"))) {
 
       int lineNo = 0;
 

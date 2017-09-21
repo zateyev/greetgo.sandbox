@@ -9,8 +9,8 @@ import kz.greetgo.sandbox.controller.register.AuthRegister;
 import kz.greetgo.sandbox.controller.register.model.SessionInfo;
 import kz.greetgo.sandbox.controller.register.model.UserParamName;
 import kz.greetgo.sandbox.controller.security.SecurityError;
-import kz.greetgo.sandbox.stand.stand_register_impls.db.Db;
-import kz.greetgo.sandbox.stand.stand_register_impls.model.PersonDot;
+import kz.greetgo.sandbox.stand_db.StandDb;
+import kz.greetgo.sandbox.stand_db.model.PersonDot;
 import kz.greetgo.util.ServerUtil;
 
 import java.io.File;
@@ -55,7 +55,7 @@ public class AuthRegisterStand implements AuthRegister {
     }
   }
 
-  public BeanGetter<Db> db;
+  public BeanGetter<StandDb> db;
 
   @Override
   public String login(String accountName, String password) {

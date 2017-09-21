@@ -1,4 +1,4 @@
-package kz.greetgo.sandbox.stand.stand_register_impls.model;
+package kz.greetgo.sandbox.stand_db.model;
 
 import kz.greetgo.sandbox.controller.model.UserInfo;
 

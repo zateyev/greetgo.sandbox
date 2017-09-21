@@ -10,7 +10,7 @@ public class TestNgRecreateDbListener implements ISuiteListener {
 
   @Override
   public void onStart(ISuite suite) {
-    if (!"All Db Test Suite".equals(suite.getName())) return;
+    if (!"All StandDb Test Suite".equals(suite.getName())) return;
 
     try {
       prepareDatabases();
