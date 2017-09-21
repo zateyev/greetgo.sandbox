@@ -3,6 +3,9 @@ package kz.greetgo.sandbox.controller.model;
 
 
 public class UserInfo {
-  public int pageSize;
-  public String appTitle;
+  public String id;
+  public String accountName;
+  public String surname;
+  public String name;
+  public String patronymic;
 }

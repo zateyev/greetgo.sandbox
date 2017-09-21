@@ -3,6 +3,7 @@ package kz.greetgo.sandbox.stand.stand_register_impls;
 import kz.greetgo.depinject.core.Bean;
 import kz.greetgo.depinject.core.BeanGetter;
 import kz.greetgo.sandbox.controller.errors.AuthError;
+import kz.greetgo.sandbox.controller.model.AuthInfo;
 import kz.greetgo.sandbox.controller.model.UserInfo;
 import kz.greetgo.sandbox.controller.register.AuthRegister;
 import kz.greetgo.sandbox.controller.register.model.SessionInfo;
@@ -112,12 +113,17 @@ public class AuthRegisterStand implements AuthRegister {
   }
 
   @Override
-  public UserInfo getUserInfo(String personId) {
+  public AuthInfo getAuthInfo(String personId) {
     PersonDot personDot = db.get().personStorage.get(personId);
     if (personDot == null) throw new NullPointerException("personDot == null for id = " + personId);
-    UserInfo ret = new UserInfo();
+    AuthInfo ret = new AuthInfo();
     ret.pageSize = 7;
     ret.appTitle = personDot.accountName + " - Sandbox STAND";
     return ret;
+  }
+
+  @Override
+  public UserInfo getUserInfo(String personId) {
+    return db.get().personStorage.get(personId).toUserInfo();
   }
 }

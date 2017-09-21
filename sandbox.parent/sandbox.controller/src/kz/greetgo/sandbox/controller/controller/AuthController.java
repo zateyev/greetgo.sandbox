@@ -7,6 +7,7 @@ import kz.greetgo.mvc.annotations.Mapping;
 import kz.greetgo.mvc.annotations.Par;
 import kz.greetgo.mvc.annotations.ParSession;
 import kz.greetgo.mvc.annotations.ToJson;
+import kz.greetgo.sandbox.controller.model.AuthInfo;
 import kz.greetgo.sandbox.controller.model.UserInfo;
 import kz.greetgo.sandbox.controller.register.AuthRegister;
 import kz.greetgo.sandbox.controller.security.NoSecurity;
@@ -27,7 +28,13 @@ public class AuthController implements Controller {
 
   @ToJson
   @Mapping("/info")
-  public UserInfo info(@ParSession("personId") String personId) {
+  public AuthInfo info(@ParSession("personId") String personId) {
+    return authRegister.get().getAuthInfo(personId);
+  }
+
+  @ToJson
+  @Mapping("/userInfo")
+  public UserInfo userInfo(@ParSession("personId") String personId) {
     return authRegister.get().getUserInfo(personId);
   }
 }

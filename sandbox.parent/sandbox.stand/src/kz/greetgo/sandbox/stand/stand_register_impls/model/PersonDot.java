@@ -1,13 +1,20 @@
 package kz.greetgo.sandbox.stand.stand_register_impls.model;
 
+import kz.greetgo.sandbox.controller.model.UserInfo;
+
 public class PersonDot {
   public String id;
   public String accountName;
   public boolean disabled = false;
   public String surname, name, patronymic;
 
-  public String fio() {
-    return surname + ' ' + name + (patronymic == null ? "" : " " + patronymic);
+  public UserInfo toUserInfo() {
+    UserInfo ret = new UserInfo();
+    ret.id = id;
+    ret.accountName = accountName;
+    ret.surname = surname;
+    ret.name = name;
+    ret.patronymic = patronymic;
+    return ret;
   }
-
 }

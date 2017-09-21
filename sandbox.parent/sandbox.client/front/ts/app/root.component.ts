@@ -1,6 +1,6 @@
 import {Component, OnInit} from "@angular/core";
 import {HttpService} from "./HttpService";
-import {UserInfo} from "../model/UserInfo";
+import {AuthInfo} from "../model/AuthInfo";
 
 @Component({
   selector: 'root-component',
@@ -16,7 +16,7 @@ import {UserInfo} from "../model/UserInfo";
     ></main-form-component>
 
     <div *ngIf="mode == 'init'">
-      Иницияция системы...
+      Инициация системы... <span class="glyphicon glyphicon-refresh glyphicon-refresh-animate"></span>
     </div>
   `
 })
@@ -30,7 +30,6 @@ export class RootComponent implements OnInit {
     this.startApp();
   }
 
-
   startApp() {
     if (!this.httpService.token) {
       this.mode = 'login';
@@ -38,7 +37,7 @@ export class RootComponent implements OnInit {
     }
 
     this.httpService.get("/auth/info").toPromise().then(result => {
-      let userInfo = result.json() as UserInfo;
+      let userInfo = result.json() as AuthInfo;
       if (userInfo.pageSize) this.httpService.pageSize = userInfo.pageSize;
       (<any>window).document.title = userInfo.appTitle;
       this.mode = 'main-form';

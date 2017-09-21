@@ -11,7 +11,7 @@ class OptionsBuilder {
 
   private get headers(): Headers {
     let ret = new Headers();
-    this.appendingHeaders.forEach(h => ret.append(h.key, h.value));
+    this.appendingHeaders.forEach(h => ret.append(h['key'], h['value']));
     return ret;
   }
 
