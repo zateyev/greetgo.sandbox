@@ -1,6 +1,7 @@
 package kz.greetgo.sandbox.db.test.dao;
 
 import kz.greetgo.sandbox.controller.register.model.UserParamName;
+import kz.greetgo.sandbox.stand_db.model.PersonDot;
 import org.apache.ibatis.annotations.Insert;
 import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
@@ -31,4 +32,7 @@ public interface AuthTestDao {
                          @Param("fieldName") String fieldName,
                          @Param("fieldValue") Object fieldValue);
 
+  @Insert("insert into Person (  id,    accountName,    surname,    name,    patronymic, blocked) " +
+    "                  values (#{id}, #{accountName}, #{surname}, #{name}, #{patronymic},      0)")
+  void insertPersonDot(PersonDot personDot);
 }

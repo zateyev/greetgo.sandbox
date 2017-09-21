@@ -1,4 +1,4 @@
-package kz.greetgo.sandbox.stand_db;
+package kz.greetgo.sandbox.stand_db.beans;
 
 import kz.greetgo.depinject.core.Bean;
 import kz.greetgo.depinject.core.HasAfterInject;
