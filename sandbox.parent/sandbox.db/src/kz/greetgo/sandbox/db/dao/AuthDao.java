@@ -1,5 +1,6 @@
 package kz.greetgo.sandbox.db.dao;
 
+import kz.greetgo.sandbox.controller.model.UserInfo;
 import kz.greetgo.sandbox.controller.register.model.UserParamName;
 import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
@@ -18,4 +19,7 @@ public interface AuthDao {
 
   @Select("select accountName from Person where id = #{personId}")
   String accountNameByPersonId(@Param("personId") String personId);
+
+  @Select("select * from Person where id = #{personId}")
+  UserInfo getUserInfo(@Param("personId") String personId);
 }

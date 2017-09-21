@@ -4,6 +4,7 @@ import kz.greetgo.sandbox.controller.register.model.UserParamName;
 import org.apache.ibatis.annotations.Insert;
 import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
+import org.apache.ibatis.annotations.Update;
 
 public interface AuthTestDao {
   @Select("select value from UserParams where personId = #{personId} and name = #{name}")
@@ -24,5 +25,10 @@ public interface AuthTestDao {
                   @Param("encryptedPassword") String encryptedPassword,
                   @Param("blocked") int blocked
   );
+
+  @Update("update Person set ${fieldName} = #{fieldValue} where id = #{id}")
+  void updatePersonField(@Param("id") String id,
+                         @Param("fieldName") String fieldName,
+                         @Param("fieldValue") Object fieldValue);
 
 }

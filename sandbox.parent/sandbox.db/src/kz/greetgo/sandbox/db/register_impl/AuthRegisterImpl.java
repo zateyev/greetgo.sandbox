@@ -13,21 +13,20 @@ import kz.greetgo.sandbox.controller.register.model.SessionInfo;
 import kz.greetgo.sandbox.controller.register.model.UserParamName;
 import kz.greetgo.sandbox.controller.security.SecurityError;
 import kz.greetgo.sandbox.db.dao.AuthDao;
-import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
 @Bean
 public class AuthRegisterImpl implements AuthRegister {
 
-  public BeanGetter<AuthDao> userDao;
+  public BeanGetter<AuthDao> authDao;
 
   @Override
   public void saveParam(String personId, UserParamName name, String value) {
-    userDao.get().saveUserParam(personId, name, value);
+    authDao.get().saveUserParam(personId, name, value);
   }
 
   @Override
   public String getParam(String personId, UserParamName name) {
-    return userDao.get().getUserParam(personId, name);
+    return authDao.get().getUserParam(personId, name);
   }
 
   public BeanGetter<TokenRegister> tokenManager;
@@ -41,7 +40,7 @@ public class AuthRegisterImpl implements AuthRegister {
     String encryptPassword = tokenManager.get().encryptPassword(password);
     if (encryptPassword == null) throw new IllegalLoginOrPassword();
 
-    String personId = userDao.get().selectPersonIdByAccountAndPassword(accountName, encryptPassword);
+    String personId = authDao.get().selectPersonIdByAccountAndPassword(accountName, encryptPassword);
     if (personId == null) throw new IllegalLoginOrPassword();
 
     SessionInfo sessionInfo = new SessionInfo(personId);
@@ -70,7 +69,7 @@ public class AuthRegisterImpl implements AuthRegister {
 
   @Override
   public AuthInfo getAuthInfo(String personId) {
-    String accountName = userDao.get().accountNameByPersonId(personId);
+    String accountName = authDao.get().accountNameByPersonId(personId);
     if (accountName == null) throw new NotFound();
     AuthInfo ret = new AuthInfo();
     ret.pageSize = 50;
@@ -80,6 +79,8 @@ public class AuthRegisterImpl implements AuthRegister {
 
   @Override
   public UserInfo getUserInfo(String personId) {
-    throw new NotImplementedException();
+    UserInfo userInfo = authDao.get().getUserInfo(personId);
+    if (userInfo == null) throw new NotFound();
+    return userInfo;
   }
 }

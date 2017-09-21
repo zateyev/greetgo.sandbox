@@ -6,6 +6,7 @@ import kz.greetgo.sandbox.controller.errors.NoAccountName;
 import kz.greetgo.sandbox.controller.errors.NoPassword;
 import kz.greetgo.sandbox.controller.errors.NotFound;
 import kz.greetgo.sandbox.controller.model.AuthInfo;
+import kz.greetgo.sandbox.controller.model.UserInfo;
 import kz.greetgo.sandbox.controller.register.AuthRegister;
 import kz.greetgo.sandbox.controller.register.model.SessionInfo;
 import kz.greetgo.sandbox.controller.register.model.UserParamName;
@@ -365,5 +366,36 @@ public class AuthRegisterImplTest extends ParentTestNg {
   @Test(expectedExceptions = NotFound.class)
   public void getAuthInfo_NotFound() throws Exception {
     authRegister.get().getAuthInfo(RND.str(10));
+  }
+
+  @Test(expectedExceptions = NotFound.class)
+  public void getUserInfo_NotFound() throws Exception {
+    authRegister.get().getUserInfo(RND.str(10));
+  }
+
+  @Test
+  public void getUserInfo_ok() throws Exception {
+    String accountName = RND.str(10);
+    String surname = RND.str(10);
+    String name = RND.str(10);
+    String patronymic = RND.str(10);
+    String id = RND.str(10);
+    authTestDao.get().insertUser(id, accountName, "asd", 1);
+    authTestDao.get().updatePersonField(id, "surname", surname);
+    authTestDao.get().updatePersonField(id, "name", name);
+    authTestDao.get().updatePersonField(id, "patronymic", patronymic);
+
+    //
+    //
+    UserInfo userInfo = authRegister.get().getUserInfo(id);
+    //
+    //
+
+    assertThat(userInfo).isNotNull();
+    assertThat(userInfo.id).isEqualTo(id);
+    assertThat(userInfo.accountName).isEqualTo(accountName);
+    assertThat(userInfo.surname).isEqualTo(surname);
+    assertThat(userInfo.name).isEqualTo(name);
+    assertThat(userInfo.patronymic).isEqualTo(patronymic);
   }
 }
