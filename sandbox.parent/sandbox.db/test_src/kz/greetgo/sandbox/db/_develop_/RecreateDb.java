@@ -9,5 +9,4 @@ public class RecreateDb {
 
     bc.dbWorker().recreateAll();
   }
-
 }
