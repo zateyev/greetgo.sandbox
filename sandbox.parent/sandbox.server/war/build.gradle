@@ -38,6 +38,8 @@ war {
 //    println(project(':sandbox.client').buildDir.toPath().resolve('product').toFile())
   }
 
+  baseName 'sandbox'
+
   addExcludes rootSpec
 
   classpath beanContainerJar

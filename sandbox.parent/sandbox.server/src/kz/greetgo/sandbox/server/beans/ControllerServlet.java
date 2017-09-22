@@ -51,4 +51,9 @@ public class ControllerServlet extends AppServlet {
 
     super.afterRegister();
   }
+
+  @Override
+  protected String getTargetSubContext() {
+    return "/api";
+  }
 }

@@ -47,11 +47,13 @@ public class StandDb implements HasAfterInject {
   private void appendPerson(String[] splitLine, String line, int lineNo) {
     PersonDot p = new PersonDot();
     p.id = splitLine[1].trim();
-    String[] fio = splitLine[2].trim().split("\\s+");
-    p.accountName = fio[0];
-    p.surname = fio[1];
-    p.name = fio[2];
-    if (fio.length > 3) p.patronymic = fio[3];
+    String[] ap = splitLine[2].trim().split("\\s+");
+    String[] fio = splitLine[3].trim().split("\\s+");
+    p.accountName = ap[0];
+    p.password = ap[1];
+    p.surname = fio[0];
+    p.name = fio[1];
+    if (fio.length > 2) p.patronymic = fio[2];
     personStorage.put(p.id, p);
   }
 }

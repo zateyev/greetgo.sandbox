@@ -110,6 +110,8 @@ public abstract class SandboxViews implements Views {
     Throwable error = invokedResult.error();
     assert error != null;
 
+    error.printStackTrace();
+
     RequestTunnel tunnel = methodInvoker.tunnel();
     tunnel.setRequestAttribute("ERROR_TYPE", error.getClass().getSimpleName());
 

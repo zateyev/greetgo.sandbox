@@ -25,7 +25,7 @@ export class LoginComponent {
   constructor(private httpService: HttpService) {}
 
   forgotPassword() {
-    window.alert("Плакать");
+    window.alert("При запуске скрипта инициации БД выводятся пользователи и их пароли: посмотрите там!");
   }
 
   updateEnterButton() {
@@ -53,10 +53,10 @@ export class LoginComponent {
     }, error => {
       this.disabled = false;
       this.enterButtonEnabled = true;
-      if (error.status == 470) {
+      console.error("AUTHENTICATION_UNKNOWN_ERROR", error);
+      if (400 <= error.status && error.status < 500) {
         this.errorMessage = error.text();
       } else {
-        console.error("AUTHENTICATION_UNKNOWN_ERROR", error);
         this.errorMessage = error;
       }
     });

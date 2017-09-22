@@ -32,7 +32,7 @@ public interface AuthTestDao {
                          @Param("fieldName") String fieldName,
                          @Param("fieldValue") Object fieldValue);
 
-  @Insert("insert into Person (  id,    accountName,    surname,    name,    patronymic, blocked) " +
-    "                  values (#{id}, #{accountName}, #{surname}, #{name}, #{patronymic},      0)")
+  @Insert("insert into Person (  id,    accountName,    surname,    name,    patronymic,    encryptedPassword, blocked) " +
+    "                  values (#{id}, #{accountName}, #{surname}, #{name}, #{patronymic}, #{encryptedPassword}, 0)")
   void insertPersonDot(PersonDot personDot);
 }
