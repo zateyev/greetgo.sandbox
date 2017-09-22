@@ -35,7 +35,9 @@ public class DbWorker {
   public void recreateAll() throws Exception {
     prepareDbConfig();
     recreateDb();
+
     liquibaseManager.get().apply();
+    App.do_not_run_liquibase_on_deploy_war().createNewFile();
   }
 
   private final java.util.Set<String> alreadyRecreatedUsers = new HashSet<>();

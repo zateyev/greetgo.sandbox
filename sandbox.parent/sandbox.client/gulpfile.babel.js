@@ -44,7 +44,7 @@ task("stand:off", done => {
 function outDir() {
   return isStand
     ? path.resolve(__dirname, 'build', 'public')
-    : path.resolve(__dirname, 'build', 'sandbox');
+    : path.resolve(__dirname, 'build', 'product', 'sandbox');
 }
 
 task('clean', () => del(['build']));
