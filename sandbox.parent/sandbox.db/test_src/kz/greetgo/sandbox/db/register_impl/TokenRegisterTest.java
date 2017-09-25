@@ -17,10 +17,21 @@ import java.util.Date;
 
 import static org.fest.assertions.api.Assertions.assertThat;
 
+/**
+ * Набор автоматизированных тестов для тестирования методов класса {@link TokenRegister}
+ */
 public class TokenRegisterTest {
 
+  /**
+   * Ссылка на тестируемый объект. Инициируется в методе {@link #prepareTokenRegister()} перед запуском каждого теста
+   */
   private TokenRegister tokenRegister;
 
+  /**
+   * Этот метод запускается перед каждым тестом. Он подготавливает поле {@link #tokenRegister}
+   *
+   * @throws Exception пробрасываем, чтобы не требовались try/catch-блоки
+   */
   @BeforeMethod
   public void prepareTokenRegister() throws Exception {
     tokenRegister = new TokenRegister();
@@ -28,19 +39,32 @@ public class TokenRegisterTest {
     SimpleDateFormat sdf = new SimpleDateFormat("yyyy_MM_dd__HH_mm_ss_SSS");
     String ext = sdf.format(new Date());
 
+    // Перед каждым тестом придумываем новые файлы, где система будет хранить ключи для ассиместричного шифрования
     tokenRegister.privateKeyFile = new File("build/TokenRegisterTest/" + ext + "_privateKeyFile");
     tokenRegister.publicKeyFile = new File("build/TokenRegisterTest/" + ext + "_publicKeyFile");
 
+    //Инициируем внутренние ресурсы
     tokenRegister.afterInject();
   }
 
+  /**
+   * С помощью этого enum-а задаются различные состояния для тестирования
+   */
+  @SuppressWarnings("unused")
   enum BreakKeyFiles {
     DO_NOT_BREAK_ANYMORE(false, false),
     BREAK_PRIVATE_KEY_FILE(true, false),
     BREAK_PUBLIC_KEY_FILE(false, true),
     BREAK_BOTH_KEY_FILES(true, true);
 
+    /**
+     * Если <code>true</code>, то необходимо создасть состояние, в котором приватный файл ключа будет сломан
+     */
     final boolean breakPrivateKeyFile;
+
+    /**
+     * Если <code>true</code>, то необходимо создасть состояние, в котором публичный файл ключа будет сломан
+     */
     final boolean breakPublicKeyFile;
 
     BreakKeyFiles(boolean breakPrivateKeyFile, boolean breakPublicKeyFile) {
@@ -48,6 +72,11 @@ public class TokenRegisterTest {
       this.breakPublicKeyFile = breakPublicKeyFile;
     }
 
+    /**
+     * Подготавливает данные для Data Provider
+     *
+     * @return все значения представленные в виде, пригодном для Data Provider
+     */
     static Object[][] dataProviderReturn() {
       Object[][] ret = new Object[values().length][];
       for (int i = 0, n = values().length; i < n; i++) {
@@ -63,15 +92,25 @@ public class TokenRegisterTest {
   }
 
   @Test(dataProvider = "leftFilesDataProvider")
-  public void createToken_decryptToken(BreakKeyFiles breakKeyFiles) throws Exception {
+  public void createToken_decryptToken_тестируемРазличныеНачальныеСостояния
+    (BreakKeyFiles breakKeyFiles) throws Exception {
 
+    //ломаем соответствующие файлы
     breakFiles(breakKeyFiles);
 
+    // берём какую-нибудь сессию
     SessionInfo sessionInfo = new SessionInfo(RND.str(10));
 
-    String token = tokenRegister.createToken(sessionInfo);
+    // и вызываем последовательно тестируемые методы создания и дешифровки токена
 
+    //
+    //
+    String token = tokenRegister.createToken(sessionInfo);
     SessionInfo sessionInfo2 = tokenRegister.decryptToken(token);
+    //
+    //
+
+    // Проверяем, чтобы всё работало правильно
 
     assertThat(sessionInfo2.personId).isEqualTo(sessionInfo.personId);
     assertThat(sessionInfo2.createdAt.getTime()).isEqualTo(sessionInfo.createdAt.getTime());

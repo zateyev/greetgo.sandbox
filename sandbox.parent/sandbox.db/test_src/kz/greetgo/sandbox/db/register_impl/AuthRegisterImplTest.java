@@ -24,6 +24,9 @@ import java.util.stream.Collectors;
 
 import static org.fest.assertions.api.Assertions.assertThat;
 
+/**
+ * Набор автоматизированных тестов для тестирования методов класса {@link AuthRegisterImpl}
+ */
 public class AuthRegisterImplTest extends ParentTestNg {
 
   public BeanGetter<AuthRegister> authRegister;
