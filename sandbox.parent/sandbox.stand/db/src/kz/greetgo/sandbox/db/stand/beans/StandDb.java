@@ -1,8 +1,9 @@
-package kz.greetgo.sandbox.stand_db.beans;
+package kz.greetgo.sandbox.db.stand.beans;
 
 import kz.greetgo.depinject.core.Bean;
 import kz.greetgo.depinject.core.HasAfterInject;
-import kz.greetgo.sandbox.stand_db.model.PersonDot;
+import kz.greetgo.sandbox.db.stand.model.PersonDot;
+
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;

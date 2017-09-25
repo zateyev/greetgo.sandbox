@@ -1,7 +1,7 @@
 package kz.greetgo.sandbox.db.test.dao;
 
 import kz.greetgo.sandbox.controller.register.model.UserParamName;
-import kz.greetgo.sandbox.stand_db.model.PersonDot;
+import kz.greetgo.sandbox.db.stand.model.PersonDot;
 import org.apache.ibatis.annotations.Insert;
 import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;

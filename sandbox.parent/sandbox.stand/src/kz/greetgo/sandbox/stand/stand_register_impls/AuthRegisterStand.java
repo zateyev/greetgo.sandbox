@@ -9,8 +9,8 @@ import kz.greetgo.sandbox.controller.register.AuthRegister;
 import kz.greetgo.sandbox.controller.register.model.SessionInfo;
 import kz.greetgo.sandbox.controller.register.model.UserParamName;
 import kz.greetgo.sandbox.controller.security.SecurityError;
-import kz.greetgo.sandbox.stand_db.beans.StandDb;
-import kz.greetgo.sandbox.stand_db.model.PersonDot;
+import kz.greetgo.sandbox.db.stand.beans.StandDb;
+import kz.greetgo.sandbox.db.stand.model.PersonDot;
 import kz.greetgo.util.ServerUtil;
 
 import java.io.File;

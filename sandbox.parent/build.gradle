@@ -41,7 +41,7 @@ subprojects {
 
   dependencies {
     ext.jacksonVersion = "2.7.3"
-    ext.depinjectVersion = '1.1.2'
+    ext.depinjectVersion = '2.0.0'
     ext.greetgoDbVersion = '2.0.0'
     ext.greetgoConfVersion = '0.1.5'
     ext.greetgoMvcVersion = "2.0.7"
