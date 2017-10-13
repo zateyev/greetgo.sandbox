@@ -117,8 +117,8 @@ public class DbWorker {
     File file = allPostgresConfigFactory.get().storageFileFor(DbConfig.class);
     try (PrintStream out = new PrintStream(file, "UTF-8")) {
 
-      out.println("url=" + changeUrlDbName(SysParams.pgAdminUrl(), System.getProperty("user.name") + "_access"));
-      out.println("username=" + System.getProperty("user.name") + "_access");
+      out.println("url=" + changeUrlDbName(SysParams.pgAdminUrl(), System.getProperty("user.name") + "_sandbox"));
+      out.println("username=" + System.getProperty("user.name") + "_sandbox");
       out.println("password=111");
 
     }

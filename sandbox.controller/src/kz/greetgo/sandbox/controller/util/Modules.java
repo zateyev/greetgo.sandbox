@@ -1,7 +1,6 @@
 package kz.greetgo.sandbox.controller.util;
 
 import java.io.File;
-import java.io.IOException;
 
 @SuppressWarnings("unused")
 public class Modules {
@@ -27,13 +26,12 @@ public class Modules {
 
     {
       File dir = new File(moduleName);
-      try {
-        if (dir.isDirectory() &&
-          dir.toPath().resolve("..").toFile().getCanonicalFile().getName().equals("sandbox.parent")) {
-          return dir;
-        }
-      } catch (IOException e) {
-        throw new RuntimeException(e);
+      if (dir.isDirectory()
+        && new File("build.gradle").isFile()
+        && new File("settings.gradle").isFile()
+        && new File("README.md").isFile()
+        ) {
+        return dir;
       }
     }
 
