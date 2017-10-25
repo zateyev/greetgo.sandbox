@@ -1,6 +1,7 @@
 def nowDate = new Date()
 def nowFormattedDate = nowDate.format("yyyy-MM-dd/HH:mm:ss")
 def vendorName = "greetgo!"
+def ggRepo = System.getenv('GG_REPO')
 
 allprojects {
   apply plugin: 'java'
@@ -36,7 +37,8 @@ subprojects {
 
   repositories {
     mavenLocal()
-    mavenCentral()
+    if (ggRepo?.trim()) maven { url ggRepo.trim() }
+    jcenter()
   }
 
   dependencies {

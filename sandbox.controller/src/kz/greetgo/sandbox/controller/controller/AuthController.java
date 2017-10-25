@@ -13,6 +13,10 @@ import kz.greetgo.sandbox.controller.register.AuthRegister;
 import kz.greetgo.sandbox.controller.security.NoSecurity;
 import kz.greetgo.sandbox.controller.util.Controller;
 
+/**
+ * как составлять контроллеры написано
+ * <a href="https://github.com/greetgo/greetgo.mvc/blob/master/greetgo.mvc.parent/doc/controller_spec.md">здесь</a>
+ */
 @Bean
 @Mapping("/auth")
 public class AuthController implements Controller {
