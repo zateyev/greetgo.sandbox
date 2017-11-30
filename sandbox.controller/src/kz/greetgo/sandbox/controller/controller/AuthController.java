@@ -41,4 +41,10 @@ public class AuthController implements Controller {
   public UserInfo userInfo(@ParSession("personId") String personId) {
     return authRegister.get().getUserInfo(personId);
   }
+
+  @ToJson
+  @Mapping("/getNum")
+  public String getnum(){
+    return "2";
+  }
 }

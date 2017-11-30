@@ -9,11 +9,15 @@ import {AuthInfo} from "../model/AuthInfo";
       *ngIf="mode == 'login'"
       (finish)="startApp()"
     ></login-component>
-
+    <list-component
+      *ngIf="mode == 'list'"
+      (exit)="exit()"
+    ></list-component>
     <main-form-component
       *ngIf="mode == 'main-form'"
       (exit)="exit()"
     ></main-form-component>
+    
 
     <div *ngIf="mode == 'init'">
       Инициация системы... <span class="glyphicon glyphicon-refresh glyphicon-refresh-animate"></span>
@@ -40,7 +44,7 @@ export class RootComponent implements OnInit {
       let userInfo = result.json() as AuthInfo;
       if (userInfo.pageSize) this.httpService.pageSize = userInfo.pageSize;
       (<any>window).document.title = userInfo.appTitle;
-      this.mode = 'main-form';
+      this.mode = 'list';
     }, error => {
       console.log(error);
       this.mode = "login";

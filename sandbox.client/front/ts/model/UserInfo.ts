@@ -1,4 +1,5 @@
 export class UserInfo {
+
   public id: string;
   public accountName: string;
   public surname: string | null;
