@@ -131,6 +131,7 @@ public class AuthRegisterStand implements AuthRegister {
   }
 
   public BeanGetter<StandClientDb> al;
+
   @Override
   public ClientRecord[] getList(){
     ClientRecord[] list = new ClientRecord[al.get().clientStorage.size()];

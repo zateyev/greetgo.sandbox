@@ -47,11 +47,29 @@ public class StandClientDb implements HasAfterInject {
   private void appendClient(String[] splitLine, String line) {
     ClientDot d = new ClientDot();
     d.id = splitLine[1].trim();
-    String[] fio = splitLine[2].split("\\s");
-    d.name = fio[0];
-    d.surname = fio[1];
-    d.patronymic = fio[2];
-
+    String[] fio = splitLine[2].trim().split("\\s+");
+    System.out.println("fio.lentgth" + fio.length);
+    switch (fio.length) {
+      case 1:
+        d.name = fio[0];
+        d.surname = "";
+        d.patronymic = "";
+        break;
+      case 2:
+        d.name = fio[0];
+        d.surname = fio[1];
+        d.patronymic = "";
+        break;
+      case 3:
+        d.name = fio[0];
+        d.surname = fio[1];
+        d.patronymic = fio[2];
+        break;
+      default:
+        d.name = "";
+        d.patronymic = "";
+        d.surname = "";
+    }
     clientStorage.add(d);
   }
 }

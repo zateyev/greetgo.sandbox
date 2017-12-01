@@ -19,7 +19,7 @@ public class ClientController implements Controller{
   @Mapping("/getList")
   public ClientRecord[] getList(){
     return authRegister.get().getList();
-  }
+      }
 
   @ToJson
   @Mapping("/getNum")

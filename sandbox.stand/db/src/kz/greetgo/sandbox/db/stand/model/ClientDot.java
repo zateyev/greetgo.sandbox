@@ -18,6 +18,6 @@ public class ClientDot {
     ClientRecord rec = new ClientRecord();
     rec.id = this.id;
     rec.fio = this.surname + " " + this.name + " " + this.patronymic;
-    return null;
+    return rec;
   }
 }
