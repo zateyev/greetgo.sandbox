@@ -1,7 +1,49 @@
-<div>
-  <button (click)="exit.emit()">Выход</button>
+<div class="container wrapper" [ngClass]="{'opacity':modalChangeForm}">
+  <div class="row">
+    <div class="pull-right">
+      <button (click)="exit.emit()">Выход</button>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col-xs-3">Ф.И.О</div>
+    <div class="col-xs-1">Характер</div>
+    <div class="col-xs-1">Возраст</div>
+    <div class="col-xs-2">Общий остаток счетов</div>
+    <div class="col-xs-2">Максимальный остаток</div>
+    <div class="col-xs-2">Минимальный остаток</div>
+    <div class="col-xs-1"></div>
+  </div>
+
+  <div *ngIf="loading" class="row text-center">
+    Загрузка данных... <span class="glyphicon glyphicon-refresh glyphicon-refresh-animate"></span>
+  </div>
+
+  <div *ngIf="errorLoading" class="row text-center">
+    Произошла ошибка при загрузке данных, попробуй обновить страницу
+  </div>
+
+  <div *ngFor="let entry of list" class="row infoRow">
+    <div class="col-xs-3">{{entry.fio}}</div>
+    <div class="col-xs-1">{{entry.id}}</div>
+    <div class="col-xs-1 text-center"></div>
+    <div class="col-xs-2"></div>
+    <div class="col-xs-2"></div>
+    <div class="col-xs-2"></div>
+    <div class="col-xs-1">
+      <button>+</button>
+      <button (click)="openModalChangeForm(entry.id)">...</button>
+      <button>-</button>
+    </div>
+  </div>
 </div>
-<div>
-  <button (click)="loadClientInfo()">as</button>
-  {{list[1].fio}}
+
+<div *ngIf="modalChangeForm" class="modal-form">
+  <div class="modal-form-content">
+    <div class="closeModal" (click)="closeModalChangeForm()">
+      &nbsp;X&nbsp;
+    </div>
+    <div>
+      {{clientToChange.fio}}
+    </div>
+  </div>
 </div>

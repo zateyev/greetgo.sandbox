@@ -1,0 +1,49 @@
+.wrapper{
+    margin-top: 10px;
+    box-shadow: 0px 0px 5px 0px rgba(0,0,0,0.75);
+}
+.opacity{
+    opacity: 0.5;
+}
+.infoRow{
+    border-bottom: 1px solid black;
+}
+button {
+    border: 0 solid black;
+    border-radius: 200px 200px 200px 200px;
+    font-size: small;
+    font-weight: bold;
+}
+button:hover{
+    background: red;
+    transition: 0.5s;
+}
+
+.modal-form{
+    z-index: 2;
+    position: fixed;
+    display: block;
+    border: 2px solid black;
+    max-width:600px;
+    top: 100px;
+    right: 0;
+    left: 0;
+    margin-left: auto;
+    margin-right: auto;
+    word-break: break-all;
+    background: #e2e2e2;
+    border-radius: 6px;
+}
+.closeModal{
+    background: buttonface;
+    cursor: pointer;
+    border-radius: 5px;
+    font-size: larger;
+    float: right;
+}
+
+.closeModal:hover{
+    background: red;
+    transition: 0.5s;
+}
+
