@@ -26,7 +26,7 @@ public class AuthController implements Controller {
   @AsIs
   @NoSecurity
   @Mapping("/login")
-  public String login(@Par("accountName") String accountName, @Par("password") String password) {
+  public String login(@Par("accountNameq") String accountName, @Par("password") String password) {
     return authRegister.get().login(accountName, password);
   }
 

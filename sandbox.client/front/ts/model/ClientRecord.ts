@@ -1,4 +1,4 @@
-export class ClientRecord{
+export class ClientRecord {
   public id: string;
   public fio: string;
 

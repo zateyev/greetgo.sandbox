@@ -1,13 +1,11 @@
 package kz.greetgo.sandbox.controller.register;
 
 import kz.greetgo.sandbox.controller.model.AuthInfo;
-import kz.greetgo.sandbox.controller.model.ClientRecord;
 import kz.greetgo.sandbox.controller.model.UserInfo;
 import kz.greetgo.sandbox.controller.register.model.SessionInfo;
 import kz.greetgo.sandbox.controller.register.model.UserParamName;
 import kz.greetgo.sandbox.controller.security.SecurityError;
 
-import java.util.List;
 
 /**
  * Аутентификация, авторизация и работа с сессией
@@ -74,5 +72,4 @@ public interface AuthRegister {
    */
   UserInfo getUserInfo(String personId);
 
-  ClientRecord[] getList();
 }

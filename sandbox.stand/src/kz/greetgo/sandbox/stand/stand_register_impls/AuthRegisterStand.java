@@ -129,15 +129,4 @@ public class AuthRegisterStand implements AuthRegister {
   public UserInfo getUserInfo(String personId) {
     return db.get().personStorage.get(personId).toUserInfo();
   }
-
-  public BeanGetter<StandClientDb> al;
-
-  @Override
-  public ClientRecord[] getList(){
-    ClientRecord[] list = new ClientRecord[al.get().clientStorage.size()];
-    for(int i = 0; i < list.length; i++){
-      list[i] = al.get().clientStorage.get(i).toClientRecord();
-    }
-    return list;
-  }
 }

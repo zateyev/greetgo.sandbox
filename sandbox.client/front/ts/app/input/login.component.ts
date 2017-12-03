@@ -38,7 +38,7 @@ export class LoginComponent {
     this.enterButtonEnabled = false;
 
     this.httpService.post("/auth/login", {
-      accountName: this.fieldEnterLogin,
+      accountNameq: this.fieldEnterLogin,
       password: this.fieldEnterPassword,
     }).toPromise().then(res => {
       this.disabled = false;

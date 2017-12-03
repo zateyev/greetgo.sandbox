@@ -7,6 +7,7 @@ import kz.greetgo.sandbox.db.stand.model.ClientDot;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
+import java.util.HashMap;
 
 /**
  * Created by jgolibzhan on 11/30/17.
@@ -15,6 +16,7 @@ import java.util.ArrayList;
 public class StandClientDb implements HasAfterInject {
 
   public final ArrayList<ClientDot> clientStorage = new ArrayList<>();
+  public final HashMap<String, ClientDot> clStorage = new HashMap<>();
 
   @Override
   public void afterInject() throws Exception {
@@ -33,9 +35,11 @@ public class StandClientDb implements HasAfterInject {
         String command = splitLine[0].trim();
         switch (command) {
           case "1":
-            appendClient(splitLine, line);
+            appendClients(splitLine);
             break;
-
+          case "2":
+            appendClient(splitLine);
+            break;
           default:
             throw new RuntimeException("Unknown command " + command);
         }
@@ -44,11 +48,10 @@ public class StandClientDb implements HasAfterInject {
   }
 
   @SuppressWarnings("unused")
-  private void appendClient(String[] splitLine, String line) {
+  private void appendClients(String[] splitLine) {
     ClientDot d = new ClientDot();
     d.id = splitLine[1].trim();
     String[] fio = splitLine[2].trim().split("\\s+");
-    System.out.println("fio.lentgth" + fio.length);
     switch (fio.length) {
       case 1:
         d.name = fio[0];
@@ -71,5 +74,17 @@ public class StandClientDb implements HasAfterInject {
         d.surname = "";
     }
     clientStorage.add(d);
+  }
+
+  private void appendClient(String[] splitLine){
+    ClientDot d = new ClientDot();
+    d.id = splitLine[1].trim();
+    String[] fio = splitLine[2].trim().split("\\s+");
+    String phone = splitLine[3].trim();
+    d.name = fio[0];
+    d.surname = fio[1];
+    d.patronymic = fio[2];
+    d.phone = phone;
+    clStorage.put(d.id, d);
   }
 }

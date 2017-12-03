@@ -3,7 +3,10 @@ package kz.greetgo.sandbox.controller.controller;
 import kz.greetgo.depinject.core.Bean;
 import kz.greetgo.depinject.core.BeanGetter;
 import kz.greetgo.mvc.annotations.Mapping;
+import kz.greetgo.mvc.annotations.Par;
 import kz.greetgo.mvc.annotations.ToJson;
+import kz.greetgo.sandbox.controller.model.ClientDetails;
+import kz.greetgo.sandbox.controller.register.ClientRegister;
 import kz.greetgo.sandbox.controller.util.Controller;
 import kz.greetgo.sandbox.controller.model.ClientRecord;
 import kz.greetgo.sandbox.controller.register.AuthRegister;
@@ -13,17 +16,25 @@ import kz.greetgo.sandbox.controller.register.AuthRegister;
 @Bean
 @Mapping("/client")
 public class ClientController implements Controller{
-  public BeanGetter<AuthRegister> authRegister;
+
+  public BeanGetter<ClientRegister> clientRegister;
 
   @ToJson
   @Mapping("/getList")
   public ClientRecord[] getList(){
-    return authRegister.get().getList();
+    return clientRegister.get().getList();
       }
 
   @ToJson
-  @Mapping("/getNum")
-  public String getnum(){
-    return "2";
+  @Mapping("/getClient")
+  public ClientDetails getClient(@Par("id") String id){
+    return clientRegister.get().getClient(id);
+  }
+  @Mapping("/saveClient")
+  public void saveClient(
+    @Par("id") String id,
+    @Par("json") String json)
+  {
+
   }
 }
