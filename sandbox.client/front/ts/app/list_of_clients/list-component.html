@@ -23,6 +23,10 @@
     Произошла ошибка при загрузке данных, попробуй обновить страницу
   </div>
 
+  <div *ngIf="emptyList" id="emptyList" class="row text-center">
+    <h2>Список пуст</h2>
+  </div>
+
   <div *ngFor="let entry of list" class="row infoRow">
     <div class="col-xs-3">
       {{entry.fio}}

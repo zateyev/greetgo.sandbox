@@ -13,6 +13,7 @@ export class ListComponent implements OnInit {
   @Output() exit = new EventEmitter<void>();
   loading: boolean = true;
   errorLoading: boolean = false;
+  emptyList: boolean = false;
 
   modalChangeForm: boolean = false;
   modalAddForm: boolean = false;
@@ -67,6 +68,10 @@ export class ListComponent implements OnInit {
   loadList() {
     this.httpService.get("/client/getList").toPromise().then(result => {
       this.list = result.json().map(ClientRecord.copy);
+      if(result.json().length == 0){
+        this.emptyList = true;
+      }
+      console.log(result.json());
     }, error => {
       this.errorLoading = true;
       console.log(error);
