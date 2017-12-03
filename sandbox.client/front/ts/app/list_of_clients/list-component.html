@@ -35,9 +35,9 @@
     <div class="col-xs-2"></div>
     <div class="col-xs-2"></div>
     <div class="col-xs-1">
-      <button>+</button>
+      <button (click)="openModalAddForm()">+</button>
       <button (click)="openModalChangeForm(entry.id)">...</button>
-      <button>-</button>
+      <button (click)="deleteClient(entry.id)">-</button>
     </div>
   </div>
 </div>
@@ -50,7 +50,7 @@
       <div class="row">
         <div class="col-xs-11"></div>
         <div class="col-xs-1">
-         <span class="closeModal" (click)="closeModalChangeForm()">
+         <span class="closeModal" (click)="closeModalForm()">
         &nbsp;X&nbsp;
       </span>
         </div>
@@ -190,7 +190,7 @@
       <div class="row">
         <div class="col-xs-11"></div>
         <div class="col-xs-1">
-         <span class="closeModal" (click)="closeModalChangeForm()">
+         <span class="closeModal" (click)="closeModalForm()">
         &nbsp;X&nbsp;
       </span>
         </div>

@@ -15,7 +15,7 @@ import java.util.HashMap;
 @Bean
 public class StandClientDb implements HasAfterInject {
 
-  public final ArrayList<ClientDot> clientStorage = new ArrayList<>();
+  public final HashMap<String, ClientDot> clientStorage = new HashMap<>();
   public final HashMap<String, ClientDot> clStorage = new HashMap<>();
 
   @Override
@@ -73,7 +73,7 @@ public class StandClientDb implements HasAfterInject {
         d.patronymic = "";
         d.surname = "";
     }
-    clientStorage.add(d);
+    clientStorage.put(d.id, d);
   }
 
   private void appendClient(String[] splitLine){

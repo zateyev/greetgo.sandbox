@@ -30,11 +30,17 @@ public class ClientController implements Controller{
   public ClientDetails getClient(@Par("id") String id){
     return clientRegister.get().getClient(id);
   }
+
   @Mapping("/saveClient")
   public void saveClient(
     @Par("id") String id,
     @Par("json") String json)
-  {
+  { }
 
+  @Mapping("/deleteClient")
+  public void deleteClient(
+    @Par("id") String id
+  ){
+    clientRegister.get().deleteClient(id);
   }
 }

@@ -15,8 +15,10 @@ public class ClientRegisterStand implements ClientRegister {
   @Override
   public ClientRecord[] getList(){
     ClientRecord[] list = new ClientRecord[al.get().clientStorage.size()];
-    for(int i = 0; i < list.length; i++){
-      list[i] = al.get().clientStorage.get(i).toClientRecord();
+    int index = 0;
+    for(ClientDot d: al.get().clientStorage.values()){
+      list[index] = d.toClientRecord();
+      index++;
     }
     return list;
   }
@@ -29,5 +31,10 @@ public class ClientRegisterStand implements ClientRegister {
   @Override
   public void saveClient(String id, String json) {
 
+  }
+
+  @Override
+  public void deleteClient(String id){
+    al.get().clientStorage.remove(id);
   }
 }

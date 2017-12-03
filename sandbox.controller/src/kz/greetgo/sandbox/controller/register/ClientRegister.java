@@ -7,4 +7,5 @@ public interface ClientRegister {
   ClientRecord[] getList();
   ClientDetails getClient(String id);
   void saveClient(String id, String json);
+  void deleteClient(String id);
 }

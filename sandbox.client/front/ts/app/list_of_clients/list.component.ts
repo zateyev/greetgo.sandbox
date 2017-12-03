@@ -13,7 +13,10 @@ export class ListComponent implements OnInit {
   @Output() exit = new EventEmitter<void>();
   loading: boolean = true;
   errorLoading: boolean = false;
+
   modalChangeForm: boolean = false;
+  modalAddForm: boolean = false;
+
   list: ClientRecord[] = [];
   clientToChange: ClientDetails = null;
 
@@ -26,16 +29,22 @@ export class ListComponent implements OnInit {
     this.loading = false;
   }
 
-  saveChangedClient(){
+  saveChangedClient() {
     this.httpService.post("/client/saveClient", {
       id: this.clientToChange.id,
       json: JSON.stringify(this.clientToChange),
     })
   }
 
+  deleteClient(id: string) {
+    this.httpService.post("/client/deleteClient", {
+      id: id,
+    }).toPromise().then();
+    this.loadList();
+  }
+
   openModalChangeForm(id: string) {
     this.modalChangeForm = true;
-    //this.clientToChange = this.list.find(i => i.id === id);
     this.httpService.post("/client/getClient", {id: id})
       .toPromise().then(res => {
       this.clientToChange = new ClientDetails().assign(res.json() as ClientDetails)
@@ -45,9 +54,14 @@ export class ListComponent implements OnInit {
     })
   }
 
-  closeModalChangeForm() {
+  closeModalForm() {
     this.modalChangeForm = false;
+    this.modalAddForm = false;
     this.clientToChange = null;
+  }
+
+  openModalAddForm() {
+    this.modalAddForm = true;
   }
 
   loadList() {
