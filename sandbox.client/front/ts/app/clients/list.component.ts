@@ -53,11 +53,12 @@ export class ListComponent implements OnInit {
     this.changeForm.showForm(id);
   }
 
-  closeModalForm() {
+  closeModalForm(client:any) {
     this.modalChangeForm = false;
-   // this.modalAddForm = false;
+    // this.modalAddForm = false;
     //this.clientDetails = null;
-    this.changeForm.closeForm();
+    //this.changeForm.closeForm();
+    console.log(client);
   }
 
 

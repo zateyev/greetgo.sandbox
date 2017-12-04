@@ -1,6 +1,6 @@
-import {Component, EventEmitter, Input, OnInit, Output} from "@angular/core";
+import {Component, EventEmitter, Output} from "@angular/core";
 import {ClientDetails} from "../../model/ClientDetails";
-import {ClientRecord} from "../../model/ClientRecord"
+import {ClientRecord} from "../../model/ClientRecord";
 import {HttpService} from "../HttpService";
 @Component({
   selector: 'change-component',
@@ -9,7 +9,7 @@ import {HttpService} from "../HttpService";
 })
 
 export class ChangeComponent {
-  @Output() saved = new EventEmitter<ClientRecord>();
+  @Output() saved = new EventEmitter<string>();
   visible = false;
 
 
@@ -24,6 +24,7 @@ export class ChangeComponent {
   }
 
   public showForm(id: string) {
+    this.change = true;
     this.visible = true;
     this.errors = 'loadingClient';
     this.httpService.post("/client/getClient", {id: id})
@@ -43,13 +44,14 @@ export class ChangeComponent {
   }
 
   closeForm() {
-    this.visible = false;
     this.errors = "savingClient";
     this.httpService.post("/client/saveClient", {
       id: this.clientDetails.id,
-      json: JSON.stringify(this.clientDetails),
-    }).toPromise().then(clientRecord => {
-      this.saved.emit(clientRecord.json() as ClientRecord);
+      json: JSON.stringify(this.clientDetails)
+    }).toPromise().then(ignore => {
+      //this.saved.emit(JSON.stringify(clientRecord.json()));
+      this.saved.emit("asfd");
+      this.visible = false;
       this.errors = "";
     }, error => {
       this.errors = "errorSavingClient";
