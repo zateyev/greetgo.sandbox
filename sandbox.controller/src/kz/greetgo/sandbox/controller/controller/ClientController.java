@@ -6,10 +6,9 @@ import kz.greetgo.mvc.annotations.Mapping;
 import kz.greetgo.mvc.annotations.Par;
 import kz.greetgo.mvc.annotations.ToJson;
 import kz.greetgo.sandbox.controller.model.ClientDetails;
+import kz.greetgo.sandbox.controller.model.ClientRecord;
 import kz.greetgo.sandbox.controller.register.ClientRegister;
 import kz.greetgo.sandbox.controller.util.Controller;
-import kz.greetgo.sandbox.controller.model.ClientRecord;
-import kz.greetgo.sandbox.controller.register.AuthRegister;
 /**
  * Created by jgolibzhan on 11/30/17.
  */
@@ -34,8 +33,9 @@ public class ClientController implements Controller{
   @Mapping("/saveClient")
   public void saveClient(
     @Par("id") String id,
-    @Par("json") String json)
-  { }
+    @Par("json") String json) {
+    clientRegister.get().saveClient(id, json);
+  }
 
   @Mapping("/deleteClient")
   public void deleteClient(

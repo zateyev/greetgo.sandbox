@@ -30,7 +30,7 @@ public class ClientRegisterStand implements ClientRegister {
 
   @Override
   public void saveClient(String id, String json) {
-
+    System.out.println(json);
   }
 
   @Override

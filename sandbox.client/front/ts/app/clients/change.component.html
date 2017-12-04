@@ -11,17 +11,27 @@
       </span>
         </div>
       </div>
-      <form *ngIf="errorLoading" class="text-center" action="">
+
+      <!-- /////////////////// ERRORS ////////////////////////////////// -->
+      <div *ngIf="errors === 'errorLoading'" class="text-center" action="">
         <h3>Произошла ошибка при загрузке данных, попробуйте снова</h3>
-      </form>
-      <form *ngIf="loadingClient" action="" class="text-center">
+      </div>
+      <div *ngIf="errors === 'loadingClient'" action="" class="text-center">
         <h3>Идет загрузка...</h3>
-      </form>
-      <form *ngIf="!errorLoading&&!loadingClient" action="">
+      </div>
+      <div *ngIf="errors === 'savingClient'" action="" class="text-center">
+       <h3> Сохраняем...</h3>
+      </div>
+      <div *ngIf="errors === 'errorSavingClient'" action="" class="text-center">
+        <h3> Ошибка при сохранении данных, попробуйте заново...</h3>
+      </div>
+      <!--////////////////////////////////////////////////////////////////-->
+
+      <form *ngIf="errors === 'success'" action="">
         <div class="row">
           <div class="col-xs-4">
             Имя:
-            <input [(ngModel)]="clientToChange.first_name"
+            <input [(ngModel)]="clientDetails.first_name"
                    [ngModelOptions]="{standalone: true}"
                    required="" type="text" class="inputForm">
           </div>

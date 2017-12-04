@@ -52,7 +52,7 @@ export class ListComponent implements OnInit {
   closeModalForm() {
     this.modalChangeForm = false;
     this.modalAddForm = false;
-    //this.clientToChange = null;
+    //this.clientDetails = null;
   }
 
 
