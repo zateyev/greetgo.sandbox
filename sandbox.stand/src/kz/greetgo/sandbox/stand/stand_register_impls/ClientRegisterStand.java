@@ -13,13 +13,14 @@ import kz.greetgo.sandbox.db.stand.model.ClientDot;
 public class ClientRegisterStand implements ClientRegister {
   public BeanGetter<StandClientDb> al;
   @Override
-  public ClientRecord[] getList(){
+  public ClientRecord[] getList(int page){
     ClientRecord[] list = new ClientRecord[al.get().clientStorage.size()];
     int index = 0;
     for(ClientDot d: al.get().clientStorage.values()){
       list[index] = d.toClientRecord();
       index++;
     }
+    System.out.println(page);
     return list;
   }
 

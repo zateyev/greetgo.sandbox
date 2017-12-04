@@ -48,8 +48,7 @@
 </div>
 <!-- ////////////////////////////////////////////// -->
 <change-component
-  *ngIf = "modalChangeForm"
-  [id] = "idForChange"
-  (close)="closeModalForm()"
+  #changeForm
+  (saved)="closeModalForm()"
 >
 </change-component>

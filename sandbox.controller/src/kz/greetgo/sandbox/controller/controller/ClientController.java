@@ -20,8 +20,8 @@ public class ClientController implements Controller{
 
   @ToJson
   @Mapping("/getList")
-  public ClientRecord[] getList(){
-    return clientRegister.get().getList();
+  public ClientRecord[] getList(@Par("page") int page){
+    return clientRegister.get().getList(page);
       }
 
   @ToJson

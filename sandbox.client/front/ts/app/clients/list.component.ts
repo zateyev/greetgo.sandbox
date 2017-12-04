@@ -1,6 +1,7 @@
-import {Component, EventEmitter, OnInit, Output} from "@angular/core";
+import {Component, EventEmitter, OnInit, Output, ViewChild} from "@angular/core";
 import {ClientRecord} from "../../model/ClientRecord";
 import {HttpService} from "../HttpService";
+import {ChangeComponent} from "./change.component";
 
 @Component({
   selector: 'list-component',
@@ -9,6 +10,8 @@ import {HttpService} from "../HttpService";
 })
 export class ListComponent implements OnInit {
   @Output() exit = new EventEmitter<void>();
+
+  @ViewChild("changeForm") changeForm: ChangeComponent;
 
   loading: boolean = true;
   deletingClient:string = "";
@@ -47,12 +50,14 @@ export class ListComponent implements OnInit {
   openModalChangeForm(id: string) {
     this.idForChange = id;
     this.modalChangeForm = true;
+    this.changeForm.showForm(id);
   }
 
   closeModalForm() {
     this.modalChangeForm = false;
-    this.modalAddForm = false;
+   // this.modalAddForm = false;
     //this.clientDetails = null;
+    this.changeForm.closeForm();
   }
 
 
@@ -62,7 +67,8 @@ export class ListComponent implements OnInit {
   }
 
   loadList() {
-    this.httpService.get("/client/getList").toPromise().then(result => {
+    let page: number = 1;
+    this.httpService.get("/client/getList?page=" + page).toPromise().then(result => {
       this.list = result.json().map(ClientRecord.copy);
       if(result.json().length == 0){
         this.emptyList = true;

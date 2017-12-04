@@ -1,4 +1,4 @@
-import {Component, Input, OnInit} from "@angular/core";
+import {Component, OnInit} from "@angular/core";
 import {HttpService} from "./HttpService";
 import {AuthInfo} from "../model/AuthInfo";
 
@@ -18,10 +18,10 @@ import {AuthInfo} from "../model/AuthInfo";
       [cou] = "cou"
       (exit)="exit()"
     ></main-form-component>
-    
 
-    <div *ngIf="mode == 'init'">
-      Инициация системы... <span class="glyphicon glyphicon-refresh glyphicon-refresh-animate"></span>
+
+    <div style="margin-top: 25%;" class="text-center" *ngIf="mode == 'init'">
+      <span><img src="/img/load.gif" alt=""></span>
     </div>
   `
 })

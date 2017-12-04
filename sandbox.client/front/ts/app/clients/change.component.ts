@@ -1,5 +1,6 @@
 import {Component, EventEmitter, Input, OnInit, Output} from "@angular/core";
 import {ClientDetails} from "../../model/ClientDetails";
+import {ClientRecord} from "../../model/ClientRecord"
 import {HttpService} from "../HttpService";
 @Component({
   selector: 'change-component',
@@ -7,9 +8,9 @@ import {HttpService} from "../HttpService";
   styles: [require('./list.component.css')],
 })
 
-export class ChangeComponent implements OnInit{
-  @Input() id:string = "";
-  @Output() close = new EventEmitter<void>();
+export class ChangeComponent {
+  @Output() saved = new EventEmitter<ClientRecord>();
+  visible = false;
 
 
   clientDetails: ClientDetails = new ClientDetails();
@@ -18,22 +19,12 @@ export class ChangeComponent implements OnInit{
 
   add:boolean = false;
   change:boolean = false;
+
   constructor(private httpService: HttpService) {
   }
 
-  ngOnInit(){
-    if(this.id == ''){
-      this.openModalAddForm();
-      this.add = true;
-    }
-    else {
-      this.openModalChangeForm(this.id);
-      this.change = true;
-    }
-  }
-
-
-  openModalChangeForm(id: string) {
+  public showForm(id: string) {
+    this.visible = true;
     this.errors = 'loadingClient';
     this.httpService.post("/client/getClient", {id: id})
       .toPromise().then(res => {
@@ -45,18 +36,20 @@ export class ChangeComponent implements OnInit{
     })
   }
 
+
   openModalAddForm(){
     this.errors = "success";
     this.clientDetails = new ClientDetails();
   }
 
-  saveChangedClient() {
+  closeForm() {
+    this.visible = false;
     this.errors = "savingClient";
     this.httpService.post("/client/saveClient", {
       id: this.clientDetails.id,
       json: JSON.stringify(this.clientDetails),
-    }).toPromise().then(ignore => {
-      this.close.emit();
+    }).toPromise().then(clientRecord => {
+      this.saved.emit(clientRecord.json() as ClientRecord);
       this.errors = "";
     }, error => {
       this.errors = "errorSavingClient";
@@ -69,7 +62,7 @@ export class ChangeComponent implements OnInit{
     this.httpService.post("/client/addClient", {
       json: JSON.stringify(this.clientDetails)
     }).toPromise().then(ignore=>{
-      this.close.emit();
+      this.saved.emit();
     }, error => {
       this.errors = "errorSavingClient";
       console.log(error);
