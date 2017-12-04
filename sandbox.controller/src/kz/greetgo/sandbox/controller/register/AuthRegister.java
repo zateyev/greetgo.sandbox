@@ -6,6 +6,7 @@ import kz.greetgo.sandbox.controller.register.model.SessionInfo;
 import kz.greetgo.sandbox.controller.register.model.UserParamName;
 import kz.greetgo.sandbox.controller.security.SecurityError;
 
+
 /**
  * Аутентификация, авторизация и работа с сессией
  */
@@ -70,4 +71,5 @@ public interface AuthRegister {
    * @return детальная информация о пользователе
    */
   UserInfo getUserInfo(String personId);
+
 }

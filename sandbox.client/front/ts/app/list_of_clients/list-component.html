@@ -1,0 +1,321 @@
+<!-- ////////   LIST OF CLIENTS //////////////-->
+<div class="container wrapper" [ngClass]="{'opacity':modalChangeForm}">
+  <div class="row">
+    <div class="pull-right">
+      <button (click)="exit.emit()">Выход</button>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col-xs-3">Ф.И.О</div>
+    <div class="col-xs-1">Характер</div>
+    <div class="col-xs-1">Возраст</div>
+    <div class="col-xs-2">Общий остаток счетов</div>
+    <div class="col-xs-2">Максимальный остаток</div>
+    <div class="col-xs-2">Минимальный остаток</div>
+    <div class="col-xs-1"></div>
+  </div>
+
+  <div *ngIf="loading" class="row text-center">
+    Загрузка данных... <span class="glyphicon glyphicon-refresh glyphicon-refresh-animate"></span>
+  </div>
+
+  <div *ngIf="errorLoading" class="row text-center">
+    Произошла ошибка при загрузке данных, попробуй обновить страницу
+  </div>
+
+  <div *ngIf="emptyList" id="emptyList" class="row text-center">
+    <h2>Список пуст</h2>
+  </div>
+
+  <div *ngFor="let entry of list" class="row infoRow">
+    <div class="col-xs-3">
+      {{entry.fio}}
+    </div>
+    <div class="col-xs-1">
+      {{entry.id}}
+    </div>
+    <div class="col-xs-1"></div>
+    <div class="col-xs-2"></div>
+    <div class="col-xs-2"></div>
+    <div class="col-xs-2"></div>
+    <div class="col-xs-1">
+      <button (click)="openModalAddForm()">+</button>
+      <button (click)="openModalChangeForm(entry.id)">...</button>
+      <button (click)="deleteClient(entry.id)">-</button>
+    </div>
+  </div>
+</div>
+<!-- ////////////////////////////////////////////// -->
+
+<!--  MODAL FORM FOR CHANGE CLIENT INFORMATION  -->
+<div *ngIf="modalChangeForm" class="modal-form">
+  <div class="modal-form-content">
+    <div class="container-fluid">
+      <div class="row">
+        <div class="col-xs-11"></div>
+        <div class="col-xs-1">
+         <span class="closeModal" (click)="closeModalForm()">
+        &nbsp;X&nbsp;
+      </span>
+        </div>
+      </div>
+      <form action="">
+
+        <div class="row">
+          <div class="col-xs-4">
+            Имя:
+            <input [(ngModel)]="clientToChange.first_name"
+                   [ngModelOptions]="{standalone: true}"
+                   required="" type="text" class="inputForm">
+          </div>
+          <div class="col-xs-4">
+            Фамилия:
+            <input required type="text" class="inputForm">
+          </div>
+          <div class="col-xs-4">
+            Отчество:
+            <input type="text" class="inputForm">
+          </div>
+        </div>
+        <div class="row">
+          <hr>
+          <div class="col-xs-4">
+            Пол:
+            <input class="inputForm" required type="radio" name="gender" value="male">
+            Мужской
+            <input class="inputForm" type="radio" name="gender" value="female">
+            Женский
+          </div>
+          <div class="col-xs-4">
+            Дата рождения:
+            <input class="inputForm" type="date">
+          </div>
+          <div class="col-xs-4">
+            Характер:
+            <select class="inputForm" name="character" id="">
+              <option value="char">
+                Характер
+              </option>
+              <option value="char">
+                Характер
+              </option>
+              <option value="char">
+                Характер
+              </option>
+            </select>
+          </div>
+        </div>
+        <div class="row">
+          <hr>
+          <div class="col-xs-12">
+            Адрес проживания (фактический):
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-xs-4">
+            Улица:
+            <input type="text" class="inputForm">
+          </div>
+          <div class="col-xs-4">
+            Дом:
+            <input type="text" class="inputForm">
+          </div>
+          <div class="col-xs-4">
+            Квартира:
+            <input type="text" class="inputForm">
+          </div>
+        </div>
+        <div class="row">
+          <hr>
+          <div class="col-xs-12">
+            Адрес регистрации:
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-xs-4">
+            Улица:
+            <input type="text" class="inputForm">
+          </div>
+          <div class="col-xs-4">
+            Дом:
+            <input type="text" class="inputForm">
+          </div>
+          <div class="col-xs-4">
+            Квартира:
+            <input type="text" class="inputForm">
+          </div>
+        </div>
+        <div class="row">
+          <hr>
+          <div class="col-xs-12">
+            Телефоны:
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-xs-4">
+            Домашний:
+            <input type="text" class="inputForm">
+          </div>
+          <div class="col-xs-4">
+            Рабочий:
+            <input type="text" class="inputForm">
+          </div>
+          <div class="col-xs-4"></div>
+        </div>
+        <div class="row">
+          <div class="col-xs-4">
+            Мобильный 1:
+            <input type="text" class="inputForm">
+          </div>
+          <div class="col-xs-4">
+            Мобильный 2:
+            <input type="text" class="inputForm">
+          </div>
+          <div class="col-xs-4">
+            Мобильный 3:
+            <input type="text" class="inputForm">
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-xs-12">
+            <input (click)="saveChangedClient()" type="submit">
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+<!-- ///////////////////////////////////////////////////////////////////   -->
+
+<!--MODAL FORM FOR ADD CLIENT-->
+<div *ngIf="modalAddForm" class="modal-form">
+  <div class="modal-form-content">
+    <div class="container-fluid">
+      <div class="row">
+        <div class="col-xs-11"></div>
+        <div class="col-xs-1">
+         <span class="closeModal" (click)="closeModalForm()">
+        &nbsp;X&nbsp;
+      </span>
+        </div>
+      </div>
+      <form action="">
+
+        <div class="row">
+          <div class="col-xs-4">
+            Имя:
+            <input required="" type="text" class="inputForm">
+          </div>
+          <div class="col-xs-4">
+            Фамилия:
+            <input required type="text" class="inputForm">
+          </div>
+          <div class="col-xs-4">
+            Отчество:
+            <input type="text" class="inputForm">
+          </div>
+        </div>
+        <div class="row">
+          <hr>
+          <div class="col-xs-4">
+            Пол:
+            <input class="inputForm" required type="radio" name="gender" value="male">
+            Мужской
+            <input class="inputForm" type="radio" name="gender" value="female">
+            Женский
+          </div>
+          <div class="col-xs-4">
+            Дата рождения:
+            <input class="inputForm" type="date">
+          </div>
+          <div class="col-xs-4">
+            Характер:
+            <select class="inputForm" name="character" id="">
+              <option value="char">
+                Характер
+              </option>
+              <option value="char">
+                Характер
+              </option>
+              <option value="char">
+                Характер
+              </option>
+            </select>
+          </div>
+        </div>
+        <div class="row">
+          <hr>
+          <div class="col-xs-12">
+            Адрес проживания (фактический):
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-xs-4">
+            Улица:
+            <input type="text" class="inputForm">
+          </div>
+          <div class="col-xs-4">
+            Дом:
+            <input type="text" class="inputForm">
+          </div>
+          <div class="col-xs-4">
+            Квартира:
+            <input type="text" class="inputForm">
+          </div>
+        </div>
+        <div class="row">
+          <hr>
+          <div class="col-xs-12">
+            Адрес регистрации:
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-xs-4">
+            Улица:
+            <input type="text" class="inputForm">
+          </div>
+          <div class="col-xs-4">
+            Дом:
+            <input type="text" class="inputForm">
+          </div>
+          <div class="col-xs-4">
+            Квартира:
+            <input type="text" class="inputForm">
+          </div>
+        </div>
+        <div class="row">
+          <hr>
+          <div class="col-xs-12">
+            Телефоны:
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-xs-4">
+            Домашний:
+            <input type="text" class="inputForm">
+          </div>
+          <div class="col-xs-4">
+            Рабочий:
+            <input type="text" class="inputForm">
+          </div>
+          <div class="col-xs-4"></div>
+        </div>
+        <div class="row">
+          <div class="col-xs-4">
+            Мобильный 1:
+            <input type="text" class="inputForm">
+          </div>
+          <div class="col-xs-4">
+            Мобильный 2:
+            <input type="text" class="inputForm">
+          </div>
+          <div class="col-xs-4">
+            Мобильный 3:
+            <input type="text" class="inputForm">
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+<!-- /////////////////////////////////////////////////////////////////////////////  -->
