@@ -1,68 +1,64 @@
 import {Component, EventEmitter, OnInit, Output} from "@angular/core";
-import {ClientRecord} from "../../model/ClientRecord"
+import {ClientRecord} from "../../model/ClientRecord";
 import {HttpService} from "../HttpService";
-import {ClientDetails} from "../../model/ClientDetails";
-import {error} from "util";
 
 @Component({
   selector: 'list-component',
-  template: require('./list-component.html'),
+  template: require('./list.component.html'),
   styles: [require('./list.component.css')],
 })
 export class ListComponent implements OnInit {
   @Output() exit = new EventEmitter<void>();
+
   loading: boolean = true;
+  deletingClient:string = "";
   errorLoading: boolean = false;
   emptyList: boolean = false;
 
+  idForChange: string = "";
   modalChangeForm: boolean = false;
   modalAddForm: boolean = false;
 
   list: ClientRecord[] = [];
-  clientToChange: ClientDetails = null;
-
 
   constructor(private httpService: HttpService) {
   }
 
   ngOnInit(): void {
+    this.loading = true;
     this.loadList();
-    this.loading = false;
   }
 
-  saveChangedClient() {
-    this.httpService.post("/client/saveClient", {
-      id: this.clientToChange.id,
-      json: JSON.stringify(this.clientToChange),
-    })
-  }
 
   deleteClient(id: string) {
+    this.deletingClient = id;
     this.httpService.post("/client/deleteClient", {
       id: id,
-    }).toPromise().then();
-    this.loadList();
+    }).toPromise().then(ignore => {
+      this.list.splice(this.list.findIndex(res => res.id == id), 1);
+      this.deletingClient = "";
+    }, error => {
+      this.deletingClient = "";
+      this.errorLoading = true;
+      console.log(error);
+    });
   }
 
   openModalChangeForm(id: string) {
+    this.idForChange = id;
     this.modalChangeForm = true;
-    this.httpService.post("/client/getClient", {id: id})
-      .toPromise().then(res => {
-      this.clientToChange = new ClientDetails().assign(res.json() as ClientDetails)
-    }, error => {
-      this.errorLoading = true;
-      console.log(error);
-    })
   }
 
   closeModalForm() {
     this.modalChangeForm = false;
     this.modalAddForm = false;
-    this.clientToChange = null;
+    //this.clientToChange = null;
   }
 
+
   openModalAddForm() {
-    this.modalAddForm = true;
+    this.idForChange = "";
+    this.modalChangeForm = true;
   }
 
   loadList() {
@@ -71,9 +67,10 @@ export class ListComponent implements OnInit {
       if(result.json().length == 0){
         this.emptyList = true;
       }
-      console.log(result.json());
+      this.loading = false;
     }, error => {
       this.errorLoading = true;
+      this.loading = false;
       console.log(error);
     });
   }

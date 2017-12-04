@@ -1,4 +1,4 @@
-import {Component, OnInit} from "@angular/core";
+import {Component, Input, OnInit} from "@angular/core";
 import {HttpService} from "./HttpService";
 import {AuthInfo} from "../model/AuthInfo";
 
@@ -15,6 +15,7 @@ import {AuthInfo} from "../model/AuthInfo";
     ></list-component>
     <main-form-component
       *ngIf="mode == 'main-form'"
+      [cou] = "cou"
       (exit)="exit()"
     ></main-form-component>
     
@@ -27,6 +28,7 @@ import {AuthInfo} from "../model/AuthInfo";
 export class RootComponent implements OnInit {
   mode: string = "login";
 
+  cou:number = 5;
   constructor(private httpService: HttpService) {}
 
   ngOnInit(): void {

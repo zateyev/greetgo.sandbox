@@ -4,16 +4,17 @@ import {FormsModule} from "@angular/forms";
 import {BrowserModule} from "@angular/platform-browser";
 import {RootComponent} from "./root.component";
 import {LoginComponent} from "./input/login.component";
-import {MainFormComponent} from "./main_form/main_form.component";
 import {HttpService} from "./HttpService";
-import {ListComponent} from "./list_of_clients/list.component"
+import {ListComponent} from "./clients/list.component";
+import {MainFormComponent} from "./main_form/main_form.component";
+import {ChangeComponent} from "./clients/change.component";
 
 @NgModule({
   imports: [
     BrowserModule, HttpModule, JsonpModule, FormsModule
   ],
   declarations: [
-    RootComponent, LoginComponent, MainFormComponent, ListComponent
+    RootComponent, LoginComponent, MainFormComponent, ListComponent, ChangeComponent
   ],
   bootstrap: [RootComponent],
   providers: [HttpService],

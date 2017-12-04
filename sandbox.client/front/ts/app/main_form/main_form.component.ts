@@ -1,4 +1,4 @@
-import {Component, EventEmitter, Output} from "@angular/core";
+import {Component, EventEmitter, Input, Output} from "@angular/core";
 import {UserInfo} from "../../model/UserInfo";
 import {HttpService} from "../HttpService";
 
@@ -56,7 +56,8 @@ import {HttpService} from "../HttpService";
     </div>`,
 })
 export class MainFormComponent {
-  @Output() exit = new EventEmitter<void>();
+  @Output() exit = new EventEmitter<string>();
+  @Input() cou:number = 0;
 
   userInfo: UserInfo | null = null;
   loadUserInfoButtonEnabled: boolean = true;
@@ -65,6 +66,7 @@ export class MainFormComponent {
   constructor(private httpService: HttpService) {}
 
   loadUserInfoButtonClicked() {
+    console.log(this.cou);
     this.loadUserInfoButtonEnabled = false;
     this.loadUserInfoError = null;
 
