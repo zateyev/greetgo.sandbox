@@ -1,6 +1,5 @@
 export class ClientDetails {
   public id: string;
-  //public fio: string;
   public first_name: string;
   public last_name: string;
   public patronymic: string;
