@@ -14,6 +14,7 @@ export class ClientDetails {
     return this;
   }
 
+
   constructor(){
     this.id ="";
     this.first_name="";

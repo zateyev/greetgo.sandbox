@@ -35,9 +35,6 @@ public class StandClientDb implements HasAfterInject {
         String command = splitLine[0].trim();
         switch (command) {
           case "1":
-            appendClients(splitLine);
-            break;
-          case "2":
             appendClient(splitLine);
             break;
           default:
@@ -48,7 +45,7 @@ public class StandClientDb implements HasAfterInject {
   }
 
   @SuppressWarnings("unused")
-  private void appendClients(String[] splitLine) {
+  private void appendClient(String[] splitLine) {
     ClientDot d = new ClientDot();
     d.id = splitLine[1].trim();
     String[] fio = splitLine[2].trim().split("\\s+");
@@ -73,18 +70,7 @@ public class StandClientDb implements HasAfterInject {
         d.patronymic = "";
         d.surname = "";
     }
+    d.phone = splitLine[3].trim();
     clientStorage.put(d.id, d);
-  }
-
-  private void appendClient(String[] splitLine){
-    ClientDot d = new ClientDot();
-    d.id = splitLine[1].trim();
-    String[] fio = splitLine[2].trim().split("\\s+");
-    String phone = splitLine[3].trim();
-    d.name = fio[0];
-    d.surname = fio[1];
-    d.patronymic = fio[2];
-    d.phone = phone;
-    clStorage.put(d.id, d);
   }
 }

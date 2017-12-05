@@ -1,7 +1,8 @@
 import {Component, EventEmitter, OnInit, Output, ViewChild} from "@angular/core";
 import {ClientRecord} from "../../model/ClientRecord";
 import {HttpService} from "../HttpService";
-import {ChangeComponent} from "./change.component";
+import {ChangeClientComponent} from "./change.component";
+import {ClientDetails} from "../../model/ClientDetails";
 
 @Component({
   selector: 'list-component',
@@ -11,7 +12,7 @@ import {ChangeComponent} from "./change.component";
 export class ListComponent implements OnInit {
   @Output() exit = new EventEmitter<void>();
 
-  @ViewChild("changeForm") changeForm: ChangeComponent;
+  @ViewChild("changeForm") changeForm: ChangeClientComponent;
 
   loading: boolean = true;
   deletingClient:string = "";
@@ -20,7 +21,6 @@ export class ListComponent implements OnInit {
 
   idForChange: string = "";
   modalChangeForm: boolean = false;
-  modalAddForm: boolean = false;
 
   list: ClientRecord[] = [];
 
@@ -58,13 +58,23 @@ export class ListComponent implements OnInit {
     // this.modalAddForm = false;
     //this.clientDetails = null;
     //this.changeForm.closeForm();
-    console.log(client);
+   // this.list.find(res=> res.id == client.id) = client;
+   this.list[this.list.findIndex(res=>res.id == client.id)] = this.toClientRecord(client);
+   if(!this.list.findIndex(res=>res.id == client.id)){
+     console.log("true");
+   }
   }
 
-
   openModalAddForm() {
-    this.idForChange = "";
+    this.changeForm.showForm("");
     this.modalChangeForm = true;
+  }
+
+  toClientRecord(o:ClientDetails):ClientRecord{
+    let cl = new ClientRecord;
+    cl.id = o.id;
+    cl.fio = o.first_name + " " + o.last_name + " " + o.patronymic;
+    return cl;
   }
 
   loadList() {
