@@ -17,7 +17,6 @@ export class ListComponent implements OnInit {
   errorLoading: boolean = false;
   emptyList: boolean = false;
   modalChangeForm: boolean = false;
-
   list: ClientRecord[] = [];
 
   constructor(private httpService: HttpService) {
@@ -32,8 +31,7 @@ export class ListComponent implements OnInit {
   deleteClient(id: string) {
     this.deletingClient = id;
     this.httpService.post("/client/deleteClient", {
-      id: id,
-    }).toPromise().then(ignore => {
+      id: id,}).toPromise().then(ignore => {
       this.list.splice(this.list.findIndex(res => res.id == id), 1);
       this.deletingClient = "";
     }, error => {
