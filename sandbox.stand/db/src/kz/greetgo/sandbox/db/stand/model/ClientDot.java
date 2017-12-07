@@ -26,8 +26,8 @@ public class ClientDot {
   public ClientDetails toClientDetails(){
     ClientDetails rec = new ClientDetails();
     rec.id = this.id;
-    rec.first_name = this.name;
-    rec.last_name = this.surname;
+    rec.name = this.name;
+    rec.surname = this.surname;
     rec.patronymic = this.patronymic;
     rec.phone = this.phone;
     return rec;

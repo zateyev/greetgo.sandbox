@@ -2,6 +2,7 @@ import {Component, EventEmitter, Output} from "@angular/core";
 import {ClientDetails} from "../../model/ClientDetails";
 import {ClientRecord} from "../../model/ClientRecord";
 import {HttpService} from "../HttpService";
+import {ClientToSave} from "../../model/ClientToSave";
 @Component({
   selector: 'change-component',
   template: require('./change.component.html'),
@@ -9,14 +10,16 @@ import {HttpService} from "../HttpService";
 })
 
 export class ChangeClientComponent {
-  @Output() saved = new EventEmitter<ClientDetails>();
+  @Output() saved = new EventEmitter<ClientRecord>();
   visible = false;
 
+  clientDetails: ClientDetails = null;
+  clientToSave: ClientToSave = new ClientToSave;
 
-  clientDetails: ClientDetails = new ClientDetails();
-  ////////////
+  /////////////////////////////////////////////////////
   errors: string = "";
-
+  /////////////////////////////////////////////////////
+  buttonEnabled: boolean = false;
   add:boolean = false;
   change:boolean = false;
 
@@ -24,13 +27,14 @@ export class ChangeClientComponent {
   }
 
   public showForm(id: string) {
-    this.change = true;
     this.visible = true;
     this.errors = 'loadingClient';
     if(id!=""){
+      this.change = true; // change value for button
       this.httpService.post("/client/getClient", {id: id})
         .toPromise().then(res => {
         this.clientDetails = new ClientDetails().assign(res.json() as ClientDetails);
+        this.updateButton();
         this.errors = 'success';
       }, error => {
         this.errors = 'errorLoading';
@@ -38,57 +42,40 @@ export class ChangeClientComponent {
       })
     }
     else{
+      this.add = true; // add value for button
       this.clientDetails = new ClientDetails();
+      this.updateButton();
       this.errors = "success";
     }
+
   }
 
-
-  openModalAddForm(){
-    this.errors = "success";
-    this.clientDetails = new ClientDetails();
+  updateButton(){
+    this.buttonEnabled = !!this.clientDetails.name && !!this.clientDetails.surname;
   }
+
 
   closeForm() {
     this.errors = "savingClient";
-    if(this.clientDetails.id !== ""){
-      this.httpService.post("/client/saveClient", {
-        id: this.clientDetails.id,
-        json: JSON.stringify(this.clientDetails)
-      }).toPromise().then(ignore => {
-        this.saved.emit(this.clientDetails);
-        this.visible = false;
-        this.errors = "";
-      }, error => {
-        this.errors = "errorSavingClient";
-        console.log(error);
-      })
-    }
-    else {
-      this.httpService.post("/client/saveClient", {
-        id: "0",
-        json: JSON.stringify(this.clientDetails)
-      }).toPromise().then(ignore => {
-        this.saved.emit(this.clientDetails);
-        this.visible = false;
-        this.errors = "";
-      }, error => {
-        this.errors = "errorSavingClient";
-        console.log(error);
-      })
-    }
-  }
+    this.add = this.change = false;
 
-  addClient() {
-    this.errors = "savingClient";
-    this.httpService.post("/client/addClient", {
-      json: JSON.stringify(this.clientDetails)
-    }).toPromise().then(ignore=>{
-      this.saved.emit();
+    this.clientToSave.assign(this.clientDetails);
+    if (this.clientToSave.name == null || this.clientToSave.surname == null){
+      this.errors = "errorSavingClient";
+      return;
+    }
+
+    this.httpService.post("/client/saveClient", {
+      clientToSave: JSON.stringify(this.clientToSave)
+    }).toPromise().then(res => {
+      this.saved.emit(res.json() as ClientRecord);
+      this.visible = false;
+      this.errors = "";
     }, error => {
       this.errors = "errorSavingClient";
       console.log(error);
     })
   }
+
 
 }

@@ -2,7 +2,6 @@ import {Component, EventEmitter, OnInit, Output, ViewChild} from "@angular/core"
 import {ClientRecord} from "../../model/ClientRecord";
 import {HttpService} from "../HttpService";
 import {ChangeClientComponent} from "./change.component";
-import {ClientDetails} from "../../model/ClientDetails";
 
 @Component({
   selector: 'list-component',
@@ -11,15 +10,12 @@ import {ClientDetails} from "../../model/ClientDetails";
 })
 export class ListComponent implements OnInit {
   @Output() exit = new EventEmitter<void>();
-
   @ViewChild("changeForm") changeForm: ChangeClientComponent;
 
   loading: boolean = true;
   deletingClient:string = "";
   errorLoading: boolean = false;
   emptyList: boolean = false;
-
-  idForChange: string = "";
   modalChangeForm: boolean = false;
 
   list: ClientRecord[] = [];
@@ -48,34 +44,28 @@ export class ListComponent implements OnInit {
   }
 
   openModalChangeForm(id: string) {
-    this.idForChange = id;
     this.modalChangeForm = true;
     this.changeForm.showForm(id);
   }
 
   closeModalForm(client:any) {
+    if(client == null){
+      return;
+    }
     this.modalChangeForm = false;
-    // this.modalAddForm = false;
-    //this.clientDetails = null;
-    //this.changeForm.closeForm();
-   // this.list.find(res=> res.id == client.id) = client;
-   this.list[this.list.findIndex(res=>res.id == client.id)] = this.toClientRecord(client);
-   if(!this.list.findIndex(res=>res.id == client.id)){
-     console.log("true");
-   }
+    if(this.list.findIndex(x => x.id === client.id) !>= 0) {
+      this.list[this.list.findIndex(res => res.id == client.id)] = client;
+    }
+    else {
+      this.list.push(client);
+    }
   }
 
   openModalAddForm() {
-    this.changeForm.showForm("");
     this.modalChangeForm = true;
+    this.changeForm.showForm("");
   }
 
-  toClientRecord(o:ClientDetails):ClientRecord{
-    let cl = new ClientRecord;
-    cl.id = o.id;
-    cl.fio = o.first_name + " " + o.last_name + " " + o.patronymic;
-    return cl;
-  }
 
   loadList() {
     let page: number = 1;
