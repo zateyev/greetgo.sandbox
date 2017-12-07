@@ -13,4 +13,12 @@ export class ClientDetails {
     this.phone = o.phone;
     return this;
   }
+
+
+  constructor(){
+    this.id ="";
+    this.first_name="";
+    this.last_name="";
+    this.phone="";
+  }
 }

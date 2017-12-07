@@ -3,6 +3,7 @@ package kz.greetgo.sandbox.stand.stand_register_impls;
 
 import kz.greetgo.depinject.core.Bean;
 import kz.greetgo.depinject.core.BeanGetter;
+import kz.greetgo.mvc.annotations.Json;
 import kz.greetgo.sandbox.controller.model.ClientDetails;
 import kz.greetgo.sandbox.controller.model.ClientRecord;
 import kz.greetgo.sandbox.controller.register.ClientRegister;
@@ -13,24 +14,31 @@ import kz.greetgo.sandbox.db.stand.model.ClientDot;
 public class ClientRegisterStand implements ClientRegister {
   public BeanGetter<StandClientDb> al;
   @Override
-  public ClientRecord[] getList(){
+  public ClientRecord[] getList(int page){
     ClientRecord[] list = new ClientRecord[al.get().clientStorage.size()];
     int index = 0;
     for(ClientDot d: al.get().clientStorage.values()){
       list[index] = d.toClientRecord();
       index++;
     }
+    System.out.println(page);
     return list;
   }
 
   @Override
   public ClientDetails getClient(String id) {
-    return al.get().clStorage.get(id).toClientDetails();
+    return al.get().clientStorage.get(id).toClientDetails();
   }
 
   @Override
-  public void saveClient(String id, String json) {
-
+  public ClientRecord saveClient(String id, String json) {
+    if(!"0".equals(id)){
+    return al.get().clientStorage.get(id).toClientRecord();
+    }
+    else {
+      return null;
+    }
+//    System.out.println(json);
   }
 
   @Override

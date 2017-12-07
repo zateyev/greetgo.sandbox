@@ -15,18 +15,20 @@ import {AuthInfo} from "../model/AuthInfo";
     ></list-component>
     <main-form-component
       *ngIf="mode == 'main-form'"
+      [cou] = "cou"
       (exit)="exit()"
     ></main-form-component>
-    
 
-    <div *ngIf="mode == 'init'">
-      Инициация системы... <span class="glyphicon glyphicon-refresh glyphicon-refresh-animate"></span>
+
+    <div style="margin-top: 25%;" class="text-center" *ngIf="mode == 'init'">
+      <span><img src="/img/load.gif" alt=""></span>
     </div>
   `
 })
 export class RootComponent implements OnInit {
   mode: string = "login";
 
+  cou:number = 5;
   constructor(private httpService: HttpService) {}
 
   ngOnInit(): void {
