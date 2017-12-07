@@ -1,8 +1,7 @@
 package kz.greetgo.sandbox.controller.model;
 
 
-
-public class ClientDetails {
+public class ClientToSave {
   public String id;
   public String name;
   public String surname;

@@ -9,9 +9,6 @@ import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-/**
- * Created by jgolibzhan on 11/30/17.
- */
 @Bean
 public class StandClientDb implements HasAfterInject {
 

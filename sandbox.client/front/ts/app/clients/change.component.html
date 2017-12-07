@@ -6,7 +6,7 @@
       <div class="row">
         <div class="col-xs-11"></div>
         <div class="col-xs-1">
-         <span class="closeModal" (click)="closeForm()">
+         <span class="closeModal" *ngIf= "buttonEnabled" (click)="closeForm()">
         &nbsp;X&nbsp;
       </span>
         </div>
@@ -23,7 +23,7 @@
        <h3> Сохраняем...</h3>
       </div>
       <div *ngIf="errors === 'errorSavingClient'" action="" class="text-center">
-        <h3> Ошибка при сохранении данных, попробуйте заново...</h3>
+        <h3> Ошибка при сохранении данных, обновите страницу и попробуйте заново...</h3>
       </div>
       <!--////////////////////////////////////////////////////////////////-->
 
@@ -31,24 +31,34 @@
         <div class="row">
           <div class="col-xs-4">
             Имя:
-            <input [(ngModel)]="clientDetails.first_name"
+            <input [(ngModel)]="clientDetails.name"
                    [ngModelOptions]="{standalone: true}"
-                   required="" type="text" class="inputForm">
+                   (keyup)="updateButton()"
+                   type="text" class="inputForm" required>
+            <span style="color: red">*</span>
           </div>
           <div class="col-xs-4">
             Фамилия:
-            <input required type="text" class="inputForm">
+            <input
+              [(ngModel)]="clientDetails.surname"
+              [ngModelOptions]="{standalone: true}"
+              (keyup)="updateButton()"
+              required="false" type="text" class="inputForm">
+            <span style="color: red">*</span>
           </div>
           <div class="col-xs-4">
             Отчество:
-            <input type="text" class="inputForm">
+            <input
+              [(ngModel)]="clientDetails.patronymic"
+              [ngModelOptions]="{standalone: true}"
+              type="text" class="inputForm">
           </div>
         </div>
         <div class="row">
           <hr>
           <div class="col-xs-4">
             Пол:
-            <input class="inputForm" required type="radio" name="gender" value="male">
+            <input class="inputForm" type="radio" name="gender" value="male">
             Мужской
             <input class="inputForm" type="radio" name="gender" value="female">
             Женский
@@ -145,8 +155,14 @@
         </div>
         <div class="row">
           <div class="col-xs-12">
-            <input *ngIf="change" (click)="closeForm()" type="submit" value="Сохранить">
-            <input *ngIf="add" (click)="addClient()" type="submit" value="Добавить">
+            <input *ngIf="change"
+                   [disabled] = "!buttonEnabled"
+                   (click)="closeForm()" type="submit" value="Сохранить">
+            <input *ngIf="add"
+                   [disabled] = "!buttonEnabled"
+                   (click)="closeForm()" type="submit" value="Добавить">
+            <span *ngIf="!buttonEnabled"
+              class="pull-right" style="color: red">* поля объязательны для заполнения</span>
           </div>
         </div>
       </form>
