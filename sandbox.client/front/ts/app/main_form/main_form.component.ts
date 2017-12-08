@@ -48,6 +48,11 @@ import {HttpService} from "../HttpService";
             <td>&nbsp;:&nbsp;</td>
             <td><b>{{userInfo.patronymic}}</b></td>
           </tr>
+          <tr>
+            <td>Patronymic</td>
+            <td>&nbsp;:&nbsp;</td>
+            <td><b>{{userInfo.firstAddress[0]}}</b></td>
+          </tr>
 
           </tbody>
         </table>

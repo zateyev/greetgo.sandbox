@@ -27,24 +27,45 @@
     <h2>Список пуст</h2>
   </div>
 
-  <div *ngFor="let entry of list" class="row infoRow">
-    <div class="col-xs-3">
-      {{entry.fio}}
-    </div>
-    <div class="col-xs-1">
-      {{entry.id}}
-    </div>
-    <div class="col-xs-1"></div>
-    <div class="col-xs-2"></div>
-    <div class="col-xs-2"></div>
-    <div class="col-xs-2"></div>
-    <div class="col-xs-1">
-      <button (click)="openModalAddForm()">+</button>
-      <button (click)="openModalChangeForm(entry.id)">...</button>
-      <button *ngIf="entry.id !== deletingClient" (click)="deleteClient(entry.id)">-</button>
-      <span *ngIf="entry.id === deletingClient" style="font-size: small" class="glyphicon glyphicon-refresh glyphicon-refresh-animate"></span>
+  <div *ngIf="!emptyList && !errorLoading && !loading">
+    <div *ngFor="let entry of list" class="row infoRow">
+      <!-- /////// ФИО  колонка//////////-->
+      <div class="col-xs-3">
+        {{entry.fio}}
+      </div>
+      <!-- /////// Характер колонка /////////-->
+      <div class="col-xs-1">
+        {{temperValue(entry.temper)}}
+      </div>
+      <!-- //////  Возраст ///////////-->
+      <div class="col-xs-1">
+        {{entry.age}}
+      </div>
+      <!-- /////// Общий счет /////////-->
+      <div class="col-xs-2">
+        {{entry.totalAccountBalance}}
+      </div>
+      <!--//////// Максимальный счет-->
+      <div class="col-xs-2">
+        {{entry.maxAccountBalance}}
+      </div>
+      <!-- //////// Минимальный счет-->
+      <div class="col-xs-2">
+        {{entry.id}}
+      </div>
+      <div class="col-xs-1">
+        <button (click)="openModalAddForm()">+</button>
+        <button (click)="openModalChangeForm(entry.id)">...</button>
+        <button *ngIf="entry.id !== deletingClient" (click)="deleteClient(entry.id)">-</button>
+        <span *ngIf="entry.id === deletingClient" style="font-size: small" class="glyphicon glyphicon-refresh glyphicon-refresh-animate"></span>
+      </div>
     </div>
   </div>
+
+  <pagination
+    (page)="loadPageOfList($event)"
+  ></pagination>
+
 </div>
 <!-- ////////////////////////////////////////////// -->
 <change-component

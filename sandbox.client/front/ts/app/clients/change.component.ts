@@ -16,6 +16,10 @@ export class ChangeClientComponent {
   clientDetails: ClientDetails = null;
   clientToSave: ClientToSave = new ClientToSave;
 
+  temperOptions: any = [{value: 'good', name: 'Хороший'},
+    {value: 'bad', name: 'Плохой'},
+    {value: 'veryBad', name: 'Очень Плохой'}];
+
   /////////////////////////////////////////////////////
   errors: string = "";
   /////////////////////////////////////////////////////
@@ -28,12 +32,14 @@ export class ChangeClientComponent {
 
   public showForm(id: string) {
     this.visible = true;
+    this.add = this.change = false;
     this.errors = 'loadingClient';
     if(id!=""){
       this.change = true; // change value for button
       this.httpService.post("/client/getClient", {id: id})
         .toPromise().then(res => {
-        this.clientDetails = new ClientDetails().assign(res.json() as ClientDetails);
+        this.clientDetails = new ClientDetails().assign(res.json());
+        console.log(this.clientDetails);
         this.updateButton();
         this.errors = 'success';
       }, error => {
@@ -57,9 +63,9 @@ export class ChangeClientComponent {
 
   closeForm() {
     this.errors = "savingClient";
-    this.add = this.change = false;
 
     this.clientToSave.assign(this.clientDetails);
+    console.log(this.clientToSave);
     if (this.clientToSave.name == null || this.clientToSave.surname == null){
       this.errors = "errorSavingClient";
       return;
@@ -68,13 +74,28 @@ export class ChangeClientComponent {
     this.httpService.post("/client/saveClient", {
       clientToSave: JSON.stringify(this.clientToSave)
     }).toPromise().then(res => {
-      this.saved.emit(res.json() as ClientRecord);
+      let clientRecord = new ClientRecord;
+      this.saved.emit(clientRecord.assign(res.json()));
       this.visible = false;
       this.errors = "";
     }, error => {
       this.errors = "errorSavingClient";
       console.log(error);
     })
+  }
+
+  hideForm() {
+    this.visible = false;
+    this.saved.emit();
+    this.errors = "";
+  }
+
+  genderToM() {
+    this.clientDetails.gender = "М";
+  }
+
+  genderToF() {
+    this.clientDetails.gender = "Ж";
   }
 
 

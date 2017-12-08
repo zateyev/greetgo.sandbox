@@ -8,13 +8,14 @@ import {HttpService} from "./HttpService";
 import {ListComponent} from "./clients/list.component";
 import {MainFormComponent} from "./main_form/main_form.component";
 import {ChangeClientComponent} from "./clients/change.component";
+import {ClientListPagination} from "./pagination/pagination.component";
 
 @NgModule({
   imports: [
     BrowserModule, HttpModule, JsonpModule, FormsModule
   ],
   declarations: [
-    RootComponent, LoginComponent, MainFormComponent, ListComponent, ChangeClientComponent
+    RootComponent, LoginComponent, MainFormComponent, ListComponent, ChangeClientComponent, ClientListPagination
   ],
   bootstrap: [RootComponent],
   providers: [HttpService],
