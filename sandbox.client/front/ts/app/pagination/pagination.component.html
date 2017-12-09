@@ -1,12 +1,20 @@
-<div class="row">
+<div *ngIf="totalSizeOfList !== 0" class="row">
   <div class="col-xs-12 text-center">
     <ul class="pagination">
-      <li [ngClass]="{disabled: currentPage == 0}"><a href="#" (click)="setCurrentPage(currentPage-1)">Previous</a></li>
+      <li
+        *ngIf="currentPage !== 0"><a href="#" (click)="setCurrentPage(currentPage-1)">Previous</a>
+      </li>
+      <li *ngIf="currentPage === 0" class="disabled"><a href="#">Previous</a></li>
+
       <li
         [ngClass]="{active: currentPage == a}"
         *ngFor="let a of numberOfPages"><a (click)="setCurrentPage(a)"
                                                               href="#">{{a+1}}</a></li>
-      <li [ngClass]="{disabled: currentPage == numberOfPages.length-1}"><a (click)="setCurrentPage(currentPage+1)" href="#">Next</a></li>
+      <li
+        *ngIf="currentPage != 5"><a (click)="setCurrentPage(currentPage+1)" href="#">Next</a></li>
+      <li
+        *ngIf="currentPage == 5"
+        class="disabled"><a href="#">Next</a></li>
     </ul>
   </div>
 </div>

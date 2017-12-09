@@ -62,34 +62,43 @@
           <div class="col-xs-4">
             Пол:
             <input class="inputForm"
-                   (click)="genderToM()"
+                   (click)="genderToM(); updateButton()"
                    [checked]="clientDetails.gender == 'М'"
                    value="М"
                    type="radio" name="gender" value="male">
             Мужской
             <input
-              (click)="genderToF()"
+              (click)="genderToF(); updateButton()"
               [checked]="clientDetails.gender == 'Ж'"
               value="Ж"
               class="inputForm" type="radio" name="gender" value="female">
             Женский
+
+            <span style="color: red">*</span>
           </div>
           <div class="col-xs-4">
             Дата рождения:
             <input
+              (click)="updateButton()"
               [(ngModel)] = "clientDetails.dateOfBirth"
               [ngModelOptions] = "{standalone :true}"
               class="inputForm" type="date">
+
+            <span style="color: red">*</span>
           </div>
           <div class="col-xs-4">
             Характер:
-            <select [(ngModel)]="clientDetails.temper"
+            <select
+              (click)="updateButton()"
+              [(ngModel)]="clientDetails.temper"
                     class="inputForm" name="temper" id="">
               <option *ngFor="let op of temperOptions"
                       value={{op.value}}>
                 {{op.name}}
               </option>
             </select>
+
+            <span style="color: red">*</span>
           </div>
         </div>
         <div class="row">

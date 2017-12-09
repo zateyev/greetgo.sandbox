@@ -48,9 +48,7 @@ public class ClientDot {
     for(String s: splitPhones)rec.phones.add(s);
 
     String[] splitAddress = this.address.split("\\s+");
-    rec.firstAddress.add(splitAddress[0].trim());
-    rec.firstAddress.add(splitAddress[1].trim());
-    rec.firstAddress.add(splitAddress[2].trim());
+    for(String s: splitAddress)rec.firstAddress.add(s);
 
     return rec;
   }
