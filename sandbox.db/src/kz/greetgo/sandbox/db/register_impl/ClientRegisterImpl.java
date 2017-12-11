@@ -5,6 +5,7 @@ import kz.greetgo.sandbox.controller.model.ClientDetails;
 import kz.greetgo.sandbox.controller.model.ClientRecord;
 import kz.greetgo.sandbox.controller.model.ClientToSave;
 import kz.greetgo.sandbox.controller.register.ClientRegister;
+import kz.greetgo.sandbox.controller.register.model.GetClientList;
 
 import java.util.List;
 
@@ -13,24 +14,26 @@ public class ClientRegisterImpl implements ClientRegister {
 
   @Override
   public long getSize() {
-    return 0;
+    throw new UnsupportedOperationException();
   }
 
   @Override
-  public List<ClientRecord> getList(int page, String sort) {
-    return null;
+  public List<ClientRecord> getList(GetClientList in) {
+    throw new UnsupportedOperationException();
   }
 
   @Override
   public ClientDetails getClient(String id) {
-    return null;
+    throw new UnsupportedOperationException();
   }
 
   @Override
   public ClientRecord saveClient(ClientToSave clientToSave) {
-    return null;
+    throw new UnsupportedOperationException();
   }
 
   @Override
-  public void deleteClient(String id) {}
+  public void deleteClient(String id) {
+    throw new UnsupportedOperationException();
+  }
 }
