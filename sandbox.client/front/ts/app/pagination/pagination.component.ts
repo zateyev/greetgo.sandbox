@@ -36,11 +36,9 @@ export class ClientListPagination implements OnInit {
 
   setNumberOfPages(): void {
     let startIndex = 0, endIndex = 5;
-    console.log("total " + this.totalPages + "   " + "current " + this.currentPage);
     if (this.totalPages < 6) {
       startIndex = 0;
       endIndex = this.totalPages;
-      console.log("total end set");
     }
     else {
       if (this.currentPage <= 2) {

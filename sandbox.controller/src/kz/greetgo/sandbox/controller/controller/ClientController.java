@@ -12,27 +12,30 @@ import kz.greetgo.sandbox.controller.model.ClientToSave;
 import kz.greetgo.sandbox.controller.register.ClientRegister;
 import kz.greetgo.sandbox.controller.util.Controller;
 
+import java.util.List;
+
 
 @Bean
 @Mapping("/client")
-public class ClientController implements Controller{
+public class ClientController implements Controller {
 
   public BeanGetter<ClientRegister> clientRegister;
 
   @ToJson
   @Mapping("/getSize")
-  public long getSize(){
+  public long getSize() {
     return clientRegister.get().getSize();
   }
+
   @ToJson
   @Mapping("/getList")
-  public ClientRecord[] getList(@Par("page") int page, @Par("sort") String sort){
+  public List<ClientRecord> getList(@Par("page") int page, @Par("sort") String sort) {
     return clientRegister.get().getList(page, sort);
-      }
+  }
 
   @ToJson
   @Mapping("/getClient")
-  public ClientDetails getClient(@Par("id") String id){
+  public ClientDetails getClient(@Par("id") String id) {
     return clientRegister.get().getClient(id);
   }
 
@@ -46,7 +49,7 @@ public class ClientController implements Controller{
   @Mapping("/deleteClient")
   public void deleteClient(
     @Par("id") String id
-  ){
+  ) {
     clientRegister.get().deleteClient(id);
   }
 }
