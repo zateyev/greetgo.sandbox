@@ -3,8 +3,6 @@ package kz.greetgo.sandbox.db.stand.model;
 import kz.greetgo.sandbox.controller.model.ClientDetails;
 import kz.greetgo.sandbox.controller.model.ClientRecord;
 
-import java.util.ArrayList;
-
 public class ClientDot {
 
   public String id;
@@ -44,7 +42,7 @@ public class ClientDot {
     rec.gender = this.gender;
 
 
-    rec.charm = this.temper;
+    rec.charmId = this.temper;
 
     rec.charms.add("Хорош");
     rec.charms.add("asdf");

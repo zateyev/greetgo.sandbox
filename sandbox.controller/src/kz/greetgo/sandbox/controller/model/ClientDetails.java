@@ -8,7 +8,7 @@ public class ClientDetails {
   public String name;
   public String surname;
   public String patronymic;
-  public String charm;
+  public String charmId;
   public String gender;
   public String dateOfBirth;
   public List<String> firstAddress = new ArrayList<>();
