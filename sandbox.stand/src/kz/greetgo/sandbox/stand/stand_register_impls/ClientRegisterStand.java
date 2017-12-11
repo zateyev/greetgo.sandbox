@@ -52,7 +52,6 @@ public class ClientRegisterStand implements ClientRegister {
   }
 
 
-
   int i = 50;
 
   @Override

@@ -18,7 +18,7 @@ import java.util.List;
 
 @Bean
 @Mapping("/client")
-public class ClientController implements Controller{
+public class ClientController implements Controller {
 
   public BeanGetter<ClientRegister> clientRegister;
 
@@ -28,17 +28,18 @@ public class ClientController implements Controller{
     @Par("filter") @Json ListInfo listInfo) {
     return clientRegister.get().getSize(listInfo);
   }
+
   @ToJson
   @Mapping("/getList")
   public List<ClientRecord> getList(
     @Par("listInfo")
     @Json ListInfo listInfo) {
     return clientRegister.get().getList(listInfo);
-      }
+  }
 
   @ToJson
   @Mapping("/getClient")
-  public ClientDetails getClient(@Par("id") String id){
+  public ClientDetails getClient(@Par("id") String id) {
     return clientRegister.get().getClient(id);
   }
 
@@ -52,7 +53,7 @@ public class ClientController implements Controller{
   @Mapping("/deleteClient")
   public void deleteClient(
     @Par("id") String id
-  ){
+  ) {
     clientRegister.get().deleteClient(id);
   }
 }
