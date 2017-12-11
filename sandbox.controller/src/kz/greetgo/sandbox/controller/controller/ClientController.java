@@ -9,6 +9,7 @@ import kz.greetgo.mvc.annotations.ToJson;
 import kz.greetgo.sandbox.controller.model.ClientDetails;
 import kz.greetgo.sandbox.controller.model.ClientRecord;
 import kz.greetgo.sandbox.controller.model.ClientToSave;
+import kz.greetgo.sandbox.controller.model.ListInfo;
 import kz.greetgo.sandbox.controller.register.ClientRegister;
 import kz.greetgo.sandbox.controller.util.Controller;
 
@@ -23,14 +24,17 @@ public class ClientController implements Controller {
 
   @ToJson
   @Mapping("/getSize")
-  public long getSize() {
-    return clientRegister.get().getSize();
+  public long getSize(
+    @Par("filter") @Json ListInfo listInfo) {
+    return clientRegister.get().getSize(listInfo);
   }
 
   @ToJson
   @Mapping("/getList")
-  public List<ClientRecord> getList(@Par("page") int page, @Par("sort") String sort) {
-    return clientRegister.get().getList(page, sort);
+  public List<ClientRecord> getList(
+    @Par("listInfo")
+    @Json ListInfo listInfo) {
+    return clientRegister.get().getList(listInfo);
   }
 
   @ToJson

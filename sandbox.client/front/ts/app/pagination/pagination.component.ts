@@ -1,6 +1,7 @@
 import {Component, EventEmitter, OnInit, Output} from "@angular/core";
 import {HttpService} from "../HttpService";
 import * as _ from "underscore";
+import {ListInfo} from "../../model/ListInfo";
 
 @Component({
   selector: 'pagination',
@@ -10,7 +11,9 @@ import * as _ from "underscore";
 
 export class ClientListPagination implements OnInit {
 
-  @Output() page = new EventEmitter<number>();
+  @Output() page = new EventEmitter<ListInfo>();
+
+  listInfo: ListInfo = new ListInfo();
 
   currentPage: number = 0;
   totalSizeOfList: number = 0;
@@ -25,12 +28,15 @@ export class ClientListPagination implements OnInit {
   }
 
   getTotalSizeOfList() {
-    this.httpService.get("/client/getSize").toPromise().then(res => {
+    this.httpService.get("/client/getSize?filter="+JSON.stringify(this.listInfo)).toPromise().then(res => {
       this.totalSizeOfList = res.json() as number;
       if(this.totalSizeOfList === 0) return null;
-      console.log(this.totalSizeOfList + " TOTAL SIZE");
       this.totalPages = Math.ceil(this.totalSizeOfList / 5);
-      this.setNumberOfPages();
+      if (this.totalSizeOfList <= 5) {
+        this.listInfo.startIndex = 0;
+        this.listInfo.endIndex = this.totalSizeOfList;
+      }
+      else this.setNumberOfPages();
     });
   }
 
@@ -39,6 +45,7 @@ export class ClientListPagination implements OnInit {
     if (this.totalPages < 6) {
       startIndex = 0;
       endIndex = this.totalPages;
+      console.log(this.listInfo.filter);
     }
     else {
       if (this.currentPage <= 2) {
@@ -57,9 +64,12 @@ export class ClientListPagination implements OnInit {
     this.numberOfPages = _.range(startIndex, endIndex);
   }
 
-  setCurrentPage(p: number) {
-    this.currentPage = p;
+  setCurrentPage(n: number) {
+    this.currentPage = n;
     this.setNumberOfPages();
-    this.page.emit(this.currentPage);
+    let listSize = 5;
+    this.listInfo.startIndex = n * listSize;
+    this.listInfo.endIndex = this.listInfo.startIndex + listSize;
+    this.page.emit(this.listInfo);
   }
 }

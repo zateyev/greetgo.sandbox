@@ -29,15 +29,18 @@
 
       <form *ngIf="errors === 'success'" action="">
         <div class="row">
-          <div class="col-xs-4">
+          <div class="col-xs-1">
             Имя:
+          </div>
+          <div class="col-xs-3">
             <input [(ngModel)]="clientDetails.name"
                    [ngModelOptions]="{standalone: true}"
                    (keyup)="updateButton()"
                    name="name"
-                   type="text" class="inputForm" required>
+                   type="text" class="inputForm form-control">
             <span style="color: red">*</span>
           </div>
+
           <div class="col-xs-4">
             Фамилия:
             <input
