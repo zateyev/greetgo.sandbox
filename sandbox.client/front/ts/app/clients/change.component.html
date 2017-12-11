@@ -2,7 +2,7 @@
 <!--  MODAL FORM FOR CHANGE CLIENT INFORMATION  -->
 <div *ngIf="visible" class="modal-form">
   <div class="modal-form-content">
-    <div class="container-fluid">
+    <div class="container">
       <div class="row">
         <div class="col-xs-11"></div>
         <div class="col-xs-1">
@@ -29,15 +29,13 @@
 
       <form *ngIf="errors === 'success'" action="">
         <div class="row">
-          <div class="col-xs-1">
+          <div class="col-xs-4">
             Имя:
-          </div>
-          <div class="col-xs-3">
             <input [(ngModel)]="clientDetails.name"
                    [ngModelOptions]="{standalone: true}"
                    (keyup)="updateButton()"
                    name="name"
-                   type="text" class="inputForm form-control">
+                   type="text" class="inputForm">
             <span style="color: red">*</span>
           </div>
 
@@ -89,15 +87,16 @@
 
             <span style="color: red">*</span>
           </div>
+          <!--ПЕРЕДЕЛАТЬ   /////////////////////////////  -->
           <div class="col-xs-4">
             Характер:
             <select
               (click)="updateButton()"
               [(ngModel)]="clientDetails.temper"
                     class="inputForm" name="temper" id="">
-              <option *ngFor="let op of temperOptions"
-                      value={{op.value}}>
-                {{op.name}}
+              <option *ngFor="let op of charms"
+                      value={{op.id}}>
+                {{op.charm}}
               </option>
             </select>
 

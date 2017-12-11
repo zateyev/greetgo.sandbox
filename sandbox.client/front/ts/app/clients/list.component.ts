@@ -3,7 +3,8 @@ import {ClientRecord} from "../../model/ClientRecord";
 import {HttpService} from "../HttpService";
 import {ChangeClientComponent} from "./change.component";
 import {ClientListPagination} from "../pagination/pagination.component";
-import {ListInfo} from "../../model/ListInfo";
+import {ClientListRequest} from "../../model/ClientListRequest";
+import {CharmRecord} from "../../model/CharmRecord";
 
 @Component({
   selector: 'list-component',
@@ -26,21 +27,16 @@ export class ListComponent implements OnInit {
   currentPage: number = 0;
   sort: string = "fio";
 
-  temperOptions: any = [{value: 'good', name: 'Хороший'},
-    {value: 'bad', name: 'Плохой'},
-    {value: 'veryBad', name: 'Очень Плохой'}];
+  charms: CharmRecord[];
 
-  listInfo: ListInfo = new ListInfo;
-
-  temperValue(k: string) {
-    for (let op of this.temperOptions) if (k === op.value) return op.name;
-  }
+  listInfo: ClientListRequest = new ClientListRequest();
 
   constructor(private httpService: HttpService) {
   }
 
   ngOnInit(): void {
     this.loading = true;
+    this.loadCharms();
     this.loadList();
   }
 
@@ -83,7 +79,7 @@ export class ListComponent implements OnInit {
     });
   }
 
-  loadPageOfList(listInfo: ListInfo) {
+  loadPageOfList(listInfo: ClientListRequest) {
     this.listInfo = listInfo;
     this.loading = true;
     this.loadList();
@@ -113,6 +109,22 @@ export class ListComponent implements OnInit {
       this.loading = false;
       console.log(error);
     });
+  }
+
+  loadCharms() {
+    this.httpService.get("/client/getCharms").toPromise().then(
+      res => {
+        this.charms = res.json().map(CharmRecord.copy)
+        this.changeForm.charmAssign(this.charms);
+      }, error => {
+        this.errorLoading = true;
+        console.log(error);
+      }
+    )
+  }
+
+  getCharm(id: number):string{
+    return this.charms.find(res=> res.id == id).charm;
   }
 
   checkEmptyList() {

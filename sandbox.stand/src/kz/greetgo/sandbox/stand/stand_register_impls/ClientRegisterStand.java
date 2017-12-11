@@ -3,10 +3,7 @@ package kz.greetgo.sandbox.stand.stand_register_impls;
 
 import kz.greetgo.depinject.core.Bean;
 import kz.greetgo.depinject.core.BeanGetter;
-import kz.greetgo.sandbox.controller.model.ClientDetails;
-import kz.greetgo.sandbox.controller.model.ClientRecord;
-import kz.greetgo.sandbox.controller.model.ClientToSave;
-import kz.greetgo.sandbox.controller.model.ListInfo;
+import kz.greetgo.sandbox.controller.model.*;
 import kz.greetgo.sandbox.controller.register.ClientRegister;
 import kz.greetgo.sandbox.db.stand.beans.StandClientDb;
 import kz.greetgo.sandbox.db.stand.model.ClientDot;
@@ -19,21 +16,30 @@ public class ClientRegisterStand implements ClientRegister {
   public BeanGetter<StandClientDb> al;
 
   @Override
-  public long getSize(ListInfo listInfo) {
-    if("".equals(listInfo.filter)) return al.get().clientStorage.size();
-    else return 5;
+  public List<CharmRecord> getCharms() {
+    return al.get().charmsStorage;
   }
 
   @Override
-  public List<ClientRecord> getList(ListInfo listInfo) {
+  public long getSize(ClientListRequest clientListRequest) {
+    if("".equals(clientListRequest.filterByFio)) {
+      return al.get().clientStorage.size();
+    }
+    else return 5;
+  }
+
+
+
+  @Override
+  public List<ClientRecord> getList(ClientListRequest clientListRequest) {
     List<ClientDot> fullList = new ArrayList(al.get().clientStorage.values());
     List<ClientRecord> list = new ArrayList<>();
 
-    System.out.println("List Info" + listInfo.filter + " " + listInfo.sort);
+    System.out.println("List Info" + clientListRequest.count + " " + clientListRequest.sort);
 
-    for (int i = listInfo.startIndex; i < listInfo.endIndex; i++) {
+    for (int i = clientListRequest.skipFirst; i < clientListRequest.count; i++) {
       list.add(fullList.get(i).toClientRecord());
-      if (listInfo.endIndex > fullList.size()) break;
+      if (clientListRequest.count > fullList.size()) break;
     }
 
     ClientRecord nn = fullList.get(3).toClientRecord();
@@ -42,7 +48,7 @@ public class ClientRegisterStand implements ClientRegister {
     list2.add(nn);
 
 
-    if("".equals(listInfo.filter)) return list;
+    if("".equals(clientListRequest.filterByFio)) return list;
     else return list2;
   }
 
