@@ -3,6 +3,7 @@ import {ClientRecord} from "../../model/ClientRecord";
 import {HttpService} from "../HttpService";
 import {ChangeClientComponent} from "./change.component";
 import {ClientListPagination} from "../pagination/pagination.component";
+import {ListInfo} from "../../model/ListInfo";
 
 @Component({
   selector: 'list-component',
@@ -29,9 +30,12 @@ export class ListComponent implements OnInit {
     {value: 'bad', name: 'Плохой'},
     {value: 'veryBad', name: 'Очень Плохой'}];
 
+  listInfo: ListInfo = new ListInfo;
+
   temperValue(k: string) {
     for (let op of this.temperOptions) if (k === op.value) return op.name;
   }
+
   constructor(private httpService: HttpService) {
   }
 
@@ -79,20 +83,21 @@ export class ListComponent implements OnInit {
     });
   }
 
-  loadPageOfList(p: number) {
-    this.currentPage = p;
+  loadPageOfList(listInfo: ListInfo) {
+    this.listInfo = listInfo;
     this.loading = true;
     this.loadList();
   }
 
   loadSortedList(sort: string) {
     this.sort = sort;
+    this.listInfo.sort = this.sort;
     this.loading = true;
     this.loadList();
   }
 
   loadList() {
-    this.httpService.get("/client/getList?page=" + this.currentPage + "&" + "sort=" + this.sort).toPromise().then(result => {
+    this.httpService.post("/client/getList", {listInfo: JSON.stringify(this.listInfo)}).toPromise().then(result => {
       this.list = result.json().map(ClientRecord.copy);
       if(result.json().length === 0) this.checkEmptyList();
       this.loading = false;

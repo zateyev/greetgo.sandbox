@@ -6,9 +6,13 @@ import kz.greetgo.depinject.core.BeanGetter;
 import kz.greetgo.sandbox.controller.model.ClientDetails;
 import kz.greetgo.sandbox.controller.model.ClientRecord;
 import kz.greetgo.sandbox.controller.model.ClientToSave;
+import kz.greetgo.sandbox.controller.model.ListInfo;
 import kz.greetgo.sandbox.controller.register.ClientRegister;
 import kz.greetgo.sandbox.db.stand.beans.StandClientDb;
 import kz.greetgo.sandbox.db.stand.model.ClientDot;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Bean
 public class ClientRegisterStand implements ClientRegister {
@@ -20,24 +24,12 @@ public class ClientRegisterStand implements ClientRegister {
   }
 
   @Override
-  public ClientRecord[] getList(int page, String sort) {
-    ClientRecord[] fullList = new ClientRecord[al.get().clientStorage.size()];
-    int index = 0;
-    for (ClientDot d : al.get().clientStorage.values()) {
-      fullList[index] = d.toClientRecord();
-      index++;
-    }
-
-    int listSize = 5;
-    int begin = listSize * page;
-    int end = begin + listSize;
-    if (end > al.get().clientStorage.size()) listSize = al.get().clientStorage.size() % listSize;
-
-    System.out.println(listSize);
-    ClientRecord[] list = new ClientRecord[listSize];
-    for (int i = 0; i < list.length; i++) {
-      list[i] = fullList[begin];
-      begin++;
+  public List<ClientRecord> getList(ListInfo listInfo) {
+    List<ClientDot> fullList = new ArrayList(al.get().clientStorage.values());
+    List<ClientRecord> list = new ArrayList<>();
+    for (int i = listInfo.startIndex; i < listInfo.endIndex; i++) {
+      list.add(fullList.get(i).toClientRecord());
+      if (listInfo.endIndex > fullList.size()) break;
     }
     return list;
   }
