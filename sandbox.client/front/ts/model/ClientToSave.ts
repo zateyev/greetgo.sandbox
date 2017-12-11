@@ -3,15 +3,25 @@ export class ClientToSave {
   public name: string;
   public surname: string;
   public patronymic: string;
-  public phone: string;
+  public gender: string;
+  public temper: string;
+  public dateOfBirth: string;
+  public firstAddress: string[];
+  public secondAddress: string[];
+  public phones: string[];
 
   public assign(o: any): ClientToSave {
     this.id = o.id;
     this.name = o.name;
     this.surname = o.surname;
+    this.dateOfBirth = o.dateOfBirth;
+    this.temper = o.temper;
+    this.firstAddress = o.firstAddress;
+    this.phones = o.phones;
+    this.gender = o.gender;
     if (o.patronymic == null) o.patronymic = "";
+    if (o.secondAddress == null) o.secondAddress = o.firstAddress;
     this.patronymic = o.patronymic;
-    this.phone = o.phone;
     return this;
   }
 }

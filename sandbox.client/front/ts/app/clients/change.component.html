@@ -6,7 +6,7 @@
       <div class="row">
         <div class="col-xs-11"></div>
         <div class="col-xs-1">
-         <span class="closeModal" *ngIf= "buttonEnabled" (click)="closeForm()">
+         <span class="closeModal" (click)="hideForm()">
         &nbsp;X&nbsp;
       </span>
         </div>
@@ -34,6 +34,7 @@
             <input [(ngModel)]="clientDetails.name"
                    [ngModelOptions]="{standalone: true}"
                    (keyup)="updateButton()"
+                   name="name"
                    type="text" class="inputForm" required>
             <span style="color: red">*</span>
           </div>
@@ -43,7 +44,8 @@
               [(ngModel)]="clientDetails.surname"
               [ngModelOptions]="{standalone: true}"
               (keyup)="updateButton()"
-              required="false" type="text" class="inputForm">
+              name="surname"
+              type="text" class="inputForm">
             <span style="color: red">*</span>
           </div>
           <div class="col-xs-4">
@@ -51,6 +53,7 @@
             <input
               [(ngModel)]="clientDetails.patronymic"
               [ngModelOptions]="{standalone: true}"
+              name="patronymic"
               type="text" class="inputForm">
           </div>
         </div>
@@ -58,28 +61,44 @@
           <hr>
           <div class="col-xs-4">
             Пол:
-            <input class="inputForm" type="radio" name="gender" value="male">
+            <input class="inputForm"
+                   (click)="genderToM(); updateButton()"
+                   [checked]="clientDetails.gender == 'М'"
+                   value="М"
+                   type="radio" name="gender" value="male">
             Мужской
-            <input class="inputForm" type="radio" name="gender" value="female">
+            <input
+              (click)="genderToF(); updateButton()"
+              [checked]="clientDetails.gender == 'Ж'"
+              value="Ж"
+              class="inputForm" type="radio" name="gender" value="female">
             Женский
+
+            <span style="color: red">*</span>
           </div>
           <div class="col-xs-4">
             Дата рождения:
-            <input class="inputForm" type="date">
+            <input
+              (click)="updateButton()"
+              [(ngModel)] = "clientDetails.dateOfBirth"
+              [ngModelOptions] = "{standalone :true}"
+              class="inputForm" type="date">
+
+            <span style="color: red">*</span>
           </div>
           <div class="col-xs-4">
             Характер:
-            <select class="inputForm" name="character" id="">
-              <option value="char">
-                Характер
-              </option>
-              <option value="char">
-                Характер
-              </option>
-              <option value="char">
-                Характер
+            <select
+              (click)="updateButton()"
+              [(ngModel)]="clientDetails.temper"
+                    class="inputForm" name="temper" id="">
+              <option *ngFor="let op of temperOptions"
+                      value={{op.value}}>
+                {{op.name}}
               </option>
             </select>
+
+            <span style="color: red">*</span>
           </div>
         </div>
         <div class="row">
@@ -91,15 +110,29 @@
         <div class="row">
           <div class="col-xs-4">
             Улица:
-            <input type="text" class="inputForm">
+            <input [(ngModel)]="clientDetails.firstAddress[0]"
+                   [ngModelOptions]="{standalone: true}"
+                   (keyup)="updateButton()"
+                   name="ul1"
+                   type="text" class="inputForm">
           </div>
           <div class="col-xs-4">
             Дом:
-            <input type="text" class="inputForm">
+            <input
+              [(ngModel)]="clientDetails.firstAddress[1]"
+              [ngModelOptions]="{standalone: true}"
+              name="home1"
+              (keyup)="updateButton()"
+              type="text" class="inputForm">
           </div>
           <div class="col-xs-4">
             Квартира:
-            <input type="text" class="inputForm">
+            <input
+              [(ngModel)]="clientDetails.firstAddress[2]"
+              [ngModelOptions]="{standalone: true}"
+              (keyup)="updateButton()"
+              name="kv1"
+              type="text" class="inputForm">
           </div>
         </div>
         <div class="row">
@@ -111,15 +144,29 @@
         <div class="row">
           <div class="col-xs-4">
             Улица:
-            <input type="text" class="inputForm">
+            <input
+              [(ngModel)]="clientDetails.secondAddress[0]"
+              [ngModelOptions]="{standalone: true}"
+              (keyup)="updateButton()"
+              type="text" class="inputForm">
           </div>
           <div class="col-xs-4">
             Дом:
-            <input type="text" class="inputForm">
+            <input
+              [(ngModel)]="clientDetails.secondAddress[1]"
+              [ngModelOptions]="{standalone: true}"
+              (keyup)="updateButton()"
+              name="asdf"
+              type="text" class="inputForm">
           </div>
           <div class="col-xs-4">
             Квартира:
-            <input type="text" class="inputForm">
+            <input
+              [(ngModel)]="clientDetails.secondAddress[2]"
+              [ngModelOptions]="{standalone: true}"
+              (keyup)="updateButton()"
+              name="asdfasd"
+              type="text" class="inputForm">
           </div>
         </div>
         <div class="row">
@@ -131,26 +178,46 @@
         <div class="row">
           <div class="col-xs-4">
             Домашний:
-            <input type="text" class="inputForm">
+            <input
+              [(ngModel)]="clientDetails.phones[0]"
+              [ngModelOptions]="{standalone: true}"
+              (keyup)="updateButton()"
+              type="text" class="inputForm">
           </div>
           <div class="col-xs-4">
             Рабочий:
-            <input type="text" class="inputForm">
+            <input
+              [(ngModel)]="clientDetails.phones[1]"
+              [ngModelOptions]="{standalone: true}"
+              (keyup)="updateButton()"
+              type="text" class="inputForm">
           </div>
           <div class="col-xs-4"></div>
         </div>
         <div class="row">
           <div class="col-xs-4">
             Мобильный 1:
-            <input type="text" class="inputForm">
+            <input
+              [(ngModel)]="clientDetails.phones[2]"
+              [ngModelOptions]="{standalone: true}"
+              (keyup)="updateButton()"
+              type="text" class="inputForm">
           </div>
           <div class="col-xs-4">
             Мобильный 2:
-            <input type="text" class="inputForm">
+            <input
+              [(ngModel)]="clientDetails.phones[3]"
+              [ngModelOptions]="{standalone: true}"
+              (keyup)="updateButton()"
+              type="text" class="inputForm">
           </div>
           <div class="col-xs-4">
             Мобильный 3:
-            <input type="text" class="inputForm">
+            <input
+              [(ngModel)]="clientDetails.phones[4]"
+              [ngModelOptions]="{standalone: true}"
+              (keyup)="updateButton()"
+              type="text" class="inputForm">
           </div>
         </div>
         <div class="row">

@@ -5,13 +5,29 @@
       <button (click)="exit.emit(exam)">Выход</button>
     </div>
   </div>
-  <div class="row">
+  <div class="row ">
     <div class="col-xs-3">Ф.И.О</div>
     <div class="col-xs-1">Характер</div>
-    <div class="col-xs-1">Возраст</div>
-    <div class="col-xs-2">Общий остаток счетов</div>
-    <div class="col-xs-2">Максимальный остаток</div>
-    <div class="col-xs-2">Минимальный остаток</div>
+    <div class="col-xs-1 text-center">
+      Возраст <br>
+      <span *ngIf="sort !== 'age' || sort === ''" (click)="loadSortedList('age')" class="glyphicon glyphicon-sort-by-order"></span>
+      <span *ngIf="sort === 'age'"(click)="loadSortedList('ageDesc')" class="glyphicon glyphicon-sort-by-order-alt"></span>
+    </div>
+    <div class="col-xs-2 text-center">
+      Общий остаток счетов <br>
+      <span *ngIf="sort !== 'total' || sort === ''" (click)="loadSortedList('total')" class="glyphicon glyphicon-sort-by-order"></span>
+      <span *ngIf="sort === 'total'"(click)="loadSortedList('totalDesc')" class="glyphicon glyphicon-sort-by-order-alt"></span>
+    </div>
+    <div class="col-xs-2 text-center">
+      Максимальный остаток <br>
+      <span *ngIf="sort !== 'max' || sort === ''" (click)="loadSortedList('max')" class="glyphicon glyphicon-sort-by-order"></span>
+      <span *ngIf="sort === 'max'"(click)="loadSortedList('maxDesc')" class="glyphicon glyphicon-sort-by-order-alt"></span>
+    </div>
+    <div class="col-xs-2 text-center">
+      Минимальный остаток <br>
+      <span *ngIf="sort !== 'min' || sort === ''" (click)="loadSortedList('min')" class="glyphicon glyphicon-sort-by-order"></span>
+      <span *ngIf="sort === 'min'"(click)="loadSortedList('minDesc')" class="glyphicon glyphicon-sort-by-order-alt"></span>
+    </div>
     <div class="col-xs-1"></div>
   </div>
 
@@ -27,24 +43,46 @@
     <h2>Список пуст</h2>
   </div>
 
-  <div *ngFor="let entry of list" class="row infoRow">
-    <div class="col-xs-3">
-      {{entry.fio}}
-    </div>
-    <div class="col-xs-1">
-      {{entry.id}}
-    </div>
-    <div class="col-xs-1"></div>
-    <div class="col-xs-2"></div>
-    <div class="col-xs-2"></div>
-    <div class="col-xs-2"></div>
-    <div class="col-xs-1">
-      <button (click)="openModalAddForm()">+</button>
-      <button (click)="openModalChangeForm(entry.id)">...</button>
-      <button *ngIf="entry.id !== deletingClient" (click)="deleteClient(entry.id)">-</button>
-      <span *ngIf="entry.id === deletingClient" style="font-size: small" class="glyphicon glyphicon-refresh glyphicon-refresh-animate"></span>
+  <div *ngIf="!emptyList && !errorLoading && !loading">
+    <div *ngFor="let entry of list" class="row infoRow">
+      <!-- /////// ФИО  колонка//////////-->
+      <div class="col-xs-3">
+        {{entry.fio}}
+      </div>
+      <!-- /////// Характер колонка /////////-->
+      <div class="col-xs-1 text-center">
+        {{temperValue(entry.temper)}}
+      </div>
+      <!-- //////  Возраст ///////////-->
+      <div class="col-xs-1 text-center">
+        {{entry.age}}
+      </div>
+      <!-- /////// Общий счет /////////-->
+      <div class="col-xs-2 text-center">
+        {{entry.totalAccountBalance}}
+      </div>
+      <!--//////// Максимальный счет-->
+      <div class="col-xs-2 text-center">
+        {{entry.maxAccountBalance}}
+      </div>
+      <!-- //////// Минимальный счет-->
+      <div class="col-xs-2 text-center">
+        {{entry.id}}
+      </div>
+      <div class="col-xs-1">
+        <button (click)="openModalAddForm()">+</button>
+        <button (click)="openModalChangeForm(entry.id)">...</button>
+        <button *ngIf="entry.id !== deletingClient" (click)="deleteClient(entry.id)">-</button>
+        <span *ngIf="entry.id === deletingClient" style="font-size: small" class="glyphicon glyphicon-refresh glyphicon-refresh-animate"></span>
+      </div>
     </div>
   </div>
+
+  <pagination
+    #pagination
+    (page)="loadPageOfList($event)"
+  ></pagination>
+
 </div>
 <!-- ////////////////////////////////////////////// -->
 <change-component

@@ -13,7 +13,6 @@ import java.util.HashMap;
 public class StandClientDb implements HasAfterInject {
 
   public final HashMap<String, ClientDot> clientStorage = new HashMap<>();
-  public final HashMap<String, ClientDot> clStorage = new HashMap<>();
 
   @Override
   public void afterInject() throws Exception {
@@ -67,7 +66,15 @@ public class StandClientDb implements HasAfterInject {
         d.patronymic = "";
         d.surname = "";
     }
-    d.phone = splitLine[3].trim();
+    d.temper = splitLine[4].trim();
+    d.dateOfBirth = splitLine[5].trim();
+    d.balance = Long.parseLong(splitLine[6].trim());
+
+    d.gender = splitLine[3].trim();
+    d.phone = splitLine[7].trim();
+    d.address = splitLine[8].trim();
+
+
     clientStorage.put(d.id, d);
   }
 }

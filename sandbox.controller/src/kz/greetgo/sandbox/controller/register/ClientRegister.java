@@ -5,7 +5,8 @@ import kz.greetgo.sandbox.controller.model.ClientRecord;
 import kz.greetgo.sandbox.controller.model.ClientToSave;
 
 public interface ClientRegister {
-  ClientRecord[] getList(int page);
+  long getSize();
+  ClientRecord[] getList(int page, String sort);
   ClientDetails getClient(String id);
   ClientRecord saveClient(ClientToSave clientToSave);
   void deleteClient(String id);

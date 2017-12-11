@@ -15,14 +15,30 @@ public class ClientRegisterStand implements ClientRegister {
   public BeanGetter<StandClientDb> al;
 
   @Override
-  public ClientRecord[] getList(int page) {
-    ClientRecord[] list = new ClientRecord[al.get().clientStorage.size()];
+  public long getSize() {
+    return al.get().clientStorage.size();
+  }
+
+  @Override
+  public ClientRecord[] getList(int page, String sort) {
+    ClientRecord[] fullList = new ClientRecord[al.get().clientStorage.size()];
     int index = 0;
     for (ClientDot d : al.get().clientStorage.values()) {
-      list[index] = d.toClientRecord();
+      fullList[index] = d.toClientRecord();
       index++;
     }
-    System.out.println(page);
+
+    int listSize = 5;
+    int begin = listSize * page;
+    int end = begin + listSize;
+    if (end > al.get().clientStorage.size()) listSize = al.get().clientStorage.size() % listSize;
+
+    System.out.println(listSize);
+    ClientRecord[] list = new ClientRecord[listSize];
+    for (int i = 0; i < list.length; i++) {
+      list[i] = fullList[begin];
+      begin++;
+    }
     return list;
   }
 
@@ -32,23 +48,36 @@ public class ClientRegisterStand implements ClientRegister {
   }
 
 
+
   int i = 50;
 
   @Override
   public ClientRecord saveClient(ClientToSave clientToSave) {
     i++;
-    System.out.println(clientToSave.name);
     ClientDot clientDot = new ClientDot();
-    if (clientToSave.id == null) {
-      clientToSave.id = Integer.toString(i);
-    }
+    if (clientToSave.id == null) clientToSave.id = Integer.toString(i);
+    else clientDot = al.get().clientStorage.get(clientToSave.id);
+
+
+////////////////////////////////////////////////////////////////////////////////
     clientDot.id = clientToSave.id;
     clientDot.name = clientToSave.name;
     clientDot.surname = clientToSave.surname;
     clientDot.patronymic = clientToSave.patronymic;
+    clientDot.gender = clientToSave.gender;
+    clientDot.temper = clientToSave.temper;
+    clientDot.dateOfBirth = clientToSave.dateOfBirth;
+
+    String str = "";
+    String str2 = "";
+    for (String address : clientToSave.firstAddress) str = str + " " + address;
+    for (String phones : clientToSave.phones) str2 = str2 + " " + phones;
+    clientDot.address = str.trim();
+    clientDot.phone = str2.trim();
+//////////////////////////////////////////////////////////////////////////////////
     al.get().clientStorage.put(clientToSave.id, clientDot);
 
-    System.out.println(al.get().clientStorage.get(clientToSave.id).name + " id   " + clientToSave.id + "    i " + i);
+    System.out.println(al.get().clientStorage.get(clientToSave.id).temper + " id   " + clientToSave.id + "    i " + i);
     return al.get().clientStorage.get(clientToSave.id).toClientRecord();
   }
 

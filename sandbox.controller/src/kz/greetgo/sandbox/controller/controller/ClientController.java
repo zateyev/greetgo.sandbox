@@ -20,9 +20,14 @@ public class ClientController implements Controller{
   public BeanGetter<ClientRegister> clientRegister;
 
   @ToJson
+  @Mapping("/getSize")
+  public long getSize(){
+    return clientRegister.get().getSize();
+  }
+  @ToJson
   @Mapping("/getList")
-  public ClientRecord[] getList(@Par("page") int page){
-    return clientRegister.get().getList(page);
+  public ClientRecord[] getList(@Par("page") int page, @Par("sort") String sort){
+    return clientRegister.get().getList(page, sort);
       }
 
   @ToJson

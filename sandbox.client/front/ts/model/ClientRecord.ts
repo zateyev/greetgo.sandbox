@@ -1,10 +1,21 @@
 export class ClientRecord {
   public id: string;
   public fio: string;
+  public temper: string;
+  public age: number /*int*/;
+  public totalAccountBalance: number /*long*/;
+  public maxAccountBalance: number /*long*/;
+  public minAccountBalance: number /*long*/;
 
-  public assign(o: ClientRecord): ClientRecord {
+
+  public assign(o: any): ClientRecord {
     this.id = o.id;
     this.fio = o.fio;
+    this.temper = o.temper;
+    this.age = o.age;
+    this.totalAccountBalance = o.totalAccountBalance;
+    this.maxAccountBalance = o.maxAccountBalance;
+    this.minAccountBalance = o.minAccountBalance;
     return this;
   }
 
