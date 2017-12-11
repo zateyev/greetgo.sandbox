@@ -1,10 +1,11 @@
-export class ListInfo{
-  public startIndex:number /*int*/;
+export class ListInfo {
+  //TODO skipFirst , count - предпочтительнее
+  public startIndex: number /*int*/;
   public endIndex: number /*int*/;
-  public sort:string;
+  public sort: string;
   public filter: string;
 
-  constructor(){
+  constructor() {
     this.startIndex = 0;
     this.endIndex = 5;
     this.sort = "";
