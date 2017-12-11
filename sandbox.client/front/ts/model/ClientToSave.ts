@@ -15,7 +15,7 @@ export class ClientToSave {
     this.name = o.name;
     this.surname = o.surname;
     this.dateOfBirth = o.dateOfBirth;
-    this.temper = o.temper;
+    this.temper = o.charm;
     this.firstAddress = o.firstAddress;
     this.phones = o.phones;
     this.gender = o.gender;

@@ -1,7 +1,7 @@
 export class ClientRecord {
   public id: string;
   public fio: string;
-  public temper: string;
+  public charm: string;
   public age: number /*int*/;
   public totalAccountBalance: number /*long*/;
   public maxAccountBalance: number /*long*/;
@@ -11,7 +11,7 @@ export class ClientRecord {
   public assign(o: any): ClientRecord {
     this.id = o.id;
     this.fio = o.fio;
-    this.temper = o.temper;
+    this.charm = o.charm;
     this.age = o.age;
     this.totalAccountBalance = o.totalAccountBalance;
     this.maxAccountBalance = o.maxAccountBalance;

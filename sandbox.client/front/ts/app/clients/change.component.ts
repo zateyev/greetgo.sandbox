@@ -3,7 +3,6 @@ import {ClientDetails} from "../../model/ClientDetails";
 import {ClientRecord} from "../../model/ClientRecord";
 import {HttpService} from "../HttpService";
 import {ClientToSave} from "../../model/ClientToSave";
-import {CharmRecord} from "../../model/CharmRecord";
 @Component({
   selector: 'change-component',
   template: require('./change.component.html'),
@@ -16,8 +15,6 @@ export class ChangeClientComponent {
 
   clientDetails: ClientDetails = null;
   clientToSave: ClientToSave = new ClientToSave;
-
-  charms: CharmRecord[];
 
   /////////////////////////////////////////////////////
   errors: string = "";
@@ -57,7 +54,7 @@ export class ChangeClientComponent {
 
   updateButton(){
     this.buttonEnabled = !!this.clientDetails.name && !!this.clientDetails.surname
-    && !!this.clientDetails.gender && !!this.clientDetails.temper && !!this.clientDetails.dateOfBirth;
+    && !!this.clientDetails.gender && !!this.clientDetails.charm && !!this.clientDetails.dateOfBirth;
   }
 
 
@@ -97,10 +94,5 @@ export class ChangeClientComponent {
   genderToF() {
     this.clientDetails.gender = "Ж";
   }
-
-  charmAssign(charms: any){
-    this.charms = charms;
-  }
-
 
 }
