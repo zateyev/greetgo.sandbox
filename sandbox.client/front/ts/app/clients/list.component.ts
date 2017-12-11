@@ -4,7 +4,6 @@ import {HttpService} from "../HttpService";
 import {ChangeClientComponent} from "./change.component";
 import {ClientListPagination} from "../pagination/pagination.component";
 import {ClientListRequest} from "../../model/ClientListRequest";
-import {CharmRecord} from "../../model/CharmRecord";
 
 @Component({
   selector: 'list-component',
@@ -26,8 +25,6 @@ export class ListComponent implements OnInit {
 
   currentPage: number = 0;
   sort: string = "fio";
-
-  charms: CharmRecord[];
 
   listInfo: ClientListRequest = new ClientListRequest();
 
