@@ -2,6 +2,7 @@ package kz.greetgo.sandbox.db.stand.beans;
 
 import kz.greetgo.depinject.core.Bean;
 import kz.greetgo.depinject.core.HasAfterInject;
+import kz.greetgo.sandbox.controller.model.CharmRecord;
 import kz.greetgo.sandbox.db.stand.model.ClientDot;
 
 import java.io.BufferedReader;
@@ -14,11 +15,26 @@ public class StandClientDb implements HasAfterInject {
 
   public final HashMap<String, ClientDot> clientStorage = new HashMap<>();
 
+  public final ArrayList<CharmRecord> charmsStorage = new ArrayList<>();
+
   @Override
   public void afterInject() throws Exception {
     try (BufferedReader br = new BufferedReader(
       new InputStreamReader(getClass().getResourceAsStream("ListData.txt"), "UTF-8"))) {
 
+      CharmRecord charm1 = new CharmRecord();
+      CharmRecord charm2 = new CharmRecord();
+      CharmRecord charm3 = new CharmRecord();
+      charm1.id = 1;
+      charm2.id = 2;
+      charm3.id = 3;
+      charm1.charm = "Хорош";
+      charm2.charm = "Плохо";
+      charm3.charm = "Средне";
+
+      charmsStorage.add(charm1);
+      charmsStorage.add(charm2);
+      charmsStorage.add(charm3);
 
       while (true) {
         String line = br.readLine();

@@ -28,7 +28,7 @@ button:hover {
   position: fixed;
   display: block;
   border: 2px solid black;
-  width: 90%;
+  max-width: 1224px;
   top: 5%;
   right: 0;
   left: 0;

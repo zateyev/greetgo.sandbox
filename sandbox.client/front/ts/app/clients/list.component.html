@@ -7,7 +7,7 @@
   </div>
   <div class="row ">
     <div class="col-xs-3">Ф.И.О <input
-      [(ngModel)]="listInfo.filter"
+      [(ngModel)]="listInfo.filterByFio"
       [ngModelOptions]="{standalone: true}"
       type="text">
       <button (click)="loadFilteredList()">find</button>
@@ -54,9 +54,9 @@
       <div class="col-xs-3">
         {{entry.fio}}
       </div>
-      <!-- /////// Характер колонка /////////-->
+      <!-- /////// Характер колонка ///////// ///////////////////////////// переделатьб ////////////////////-->
       <div class="col-xs-1 text-center">
-        {{temperValue(entry.temper)}}
+        {{getCharm(entry.temper)}}
       </div>
       <!-- //////  Возраст ///////////-->
       <div class="col-xs-1 text-center">
@@ -95,3 +95,6 @@
   (saved)="closeModalForm($event)"
 >
 </change-component>
+
+
+
