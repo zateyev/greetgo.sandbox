@@ -36,7 +36,6 @@ export class ListComponent implements OnInit {
 
   ngOnInit(): void {
     this.loading = true;
-    this.loadCharms();
     this.loadList();
   }
 
@@ -109,22 +108,6 @@ export class ListComponent implements OnInit {
       this.loading = false;
       console.log(error);
     });
-  }
-
-  loadCharms() {
-    this.httpService.get("/client/getCharms").toPromise().then(
-      res => {
-        this.charms = res.json().map(CharmRecord.copy)
-        this.changeForm.charmAssign(this.charms);
-      }, error => {
-        this.errorLoading = true;
-        console.log(error);
-      }
-    )
-  }
-
-  getCharm(id: number):string{
-    return this.charms.find(res=> res.id == id).charm;
   }
 
   checkEmptyList() {

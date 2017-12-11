@@ -24,7 +24,7 @@ public class ClientDot {
     ClientRecord rec = new ClientRecord();
     rec.id = this.id;
     rec.fio = this.surname + " " + this.name + " " + this.patronymic;
-    rec.temper = this.temper;
+    rec.charm = this.temper;
     int year = Integer.parseInt(this.dateOfBirth.trim().substring(0, 4));
     rec.age = 2017 - year;
     rec.totalAccountBalance = this.balance;
@@ -42,7 +42,14 @@ public class ClientDot {
     rec.patronymic = this.patronymic;
     rec.dateOfBirth = String.valueOf(this.dateOfBirth);
     rec.gender = this.gender;
-    rec.temper = this.temper;
+
+
+    rec.charm = this.temper;
+
+    rec.charms.add("Хорош");
+    rec.charms.add("asdf");
+    rec.charms.add("yghwre");
+
 
     String[] splitPhones = this.phone.split("\\s+");
     for(String s: splitPhones)rec.phones.add(s);

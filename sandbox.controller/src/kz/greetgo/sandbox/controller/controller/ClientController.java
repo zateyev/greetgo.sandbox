@@ -27,12 +27,6 @@ public class ClientController implements Controller {
   }
 
   @ToJson
-  @Mapping("/getCharms")
-  public List<CharmRecord> getCharms(){
-    return clientRegister.get().getCharms();
-  }
-
-  @ToJson
   @Mapping("/getList")
   public List<ClientRecord> getList(
     @Par("listInfo")

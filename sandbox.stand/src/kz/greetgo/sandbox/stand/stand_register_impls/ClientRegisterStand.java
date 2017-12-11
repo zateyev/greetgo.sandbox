@@ -16,11 +16,6 @@ public class ClientRegisterStand implements ClientRegister {
   public BeanGetter<StandClientDb> al;
 
   @Override
-  public List<CharmRecord> getCharms() {
-    return al.get().charmsStorage;
-  }
-
-  @Override
   public long getSize(ClientListRequest clientListRequest) {
     if("".equals(clientListRequest.filterByFio)) {
       return al.get().clientStorage.size();

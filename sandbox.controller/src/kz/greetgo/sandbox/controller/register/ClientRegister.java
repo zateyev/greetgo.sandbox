@@ -5,7 +5,6 @@ import kz.greetgo.sandbox.controller.model.*;
 import java.util.List;
 
 public interface ClientRegister {
-  List<CharmRecord> getCharms();
 
   long getSize(ClientListRequest clientListRequest);
 

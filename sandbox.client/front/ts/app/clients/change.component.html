@@ -92,11 +92,11 @@
             Характер:
             <select
               (click)="updateButton()"
-              [(ngModel)]="clientDetails.temper"
+              [(ngModel)]="clientDetails.charm"
                     class="inputForm" name="temper" id="">
-              <option *ngFor="let op of charms"
-                      value={{op.id}}>
-                {{op.charm}}
+              <option *ngFor="let op of clientDetails.charms"
+                      value={{op}}>
+                {{op}}
               </option>
             </select>
 

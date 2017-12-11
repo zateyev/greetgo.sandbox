@@ -3,12 +3,13 @@ export class ClientDetails {
   public name: string;
   public surname: string;
   public patronymic: string;
-  public temper: string;
+  public charm: string;
   public gender: string;
   public dateOfBirth: string;
   public firstAddress: string[];
   public secondAddress: string[];
   public phones: string[];
+  public charms: string[];
 
 
   constructor(){
@@ -17,11 +18,11 @@ export class ClientDetails {
     // this.surname = "";
     // this.patronymic = "";
     // this.gender = "";
-    // this.temper = "";
+    // this.charm = "";
     // this.dateOfBirth = "";
-    this.firstAddress = [];
-    this.secondAddress = [];
-    this.phones = [];
+    // this.firstAddress = [];
+    // this.secondAddress = [];
+    // this.phones = [];
   }
 
   public assign(o: any): ClientDetails{
@@ -30,11 +31,12 @@ export class ClientDetails {
     this.surname = o.surname;
     this.patronymic = o.patronymic;
     this.gender = o.gender;
-    this.temper = o.temper;
+    this.charm = o.charm;
     this.dateOfBirth = o.dateOfBirth;
     this.firstAddress = o.firstAddress;
     this.secondAddress = o.secondAddress;
     this.phones = o.phones;
+    this.charms = o.charms;
     return this;
   }
 
