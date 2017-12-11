@@ -89,6 +89,13 @@ export class ListComponent implements OnInit {
     this.loadList();
   }
 
+  loadFilteredList(){
+    this.loading = true;
+    this.pagination.listInfo = this.listInfo;
+    this.pagination.getTotalSizeOfList();
+    this.loadList();
+  }
+
   loadSortedList(sort: string) {
     this.sort = sort;
     this.listInfo.sort = this.sort;

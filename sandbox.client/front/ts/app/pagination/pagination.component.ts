@@ -28,7 +28,7 @@ export class ClientListPagination implements OnInit {
   }
 
   getTotalSizeOfList() {
-    this.httpService.get("/client/getSize").toPromise().then(res => {
+    this.httpService.get("/client/getSize?filter="+JSON.stringify(this.listInfo)).toPromise().then(res => {
       this.totalSizeOfList = res.json() as number;
       if(this.totalSizeOfList === 0) return null;
       this.totalPages = Math.ceil(this.totalSizeOfList / 5);
@@ -45,7 +45,7 @@ export class ClientListPagination implements OnInit {
     if (this.totalPages < 6) {
       startIndex = 0;
       endIndex = this.totalPages;
-      console.log("total end set");
+      console.log(this.listInfo.filter);
     }
     else {
       if (this.currentPage <= 2) {

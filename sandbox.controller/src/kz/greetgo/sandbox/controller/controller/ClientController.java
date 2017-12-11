@@ -24,8 +24,9 @@ public class ClientController implements Controller{
 
   @ToJson
   @Mapping("/getSize")
-  public long getSize(){
-    return clientRegister.get().getSize();
+  public long getSize(
+    @Par("filter") @Json ListInfo listInfo) {
+    return clientRegister.get().getSize(listInfo);
   }
   @ToJson
   @Mapping("/getList")

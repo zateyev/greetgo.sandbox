@@ -1,4 +1,4 @@
-<div *ngIf="totalSizeOfList !== 0" class="row">
+<div *ngIf="totalSizeOfList > 5" class="row">
   <div class="col-xs-12 text-center">
     <ul class="pagination">
       <li
@@ -11,9 +11,9 @@
         *ngFor="let a of numberOfPages"><a (click)="setCurrentPage(a)"
                                                               href="#">{{a+1}}</a></li>
       <li
-        *ngIf="currentPage != 5"><a (click)="setCurrentPage(currentPage+1)" href="#">Next</a></li>
+        *ngIf="currentPage != totalPages-1"><a (click)="setCurrentPage(currentPage+1)" href="#">Next</a></li>
       <li
-        *ngIf="currentPage == 5"
+        *ngIf="currentPage == totalPages-1"
         class="disabled"><a href="#">Next</a></li>
     </ul>
   </div>

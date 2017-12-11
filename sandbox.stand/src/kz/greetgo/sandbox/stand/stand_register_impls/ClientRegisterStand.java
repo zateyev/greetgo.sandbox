@@ -19,19 +19,31 @@ public class ClientRegisterStand implements ClientRegister {
   public BeanGetter<StandClientDb> al;
 
   @Override
-  public long getSize() {
-    return al.get().clientStorage.size();
+  public long getSize(ListInfo listInfo) {
+    if("".equals(listInfo.filter)) return al.get().clientStorage.size();
+    else return 5;
   }
 
   @Override
   public List<ClientRecord> getList(ListInfo listInfo) {
     List<ClientDot> fullList = new ArrayList(al.get().clientStorage.values());
     List<ClientRecord> list = new ArrayList<>();
+
+    System.out.println("List Info" + listInfo.filter + " " + listInfo.sort);
+
     for (int i = listInfo.startIndex; i < listInfo.endIndex; i++) {
       list.add(fullList.get(i).toClientRecord());
       if (listInfo.endIndex > fullList.size()) break;
     }
-    return list;
+
+    ClientRecord nn = fullList.get(3).toClientRecord();
+
+    List<ClientRecord> list2 = new ArrayList<>();
+    list2.add(nn);
+
+
+    if("".equals(listInfo.filter)) return list;
+    else return list2;
   }
 
   @Override
