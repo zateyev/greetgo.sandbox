@@ -1,5 +1,6 @@
 package kz.greetgo.sandbox.db.stand.model;
 
+import kz.greetgo.sandbox.controller.model.CharmRecord;
 import kz.greetgo.sandbox.controller.model.ClientDetails;
 import kz.greetgo.sandbox.controller.model.ClientRecord;
 
@@ -40,13 +41,23 @@ public class ClientDot {
     rec.patronymic = this.patronymic;
     rec.dateOfBirth = String.valueOf(this.dateOfBirth);
     rec.gender = this.gender;
+    rec.charm = this.temper;
 
 
-    rec.charmId = this.temper;
+    CharmRecord charmRecord = new CharmRecord();
+    CharmRecord charmRecord2 = new CharmRecord();
+    CharmRecord charmRecord3 = new CharmRecord();
+    charmRecord.id = 1;
+    charmRecord2.id = 2;
+    charmRecord3.id = 3;
+    charmRecord.name = "Хорош";
+    charmRecord2.name = "Плохо";
+    charmRecord3.name = "Отлично";
 
-    rec.charms.add("Хорош");
-    rec.charms.add("asdf");
-    rec.charms.add("yghwre");
+
+    rec.charms.add(charmRecord);
+    rec.charms.add(charmRecord2);
+    rec.charms.add(charmRecord3);
 
 
     String[] splitPhones = this.phone.split("\\s+");

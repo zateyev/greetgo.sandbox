@@ -3,6 +3,7 @@ import {ClientDetails} from "../../model/ClientDetails";
 import {ClientRecord} from "../../model/ClientRecord";
 import {HttpService} from "../HttpService";
 import {ClientToSave} from "../../model/ClientToSave";
+import {CharmRecord} from "../../model/CharmRecord";
 @Component({
   selector: 'change-component',
   template: require('./change.component.html'),
@@ -14,6 +15,7 @@ export class ChangeClientComponent {
   visible = false;
 
   clientDetails: ClientDetails = null;
+  charms: CharmRecord[] = null;
   clientToSave: ClientToSave = new ClientToSave;
 
   /////////////////////////////////////////////////////
@@ -35,6 +37,7 @@ export class ChangeClientComponent {
       this.httpService.post("/client/getClient", {id: id})
         .toPromise().then(res => {
         this.clientDetails = new ClientDetails().assign(res.json());
+        this.charms = this.clientDetails.charms;
         console.log(this.clientDetails);
         this.updateButton();
         this.errors = 'success';
@@ -46,8 +49,15 @@ export class ChangeClientComponent {
     else{
       this.add = true; // add value for button
       this.clientDetails = new ClientDetails();
-      this.updateButton();
-      this.errors = "success";
+      this.httpService.post("/client/getClient", {id: "1"})
+        .toPromise().then(res => {
+        this.charms = res.json().charms;
+        this.errors = 'success';
+        this.updateButton();
+      }, error => {
+        this.errors = 'errorLoading';
+        console.log(error);
+      });
     }
 
   }
