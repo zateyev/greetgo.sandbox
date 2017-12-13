@@ -8,10 +8,6 @@ import kz.greetgo.sandbox.db.test.util.ParentTestNg;
 import kz.greetgo.util.RND;
 import org.testng.annotations.Test;
 
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-
 import static org.fest.assertions.api.Assertions.assertThat;
 
 public class ClientRegisterImplTest extends ParentTestNg {
@@ -22,6 +18,8 @@ public class ClientRegisterImplTest extends ParentTestNg {
 
   @Test
   public void getClient_CREATE() throws Exception {
+
+    clientTestDao.get().insertCharm(RND.str(10), RND.str(10));
 
     clientTestDao.get().deleteAllCharms();
 
@@ -36,7 +34,7 @@ public class ClientRegisterImplTest extends ParentTestNg {
 
     assertThat(details).isNotNull();
     assertThat(details.id).isNull();
-    assertThat(details.charm).isNull();
+    assertThat(details.charmId).isNull();
     assertThat(details.charms).isNotNull();
     assertThat(details.charms).hasSize(2);
   }
@@ -46,11 +44,11 @@ public class ClientRegisterImplTest extends ParentTestNg {
 
     clientTestDao.get().deleteAllCharms();
 
-    String charmId1 = RND.str(10);
-    String charmId2 = RND.str(10);
+    String charmId1 = RND.str(10), charmName1 = "B" + RND.str(10);
+    String charmId2 = RND.str(10), charmName2 = "A" + RND.str(10);
 
-    clientTestDao.get().insertCharm(charmId1, RND.str(10));
-    clientTestDao.get().insertCharm(charmId2, RND.str(10));
+    clientTestDao.get().insertCharm(charmId1, charmName1);
+    clientTestDao.get().insertCharm(charmId2, charmName2);
 
     String clientId = RND.str(10);
 
@@ -64,7 +62,7 @@ public class ClientRegisterImplTest extends ParentTestNg {
 
     //
     //
-    ClientDetails details = clientRegister.get().getClient(null);
+    ClientDetails details = clientRegister.get().getClient(clientId);
     //
     //
 
@@ -72,16 +70,11 @@ public class ClientRegisterImplTest extends ParentTestNg {
     assertThat(details.id).isEqualTo(clientId);
     assertThat(details.surname).isEqualTo(surname);
     assertThat(details.name).isEqualTo(name);
-    assertThat(details.charm).isEqualTo(charmId1);
+    assertThat(details.charmId).isEqualTo(charmId1);
     assertThat(details.charms).isNotNull();
 
-    List<String> charmList = new ArrayList<>();
-    charmList.add(charmId1);
-    charmList.add(charmId2);
-    charmList.sort(Comparator.comparing(s -> s));
-
-    assertThat(details.charms).hasSameSizeAs(charmList);
-//    assertThat(details.charms.get(0)).isEqualTo(charmList.get(0));
-//    assertThat(details.charms.get(1)).isEqualTo(charmList.get(1));
+    assertThat(details.charms).hasSize(2);
+    assertThat(details.charms.get(0).name).isEqualTo(charmName2);
+    assertThat(details.charms.get(1).name).isEqualTo(charmName1);
   }
 }

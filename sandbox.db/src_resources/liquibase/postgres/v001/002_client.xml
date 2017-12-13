@@ -13,4 +13,17 @@
     ]]></sql>
   </changeSet>
 
+  <changeSet author="jgolibzhan" id="create-table-Client">
+    <sql endDelimiter=";;"><![CDATA[
+      create table Client (
+        id varchar(32) not null primary key,
+        surname varchar(300),
+        name varchar(300),
+        patronymic varchar(300),
+        charm_id varchar(32) references Charm,
+        actual smallint not null default 0
+      )
+    ]]></sql>
+  </changeSet>
+
 </databaseChangeLog>

@@ -19,7 +19,7 @@ public class ClientDot {
   public String address2;
   public String phone;
 
-  public ClientRecord toClientRecord(){
+  public ClientRecord toClientRecord() {
     ClientRecord rec = new ClientRecord();
     rec.id = this.id;
     rec.fio = this.surname + " " + this.name + " " + this.patronymic;
@@ -32,7 +32,7 @@ public class ClientDot {
     return rec;
   }
 
-  public ClientDetails toClientDetails(){
+  public ClientDetails toClientDetails() {
     ClientDetails rec = new ClientDetails();
 
     rec.id = this.id;
@@ -41,15 +41,15 @@ public class ClientDot {
     rec.patronymic = this.patronymic;
     rec.dateOfBirth = String.valueOf(this.dateOfBirth);
     rec.gender = this.gender;
-    rec.charm = this.temper;
+    rec.charmId = this.temper;
 
 
     CharmRecord charmRecord = new CharmRecord();
     CharmRecord charmRecord2 = new CharmRecord();
     CharmRecord charmRecord3 = new CharmRecord();
-    charmRecord.id = 1;
-    charmRecord2.id = 2;
-    charmRecord3.id = 3;
+    charmRecord.id = "1";
+    charmRecord2.id = "2";
+    charmRecord3.id = "3";
     charmRecord.name = "Хорош";
     charmRecord2.name = "Плохо";
     charmRecord3.name = "Отлично";
@@ -61,10 +61,10 @@ public class ClientDot {
 
 
     String[] splitPhones = this.phone.split("\\s+");
-    for(String s: splitPhones)rec.phones.add(s);
+    for (String s : splitPhones) rec.phones.add(s);
 
     String[] splitAddress = this.address.split("\\s+");
-    for(String s: splitAddress)rec.firstAddress.add(s);
+    for (String s : splitAddress) rec.firstAddress.add(s);
 
     return rec;
   }

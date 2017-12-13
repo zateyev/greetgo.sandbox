@@ -1,11 +1,13 @@
 package kz.greetgo.sandbox.db.register_impl;
 
 import kz.greetgo.depinject.core.Bean;
+import kz.greetgo.depinject.core.BeanGetter;
 import kz.greetgo.sandbox.controller.model.ClientDetails;
 import kz.greetgo.sandbox.controller.model.ClientListRequest;
 import kz.greetgo.sandbox.controller.model.ClientRecord;
 import kz.greetgo.sandbox.controller.model.ClientToSave;
 import kz.greetgo.sandbox.controller.register.ClientRegister;
+import kz.greetgo.sandbox.db.dao.ClientDao;
 
 import java.util.List;
 
@@ -21,9 +23,20 @@ public class ClientRegisterImpl implements ClientRegister {
     throw new UnsupportedOperationException();
   }
 
+  public BeanGetter<ClientDao> clientDao;
+
   @Override
   public ClientDetails getClient(String id) {
-    throw new UnsupportedOperationException();
+    ClientDetails ret = new ClientDetails();
+
+    if (id != null) {
+      ret = clientDao.get().loadDetails(id);
+    }
+
+    ret.charms = clientDao.get().loadCharmList();
+
+
+    return ret;
   }
 
   @Override
