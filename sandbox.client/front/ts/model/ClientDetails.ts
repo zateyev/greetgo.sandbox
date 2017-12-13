@@ -1,3 +1,4 @@
+import {CharmRecord} from "./CharmRecord";
 export class ClientDetails {
   public id: string;
   public name: string;
@@ -9,20 +10,20 @@ export class ClientDetails {
   public firstAddress: string[];
   public secondAddress: string[];
   public phones: string[];
-  public charms: string[];
+  public charms: CharmRecord[];
 
 
   constructor(){
-    // this.id = "";
-    // this.name = "";
-    // this.surname = "";
-    // this.patronymic = "";
-    // this.gender = "";
-    // this.charm = "";
-    // this.dateOfBirth = "";
-    // this.firstAddress = [];
-    // this.secondAddress = [];
-    // this.phones = [];
+    this.id = null;
+    this.name = "";
+    this.surname = "";
+    this.patronymic = "";
+    this.gender = "";
+    this.charm = "";
+    this.dateOfBirth = "";
+    this.firstAddress = [];
+    this.secondAddress = [];
+    this.phones = [];
   }
 
   public assign(o: any): ClientDetails{

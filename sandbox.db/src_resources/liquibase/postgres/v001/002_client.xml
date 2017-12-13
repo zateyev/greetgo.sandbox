@@ -3,7 +3,7 @@
                    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
                    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-2.0.xsd">
 
-  <changeSet author="pompei" id="create-table-Charm">
+  <changeSet author="jgolibzhan" id="create-table-Charm">
     <sql endDelimiter=";;"><![CDATA[
       create table Charm (
         id varchar(32) not null primary key,
