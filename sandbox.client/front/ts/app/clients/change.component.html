@@ -112,7 +112,7 @@
               <div class="col-xs-8">
                 <select
                   (click)="updateButton()"
-                  [(ngModel)]="clientDetails.charm"
+                  [(ngModel)]="clientDetails.charmId"
                   class="inputForm" name="temper" id="">
                   <option *ngFor="let op of charms"
                           value={{op.name}}>

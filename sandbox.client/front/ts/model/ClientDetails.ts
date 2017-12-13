@@ -4,7 +4,7 @@ export class ClientDetails {
   public name: string;
   public surname: string;
   public patronymic: string;
-  public charm: string;
+  public charmId: string;
   public gender: string;
   public dateOfBirth: string;
   public firstAddress: string[];
@@ -19,7 +19,7 @@ export class ClientDetails {
     this.surname = "";
     this.patronymic = "";
     this.gender = "";
-    this.charm = "";
+    this.charmId = "";
     this.dateOfBirth = "";
     this.firstAddress = [];
     this.secondAddress = [];
@@ -32,7 +32,7 @@ export class ClientDetails {
     this.surname = o.surname;
     this.patronymic = o.patronymic;
     this.gender = o.gender;
-    this.charm = o.charm;
+    this.charmId = o.charmId;
     this.dateOfBirth = o.dateOfBirth;
     this.firstAddress = o.firstAddress;
     this.secondAddress = o.secondAddress;

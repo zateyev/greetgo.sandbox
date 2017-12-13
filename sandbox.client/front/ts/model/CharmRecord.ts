@@ -1,4 +1,4 @@
 export class CharmRecord{
-  public id: number /*int*/;
+  public id: string;
   public name: string;
 }

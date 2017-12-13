@@ -4,7 +4,7 @@ export class ClientToSave {
   public surname: string;
   public patronymic: string;
   public gender: string;
-  public temper: string;
+  public charmId: string;
   public dateOfBirth: string;
   public firstAddress: string[];
   public secondAddress: string[];
@@ -15,7 +15,7 @@ export class ClientToSave {
     this.name = o.name;
     this.surname = o.surname;
     this.dateOfBirth = o.dateOfBirth;
-    this.temper = o.charm;
+    this.charmId = o.charmId;
     this.firstAddress = o.firstAddress;
     this.phones = o.phones;
     this.gender = o.gender;
