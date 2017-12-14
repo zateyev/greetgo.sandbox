@@ -2,6 +2,8 @@ package kz.greetgo.sandbox.controller.register;
 
 import kz.greetgo.sandbox.controller.model.*;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.List;
 
 public interface ClientRegister {
@@ -15,4 +17,6 @@ public interface ClientRegister {
   ClientRecord saveClient(ClientToSave clientToSave);
 
   void deleteClient(String id);
+
+  void getFile(ClientListRequest clientListRequest);
 }

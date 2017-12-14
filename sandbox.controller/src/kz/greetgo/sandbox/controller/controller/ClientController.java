@@ -10,6 +10,7 @@ import kz.greetgo.sandbox.controller.model.*;
 import kz.greetgo.sandbox.controller.register.ClientRegister;
 import kz.greetgo.sandbox.controller.util.Controller;
 
+import java.io.File;
 import java.util.List;
 
 
@@ -38,6 +39,11 @@ public class ClientController implements Controller {
   @Mapping("/getClient")
   public ClientDetails getClient(@Par("id") String id) {
     return clientRegister.get().getClient(id);
+  }
+
+  @Mapping("/download")
+  public void getFile(@Par("info") @Json ClientListRequest clientListRequest){
+    clientRegister.get().getFile(clientListRequest);
   }
 
   @ToJson
