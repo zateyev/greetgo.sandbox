@@ -2,6 +2,8 @@ package kz.greetgo.sandbox.db.register_impl;
 
 import kz.greetgo.depinject.core.BeanGetter;
 import kz.greetgo.sandbox.controller.model.ClientDetails;
+import kz.greetgo.sandbox.controller.model.ClientRecord;
+import kz.greetgo.sandbox.controller.model.ClientToSave;
 import kz.greetgo.sandbox.controller.register.ClientRegister;
 import kz.greetgo.sandbox.db.test.dao.ClientTestDao;
 import kz.greetgo.sandbox.db.test.util.ParentTestNg;
@@ -135,16 +137,31 @@ public class ClientRegisterImplTest extends ParentTestNg {
   }
 
   @Test
-  public void saveClient_NOTNULLid() {
+  public void saveClient_NULLid() {
 
-    String clientID = RND.str(5);
+    ClientToSave cl = new ClientToSave();
+
+    String charmId = RND.str(10);
+    String charmName = RND.str(10);
 
 
+    clientTestDao.get().insertCharm(charmId, charmName);
+
+    cl.id = null;
+    cl.name = RND.str(10);
+    cl.surname = RND.str(10);
+    cl.patronymic = RND.str(10);
+    cl.charmId = charmId;
     //
     //
-    //clientRegister.get().saveClient()
+    ClientRecord rec = clientRegister.get().saveClient(cl);
     //
     //
+    assertThat(clientTestDao.get().loadDetails(rec.id)).isNotNull();
+    assertThat(clientTestDao.get().loadDetails(rec.id).name).isEqualTo(cl.name);
+    assertThat(clientTestDao.get().loadDetails(rec.id).surname).isEqualTo(cl.surname);
+    assertThat(clientTestDao.get().loadDetails(rec.id).patronymic).isEqualTo(cl.patronymic);
+    assertThat(clientTestDao.get().loadDetails(rec.id).charmId).isEqualTo(cl.charmId);
 
   }
 

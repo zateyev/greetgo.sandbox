@@ -1,4 +1,4 @@
-package kz.greetgo.sandbox.db.util;
+package kz.greetgo.sandbox.db.register_impl;
 
 import kz.greetgo.depinject.core.Bean;
 

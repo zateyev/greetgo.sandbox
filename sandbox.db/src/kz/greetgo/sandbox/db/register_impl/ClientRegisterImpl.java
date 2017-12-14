@@ -8,7 +8,6 @@ import kz.greetgo.sandbox.controller.model.ClientRecord;
 import kz.greetgo.sandbox.controller.model.ClientToSave;
 import kz.greetgo.sandbox.controller.register.ClientRegister;
 import kz.greetgo.sandbox.db.dao.ClientDao;
-import kz.greetgo.sandbox.db.util.IdGenerator;
 
 import java.util.List;
 
@@ -34,7 +33,6 @@ public class ClientRegisterImpl implements ClientRegister {
     if (id != null && !"".equals(id)) {
       ret = clientDao.get().loadDetails(id);
     }
-
     ret.charms = clientDao.get().loadCharmList();
 
     return ret;
@@ -52,12 +50,17 @@ public class ClientRegisterImpl implements ClientRegister {
       clientDao.get().saveClient("actual", "1", clientToSave.id);
     } else {
       clientToSave.id = idGen.get().newId();
-      clientDao.get().insertClient(clientToSave.id,
+      clientDao.get().insertClient(
+        clientToSave.id,
         clientToSave.name,
         clientToSave.surname,
-        clientToSave.patronymic);
+        clientToSave.patronymic,
+        clientToSave.charmId);
     }
-    return null;
+    ClientRecord rec = new ClientRecord();
+
+    rec.id = clientToSave.id;
+    return rec;
   }
 
   @Override

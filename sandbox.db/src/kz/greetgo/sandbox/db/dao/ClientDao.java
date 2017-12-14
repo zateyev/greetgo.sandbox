@@ -2,7 +2,6 @@ package kz.greetgo.sandbox.db.dao;
 
 import kz.greetgo.sandbox.controller.model.CharmRecord;
 import kz.greetgo.sandbox.controller.model.ClientDetails;
-import kz.greetgo.sandbox.controller.model.ClientToSave;
 import org.apache.ibatis.annotations.Insert;
 import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
@@ -28,10 +27,11 @@ public interface ClientDao {
                   @Param("clientId") String id);
 
 
-  @Insert("insert into client (id, name, surname, patronymic, actual) values (#{id}, #{name}, #{surname}" +
-    "#{patronymic}, 1)")
+  @Insert("insert into client (id, name, surname, patronymic, charm_id, actual) values (#{id}, #{name}, #{surname}, " +
+    "#{patronymic}, #{charm_id}, 1)")
   void insertClient(@Param("id") String id,
                     @Param("name") String name,
                     @Param("surname") String surname,
-                    @Param("patronymic") String patronymic);
+                    @Param("patronymic") String patronymic,
+                    @Param("charm_id") String charmId);
 }
