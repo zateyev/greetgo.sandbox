@@ -83,10 +83,32 @@
     </div>
   </div>
 
-  <pagination
-    #pagination
-    (page)="loadPageOfList($event)"
-  ></pagination>
+  <div class="row">
+    <div class="col-xs-4"></div>
+    <div class="col-xs-4">
+      <pagination
+        #pagination
+        (page)="loadPageOfList($event)"
+      ></pagination>
+    </div>
+    <div class="col-xs-4">
+      <div class="small pull-right" style="margin-top: 5%;">
+        Скачать список в формате:
+        <select
+        [(ngModel)] = "fileTypeForDownload"
+        >
+          <option value="pdf">
+            PDF
+          </option>
+          <option value="xlsx">
+            XSLX
+          </option>
+        </select>
+        <br>
+        <button (click)="loadFile()">Скачать</button>
+      </div>
+    </div>
+  </div>
 
 </div>
 <!-- ////////////////////////////////////////////// -->

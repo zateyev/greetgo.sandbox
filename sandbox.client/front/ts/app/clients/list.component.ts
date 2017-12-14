@@ -27,6 +27,7 @@ export class ListComponent implements OnInit {
   sort: string = "fio";
 
   listInfo: ClientListRequest = new ClientListRequest();
+  fileTypeForDownload: string = null;
 
   constructor(private httpService: HttpService) {
   }
@@ -34,6 +35,7 @@ export class ListComponent implements OnInit {
   ngOnInit(): void {
     this.loading = true;
     this.loadList();
+    console.log(this.fileTypeForDownload);
   }
 
   openModalChangeForm(id: string) {
@@ -104,6 +106,12 @@ export class ListComponent implements OnInit {
       this.errorLoading = true;
       this.loading = false;
       console.log(error);
+    });
+  }
+
+  loadFile() {
+    this.httpService.get("/client/download").toPromise().then(ignore => {
+      document.location.href = "http://localhost:3000/files/myfile.pdf";
     });
   }
 

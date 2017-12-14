@@ -11,6 +11,10 @@ import kz.greetgo.sandbox.controller.register.ClientRegister;
 import kz.greetgo.sandbox.db.stand.beans.StandClientDb;
 import kz.greetgo.sandbox.db.stand.model.ClientDot;
 
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -96,5 +100,19 @@ public class ClientRegisterStand implements ClientRegister {
   @Override
   public void deleteClient(String id) {
     al.get().clientStorage.remove(id);
+  }
+
+  @Override
+  public void getFile(ClientListRequest clientListRequest) {
+    File file = new File("sandbox.stand/db/src/kz/greetgo/sandbox/db/stand/beans/pdf.pdf");
+    file.getParentFile().mkdirs();
+    try {
+      Files.copy(file.toPath(),
+        (new File("sandbox.client/build/public/files/myfile.pdf")).toPath(),
+        StandardCopyOption.REPLACE_EXISTING);
+    } catch (IOException e) {
+      System.out.println("File dont created");
+      e.printStackTrace();
+    }
   }
 }
