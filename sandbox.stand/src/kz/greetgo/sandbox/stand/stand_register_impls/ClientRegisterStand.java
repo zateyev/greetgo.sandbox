@@ -9,12 +9,12 @@ import kz.greetgo.sandbox.controller.model.ClientRecord;
 import kz.greetgo.sandbox.controller.model.ClientToSave;
 import kz.greetgo.sandbox.controller.register.ClientRegister;
 import kz.greetgo.sandbox.db.stand.beans.StandClientDb;
+import kz.greetgo.sandbox.db.stand.beans.StandDb;
 import kz.greetgo.sandbox.db.stand.model.ClientDot;
+import kz.greetgo.util.ServerUtil;
 
-import java.io.File;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.StandardCopyOption;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -24,12 +24,10 @@ public class ClientRegisterStand implements ClientRegister {
 
   @Override
   public long getSize(ClientListRequest clientListRequest) {
-    if("".equals(clientListRequest.filterByFio)) {
+    if ("".equals(clientListRequest.filterByFio)) {
       return al.get().clientStorage.size();
-    }
-    else return 5;
+    } else return 5;
   }
-
 
 
   @Override
@@ -50,7 +48,7 @@ public class ClientRegisterStand implements ClientRegister {
     list2.add(nn);
 
 
-    if("".equals(clientListRequest.filterByFio)) return list;
+    if ("".equals(clientListRequest.filterByFio)) return list;
     else return list2;
   }
 
@@ -103,16 +101,27 @@ public class ClientRegisterStand implements ClientRegister {
   }
 
   @Override
-  public void getFile(ClientListRequest clientListRequest) {
-    File file = new File("sandbox.stand/db/src/kz/greetgo/sandbox/db/stand/beans/pdf.pdf");
-    file.getParentFile().mkdirs();
-    try {
-      Files.copy(file.toPath(),
-        (new File("sandbox.client/build/public/files/myfile.pdf")).toPath(),
-        StandardCopyOption.REPLACE_EXISTING);
-    } catch (IOException e) {
-      System.out.println("File dont created");
-      e.printStackTrace();
+  public void download(ClientListRequest clientListRequest,
+                       OutputStream outputStream,
+                       String contentType,
+                       String personId) throws Exception {
+
+    if (contentType.contains("pdf")) {
+      try (InputStream in = StandDb.class.getResourceAsStream("getClientListReport.pdf")) {
+        ServerUtil.copyStreamsAndCloseIn(in, outputStream);
+      }
+
+      return;
     }
+
+    if ("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet".equals(contentType)) {
+      try (InputStream in = StandDb.class.getResourceAsStream("getClientListReport.xlsx")) {
+        ServerUtil.copyStreamsAndCloseIn(in, outputStream);
+      }
+
+      return;
+    }
+
+    throw new RuntimeException("Unknown content type " + contentType);
   }
 }

@@ -1,9 +1,11 @@
 package kz.greetgo.sandbox.controller.register;
 
-import kz.greetgo.sandbox.controller.model.*;
+import kz.greetgo.sandbox.controller.model.ClientDetails;
+import kz.greetgo.sandbox.controller.model.ClientListRequest;
+import kz.greetgo.sandbox.controller.model.ClientRecord;
+import kz.greetgo.sandbox.controller.model.ClientToSave;
 
-import java.io.File;
-import java.io.IOException;
+import java.io.OutputStream;
 import java.util.List;
 
 public interface ClientRegister {
@@ -18,5 +20,8 @@ public interface ClientRegister {
 
   void deleteClient(String id);
 
-  void getFile(ClientListRequest clientListRequest);
+  void download(ClientListRequest clientListRequest,
+                OutputStream outputStream,
+                String contentType,
+                String personId) throws Exception;
 }

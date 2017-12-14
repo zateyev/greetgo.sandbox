@@ -16,7 +16,7 @@ export class ListComponent implements OnInit {
   @ViewChild("pagination") pagination: ClientListPagination;
 
   loading: boolean = true;
-  deletingClient:string = "";
+  deletingClient: string = "";
   errorLoading: boolean = false;
   emptyList: boolean = false;
   modalChangeForm: boolean = false;
@@ -43,13 +43,13 @@ export class ListComponent implements OnInit {
     this.changeForm.showForm(id);
   }
 
-  closeModalForm(client:any) {
-    if(client == null){
+  closeModalForm(client: any) {
+    if (client == null) {
       this.modalChangeForm = false;
       return;
     }
     this.modalChangeForm = false;
-    if(this.list.findIndex(x => x.id === client.id) !>= 0) {
+    if (this.list.findIndex(x => x.id === client.id) ! >= 0) {
       this.list[this.list.findIndex(res => res.id == client.id)] = client;
     }
     else {
@@ -83,7 +83,7 @@ export class ListComponent implements OnInit {
     this.loadList();
   }
 
-  loadFilteredList(){
+  loadFilteredList() {
     this.loading = true;
     this.pagination.listInfo = this.listInfo;
     this.pagination.getTotalSizeOfList();
@@ -100,7 +100,7 @@ export class ListComponent implements OnInit {
   loadList() {
     this.httpService.post("/client/getList", {listInfo: JSON.stringify(this.listInfo)}).toPromise().then(result => {
       this.list = result.json().map(ClientRecord.copy);
-      if(result.json().length === 0) this.checkEmptyList();
+      if (result.json().length === 0) this.checkEmptyList();
       this.loading = false;
     }, error => {
       this.errorLoading = true;
@@ -110,13 +110,15 @@ export class ListComponent implements OnInit {
   }
 
   loadFile() {
-    this.httpService.get("/client/download").toPromise().then(ignore => {
-      document.location.href = "http://localhost:3000/files/myfile.pdf";
-    });
+    let listInfo = encodeURIComponent(JSON.stringify(this.listInfo));
+    let contentType = this.fileTypeForDownload;
+    let token = encodeURIComponent(this.httpService.token);
+    window.open(this.httpService.url("/client/download?contentType=" + contentType
+      + "&listInfo=" + listInfo + "&token=" + token));
   }
 
   checkEmptyList() {
-    if (this.pagination.totalSizeOfList === 0){
+    if (this.pagination.totalSizeOfList === 0) {
       this.emptyList = true;
       return;
     }

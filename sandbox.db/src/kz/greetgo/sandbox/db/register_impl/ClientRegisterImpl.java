@@ -9,6 +9,7 @@ import kz.greetgo.sandbox.controller.model.ClientToSave;
 import kz.greetgo.sandbox.controller.register.ClientRegister;
 import kz.greetgo.sandbox.db.dao.ClientDao;
 
+import java.io.OutputStream;
 import java.util.List;
 
 @Bean
@@ -67,4 +68,10 @@ public class ClientRegisterImpl implements ClientRegister {
   public void deleteClient(String id) {
     clientDao.get().deleteClient(id);
   }
+
+  @Override
+  public void download(ClientListRequest clientListRequest, OutputStream outputStream, String contentType, String personId) throws Exception {
+    throw new UnsupportedOperationException();
+  }
+
 }

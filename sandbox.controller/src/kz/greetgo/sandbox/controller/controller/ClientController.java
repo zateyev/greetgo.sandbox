@@ -5,12 +5,17 @@ import kz.greetgo.depinject.core.BeanGetter;
 import kz.greetgo.mvc.annotations.Json;
 import kz.greetgo.mvc.annotations.Mapping;
 import kz.greetgo.mvc.annotations.Par;
+import kz.greetgo.mvc.annotations.ParSession;
 import kz.greetgo.mvc.annotations.ToJson;
-import kz.greetgo.sandbox.controller.model.*;
+import kz.greetgo.mvc.interfaces.RequestTunnel;
+import kz.greetgo.sandbox.controller.model.ClientDetails;
+import kz.greetgo.sandbox.controller.model.ClientListRequest;
+import kz.greetgo.sandbox.controller.model.ClientRecord;
+import kz.greetgo.sandbox.controller.model.ClientToSave;
 import kz.greetgo.sandbox.controller.register.ClientRegister;
 import kz.greetgo.sandbox.controller.util.Controller;
 
-import java.io.File;
+import java.io.OutputStream;
 import java.util.List;
 
 
@@ -42,8 +47,25 @@ public class ClientController implements Controller {
   }
 
   @Mapping("/download")
-  public void getFile(@Par("info") @Json ClientListRequest clientListRequest){
-    clientRegister.get().getFile(clientListRequest);
+  public void download(@Par("listInfo") @Json ClientListRequest clientListRequest,
+                       @Par("contentType") String contentType,
+                       @ParSession("personId") String personId,
+                       RequestTunnel tunnel
+  ) throws Exception {
+
+    tunnel.setResponseContentType(contentType);
+
+    OutputStream outputStream = tunnel.getResponseOutputStream();
+
+    if (contentType.contains("pdf")) {
+      tunnel.setResponseHeader("content-disposition", "attachment; filename=\"asd.pdf\"");
+    } else {
+      tunnel.setResponseHeader("content-disposition", "attachment; filename=\"asd.xlsx\"");
+    }
+    clientRegister.get().download(clientListRequest, outputStream, contentType, personId);
+
+    tunnel.flushBuffer();
+
   }
 
   @ToJson

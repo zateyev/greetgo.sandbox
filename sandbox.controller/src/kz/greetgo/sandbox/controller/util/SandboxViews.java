@@ -134,30 +134,33 @@ public abstract class SandboxViews implements Views {
    * @param methodInvoker исполнитель метода контроллера
    */
   private void prepareSession(MethodInvoker methodInvoker) {
-    try {
-      //смотрим, есть ли у вызываемого метода аннотация NoSecurity
-      if (methodInvoker.getMethodAnnotation(NoSecurity.class) == null) {
-        // если аннотации нет, то нужно проверить на наличие прав
+    //смотрим, есть ли у вызываемого метода аннотация NoSecurity
+    if (methodInvoker.getMethodAnnotation(NoSecurity.class) == null) {
+      // если аннотации нет, то нужно проверить на наличие прав
 
 
-        //Достаём токен из заголовка запроса. Если токена нет, то получим null
-        String token = methodInvoker.tunnel().getRequestHeader("Token");
+      //Достаём токен из заголовка запроса. Если токена нет, то получим null
+      String token = methodInvoker.tunnel().getRequestHeader("Token");
+      if (token == null) token = first(methodInvoker.tunnel().getParamValues("token"));
 
-        //в этом методе токен будет расшифрован и помещён в ThreadLocal-переменную
-        //если произойдёт какой-нибудь сбой, то произойдёт ошибка и вызов метода контроллера не произойдёт
-        //тем самым мы предотвратим вероятный взлом
-        authRegister.get().checkTokenAndPutToThreadLocal(token);
-      } else {
+      //в этом методе токен будет расшифрован и помещён в ThreadLocal-переменную
+      //если произойдёт какой-нибудь сбой, то произойдёт ошибка и вызов метода контроллера не произойдёт
+      //тем самым мы предотвратим вероятный взлом
+      authRegister.get().checkTokenAndPutToThreadLocal(token);
+    } else {
 
-        // если есть аннотация NoSecurity то это значит, что метод не нуждается в параметрах сессии и не
-        // нуждается в защите - т.е. его может вызвать любой. Таким методом например является логинг.
-        // В этом случае мы очищаем ThreadLocal-переменную
-        authRegister.get().cleanTokenThreadLocal();
-      }
-    } catch (RestError restError) {
-      restError.printStackTrace();
-      return;
+      // если есть аннотация NoSecurity то это значит, что метод не нуждается в параметрах сессии и не
+      // нуждается в защите - т.е. его может вызвать любой. Таким методом например является логинг.
+      // В этом случае мы очищаем ThreadLocal-переменную
+      authRegister.get().cleanTokenThreadLocal();
     }
+
+  }
+
+  private static String first(String[] array) {
+    if (array == null) return null;
+    if (array.length == 0) return null;
+    return array[0];
   }
 
   /**
