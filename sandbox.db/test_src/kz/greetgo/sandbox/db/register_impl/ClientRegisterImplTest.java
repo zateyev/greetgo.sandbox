@@ -157,11 +157,14 @@ public class ClientRegisterImplTest extends ParentTestNg {
     ClientRecord rec = clientRegister.get().saveClient(cl);
     //
     //
-    assertThat(clientTestDao.get().loadDetails(rec.id)).isNotNull();
-    assertThat(clientTestDao.get().loadDetails(rec.id).name).isEqualTo(cl.name);
-    assertThat(clientTestDao.get().loadDetails(rec.id).surname).isEqualTo(cl.surname);
-    assertThat(clientTestDao.get().loadDetails(rec.id).patronymic).isEqualTo(cl.patronymic);
-    assertThat(clientTestDao.get().loadDetails(rec.id).charmId).isEqualTo(cl.charmId);
+
+    ClientDetails actual = clientTestDao.get().loadDetails(rec.id);
+
+    assertThat(actual).isNotNull();
+    assertThat(actual.name).isEqualTo(cl.name);
+    assertThat(actual.surname).isEqualTo(cl.surname);
+    assertThat(actual.patronymic).isEqualTo(cl.patronymic);
+    assertThat(actual.charmId).isEqualTo(cl.charmId);
 
   }
 

@@ -22,9 +22,8 @@ public interface ClientDao {
   void deleteClient(@Param("id") String id);
 
   @Update("update client set ${fieldName} = #{value} where id = #{clientId}")
-  void saveClient(@Param("fieldName") String fieldName,
-                  @Param("value") String value,
-                  @Param("clientId") String id);
+  void updateClientField(@Param("clientId") String id, @Param("fieldName") String fieldName,
+                         @Param("value") String value);
 
 
   @Insert("insert into client (id, name, surname, patronymic, charm_id, actual) values (#{id}, #{name}, #{surname}, " +

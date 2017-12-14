@@ -43,11 +43,11 @@ public class ClientRegisterImpl implements ClientRegister {
   @Override
   public ClientRecord saveClient(ClientToSave clientToSave) {
     if (clientToSave.id != null) {
-      clientDao.get().saveClient("name", clientToSave.name, clientToSave.id);
-      clientDao.get().saveClient("surname", clientToSave.surname, clientToSave.id);
-      clientDao.get().saveClient("patronymic", clientToSave.patronymic, clientToSave.id);
-      clientDao.get().saveClient("charm_id", clientToSave.charmId, clientToSave.id);
-      clientDao.get().saveClient("actual", "1", clientToSave.id);
+      clientDao.get().updateClientField(clientToSave.id, "name", clientToSave.name);
+      clientDao.get().updateClientField(clientToSave.id, "surname", clientToSave.surname);
+      clientDao.get().updateClientField(clientToSave.id, "patronymic", clientToSave.patronymic);
+      clientDao.get().updateClientField(clientToSave.id, "charm_id", clientToSave.charmId);
+      clientDao.get().updateClientField(clientToSave.id, "actual", "1");
     } else {
       clientToSave.id = idGen.get().newId();
       clientDao.get().insertClient(
