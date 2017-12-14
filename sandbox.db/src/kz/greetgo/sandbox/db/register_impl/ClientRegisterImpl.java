@@ -18,34 +18,53 @@ public class ClientRegisterImpl implements ClientRegister {
     throw new UnsupportedOperationException();
   }
 
+  public BeanGetter<ClientDao> clientDao;
+
   @Override
   public List<ClientRecord> getList(ClientListRequest clientListRequest) {
     throw new UnsupportedOperationException();
   }
 
-  public BeanGetter<ClientDao> clientDao;
 
   @Override
   public ClientDetails getClient(String id) {
     ClientDetails ret = new ClientDetails();
 
-    if (id != null) {
+    if (id != null && !"".equals(id)) {
       ret = clientDao.get().loadDetails(id);
     }
-
     ret.charms = clientDao.get().loadCharmList();
-
 
     return ret;
   }
 
+  public BeanGetter<IdGenerator> idGen;
+
   @Override
   public ClientRecord saveClient(ClientToSave clientToSave) {
-    throw new UnsupportedOperationException();
+    if (clientToSave.id != null) {
+      clientDao.get().saveClient("name", clientToSave.name, clientToSave.id);
+      clientDao.get().saveClient("surname", clientToSave.surname, clientToSave.id);
+      clientDao.get().saveClient("patronymic", clientToSave.patronymic, clientToSave.id);
+      clientDao.get().saveClient("charm_id", clientToSave.charmId, clientToSave.id);
+      clientDao.get().saveClient("actual", "1", clientToSave.id);
+    } else {
+      clientToSave.id = idGen.get().newId();
+      clientDao.get().insertClient(
+        clientToSave.id,
+        clientToSave.name,
+        clientToSave.surname,
+        clientToSave.patronymic,
+        clientToSave.charmId);
+    }
+    ClientRecord rec = new ClientRecord();
+
+    rec.id = clientToSave.id;
+    return rec;
   }
 
   @Override
   public void deleteClient(String id) {
-    throw new UnsupportedOperationException();
+    clientDao.get().deleteClient(id);
   }
 }

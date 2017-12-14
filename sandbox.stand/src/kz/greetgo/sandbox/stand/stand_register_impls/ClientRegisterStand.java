@@ -3,7 +3,10 @@ package kz.greetgo.sandbox.stand.stand_register_impls;
 
 import kz.greetgo.depinject.core.Bean;
 import kz.greetgo.depinject.core.BeanGetter;
-import kz.greetgo.sandbox.controller.model.*;
+import kz.greetgo.sandbox.controller.model.ClientDetails;
+import kz.greetgo.sandbox.controller.model.ClientListRequest;
+import kz.greetgo.sandbox.controller.model.ClientRecord;
+import kz.greetgo.sandbox.controller.model.ClientToSave;
 import kz.greetgo.sandbox.controller.register.ClientRegister;
 import kz.greetgo.sandbox.db.stand.beans.StandClientDb;
 import kz.greetgo.sandbox.db.stand.model.ClientDot;
@@ -49,7 +52,12 @@ public class ClientRegisterStand implements ClientRegister {
 
   @Override
   public ClientDetails getClient(String id) {
-    return al.get().clientStorage.get(id).toClientDetails();
+    if (id != null) return al.get().clientStorage.get(id).toClientDetails();
+    else {
+      ClientDetails det = new ClientDetails();
+      det.charms = al.get().clientStorage.get("1").toClientDetails().charms;
+      return det;
+    }
   }
 
 
@@ -69,7 +77,7 @@ public class ClientRegisterStand implements ClientRegister {
     clientDot.surname = clientToSave.surname;
     clientDot.patronymic = clientToSave.patronymic;
     clientDot.gender = clientToSave.gender;
-    clientDot.temper = clientToSave.temper;
+    clientDot.temper = clientToSave.charmId;
     clientDot.dateOfBirth = clientToSave.dateOfBirth;
 
     String str = "";

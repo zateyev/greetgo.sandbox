@@ -1,10 +1,20 @@
 package kz.greetgo.sandbox.db.test.dao;
 
+import kz.greetgo.sandbox.controller.model.ClientDetails;
 import org.apache.ibatis.annotations.Insert;
 import org.apache.ibatis.annotations.Param;
+import org.apache.ibatis.annotations.Select;
 import org.apache.ibatis.annotations.Update;
 
 public interface ClientTestDao {
+
+  @Select("select actual from client where id = #{id}")
+  String getActualClient(@Param("id") String id);
+
+  @Select("select c.charm_id charmId, c.* from Client c where id = #{id}")
+  ClientDetails loadDetails(@Param("id") String id);
+
+
   @Update("update charm set actual = 0")
   void deleteAllCharms();
 
