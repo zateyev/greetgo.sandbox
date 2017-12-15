@@ -43,12 +43,18 @@ public class ClientRegisterImpl implements ClientRegister {
 
   @Override
   public ClientRecord saveClient(ClientToSave clientToSave) {
+
+    java.sql.Date dateOfBirth = java.sql.Date.valueOf(clientToSave.dateOfBirth);
+    clientToSave.gender = clientToSave.gender.toLowerCase()+"::gender";
+
     if (clientToSave.id != null) {
       clientDao.get().updateClientField(clientToSave.id, "name", clientToSave.name);
       clientDao.get().updateClientField(clientToSave.id, "surname", clientToSave.surname);
       clientDao.get().updateClientField(clientToSave.id, "patronymic", clientToSave.patronymic);
       clientDao.get().updateClientField(clientToSave.id, "charm_id", clientToSave.charmId);
-      clientDao.get().updateClientField(clientToSave.id, "actual", "1");
+      clientDao.get().updateClientField(clientToSave.id, "birth_date", dateOfBirth);
+      clientDao.get().updateClientField(clientToSave.id, "current_gender", clientToSave.gender);
+      clientDao.get().updateClientField(clientToSave.id, "actual", 1);
     } else {
       clientToSave.id = idGen.get().newId();
       clientDao.get().insertClient(
@@ -56,11 +62,14 @@ public class ClientRegisterImpl implements ClientRegister {
         clientToSave.name,
         clientToSave.surname,
         clientToSave.patronymic,
+        dateOfBirth,
+        clientToSave.gender,
         clientToSave.charmId);
     }
-    ClientRecord rec = new ClientRecord();
 
+    ClientRecord rec = new ClientRecord();
     rec.id = clientToSave.id;
+
     return rec;
   }
 
