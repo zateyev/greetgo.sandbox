@@ -12,6 +12,11 @@
       )
     ]]></sql>
   </changeSet>
+  <changeSet author="jgolibzhan" id="create-enum-gender">
+    <sql endDelimiter=";;"><![CDATA[
+      create type gender as enum ('male', 'female')
+    ]]></sql>
+  </changeSet>
 
   <changeSet author="jgolibzhan" id="create-table-Client">
     <sql endDelimiter=";;"><![CDATA[
@@ -20,7 +25,9 @@
         surname varchar(300),
         name varchar(300),
         patronymic varchar(300),
+        current_gender gender,
         charm_id varchar(32) references Charm,
+        birth_date date,
         actual smallint not null default 0
       )
     ]]></sql>
