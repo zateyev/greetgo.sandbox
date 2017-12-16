@@ -2,6 +2,7 @@ package kz.greetgo.sandbox.db.register_impl;
 
 import kz.greetgo.depinject.core.BeanGetter;
 import kz.greetgo.sandbox.controller.model.ClientDetails;
+import kz.greetgo.sandbox.controller.model.ClientListRequest;
 import kz.greetgo.sandbox.controller.model.ClientRecord;
 import kz.greetgo.sandbox.controller.model.ClientToSave;
 import kz.greetgo.sandbox.controller.register.ClientRegister;
@@ -9,6 +10,8 @@ import kz.greetgo.sandbox.db.test.dao.ClientTestDao;
 import kz.greetgo.sandbox.db.test.util.ParentTestNg;
 import kz.greetgo.util.RND;
 import org.testng.annotations.Test;
+
+import java.util.List;
 
 import static org.fest.assertions.api.Assertions.assertThat;
 
@@ -53,7 +56,7 @@ public class ClientRegisterImplTest extends ParentTestNg {
     String clientId = RND.str(10);
     String surname = RND.str(10);
     String name = RND.str(10);
-    String gender = "m";
+    String gender = "male";
     java.sql.Date birthDate = java.sql.Date.valueOf("1991-11-11");
 
     clientTestDao.get().insert(clientId);
@@ -61,7 +64,7 @@ public class ClientRegisterImplTest extends ParentTestNg {
     clientTestDao.get().update(clientId, "surname", surname);
     clientTestDao.get().update(clientId, "name", name);
     clientTestDao.get().update(clientId, "birth_date", birthDate);
-    clientTestDao.get().update(clientId, "gender", gender);
+    clientTestDao.get().update(clientId, "current_gender", gender);
     clientTestDao.get().update(clientId, "actual", 1);
 
     //
@@ -188,6 +191,13 @@ public class ClientRegisterImplTest extends ParentTestNg {
     String surname = RND.str(10);
     String patronymic = RND.str(10);
 
+    String charmId = RND.str(5);
+    String charmName = RND.str(10);
+
+    clientTestDao.get().insertCharm(charmId, charmName);
+
+    clientTestDao.get().deleteAllClients();
+
     clientTestDao.get().insertClient(
       clientId,
       name,
@@ -195,7 +205,7 @@ public class ClientRegisterImplTest extends ParentTestNg {
       patronymic,
       java.sql.Date.valueOf("1990-10-10"),
       "male",
-      null);
+      charmId);
 
     ClientToSave clUpdated = new ClientToSave();
     clUpdated.id = clientId;
@@ -204,6 +214,7 @@ public class ClientRegisterImplTest extends ParentTestNg {
     clUpdated.patronymic = patronymic + "new";
     clUpdated.dateOfBirth = "1990-11-11";
     clUpdated.gender = "female";
+    clUpdated.charmId = charmId;
 
     //
     //
@@ -211,12 +222,158 @@ public class ClientRegisterImplTest extends ParentTestNg {
     //
     //
 
-    ClientDetails actual = clientTestDao.get().loadDetails(rec.id);
+    ClientDetails actual =
+      clientTestDao.get().loadDetails(rec.id);
     assertThat(actual.name).isEqualTo(clUpdated.name);
     assertThat(actual.surname).isEqualTo(clUpdated.surname);
     assertThat(actual.patronymic).isEqualTo(clUpdated.patronymic);
     assertThat(actual.dateOfBirth).isEqualTo(clUpdated.dateOfBirth);
 
   }
+
+  @Test
+  public void getList_emptyList() {
+    clientTestDao.get().deleteAllClients();
+
+    ClientListRequest req = new ClientListRequest();
+
+    //
+    //
+    List<ClientRecord> rec = clientRegister.get().getList(req);
+    //
+    //
+
+    assertThat(rec).hasSize(0);
+  }
+
+  @Test
+  public void getList_CheckReturnedRecord() {
+
+    clientTestDao.get().deleteAllClients();
+    clientTestDao.get().deleteAllCharms();
+    String id = RND.str(10);
+    String charmId = RND.str(5);
+    String charmName = RND.str(10);
+
+    clientTestDao.get().insertCharm(charmId, charmName);
+    clientTestDao.get().insertClient(
+      id,
+      RND.str(10),
+      RND.str(10),
+      RND.str(10),
+      java.sql.Date.valueOf("1990-10-10"),
+      "male",
+      charmId
+    );
+
+    ClientListRequest req = new ClientListRequest();
+
+    //
+    //
+    List<ClientRecord> list = clientRegister.get().getList(req);
+    //
+    //
+
+    ClientRecord rc = clientTestDao.get().getClient(id);
+
+    assertThat(list).hasSize(1);
+    assertThat(list.get(0).fio).isEqualTo(rc.fio);
+    assertThat(list.get(0).age).isEqualTo(rc.age);
+    assertThat(list.get(0).charm).isEqualTo(charmName);
+
+  }
+
+  @Test
+  public void getList_CheckLimitedList() {
+    String charmId = RND.str(5);
+    String charmName = RND.str(10);
+    clientTestDao.get().insertCharm(charmId, charmName);
+    clientTestDao.get().deleteAllClients();
+
+    for (int i = 0; i < 50; i++) {
+      clientTestDao.get().insertClient(
+        RND.str(10),
+        RND.str(10),
+        RND.str(10),
+        RND.str(10),
+        java.sql.Date.valueOf("1990-10-10"),
+        "male",
+        charmId
+      );
+    }
+
+    ClientListRequest req = new ClientListRequest();
+    req.count = 5;
+    req.skipFirst = 10;
+    req.sort = "";
+    req.filterByFio = "";
+
+    //
+    //
+    List<ClientRecord> list = clientRegister.get().getList(req);
+    //
+    //
+
+    List<String> detList = clientTestDao.get().getListOfIds();
+
+    assertThat(detList.get(10)).isEqualTo(list.get(0).id);
+    assertThat(list).hasSize(5);
+
+  }
+
+  @Test
+  public void getSize() {
+
+    ClientListRequest req = new ClientListRequest();
+    clientTestDao.get().deleteAllClients();
+    req.filterByFio = "";
+
+    for (int i = 0; i < 50; i++) {
+      clientTestDao.get().insertClient(
+        RND.str(10),
+        RND.str(10),
+        RND.str(10),
+        RND.str(10),
+        java.sql.Date.valueOf("1990-10-10"),
+        "male",
+        null
+      );
+    }
+
+    //
+    //
+    long size = clientRegister.get().getSize(req);
+    //
+    //
+
+    assertThat(size).isEqualTo(50);
+
+  }
+
+  @Test
+  public void loadTestData() {
+    clientTestDao.get().deleteAllClients();
+    clientTestDao.get().deleteAllCharms();
+
+    String charmId = RND.str(5);
+    String charmName = RND.str(10);
+    clientTestDao.get().insertCharm(charmId, charmName);
+    clientTestDao.get().deleteAllClients();
+
+    for (int i = 0; i < 50; i++) {
+      clientTestDao.get().insertClient(
+        RND.str(10),
+        RND.str(10),
+        RND.str(10),
+        RND.str(10),
+        java.sql.Date.valueOf("1990-10-10"),
+        "male",
+        charmId
+      );
+    }
+
+  }
+
+
 
 }

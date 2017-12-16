@@ -15,16 +15,18 @@ export class ListComponent implements OnInit {
   @ViewChild("changeForm") changeForm: ChangeClientComponent;
   @ViewChild("pagination") pagination: ClientListPagination;
 
-  loading: boolean = true;
   deletingClient: string = "";
+  loading: boolean = true;
   errorLoading: boolean = false;
   emptyList: boolean = false;
+
   modalChangeForm: boolean = false;
 
   list: ClientRecord[] = [];
 
   currentPage: number = 0;
   sort: string = "fio";
+  filter: string = "";
 
   listInfo: ClientListRequest = new ClientListRequest();
   fileTypeForDownload: string = null;
@@ -84,6 +86,8 @@ export class ListComponent implements OnInit {
 
   loadFilteredList() {
     this.loading = true;
+    this.listInfo = new ClientListRequest();
+    this.listInfo.filterByFio = this.filter;
     this.pagination.listInfo = this.listInfo;
     this.pagination.getTotalSizeOfList();
     this.loadList();
@@ -98,9 +102,11 @@ export class ListComponent implements OnInit {
 
   loadList() {
     this.httpService.post("/client/getList", {listInfo: JSON.stringify(this.listInfo)}).toPromise().then(result => {
-      this.list = result.json().map(ClientRecord.copy);
-      if (result.json().length === 0) this.checkEmptyList();
+      this.emptyList = false;
+      this.errorLoading = false;
       this.loading = false;
+      this.list = result.json().map(ClientRecord.copy);
+      if (this.list.length === 0) this.checkEmptyList();
     }, error => {
       this.errorLoading = true;
       this.loading = false;
@@ -119,6 +125,7 @@ export class ListComponent implements OnInit {
   checkEmptyList() {
     if (this.pagination.totalSizeOfList === 0) {
       this.emptyList = true;
+      this.pagination.getTotalSizeOfList();
       return;
     }
     if (this.list.length === 0) {

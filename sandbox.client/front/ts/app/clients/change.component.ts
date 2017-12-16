@@ -98,11 +98,11 @@ export class ChangeClientComponent {
   }
 
   genderToM() {
-    this.clientDetails.gender = "М";
+    this.clientDetails.gender = "male";
   }
 
   genderToF() {
-    this.clientDetails.gender = "Ж";
+    this.clientDetails.gender = "female";
   }
 
 }

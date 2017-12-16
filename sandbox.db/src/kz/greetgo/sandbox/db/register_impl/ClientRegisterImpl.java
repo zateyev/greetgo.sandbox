@@ -14,16 +14,36 @@ import java.util.List;
 
 @Bean
 public class ClientRegisterImpl implements ClientRegister {
-  @Override
-  public long getSize(ClientListRequest clientListRequest) {
-    throw new UnsupportedOperationException();
-  }
-
   public BeanGetter<ClientDao> clientDao;
 
   @Override
+  public long getSize(ClientListRequest clientListRequest) {
+    long size;
+    if ("".equals(clientListRequest.filterByFio)) size = clientDao.get().getSizeOfList();
+    else {
+      size = clientDao.get().getSizeOfFilteredList(clientListRequest.filterByFio);
+    }
+
+    return size;
+  }
+
+  @Override
   public List<ClientRecord> getList(ClientListRequest clientListRequest) {
-    throw new UnsupportedOperationException();
+
+    List<ClientRecord> list = null;
+
+    if ("".equals(clientListRequest.sort)) clientListRequest.sort = "surname";
+    if ("".equals(clientListRequest.filterByFio)) clientListRequest.filterByFio = "";
+
+    if (clientListRequest.count != 0) {
+      list = clientDao.get().getLimitedListOfClients(
+        clientListRequest.count,
+        clientListRequest.skipFirst,
+        clientListRequest.sort,
+        clientListRequest.filterByFio);
+    } else list = clientDao.get().getListOfClients();
+
+    return list;
   }
 
 
@@ -45,7 +65,7 @@ public class ClientRegisterImpl implements ClientRegister {
   public ClientRecord saveClient(ClientToSave clientToSave) {
 
     java.sql.Date dateOfBirth = java.sql.Date.valueOf(clientToSave.dateOfBirth);
-    clientToSave.gender = clientToSave.gender.toLowerCase()+"::gender";
+    clientToSave.gender = clientToSave.gender.toLowerCase();
 
     if (clientToSave.id != null) {
       clientDao.get().updateClientField(clientToSave.id, "name", clientToSave.name);
@@ -67,8 +87,7 @@ public class ClientRegisterImpl implements ClientRegister {
         clientToSave.charmId);
     }
 
-    ClientRecord rec = new ClientRecord();
-    rec.id = clientToSave.id;
+    ClientRecord rec = clientDao.get().getClientRecord(clientToSave.id);
 
     return rec;
   }
