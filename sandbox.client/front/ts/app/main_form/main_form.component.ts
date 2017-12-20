@@ -18,41 +18,9 @@ import {HttpService} from "../HttpService";
           {{loadUserInfoError}}
         </div>
       </div>
-      <div *ngIf="userInfo">
-
-        <table>
-          <tbody>
-
-          <tr>
-            <td>ID</td>
-            <td>&nbsp;:&nbsp;</td>
-            <td><b>{{userInfo.id}}</b></td>
-          </tr>
-          <tr>
-            <td>Account name</td>
-            <td>&nbsp;:&nbsp;</td>
-            <td><b>{{userInfo.accountName}}</b></td>
-          </tr>
-          <tr>
-            <td>Surname</td>
-            <td>&nbsp;:&nbsp;</td>
-            <td><b>{{userInfo.surname}}</b></td>
-          </tr>
-          <tr>
-            <td>Name</td>
-            <td>&nbsp;:&nbsp;</td>
-            <td><b>{{userInfo.name}}</b></td>
-          </tr>
-          <tr>
-            <td>Patronymic</td>
-            <td>&nbsp;:&nbsp;</td>
-            <td><b>{{userInfo.patronymic}}</b></td>
-          </tr>
-
-          </tbody>
-        </table>
-
-      </div>
+      
+      <client-list></client-list>
+      
     </div>`,
 })
 export class MainFormComponent {
