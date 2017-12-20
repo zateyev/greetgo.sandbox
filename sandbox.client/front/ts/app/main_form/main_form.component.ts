@@ -8,10 +8,10 @@ import {HttpService} from "../HttpService";
     <div>
       <h2>Main Form Component</h2>
 
-      <button (click)="exit.emit()">Выход</button>
+      <button class="buttonStyle" (click)="exit.emit()">Выход</button>
 
       <div *ngIf="!userInfo">
-        <button [disabled]="!loadUserInfoButtonEnabled" (click)="loadUserInfoButtonClicked()">
+        <button class="buttonStyle" [disabled]="!loadUserInfoButtonEnabled" (click)="loadUserInfoButtonClicked()">
           Загрузить данные пользователя
         </button>
         <div *ngIf="loadUserInfoError">
