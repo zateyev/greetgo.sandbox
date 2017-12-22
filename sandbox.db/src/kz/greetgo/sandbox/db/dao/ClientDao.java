@@ -73,7 +73,7 @@ public interface ClientDao {
   long getSizeOfList();
 
   @Select("select count(id) from client where actual = 1 and " +
-    " name || surname || patronymic like '% || #{filter} || %' ")
+    " ((surname like '#{filter} || %') or (name like '#{filter} || %')) ")
   long getSizeOfFilteredList(@Param("filter") String filterByFio);
 
   @Select("select c.id as id, " +

@@ -8,6 +8,9 @@ import kz.greetgo.sandbox.controller.model.ClientRecord;
 import kz.greetgo.sandbox.controller.model.ClientToSave;
 import kz.greetgo.sandbox.controller.register.ClientRegister;
 import kz.greetgo.sandbox.db.dao.ClientDao;
+import kz.greetgo.sandbox.db.register_impl.jdbc.GetClientList;
+import kz.greetgo.sandbox.db.register_impl.jdbc.GetClientListSize;
+import kz.greetgo.sandbox.db.util.JdbcSandbox;
 
 import java.io.OutputStream;
 import java.util.List;
@@ -16,33 +19,16 @@ import java.util.List;
 public class ClientRegisterImpl implements ClientRegister {
   public BeanGetter<ClientDao> clientDao;
 
+  public BeanGetter<JdbcSandbox> jdbc;
+
   @Override
   public long getSize(ClientListRequest clientListRequest) {
-    long size;
-    if ("".equals(clientListRequest.filterByFio)) size = clientDao.get().getSizeOfList();
-    else {
-      size = clientDao.get().getSizeOfFilteredList(clientListRequest.filterByFio);
-    }
-
-    return size;
+    return jdbc.get().execute(new GetClientListSize(clientListRequest));
   }
 
   @Override
   public List<ClientRecord> getList(ClientListRequest clientListRequest) {
-
-    List<ClientRecord> list = null;
-
-    if ("".equals(clientListRequest.sort)) clientListRequest.sort = "surname";
-
-    if (clientListRequest.count != 0) {
-      list = clientDao.get().getLimitedListOfClients(
-        clientListRequest.count,
-        clientListRequest.skipFirst,
-        clientListRequest.sort,
-        clientListRequest.filterByFio);
-    } else list = clientDao.get().getListOfClients();
-
-    return list;
+    return jdbc.get().execute(new GetClientList(clientListRequest));
   }
 
 
@@ -98,11 +84,12 @@ public class ClientRegisterImpl implements ClientRegister {
         "work"
       );
 
-      for(String s : clientToSave.phones.mobile) clientDao.get().insertClientPhone(
-        clientToSave.id,
-        s,
-        "mobile"
-      );
+      for (String s : clientToSave.phones.mobile)
+        clientDao.get().insertClientPhone(
+          clientToSave.id,
+          s,
+          "mobile"
+        );
 
     } else {
       clientToSave.id = idGen.get().newId();
@@ -141,11 +128,12 @@ public class ClientRegisterImpl implements ClientRegister {
         "work"
       );
 
-      for(String s : clientToSave.phones.mobile) clientDao.get().insertClientPhone(
-        clientToSave.id,
-        s,
-        "mobile"
-      );
+      for (String s : clientToSave.phones.mobile)
+        clientDao.get().insertClientPhone(
+          clientToSave.id,
+          s,
+          "mobile"
+        );
 
     }
 
