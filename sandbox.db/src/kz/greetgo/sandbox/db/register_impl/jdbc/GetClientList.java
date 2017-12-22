@@ -32,6 +32,7 @@ public class GetClientList extends AbstractGetClientList implements ConnectionCa
     prepareSql();
 
     try (PreparedStatement ps = connection.prepareStatement(sql.toString())) {
+      System.out.println(sql.toString());
 
       {
         int index = 1;
@@ -60,13 +61,18 @@ public class GetClientList extends AbstractGetClientList implements ConnectionCa
 
   @Override
   protected void select() {
-    sql.append("select c.id, c.surname, c.name, c.patronymic");
+    sql.append("select c.id, c.surname, c.name, c.patronymic, " +
+      " ch.name as charm," +
+      " extract(year from age(c.birth_date)) as age");
   }
+
 
   private ClientRecord readRecord(ResultSet rs) throws SQLException {
     ClientRecord ret = new ClientRecord();
     ret.id = rs.getString("id");
     ret.fio = makeFio(rs.getString("surname"), rs.getString("name"), rs.getString("patronymic"));
+    ret.age = rs.getInt("age");
+    ret.charm = rs.getString("charm");
     return ret;
   }
 

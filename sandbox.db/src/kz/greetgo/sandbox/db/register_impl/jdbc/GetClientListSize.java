@@ -23,7 +23,7 @@ public class GetClientListSize extends AbstractGetClientList implements Connecti
 
   @Override
   protected void select() {
-    sql.append("select count(1)");
+    sql.append("select count(*)");
   }
 
   @Override
@@ -31,6 +31,7 @@ public class GetClientListSize extends AbstractGetClientList implements Connecti
     prepareSql();
 
     try (PreparedStatement ps = connection.prepareStatement(sql.toString())) {
+      System.out.println(sql.toString());
 
       {
         int index = 1;
@@ -41,7 +42,7 @@ public class GetClientListSize extends AbstractGetClientList implements Connecti
 
       try (ResultSet rs = ps.executeQuery()) {
 
-        if (!rs.next()) throw new RuntimeException("asd");
+        if (!rs.next()) throw new RuntimeException("Result res Exception");
 
         return rs.getLong(1);
 

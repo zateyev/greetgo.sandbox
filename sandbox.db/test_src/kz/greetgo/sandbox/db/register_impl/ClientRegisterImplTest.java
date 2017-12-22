@@ -68,6 +68,23 @@ public class ClientRegisterImplTest extends ParentTestNg {
       "fact",
       "fact",
       "fact");
+
+    clientTestDao.get().insertPhones(
+      clientId,
+      "work",
+      "878754878"
+    );
+    clientTestDao.get().insertPhones(
+      clientId,
+      "home",
+      "878712878"
+    );
+    clientTestDao.get().insertPhones(
+      clientId,
+      "mobile",
+      "83787878"
+    );
+
     clientTestDao.get().update(clientId, "charm_id", charmId1);
     clientTestDao.get().update(clientId, "surname", surname);
     clientTestDao.get().update(clientId, "name", name);
@@ -101,6 +118,10 @@ public class ClientRegisterImplTest extends ParentTestNg {
     assertThat(details.regAddress.street).isEqualTo("reg");
     assertThat(details.regAddress.house).isEqualTo("reg");
     assertThat(details.regAddress.flat).isEqualTo("reg");
+
+    assertThat(details.phones.home).isEqualTo("878712878");
+    assertThat(details.phones.work).isEqualTo("878754878");
+    assertThat(details.phones.mobile.get(0)).isEqualTo("83787878");
 
   }
 
@@ -245,6 +266,48 @@ public class ClientRegisterImplTest extends ParentTestNg {
     String charmId = RND.str(5);
     String charmName = RND.str(10);
 
+    clientTestDao.get().insertCharm(charmId, charmName);
+    clientTestDao.get().deleteAllClients();
+    clientTestDao.get().deleteAllPhones();
+    clientTestDao.get().deleteAllAddr();
+
+    clientTestDao.get().insertClient(
+      clientId,
+      name,
+      surname,
+      patronymic,
+      java.sql.Date.valueOf("1990-10-10"),
+      "male",
+      charmId);
+
+    clientTestDao.get().insertAdrr(clientId,
+      "reg",
+      "reg",
+      "reg",
+      "reg");
+    clientTestDao.get().insertAdrr(clientId,
+      "fact",
+      "fact",
+      "fact",
+      "fact");
+
+    clientTestDao.get().insertPhones(
+      clientId,
+      "work",
+      "123132"
+    );
+    clientTestDao.get().insertPhones(
+      clientId,
+      "home",
+      "123133"
+    );
+    clientTestDao.get().insertPhones(
+      clientId,
+      "mobile",
+      "83787878"
+    );
+
+    ClientToSave clUpdated = new ClientToSave();
     ClientAddress fact = new ClientAddress();
     ClientAddress reg = new ClientAddress();
     ClientPhones phone = new ClientPhones();
@@ -259,20 +322,6 @@ public class ClientRegisterImplTest extends ParentTestNg {
     phone.work = "123133";
     phone.mobile.add("143132");
 
-    clientTestDao.get().insertCharm(charmId, charmName);
-
-    clientTestDao.get().deleteAllClients();
-
-    clientTestDao.get().insertClient(
-      clientId,
-      name,
-      surname,
-      patronymic,
-      java.sql.Date.valueOf("1990-10-10"),
-      "male",
-      charmId);
-
-    ClientToSave clUpdated = new ClientToSave();
     clUpdated.id = clientId;
     clUpdated.name = name + "new";
     clUpdated.surname = surname + "new";
@@ -387,8 +436,6 @@ public class ClientRegisterImplTest extends ParentTestNg {
     ClientListRequest req = new ClientListRequest();
     req.count = 5;
     req.skipFirst = 10;
-    req.sort = "";
-    req.filterByFio = "";
 
     //
     //
@@ -408,17 +455,19 @@ public class ClientRegisterImplTest extends ParentTestNg {
 
     ClientListRequest req = new ClientListRequest();
     clientTestDao.get().deleteAllClients();
-    req.filterByFio = "";
+    clientTestDao.get().deleteAllCharms();
+
+    req.filterByFio  = "a";
 
     for (int i = 0; i < 50; i++) {
       clientTestDao.get().insertClient(
-        RND.str(10),
-        RND.str(10),
-        RND.str(10),
-        RND.str(10),
+        "a" + RND.str(10),
+        "a" + RND.str(10),
+        "a" +  RND.str(10),
+        "a" +  RND.str(10),
         java.sql.Date.valueOf("1990-10-10"),
         "male",
-        null
+        "charmId"
       );
     }
 
@@ -437,6 +486,7 @@ public class ClientRegisterImplTest extends ParentTestNg {
   public void loadTestData() {
     clientTestDao.get().deleteAllClients();
     clientTestDao.get().deleteAllCharms();
+    clientTestDao.get().deleteAllPhones();
 
     String charmId = RND.str(5);
     String charmName = RND.str(10);
@@ -445,12 +495,16 @@ public class ClientRegisterImplTest extends ParentTestNg {
 
     ClientAddress fact = new ClientAddress();
     ClientAddress reg = new ClientAddress();
+    ClientPhones phones = new ClientPhones();
     fact.street = "street";
     fact.house = "house";
     fact.flat = "flat";
     reg.street = "street";
     reg.house = "house";
     reg.flat = "flat";
+    phones.work = "98778561214";
+    phones.home = "98778132564";
+    phones.mobile.add("98778654564");
 
     for (int i = 0; i < 50; i++) {
       ClientToSave save = new ClientToSave();
@@ -462,6 +516,7 @@ public class ClientRegisterImplTest extends ParentTestNg {
       save.gender = "male";
       save.factAddress = fact;
       save.regAddress = reg;
+      save.phones = phones;
 
       ClientRecord rec = clientRegister.get().saveClient(save);
     }
