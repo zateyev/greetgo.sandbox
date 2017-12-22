@@ -1,5 +1,6 @@
 package kz.greetgo.sandbox.db.stand.model;
 
+import kz.greetgo.sandbox.controller.model.PhoneType;
 import kz.greetgo.sandbox.controller.model.UserInfo;
 
 public class PersonDot {
@@ -17,6 +18,7 @@ public class PersonDot {
     ret.surname = surname;
     ret.name = name;
     ret.patronymic = patronymic;
+    ret.phoneType = PhoneType.MOBILE;
     return ret;
   }
 

@@ -1,3 +1,5 @@
+import {PhoneType} from "./PhoneType";
+
 export class UserInfo {
   public id: string;
   public accountName: string;
@@ -5,12 +7,21 @@ export class UserInfo {
   public name: string | null;
   public patronymic: string | null;
 
-  public assign(o: UserInfo): UserInfo {
+  public phoneType: PhoneType | null;
+
+  public assign(o: any): UserInfo {
     this.id = o.id;
     this.accountName = o.accountName;
     this.surname = o.surname;
     this.name = o.name;
     this.patronymic = o.patronymic;
+    this.phoneType = o.phoneType;
     return this;
+  }
+
+  public static copy(a: any): UserInfo {
+    let ret = new UserInfo();
+    ret.assign(a);
+    return ret;
   }
 }

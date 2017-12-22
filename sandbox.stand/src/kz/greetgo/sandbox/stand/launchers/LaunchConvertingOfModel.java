@@ -1,7 +1,7 @@
 package kz.greetgo.sandbox.stand.launchers;
 
 import kz.greetgo.sandbox.controller.util.Modules;
-import kz.greetgo.sandbox.stand.modelling.ConvertModel;
+import kz.greetgo.ts_java_convert.ConvertModelBuilder;
 
 import java.io.File;
 
@@ -12,7 +12,11 @@ public class LaunchConvertingOfModel {
     File destinationDir = Modules.controllerDir().toPath()
       .resolve("src").toFile();
     String destinationPackage = "kz.greetgo.sandbox.controller.model";
-    new ConvertModel(sourceDir, destinationDir, destinationPackage)
-      .exec();
+
+    new ConvertModelBuilder()
+      .sourceDir(sourceDir)
+      .destinationDir(destinationDir)
+      .destinationPackage(destinationPackage)
+      .create().execute();
   }
 }

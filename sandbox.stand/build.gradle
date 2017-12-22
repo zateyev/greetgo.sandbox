@@ -6,6 +6,7 @@ dependencies {
   compile "kz.greetgo.mvc:greetgo.mvc:$greetgoMvcVersion"
   compile "kz.greetgo.mvc:greetgo.mvc.jetty:$greetgoMvcVersion"
   compile "kz.greetgo.mvc:greetgo.mvc.war:$greetgoMvcVersion"
+  compile "kz.greetgo.type_script:greetgo.ts_java_convert:0.0.1"
 
   compile "com.fasterxml.jackson.core:jackson-databind:$jacksonVersion"
 
@@ -22,5 +23,7 @@ dependencies {
 
   compile 'jstl:jstl:1.2'
 
+
   testCompile "kz.greetgo.depinject:greetgo.depinject.testng:$depinjectVersion"
+
 }

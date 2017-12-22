@@ -1,6 +1,7 @@
 import {Component, EventEmitter, Output} from "@angular/core";
 import {UserInfo} from "../../model/UserInfo";
 import {HttpService} from "../HttpService";
+import {PhoneType} from "../../model/PhoneType";
 
 @Component({
   selector: 'main-form-component',
@@ -48,6 +49,11 @@ import {HttpService} from "../HttpService";
             <td>&nbsp;:&nbsp;</td>
             <td><b>{{userInfo.patronymic}}</b></td>
           </tr>
+          <tr>
+            <td>Phone type</td>
+            <td>&nbsp;:&nbsp;</td>
+            <td><b>{{userInfo.phoneType}}</b></td>
+          </tr>
 
           </tbody>
         </table>
@@ -69,7 +75,9 @@ export class MainFormComponent {
     this.loadUserInfoError = null;
 
     this.httpService.get("/auth/userInfo").toPromise().then(result => {
-      this.userInfo = new UserInfo().assign(result.json() as UserInfo);
+      this.userInfo = UserInfo.copy(result.json());
+      let phoneType: PhoneType | null = this.userInfo.phoneType;
+      console.log(phoneType);
     }, error => {
       console.log(error);
       this.loadUserInfoButtonEnabled = true;
