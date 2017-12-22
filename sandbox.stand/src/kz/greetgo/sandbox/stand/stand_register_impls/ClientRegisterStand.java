@@ -39,7 +39,7 @@ public class ClientRegisterStand implements ClientRegister {
 
     for (int i = clientListRequest.skipFirst; i < clientListRequest.skipFirst+clientListRequest.count; i++) {
       list.add(fullList.get(i).toClientRecord());
-      if (clientListRequest.count > fullList.size()) break;
+      if (clientListRequest.skipFirst + clientListRequest.count > fullList.size()) break;
     }
 
     ClientRecord nn = fullList.get(3).toClientRecord();
@@ -82,16 +82,10 @@ public class ClientRegisterStand implements ClientRegister {
     clientDot.temper = clientToSave.charmId;
     clientDot.dateOfBirth = clientToSave.dateOfBirth;
 
-    String str = "";
-    String str2 = "";
-    for (String address : clientToSave.firstAddress) str = str + " " + address;
-    for (String phones : clientToSave.phones) str2 = str2 + " " + phones;
-    clientDot.address = str.trim();
-    clientDot.phone = str2.trim();
-//////////////////////////////////////////////////////////////////////////////////
+    System.out.println("client phones mobile" + clientToSave.phones.mobile);
+
     al.get().clientStorage.put(clientToSave.id, clientDot);
 
-    System.out.println(al.get().clientStorage.get(clientToSave.id).temper + " id   " + clientToSave.id + "    i " + i);
     return al.get().clientStorage.get(clientToSave.id).toClientRecord();
   }
 

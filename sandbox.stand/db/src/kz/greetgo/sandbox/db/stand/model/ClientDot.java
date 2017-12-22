@@ -1,8 +1,6 @@
 package kz.greetgo.sandbox.db.stand.model;
 
-import kz.greetgo.sandbox.controller.model.CharmRecord;
-import kz.greetgo.sandbox.controller.model.ClientDetails;
-import kz.greetgo.sandbox.controller.model.ClientRecord;
+import kz.greetgo.sandbox.controller.model.*;
 
 public class ClientDot {
 
@@ -40,8 +38,8 @@ public class ClientDot {
     rec.surname = this.surname;
     rec.patronymic = this.patronymic;
     rec.dateOfBirth = String.valueOf(this.dateOfBirth);
-    rec.gender = this.gender;
-    rec.charmId = this.temper;
+    rec.gender = "male";
+    rec.charmId = "1";
 
 
     CharmRecord charmRecord = new CharmRecord();
@@ -59,12 +57,25 @@ public class ClientDot {
     rec.charms.add(charmRecord2);
     rec.charms.add(charmRecord3);
 
+    ClientPhones phones = new ClientPhones();
+    ClientAddress fact = new ClientAddress();
+    ClientAddress reg = new ClientAddress();
 
-    String[] splitPhones = this.phone.split("\\s+");
-    for (String s : splitPhones) rec.phones.add(s);
+    phones.home = "87782332332";
+    phones.work = "87782332332";
+    phones.mobile.add("87782332332");
+    phones.mobile.add("87878787877");
 
-    String[] splitAddress = this.address.split("\\s+");
-    for (String s : splitAddress) rec.firstAddress.add(s);
+    fact.street = "street";
+    reg.street = "street";
+    fact.house = "house";
+    reg.house = "house";
+    fact.flat = "flat";
+    reg.flat = "flat";
+
+    rec.factAddress = fact;
+    rec.regAddress = reg;
+    rec.phones = phones;
 
     return rec;
   }

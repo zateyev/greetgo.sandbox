@@ -1,6 +1,8 @@
 package kz.greetgo.sandbox.db.test.dao;
 
+import kz.greetgo.sandbox.controller.model.ClientAddress;
 import kz.greetgo.sandbox.controller.model.ClientDetails;
+import kz.greetgo.sandbox.controller.model.ClientPhones;
 import kz.greetgo.sandbox.controller.model.ClientRecord;
 import org.apache.ibatis.annotations.Insert;
 import org.apache.ibatis.annotations.Param;
@@ -28,8 +30,8 @@ public interface ClientTestDao {
 
   @Insert("insert into client (id, name, surname, patronymic, birth_date, current_gender, charm_id, actual) " +
     "values (#{id}, #{name}, #{surname}, #{patronymic}, #{birth_date}, #{gender}, #{charm_id}, 1);" +
-    "insert into client_addr(client, type) values(#{id}, 'fact'); " +
-    "insert into client_addr(client, type) values(#{id}, 'reg');")
+    "insert into client_addr(client, type, actual) values(#{id}, 'fact', 1); " +
+    "insert into client_addr(client, type, actual) values(#{id}, 'reg', 1);")
   void insertClient(@Param("id") String id,
                     @Param("name") String name,
                     @Param("surname") String surname,
@@ -67,8 +69,15 @@ public interface ClientTestDao {
                   @Param("house") String house,
                   @Param("flat") String flat);
 
-  @Select("select street from client_addr where client = #{id} and actual = 1 union all" +
-    " select house from client_addr where client = #{id} and actual = 1 union all" +
-    " select flat from client_addr where client =#{id} and actual = 1")
-  List<String> getFirstAddress(@Param("id") String id);
+  @Select("select street, house, flat from client_addr where client = #{id} and type = 'fact' and actual = 1")
+  ClientAddress getFactAddress(@Param("id") String id);
+
+  @Select("select number from client_phone where client = #{id} and type = 'home' and actual = 1")
+  String getHomePhone(@Param("id") String id);
+
+  @Select("select number from client_phone where client = #{id} and type = 'work' and actual = 1")
+  String getWorkPhone(@Param("id")  String id);
+
+  @Select("select number from client_phone where client = #{id} and type = 'mobile' and actual = 1")
+  List<String> getMobile(@Param("id")  String id);
 }
