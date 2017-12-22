@@ -6,6 +6,6 @@ export class ClientPhones{
   constructor(){
     this.home = "";
     this.work = "";
-    this.mobile = ["", "", ""];
+    this.mobile = [];
   }
 }

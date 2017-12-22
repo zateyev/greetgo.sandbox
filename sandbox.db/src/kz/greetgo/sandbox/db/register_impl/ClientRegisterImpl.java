@@ -85,7 +85,24 @@ public class ClientRegisterImpl implements ClientRegister {
       clientDao.get().updateAddressField(clientToSave.id, "reg", "house", clientToSave.regAddress.house);
       clientDao.get().updateAddressField(clientToSave.id, "reg", "flat", clientToSave.regAddress.flat);
 
-      clientDao.get().updatePhoneField(clientToSave.id, "home", clientToSave.phones.home);
+      /*clientDao.get().insertClientPhone(
+        clientToSave.id,
+        clientToSave.phones.home,
+        "home"
+      );
+
+      clientDao.get().insertClientPhone(
+        clientToSave.id,
+        clientToSave.phones.work,
+        "work"
+      );
+
+      for(String s : clientToSave.phones.mobile) clientDao.get().insertClientPhone(
+        clientToSave.id,
+        s,
+        "mobile"
+      );*/
+
     } else {
       clientToSave.id = idGen.get().newId();
       clientDao.get().insertClient(
@@ -140,6 +157,7 @@ public class ClientRegisterImpl implements ClientRegister {
   public void deleteClient(String id) {
     clientDao.get().deleteClient(id);
     clientDao.get().deleteClientAddress(id);
+    clientDao.get().deleteClientPhone(id);
   }
 
   @Override

@@ -65,7 +65,6 @@ public class ClientDot {
     phones.work = "87782332332";
     phones.mobile.add("87782332332");
     phones.mobile.add("87878787877");
-    phones.mobile.add("");
 
     fact.street = "street";
     reg.street = "street";
