@@ -7,10 +7,10 @@
   </div>
   <div class="row ">
     <div class="col-xs-3">Ф.И.О <input
-      [(ngModel)]="listInfo.filterByFio"
+      [(ngModel)]="filter"
       [ngModelOptions]="{standalone: true}"
       type="text">
-      <button (click)="loadFilteredList()">find</button>
+      <button (click)="loadFilteredList()">Find</button>
     </div>
     <div class="col-xs-1">Характер</div>
     <div class="col-xs-1 text-center">

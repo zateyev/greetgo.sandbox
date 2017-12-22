@@ -14,16 +14,35 @@ import java.util.List;
 
 @Bean
 public class ClientRegisterImpl implements ClientRegister {
-  @Override
-  public long getSize(ClientListRequest clientListRequest) {
-    throw new UnsupportedOperationException();
-  }
-
   public BeanGetter<ClientDao> clientDao;
 
   @Override
+  public long getSize(ClientListRequest clientListRequest) {
+    long size;
+    if ("".equals(clientListRequest.filterByFio)) size = clientDao.get().getSizeOfList();
+    else {
+      size = clientDao.get().getSizeOfFilteredList(clientListRequest.filterByFio);
+    }
+
+    return size;
+  }
+
+  @Override
   public List<ClientRecord> getList(ClientListRequest clientListRequest) {
-    throw new UnsupportedOperationException();
+
+    List<ClientRecord> list = null;
+
+    if ("".equals(clientListRequest.sort)) clientListRequest.sort = "surname";
+
+    if (clientListRequest.count != 0) {
+      list = clientDao.get().getLimitedListOfClients(
+        clientListRequest.count,
+        clientListRequest.skipFirst,
+        clientListRequest.sort,
+        clientListRequest.filterByFio);
+    } else list = clientDao.get().getListOfClients();
+
+    return list;
   }
 
 
@@ -33,6 +52,7 @@ public class ClientRegisterImpl implements ClientRegister {
 
     if (id != null && !"".equals(id)) {
       ret = clientDao.get().loadDetails(id);
+      ret.firstAddress = clientDao.get().getFirstAddress(id);
     }
     ret.charms = clientDao.get().loadCharmList();
 
@@ -45,7 +65,7 @@ public class ClientRegisterImpl implements ClientRegister {
   public ClientRecord saveClient(ClientToSave clientToSave) {
 
     java.sql.Date dateOfBirth = java.sql.Date.valueOf(clientToSave.dateOfBirth);
-    clientToSave.gender = clientToSave.gender.toLowerCase()+"::gender";
+    clientToSave.gender = clientToSave.gender.toLowerCase();
 
     if (clientToSave.id != null) {
       clientDao.get().updateClientField(clientToSave.id, "name", clientToSave.name);
@@ -55,6 +75,11 @@ public class ClientRegisterImpl implements ClientRegister {
       clientDao.get().updateClientField(clientToSave.id, "birth_date", dateOfBirth);
       clientDao.get().updateClientField(clientToSave.id, "current_gender", clientToSave.gender);
       clientDao.get().updateClientField(clientToSave.id, "actual", 1);
+
+      clientDao.get().updateFirstAddressField(clientToSave.id, "street", clientToSave.firstAddress.get(0));
+      clientDao.get().updateFirstAddressField(clientToSave.id, "house", clientToSave.firstAddress.get(1));
+      clientDao.get().updateFirstAddressField(clientToSave.id, "flat", clientToSave.firstAddress.get(2));
+      clientDao.get().updateFirstAddressField(clientToSave.id, "actual", 1);
     } else {
       clientToSave.id = idGen.get().newId();
       clientDao.get().insertClient(
@@ -65,10 +90,14 @@ public class ClientRegisterImpl implements ClientRegister {
         dateOfBirth,
         clientToSave.gender,
         clientToSave.charmId);
+
+      clientDao.get().updateFirstAddressField(clientToSave.id, "street", clientToSave.firstAddress.get(0));
+      clientDao.get().updateFirstAddressField(clientToSave.id, "house", clientToSave.firstAddress.get(1));
+      clientDao.get().updateFirstAddressField(clientToSave.id, "flat", clientToSave.firstAddress.get(2));
+      clientDao.get().updateFirstAddressField(clientToSave.id, "actual", 1);
     }
 
-    ClientRecord rec = new ClientRecord();
-    rec.id = clientToSave.id;
+    ClientRecord rec = clientDao.get().getClientRecord(clientToSave.id);
 
     return rec;
   }

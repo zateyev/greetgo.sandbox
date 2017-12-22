@@ -69,7 +69,7 @@ export class ClientListPagination implements OnInit {
     this.setNumberOfPages();
     let listSize = 5;
     this.listInfo.skipFirst = n * listSize;
-    this.listInfo.count = this.listInfo.skipFirst + listSize;
+    this.listInfo.count = listSize;
     this.page.emit(this.listInfo);
   }
 }

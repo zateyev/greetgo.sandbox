@@ -26,7 +26,7 @@ public class ClientRegisterStand implements ClientRegister {
   public long getSize(ClientListRequest clientListRequest) {
     if ("".equals(clientListRequest.filterByFio)) {
       return al.get().clientStorage.size();
-    } else return 5;
+    } else return 0;
   }
 
 
@@ -37,7 +37,7 @@ public class ClientRegisterStand implements ClientRegister {
 
     System.out.println("List Info" + clientListRequest.count + " " + clientListRequest.sort);
 
-    for (int i = clientListRequest.skipFirst; i < clientListRequest.count; i++) {
+    for (int i = clientListRequest.skipFirst; i < clientListRequest.skipFirst+clientListRequest.count; i++) {
       list.add(fullList.get(i).toClientRecord());
       if (clientListRequest.count > fullList.size()) break;
     }
@@ -45,7 +45,7 @@ public class ClientRegisterStand implements ClientRegister {
     ClientRecord nn = fullList.get(3).toClientRecord();
 
     List<ClientRecord> list2 = new ArrayList<>();
-    list2.add(nn);
+    //list2.add(nn);
 
 
     if ("".equals(clientListRequest.filterByFio)) return list;
