@@ -136,7 +136,7 @@
             <div class="row">
               <div class="col-xs-4">Улица:</div>
               <div class="col-xs-8">
-                <input [(ngModel)]="clientDetails.firstAddress[0]"
+                <input [(ngModel)]="clientDetails.factAddress.street"
                        [ngModelOptions]="{standalone: true}"
                        (keyup)="updateButton()"
                        name="ul1"
@@ -148,7 +148,7 @@
             <div class="row">
               <div class="col-xs-4">Дом:</div>
               <div class="col-xs-8"><input
-                [(ngModel)]="clientDetails.firstAddress[1]"
+                [(ngModel)]="clientDetails.factAddress.house"
                 [ngModelOptions]="{standalone: true}"
                 name="home1"
                 (keyup)="updateButton()"
@@ -159,7 +159,7 @@
             <div class="row">
               <div class="col-xs-4"> Квартира:</div>
               <div class="col-xs-8"><input
-                [(ngModel)]="clientDetails.firstAddress[2]"
+                [(ngModel)]="clientDetails.factAddress.flat"
                 [ngModelOptions]="{standalone: true}"
                 (keyup)="updateButton()"
                 name="kv1"
@@ -180,7 +180,7 @@
             <div class="row">
               <div class="col-xs-4">Улица:</div>
               <div class="col-xs-8"><input
-                [(ngModel)]="clientDetails.secondAddress[0]"
+                [(ngModel)]="clientDetails.regAddress.street"
                 [ngModelOptions]="{standalone: true}"
                 (keyup)="updateButton()"
                 type="text" class="inputForm"></div>
@@ -190,10 +190,9 @@
             <div class="row">
               <div class="col-xs-4"> Дом:</div>
               <div class="col-xs-8"> <input
-                [(ngModel)]="clientDetails.secondAddress[1]"
+                [(ngModel)]="clientDetails.regAddress.house"
                 [ngModelOptions]="{standalone: true}"
                 (keyup)="updateButton()"
-                name="asdf"
                 type="text" class="inputForm"></div>
             </div>
           </div>
@@ -201,10 +200,9 @@
             <div class="row">
               <div class="col-xs-4"> Квартира:</div>
               <div class="col-xs-8"><input
-                [(ngModel)]="clientDetails.secondAddress[2]"
+                [(ngModel)]="clientDetails.regAddress.flat"
                 [ngModelOptions]="{standalone: true}"
                 (keyup)="updateButton()"
-                name="asdfasd"
                 type="text" class="inputForm"></div>
             </div>
           </div>
@@ -220,7 +218,7 @@
             <div class="row">
               <div class="col-xs-4">Домашний:</div>
               <div class="col-xs-8"><input
-                [(ngModel)]="clientDetails.phones[0]"
+                [(ngModel)]="clientDetails.phones.home"
                 [ngModelOptions]="{standalone: true}"
                 (keyup)="updateButton()"
                 type="text" class="inputForm"></div>
@@ -230,7 +228,7 @@
             <div class="row">
               <div class="col-xs-4">   Рабочий:</div>
               <div class="col-xs-8"><input
-                [(ngModel)]="clientDetails.phones[1]"
+                [(ngModel)]="clientDetails.phones.work"
                 [ngModelOptions]="{standalone: true}"
                 (keyup)="updateButton()"
                 type="text" class="inputForm"></div>
@@ -245,7 +243,7 @@
             <div class="row">
               <div class="col-xs-4"> Мобильный 1:</div>
               <div class="col-xs-8"><input
-                [(ngModel)]="clientDetails.phones[2]"
+                [(ngModel)]="clientDetails.phones.mobile[0]"
                 [ngModelOptions]="{standalone: true}"
                 (keyup)="updateButton()"
                 type="text" class="inputForm"></div>
@@ -255,7 +253,7 @@
             <div class="row">
               <div class="col-xs-4">     Мобильный 2:</div>
               <div class="col-xs-8"> <input
-                [(ngModel)]="clientDetails.phones[3]"
+                [(ngModel)]="clientDetails.phones.mobile[1]"
                 [ngModelOptions]="{standalone: true}"
                 (keyup)="updateButton()"
                 type="text" class="inputForm"></div>
@@ -267,7 +265,7 @@
             <div class="row">
               <div class="col-xs-4">Мобильный 3:</div>
               <div class="col-xs-8"><input
-                [(ngModel)]="clientDetails.phones[4]"
+                [(ngModel)]="clientDetails.phones.mobile[2]"
                 [ngModelOptions]="{standalone: true}"
                 (keyup)="updateButton()"
                 type="text" class="inputForm"></div>

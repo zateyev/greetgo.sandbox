@@ -4,6 +4,7 @@ import {ClientRecord} from "../../model/ClientRecord";
 import {HttpService} from "../HttpService";
 import {ClientToSave} from "../../model/ClientToSave";
 import {CharmRecord} from "../../model/CharmRecord";
+import {ClientAddress} from "../../model/ClientAddress";
 @Component({
   selector: 'change-component',
   template: require('./change.component.html'),

@@ -1,6 +1,7 @@
 package kz.greetgo.sandbox.db.dao;
 
 import kz.greetgo.sandbox.controller.model.CharmRecord;
+import kz.greetgo.sandbox.controller.model.ClientAddress;
 import kz.greetgo.sandbox.controller.model.ClientDetails;
 import kz.greetgo.sandbox.controller.model.ClientRecord;
 import org.apache.ibatis.annotations.Insert;
@@ -27,15 +28,16 @@ public interface ClientDao {
   @Update("update client set actual = 0 where id = #{id}")
   void deleteClient(@Param("id") String id);
 
+  @Update("update client_addr set actual = 0 where client = #{id}")
+  void deleteClientAddress(@Param("id") String id);
+
   @Update("update client set ${fieldName} = #{value} where id = #{clientId}")
   void updateClientField(@Param("clientId") String id, @Param("fieldName") String fieldName,
                          @Param("value") Object value);
 
 
   @Insert("insert into client (id, name, surname, patronymic, birth_date, current_gender, charm_id, actual) " +
-    "values (#{id}, #{name}, #{surname}, #{patronymic}, #{birth_date}, #{gender}, #{charm_id}, 1); " +
-    "insert into client_addr(client, type) values(#{id}, 'fact');" +
-    "insert into client_addr(client, type) values(#{id}, 'reg');")
+    "values (#{id}, #{name}, #{surname}, #{patronymic}, #{birth_date}, #{gender}, #{charm_id}, 1); ")
   void insertClient(@Param("id") String id,
                     @Param("name") String name,
                     @Param("surname") String surname,
@@ -81,13 +83,34 @@ public interface ClientDao {
   ClientRecord getClientRecord(@Param("id") String id);
 
 
-  @Update("update client_addr set ${fieldName} = #{value} where client = #{id} and type = 'fact'")
-  void updateFirstAddressField(@Param("id") String id,
-                               @Param("fieldName") String fieldName,
-                               @Param("value") Object value);
+  @Update("update client_addr set ${fieldName} = #{value} where client = #{id} and type = #{type}")
+  void updateAddressField(@Param("id") String id,
+                          @Param("type") String type,
+                          @Param("fieldName") String fieldName,
+                          @Param("value") Object value);
 
-  @Select("select street from client_addr where client = #{id} and actual = 1 union all" +
-    " select house from client_addr where client = #{id} and actual = 1 union all" +
-    " select flat from client_addr where client = #{id} and actual = 1")
-  List<String> getFirstAddress(@Param("id") String id);
+  @Select("select street, house, flat from client_addr where client = #{id} and type = 'fact' and actual = 1")
+  ClientAddress getFactAddress(@Param("id") String id);
+
+  @Select("select street, house, flat from client_addr where client = #{id} and type = 'reg' and actual = 1")
+  ClientAddress getRegAddress(String id);
+
+  @Insert("insert into client_addr(client, street, house, flat, type, actual) " +
+    "values (#{id}, #{street}, #{house}, #{flat}, #{type}, 1)")
+  void insertClientAddress(@Param("id") String id,
+                           @Param("street") String street,
+                           @Param("house") String house,
+                           @Param("flat") String flat,
+                           @Param("type") String type);
+
+  @Insert("insert into client_phone(client, number, type, actual)" +
+    " values (#{id}, #{number}, #{type}, 1)")
+  void insertClientPhone(@Param("id") String id,
+                         @Param("number") String number,
+                         @Param("type") String type);
+
+  @Update("update client_phone set number = #{value} where type = #{type}")
+  void updatePhoneField(@Param("id") String id,
+                        @Param("type") String type,
+                        @Param("value") String value);
 }

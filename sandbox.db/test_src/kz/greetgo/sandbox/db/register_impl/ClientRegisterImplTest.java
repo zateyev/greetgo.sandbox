@@ -1,10 +1,7 @@
 package kz.greetgo.sandbox.db.register_impl;
 
 import kz.greetgo.depinject.core.BeanGetter;
-import kz.greetgo.sandbox.controller.model.ClientDetails;
-import kz.greetgo.sandbox.controller.model.ClientListRequest;
-import kz.greetgo.sandbox.controller.model.ClientRecord;
-import kz.greetgo.sandbox.controller.model.ClientToSave;
+import kz.greetgo.sandbox.controller.model.*;
 import kz.greetgo.sandbox.controller.register.ClientRegister;
 import kz.greetgo.sandbox.db.test.dao.ClientTestDao;
 import kz.greetgo.sandbox.db.test.util.ParentTestNg;
@@ -66,6 +63,11 @@ public class ClientRegisterImplTest extends ParentTestNg {
       "reg",
       "reg",
       "reg");
+    clientTestDao.get().insertAdrr(clientId,
+      "fact",
+      "fact",
+      "fact",
+      "fact");
     clientTestDao.get().update(clientId, "charm_id", charmId1);
     clientTestDao.get().update(clientId, "surname", surname);
     clientTestDao.get().update(clientId, "name", name);
@@ -88,14 +90,17 @@ public class ClientRegisterImplTest extends ParentTestNg {
     assertThat(details.charmId).isEqualTo(charmId1);
     assertThat(details.charms).isNotNull();
 
-    assertThat(details.firstAddress).hasSize(3);
-    assertThat(details.firstAddress.get(0)).isEqualTo("reg");
-    assertThat(details.firstAddress.get(1)).isEqualTo("reg");
-    assertThat(details.firstAddress.get(2)).isEqualTo("reg");
 
     assertThat(details.charms).hasSize(2);
     assertThat(details.charms.get(0).name).isEqualTo(charmName2);
     assertThat(details.charms.get(1).name).isEqualTo(charmName1);
+    assertThat(details.factAddress.street).isEqualTo("fact");
+    assertThat(details.factAddress.house).isEqualTo("fact");
+    assertThat(details.factAddress.flat).isEqualTo("fact");
+
+    assertThat(details.regAddress.street).isEqualTo("reg");
+    assertThat(details.regAddress.house).isEqualTo("reg");
+    assertThat(details.regAddress.flat).isEqualTo("reg");
 
   }
 
@@ -165,11 +170,25 @@ public class ClientRegisterImplTest extends ParentTestNg {
     clientTestDao.get().deleteAllCharms();
 
     ClientToSave cl = new ClientToSave();
-
-    String address = RND.str(10);
+    ClientAddress fact = new ClientAddress();
+    ClientAddress reg = new ClientAddress();
+    ClientPhones phones = new ClientPhones();
 
     String charmId = RND.str(10);
     String charmName = RND.str(10);
+
+    fact.street = "street";
+    fact.house = "house";
+    fact.flat = "flat";
+    reg.street = "street";
+    reg.house = "house";
+    reg.flat = "flat";
+
+    phones.home = "7878787878787";
+    phones.work = "7878787878787";
+    phones.mobile.add("7878787878787");
+    phones.mobile.add("7878787878787");
+    phones.mobile.add("");
 
 
     clientTestDao.get().insertCharm(charmId, charmName);
@@ -181,9 +200,9 @@ public class ClientRegisterImplTest extends ParentTestNg {
     cl.charmId = charmId;
     cl.dateOfBirth = "1992-11-12";
     cl.gender = "male";
-    cl.firstAddress.add(address);
-    cl.firstAddress.add(address);
-    //cl.firstAddress.add(address);
+    cl.factAddress = fact;
+    cl.regAddress = reg;
+    cl.phones = phones;
 
     //
     //
@@ -192,8 +211,11 @@ public class ClientRegisterImplTest extends ParentTestNg {
     //
 
     ClientDetails actual = clientTestDao.get().loadDetails(rec.id);
+    ClientAddress addr = clientTestDao.get().getFactAddress(rec.id);
+    String homePhone = clientTestDao.get().getHomePhone(rec.id);
+    String workPhone = clientTestDao.get().getWorkPhone(rec.id);
+    List<String> mobile = clientTestDao.get().getMobile(rec.id);
 
-    List<String> adresses = clientTestDao.get().getFirstAddress(actual.id);
 
     assertThat(actual).isNotNull();
     assertThat(actual.name).isEqualTo(cl.name);
@@ -202,9 +224,14 @@ public class ClientRegisterImplTest extends ParentTestNg {
     assertThat(actual.charmId).isEqualTo(cl.charmId);
     assertThat(actual.dateOfBirth).isEqualTo(cl.dateOfBirth);
     assertThat(actual.gender).isEqualTo(cl.gender);
-    assertThat(adresses.get(0)).isEqualTo(address);
-    assertThat(adresses.get(1)).isEqualTo(address);
-    assertThat(adresses.get(2)).isNullOrEmpty();
+
+    assertThat(addr.street).isEqualTo("street");
+    assertThat(addr.house).isEqualTo("house");
+    assertThat(addr.flat).isEqualTo("flat");
+
+    assertThat(homePhone).isEqualTo(phones.home);
+    assertThat(workPhone).isEqualTo(phones.work);
+    assertThat(mobile).isEqualTo(phones.mobile);
 
   }
 
@@ -218,6 +245,15 @@ public class ClientRegisterImplTest extends ParentTestNg {
 
     String charmId = RND.str(5);
     String charmName = RND.str(10);
+
+    ClientAddress fact = new ClientAddress();
+    ClientAddress reg = new ClientAddress();
+    fact.street = "street";
+    fact.house = "house";
+    fact.flat = "flat";
+    reg.street = "street";
+    reg.house = "house";
+    reg.flat = "flat";
 
     clientTestDao.get().insertCharm(charmId, charmName);
 
@@ -240,9 +276,8 @@ public class ClientRegisterImplTest extends ParentTestNg {
     clUpdated.dateOfBirth = "1990-11-11";
     clUpdated.gender = "female";
     clUpdated.charmId = charmId;
-    clUpdated.firstAddress.add("address new");
-    clUpdated.firstAddress.add("address new");
-    clUpdated.firstAddress.add("address new");
+    clUpdated.factAddress = fact;
+    clUpdated.regAddress = reg;
 
     //
     //
@@ -251,17 +286,20 @@ public class ClientRegisterImplTest extends ParentTestNg {
     //
 
     ClientDetails actual = clientTestDao.get().loadDetails(rec.id);
-    List<String> addresses = clientTestDao.get().getFirstAddress(clientId);
-
+    ClientAddress addr = clientTestDao.get().getFactAddress(rec.id);
     assertThat(actual.name).isEqualTo(clUpdated.name);
     assertThat(actual.surname).isEqualTo(clUpdated.surname);
     assertThat(actual.patronymic).isEqualTo(clUpdated.patronymic);
     assertThat(actual.dateOfBirth).isEqualTo(clUpdated.dateOfBirth);
-    assertThat(addresses.get(0)).isEqualTo(clUpdated.firstAddress.get(0));
-    assertThat(addresses.get(1)).isEqualTo(clUpdated.firstAddress.get(1));
-    assertThat(addresses.get(2)).isEqualTo(clUpdated.firstAddress.get(2));
+    assertThat(addr.street).isEqualTo("street");
+    assertThat(addr.house).isEqualTo("house");
+    assertThat(addr.flat).isEqualTo("flat");
+
+
+
 
   }
+
 
   @Test
   public void getList_emptyList() {
@@ -392,6 +430,16 @@ public class ClientRegisterImplTest extends ParentTestNg {
     String charmId = RND.str(5);
     String charmName = RND.str(10);
     clientTestDao.get().insertCharm(charmId, charmName);
+    clientTestDao.get().insertCharm(RND.str(10), RND.str(10));
+
+    ClientAddress fact = new ClientAddress();
+    ClientAddress reg = new ClientAddress();
+    fact.street = "street";
+    fact.house = "house";
+    fact.flat = "flat";
+    reg.street = "street";
+    reg.house = "house";
+    reg.flat = "flat";
 
     for (int i = 0; i < 50; i++) {
       ClientToSave save = new ClientToSave();
@@ -401,9 +449,8 @@ public class ClientRegisterImplTest extends ParentTestNg {
       save.charmId = charmId;
       save.dateOfBirth = "1990-10-10";
       save.gender = "male";
-      save.firstAddress.add("address");
-      save.firstAddress.add("address");
-      save.firstAddress.add("");
+      save.factAddress = fact;
+      save.regAddress = reg;
 
       ClientRecord rec = clientRegister.get().saveClient(save);
     }

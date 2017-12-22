@@ -52,7 +52,8 @@ public class ClientRegisterImpl implements ClientRegister {
 
     if (id != null && !"".equals(id)) {
       ret = clientDao.get().loadDetails(id);
-      ret.firstAddress = clientDao.get().getFirstAddress(id);
+      ret.factAddress = clientDao.get().getFactAddress(id);
+      ret.regAddress = clientDao.get().getRegAddress(id);
     }
     ret.charms = clientDao.get().loadCharmList();
 
@@ -76,10 +77,15 @@ public class ClientRegisterImpl implements ClientRegister {
       clientDao.get().updateClientField(clientToSave.id, "current_gender", clientToSave.gender);
       clientDao.get().updateClientField(clientToSave.id, "actual", 1);
 
-      clientDao.get().updateFirstAddressField(clientToSave.id, "street", clientToSave.firstAddress.get(0));
-      clientDao.get().updateFirstAddressField(clientToSave.id, "house", clientToSave.firstAddress.get(1));
-      clientDao.get().updateFirstAddressField(clientToSave.id, "flat", clientToSave.firstAddress.get(2));
-      clientDao.get().updateFirstAddressField(clientToSave.id, "actual", 1);
+      clientDao.get().updateAddressField(clientToSave.id, "fact", "street", clientToSave.factAddress.street);
+      clientDao.get().updateAddressField(clientToSave.id, "fact", "house", clientToSave.factAddress.house);
+      clientDao.get().updateAddressField(clientToSave.id, "fact", "flat", clientToSave.factAddress.flat);
+
+      clientDao.get().updateAddressField(clientToSave.id, "reg", "street", clientToSave.regAddress.street);
+      clientDao.get().updateAddressField(clientToSave.id, "reg", "house", clientToSave.regAddress.house);
+      clientDao.get().updateAddressField(clientToSave.id, "reg", "flat", clientToSave.regAddress.flat);
+
+      clientDao.get().updatePhoneField(clientToSave.id, "home", clientToSave.phones.home);
     } else {
       clientToSave.id = idGen.get().newId();
       clientDao.get().insertClient(
@@ -91,10 +97,38 @@ public class ClientRegisterImpl implements ClientRegister {
         clientToSave.gender,
         clientToSave.charmId);
 
-      clientDao.get().updateFirstAddressField(clientToSave.id, "street", clientToSave.firstAddress.get(0));
-      clientDao.get().updateFirstAddressField(clientToSave.id, "house", clientToSave.firstAddress.get(1));
-      clientDao.get().updateFirstAddressField(clientToSave.id, "flat", clientToSave.firstAddress.get(2));
-      clientDao.get().updateFirstAddressField(clientToSave.id, "actual", 1);
+      clientDao.get().insertClientAddress(
+        clientToSave.id,
+        clientToSave.factAddress.street,
+        clientToSave.factAddress.house,
+        clientToSave.factAddress.flat,
+        "fact");
+
+      clientDao.get().insertClientAddress(
+        clientToSave.id,
+        clientToSave.regAddress.street,
+        clientToSave.regAddress.house,
+        clientToSave.regAddress.flat,
+        "reg");
+
+      clientDao.get().insertClientPhone(
+        clientToSave.id,
+        clientToSave.phones.home,
+        "home"
+      );
+
+      clientDao.get().insertClientPhone(
+        clientToSave.id,
+        clientToSave.phones.work,
+        "work"
+      );
+
+      for(String s : clientToSave.phones.mobile) clientDao.get().insertClientPhone(
+        clientToSave.id,
+        s,
+        "mobile"
+      );
+
     }
 
     ClientRecord rec = clientDao.get().getClientRecord(clientToSave.id);
@@ -105,6 +139,7 @@ public class ClientRegisterImpl implements ClientRegister {
   @Override
   public void deleteClient(String id) {
     clientDao.get().deleteClient(id);
+    clientDao.get().deleteClientAddress(id);
   }
 
   @Override

@@ -31,10 +31,21 @@
     <sql endDelimiter=";;"><![CDATA[
       create table Client_addr (
         client varchar(32) references Client,
-        type varchar(32),
+        type varchar(10),
         street varchar(300),
         house varchar(300),
         flat varchar(300),
+        actual smallint not null default 0
+      )
+    ]]></sql>
+  </changeSet>
+
+  <changeSet author="jgolibzhan" id="create-table-Client_phone">
+    <sql endDelimiter=";;"><![CDATA[
+      create table Client_phone (
+        client varchar(32) references Client,
+        type varchar(10),
+        number varchar(15),
         actual smallint not null default 0
       )
     ]]></sql>

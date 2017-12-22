@@ -1,4 +1,6 @@
 import {CharmRecord} from "./CharmRecord";
+import {ClientAddress} from "./ClientAddress";
+import {ClientPhones} from "./ClientPhones";
 export class ClientDetails {
   public id: string;
   public name: string;
@@ -7,9 +9,9 @@ export class ClientDetails {
   public charmId: string;
   public gender: string;
   public dateOfBirth: string;
-  public firstAddress: string[];
-  public secondAddress: string[];
-  public phones: string[];
+  public factAddress: ClientAddress;
+  public regAddress: ClientAddress;
+  public phones: ClientPhones;
   public charms: CharmRecord[];
 
 
@@ -21,9 +23,9 @@ export class ClientDetails {
     this.gender = "";
     this.charmId = "";
     this.dateOfBirth = "";
-    this.firstAddress = [];
-    this.secondAddress = [];
-    this.phones = [];
+    this.factAddress = new ClientAddress();
+    this.regAddress = new ClientAddress();
+    this.phones = new ClientPhones();
   }
 
   public assign(o: any): ClientDetails{
@@ -34,10 +36,11 @@ export class ClientDetails {
     this.gender = o.gender;
     this.charmId = o.charmId;
     this.dateOfBirth = o.dateOfBirth;
-    this.firstAddress = o.firstAddress;
-    this.secondAddress = o.secondAddress;
     this.phones = o.phones;
     this.charms = o.charms;
+    this.factAddress = o.factAddress;
+    this.regAddress = o.regAddress;
+    this.phones = o.phones;
     return this;
   }
 
