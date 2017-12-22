@@ -18,6 +18,4 @@ public class ClientDot {
     ret.minBalance = minBalance;
     return ret;
   }
-
-
 }

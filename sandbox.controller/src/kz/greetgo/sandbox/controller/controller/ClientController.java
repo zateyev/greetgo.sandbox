@@ -14,6 +14,7 @@ import java.util.List;
 @Mapping("/client")
 public class ClientController implements Controller {
 
+
   public BeanGetter<ClientRegister> clientRegister;
 
   @ToJson

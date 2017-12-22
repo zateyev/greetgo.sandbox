@@ -10,6 +10,7 @@ import java.util.List;
 public class ClientRegisterStand implements ClientRegister {
   @Override
   public List<ClientRecord> list() {
+
     return null;
   }
 }
