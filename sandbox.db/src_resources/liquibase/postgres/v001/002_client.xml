@@ -46,7 +46,8 @@
         client varchar(32) references Client,
         type varchar(10),
         number varchar(15),
-        actual smallint not null default 0
+        actual smallint not null default 0,
+        primary key(client, number)
       )
     ]]></sql>
   </changeSet>

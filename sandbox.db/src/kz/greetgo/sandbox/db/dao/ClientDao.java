@@ -107,7 +107,9 @@ public interface ClientDao {
                            @Param("type") String type);
 
   @Insert("insert into client_phone(client, number, type, actual)" +
-    " values (#{id}, #{number}, #{type}, 1)")
+    " values (#{id}, #{number}, #{type}, 1)" +
+    " on conflict(client, number) do update" +
+    " set actual = 1")
   void insertClientPhone(@Param("id") String id,
                          @Param("number") String number,
                          @Param("type") String type);

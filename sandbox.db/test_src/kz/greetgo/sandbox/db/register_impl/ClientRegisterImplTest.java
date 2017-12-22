@@ -185,10 +185,9 @@ public class ClientRegisterImplTest extends ParentTestNg {
     reg.flat = "flat";
 
     phones.home = "7878787878787";
-    phones.work = "7878787878787";
-    phones.mobile.add("7878787878787");
-    phones.mobile.add("7878787878787");
-    phones.mobile.add("");
+    phones.work = "7878787878788";
+    phones.mobile.add("7878787878887");
+    phones.mobile.add("7888787878787");
 
 
     clientTestDao.get().insertCharm(charmId, charmName);
@@ -248,12 +247,17 @@ public class ClientRegisterImplTest extends ParentTestNg {
 
     ClientAddress fact = new ClientAddress();
     ClientAddress reg = new ClientAddress();
+    ClientPhones phone = new ClientPhones();
     fact.street = "street";
     fact.house = "house";
     fact.flat = "flat";
     reg.street = "street";
     reg.house = "house";
     reg.flat = "flat";
+
+    phone.home = "123132";
+    phone.work = "123133";
+    phone.mobile.add("143132");
 
     clientTestDao.get().insertCharm(charmId, charmName);
 
@@ -278,6 +282,7 @@ public class ClientRegisterImplTest extends ParentTestNg {
     clUpdated.charmId = charmId;
     clUpdated.factAddress = fact;
     clUpdated.regAddress = reg;
+    clUpdated.phones = phone;
 
     //
     //
@@ -287,6 +292,10 @@ public class ClientRegisterImplTest extends ParentTestNg {
 
     ClientDetails actual = clientTestDao.get().loadDetails(rec.id);
     ClientAddress addr = clientTestDao.get().getFactAddress(rec.id);
+    String homePhone = clientTestDao.get().getHomePhone(rec.id);
+    String workPhone = clientTestDao.get().getWorkPhone(rec.id);
+    List<String> mobile = clientTestDao.get().getMobile(rec.id);
+
     assertThat(actual.name).isEqualTo(clUpdated.name);
     assertThat(actual.surname).isEqualTo(clUpdated.surname);
     assertThat(actual.patronymic).isEqualTo(clUpdated.patronymic);
@@ -295,7 +304,9 @@ public class ClientRegisterImplTest extends ParentTestNg {
     assertThat(addr.house).isEqualTo("house");
     assertThat(addr.flat).isEqualTo("flat");
 
-
+    assertThat(homePhone).isEqualTo(phone.home);
+    assertThat(workPhone).isEqualTo(phone.work);
+    assertThat(mobile).isEqualTo(phone.mobile);
 
 
   }
