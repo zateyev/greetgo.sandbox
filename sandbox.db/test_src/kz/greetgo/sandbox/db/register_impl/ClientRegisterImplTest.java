@@ -46,6 +46,7 @@ public class ClientRegisterImplTest extends ParentTestNg {
   public void getClient_UPDATE() throws Exception {
 
     clientTestDao.get().deleteAllCharms();
+    clientTestDao.get().deleteAllClients();
 
     String charmId1 = RND.str(10), charmName1 = "B" + RND.str(10);
     String charmId2 = RND.str(10), charmName2 = "A" + RND.str(10);
@@ -60,6 +61,11 @@ public class ClientRegisterImplTest extends ParentTestNg {
     java.sql.Date birthDate = java.sql.Date.valueOf("1991-11-11");
 
     clientTestDao.get().insert(clientId);
+    clientTestDao.get().insertAdrr(clientId,
+      "reg",
+      "reg",
+      "reg",
+      "reg");
     clientTestDao.get().update(clientId, "charm_id", charmId1);
     clientTestDao.get().update(clientId, "surname", surname);
     clientTestDao.get().update(clientId, "name", name);
@@ -82,9 +88,15 @@ public class ClientRegisterImplTest extends ParentTestNg {
     assertThat(details.charmId).isEqualTo(charmId1);
     assertThat(details.charms).isNotNull();
 
+    assertThat(details.firstAddress).hasSize(3);
+    assertThat(details.firstAddress.get(0)).isEqualTo("reg");
+    assertThat(details.firstAddress.get(1)).isEqualTo("reg");
+    assertThat(details.firstAddress.get(2)).isEqualTo("reg");
+
     assertThat(details.charms).hasSize(2);
     assertThat(details.charms.get(0).name).isEqualTo(charmName2);
     assertThat(details.charms.get(1).name).isEqualTo(charmName1);
+
   }
 
 
@@ -149,7 +161,12 @@ public class ClientRegisterImplTest extends ParentTestNg {
   @Test
   public void saveClient_NULLid() {
 
+    clientTestDao.get().deleteAllClients();
+    clientTestDao.get().deleteAllCharms();
+
     ClientToSave cl = new ClientToSave();
+
+    String address = RND.str(10);
 
     String charmId = RND.str(10);
     String charmName = RND.str(10);
@@ -164,6 +181,9 @@ public class ClientRegisterImplTest extends ParentTestNg {
     cl.charmId = charmId;
     cl.dateOfBirth = "1992-11-12";
     cl.gender = "male";
+    cl.firstAddress.add(address);
+    cl.firstAddress.add(address);
+    //cl.firstAddress.add(address);
 
     //
     //
@@ -173,6 +193,8 @@ public class ClientRegisterImplTest extends ParentTestNg {
 
     ClientDetails actual = clientTestDao.get().loadDetails(rec.id);
 
+    List<String> adresses = clientTestDao.get().getFirstAddress(actual.id);
+
     assertThat(actual).isNotNull();
     assertThat(actual.name).isEqualTo(cl.name);
     assertThat(actual.surname).isEqualTo(cl.surname);
@@ -180,6 +202,9 @@ public class ClientRegisterImplTest extends ParentTestNg {
     assertThat(actual.charmId).isEqualTo(cl.charmId);
     assertThat(actual.dateOfBirth).isEqualTo(cl.dateOfBirth);
     assertThat(actual.gender).isEqualTo(cl.gender);
+    assertThat(adresses.get(0)).isEqualTo(address);
+    assertThat(adresses.get(1)).isEqualTo(address);
+    assertThat(adresses.get(2)).isNullOrEmpty();
 
   }
 
@@ -215,6 +240,9 @@ public class ClientRegisterImplTest extends ParentTestNg {
     clUpdated.dateOfBirth = "1990-11-11";
     clUpdated.gender = "female";
     clUpdated.charmId = charmId;
+    clUpdated.firstAddress.add("address new");
+    clUpdated.firstAddress.add("address new");
+    clUpdated.firstAddress.add("address new");
 
     //
     //
@@ -222,12 +250,16 @@ public class ClientRegisterImplTest extends ParentTestNg {
     //
     //
 
-    ClientDetails actual =
-      clientTestDao.get().loadDetails(rec.id);
+    ClientDetails actual = clientTestDao.get().loadDetails(rec.id);
+    List<String> addresses = clientTestDao.get().getFirstAddress(clientId);
+
     assertThat(actual.name).isEqualTo(clUpdated.name);
     assertThat(actual.surname).isEqualTo(clUpdated.surname);
     assertThat(actual.patronymic).isEqualTo(clUpdated.patronymic);
     assertThat(actual.dateOfBirth).isEqualTo(clUpdated.dateOfBirth);
+    assertThat(addresses.get(0)).isEqualTo(clUpdated.firstAddress.get(0));
+    assertThat(addresses.get(1)).isEqualTo(clUpdated.firstAddress.get(1));
+    assertThat(addresses.get(2)).isEqualTo(clUpdated.firstAddress.get(2));
 
   }
 
@@ -289,11 +321,12 @@ public class ClientRegisterImplTest extends ParentTestNg {
     String charmName = RND.str(10);
     clientTestDao.get().insertCharm(charmId, charmName);
     clientTestDao.get().deleteAllClients();
+    String clientName = RND.str(10);
 
     for (int i = 0; i < 50; i++) {
       clientTestDao.get().insertClient(
         RND.str(10),
-        RND.str(10),
+        clientName,
         RND.str(10),
         RND.str(10),
         java.sql.Date.valueOf("1990-10-10"),
@@ -350,6 +383,7 @@ public class ClientRegisterImplTest extends ParentTestNg {
 
   }
 
+
   @Test
   public void loadTestData() {
     clientTestDao.get().deleteAllClients();
@@ -358,18 +392,20 @@ public class ClientRegisterImplTest extends ParentTestNg {
     String charmId = RND.str(5);
     String charmName = RND.str(10);
     clientTestDao.get().insertCharm(charmId, charmName);
-    clientTestDao.get().deleteAllClients();
 
     for (int i = 0; i < 50; i++) {
-      clientTestDao.get().insertClient(
-        RND.str(10),
-        RND.str(10),
-        RND.str(10),
-        RND.str(10),
-        java.sql.Date.valueOf("1990-10-10"),
-        "male",
-        charmId
-      );
+      ClientToSave save = new ClientToSave();
+      save.name = RND.str(10);
+      save.surname = RND.str(10);
+      save.patronymic = RND.str(10);
+      save.charmId = charmId;
+      save.dateOfBirth = "1990-10-10";
+      save.gender = "male";
+      save.firstAddress.add("address");
+      save.firstAddress.add("address");
+      save.firstAddress.add("");
+
+      ClientRecord rec = clientRegister.get().saveClient(save);
     }
 
   }

@@ -33,7 +33,6 @@ public class ClientRegisterImpl implements ClientRegister {
     List<ClientRecord> list = null;
 
     if ("".equals(clientListRequest.sort)) clientListRequest.sort = "surname";
-    if ("".equals(clientListRequest.filterByFio)) clientListRequest.filterByFio = "";
 
     if (clientListRequest.count != 0) {
       list = clientDao.get().getLimitedListOfClients(
@@ -53,6 +52,7 @@ public class ClientRegisterImpl implements ClientRegister {
 
     if (id != null && !"".equals(id)) {
       ret = clientDao.get().loadDetails(id);
+      ret.firstAddress = clientDao.get().getFirstAddress(id);
     }
     ret.charms = clientDao.get().loadCharmList();
 
@@ -75,6 +75,11 @@ public class ClientRegisterImpl implements ClientRegister {
       clientDao.get().updateClientField(clientToSave.id, "birth_date", dateOfBirth);
       clientDao.get().updateClientField(clientToSave.id, "current_gender", clientToSave.gender);
       clientDao.get().updateClientField(clientToSave.id, "actual", 1);
+
+      clientDao.get().updateFirstAddressField(clientToSave.id, "street", clientToSave.firstAddress.get(0));
+      clientDao.get().updateFirstAddressField(clientToSave.id, "house", clientToSave.firstAddress.get(1));
+      clientDao.get().updateFirstAddressField(clientToSave.id, "flat", clientToSave.firstAddress.get(2));
+      clientDao.get().updateFirstAddressField(clientToSave.id, "actual", 1);
     } else {
       clientToSave.id = idGen.get().newId();
       clientDao.get().insertClient(
@@ -85,6 +90,11 @@ public class ClientRegisterImpl implements ClientRegister {
         dateOfBirth,
         clientToSave.gender,
         clientToSave.charmId);
+
+      clientDao.get().updateFirstAddressField(clientToSave.id, "street", clientToSave.firstAddress.get(0));
+      clientDao.get().updateFirstAddressField(clientToSave.id, "house", clientToSave.firstAddress.get(1));
+      clientDao.get().updateFirstAddressField(clientToSave.id, "flat", clientToSave.firstAddress.get(2));
+      clientDao.get().updateFirstAddressField(clientToSave.id, "actual", 1);
     }
 
     ClientRecord rec = clientDao.get().getClientRecord(clientToSave.id);

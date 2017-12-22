@@ -27,5 +27,17 @@
       )
     ]]></sql>
   </changeSet>
+  <changeSet author="jgolibzhan" id="create-table-Client_addr">
+    <sql endDelimiter=";;"><![CDATA[
+      create table Client_addr (
+        client varchar(32) references Client,
+        type varchar(32),
+        street varchar(300),
+        house varchar(300),
+        flat varchar(300),
+        actual smallint not null default 0
+      )
+    ]]></sql>
+  </changeSet>
 
 </databaseChangeLog>
