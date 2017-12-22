@@ -2,5 +2,9 @@ package kz.greetgo.sandbox.controller.model;
 
 
 
-public class PhoneType {
+public enum PhoneType {
+  HOME,
+  WORK,
+  MOBILE,
+  ;
 }
