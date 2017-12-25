@@ -47,6 +47,14 @@ public abstract class AbstractGetClientList {
       case "totalDesc":
         sql.append(" order by total desc");
         return;
+      case "max":
+        sql.append(" order by max");
+      case "maxDesc":
+        sql.append(" order by max desc");
+      case "min":
+        sql.append(" order by min");
+      case "minDesc":
+        sql.append(" order by min desc");
     }
 
   }
