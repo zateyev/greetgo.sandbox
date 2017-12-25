@@ -49,32 +49,6 @@ public interface ClientDao {
                     @Param("gender") String gender,
                     @Param("charm_id") String charmId);
 
-  @Select("select c.surname || ' ' || c.name || ' ' || c.patronymic AS fio, " +
-    "ch.name AS charm " +
-    "from client c join charm ch on (c.charm_id = ch.id) where c.actual = 1 and ch.actual = 1")
-  List<ClientRecord> getListOfClients();
-
-  @Select("select c.id as id, " +
-    " c.surname || ' ' || c.name || ' ' || c.patronymic AS fio, " +
-    "ch.name AS charm, " +
-    "extract(year from age(c.birth_date)) as age " +
-    "from client c join charm ch on (c.charm_id = ch.id) " +
-    "where c.actual = 1 and ch.actual = 1 and " +
-    "c.name || c.surname || c.patronymic like '%' || #{filter} || '%'" +
-    "order by ${sort} limit #{count} offset #{skipFirst}")
-  List<ClientRecord> getLimitedListOfClients(
-    @Param("count") int count,
-    @Param("skipFirst") int skipFirst,
-    @Param("sort") String sort,
-    @Param("filter") String filter
-  );
-
-  @Select("select count(*) from client where actual = 1")
-  long getSizeOfList();
-
-  @Select("select count(id) from client where actual = 1 and " +
-    " ((surname like '#{filter} || %') or (name like '#{filter} || %')) ")
-  long getSizeOfFilteredList(@Param("filter") String filterByFio);
 
   @Select("select c.id as id, " +
     " c.surname || ' ' || c.name || ' ' || c.patronymic AS fio, " +
@@ -109,9 +83,17 @@ public interface ClientDao {
   @Insert("insert into client_phone(client, number, type, actual)" +
     " values (#{id}, #{number}, #{type}, 1)" +
     " on conflict(client, number) do update" +
-    " set actual = 1")
+    " set actual = 1, type = #{type}")
   void insertClientPhone(@Param("id") String id,
                          @Param("number") String number,
                          @Param("type") String type);
 
+  @Select("select number from client_phone where type = 'home' and client = #{id} and actual = 1")
+  String getHomePhone(@Param("id") String id);
+
+  @Select("select number from client_phone where type = 'work' and client = #{id} and actual = 1")
+  String getWorkPhone(@Param("id") String id);
+
+  @Select("select number from client_phone where type = 'mobile' and client = #{id} and actual = 1")
+  List<String> getMobilePhone(String id);
 }

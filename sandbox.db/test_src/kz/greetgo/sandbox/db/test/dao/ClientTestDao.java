@@ -17,8 +17,9 @@ public interface ClientTestDao {
   int getActualClient(@Param("id") String id);
 
   @Select("select c.surname || ' ' || c.name || ' ' || c.patronymic AS fio, " +
-    "ch.name AS charm " +
-    "from client c join charm ch on (c.charm_id = ch.id) where c.actual = 1 and ch.actual = 1")
+    " ch.name AS charm, " +
+    " extract(year from age(c.birth_date)) as age" +
+    " from client c join charm ch on (c.charm_id = ch.id) where c.actual = 1 and ch.actual = 1")
   ClientRecord getClient(@Param("id") String id);
 
   @Select("select c.current_gender gender," +
@@ -29,9 +30,7 @@ public interface ClientTestDao {
   ClientDetails loadDetails(@Param("id") String id);
 
   @Insert("insert into client (id, name, surname, patronymic, birth_date, current_gender, charm_id, actual) " +
-    "values (#{id}, #{name}, #{surname}, #{patronymic}, #{birth_date}, #{gender}, #{charm_id}, 1);" +
-    "insert into client_addr(client, type, actual) values(#{id}, 'fact', 1); " +
-    "insert into client_addr(client, type, actual) values(#{id}, 'reg', 1);")
+    "values (#{id}, #{name}, #{surname}, #{patronymic}, #{birth_date}, #{gender}, #{charm_id}, 1);")
   void insertClient(@Param("id") String id,
                     @Param("name") String name,
                     @Param("surname") String surname,
@@ -58,7 +57,7 @@ public interface ClientTestDao {
   @Update("update client set actual = 0")
   void deleteAllClients();
 
-  @Select("select id from client where actual = 1 order by surname")
+  @Select("select id from client where actual = 1")
   List<String> getListOfIds();
 
   @Insert("insert into client_addr(client, type, street, house, flat, actual)" +
@@ -80,4 +79,15 @@ public interface ClientTestDao {
 
   @Select("select number from client_phone where client = #{id} and type = 'mobile' and actual = 1")
   List<String> getMobile(@Param("id")  String id);
+
+  @Update("update client_phone set actual = 0")
+  void deleteAllPhones();
+
+  @Update("update client_addr set actual = 0")
+  void deleteAllAddr();
+
+  @Insert("insert into client_phone(client, type, number, actual) values (#{id}, #{type}, #{number}, 1)")
+  void insertPhones(@Param("id") String clientId,
+                    @Param("type") String type,
+                    @Param("number") String number);
 }

@@ -2,10 +2,7 @@ package kz.greetgo.sandbox.db.register_impl;
 
 import kz.greetgo.depinject.core.Bean;
 import kz.greetgo.depinject.core.BeanGetter;
-import kz.greetgo.sandbox.controller.model.ClientDetails;
-import kz.greetgo.sandbox.controller.model.ClientListRequest;
-import kz.greetgo.sandbox.controller.model.ClientRecord;
-import kz.greetgo.sandbox.controller.model.ClientToSave;
+import kz.greetgo.sandbox.controller.model.*;
 import kz.greetgo.sandbox.controller.register.ClientRegister;
 import kz.greetgo.sandbox.db.dao.ClientDao;
 import kz.greetgo.sandbox.db.register_impl.jdbc.GetClientList;
@@ -40,6 +37,11 @@ public class ClientRegisterImpl implements ClientRegister {
       ret = clientDao.get().loadDetails(id);
       ret.factAddress = clientDao.get().getFactAddress(id);
       ret.regAddress = clientDao.get().getRegAddress(id);
+      ClientPhones phones = new ClientPhones();
+      phones.home = clientDao.get().getHomePhone(id);
+      phones.work = clientDao.get().getWorkPhone(id);
+      phones.mobile = clientDao.get().getMobilePhone(id);
+      ret.phones = phones;
     }
     ret.charms = clientDao.get().loadCharmList();
 

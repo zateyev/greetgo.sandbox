@@ -37,6 +37,7 @@ export class ChangeClientComponent {
       this.change = true; // change value for button
       this.httpService.post("/client/getClient", {id: id})
         .toPromise().then(res => {
+          console.log(res.json());
         this.clientDetails = new ClientDetails().assign(res.json());
         this.charms = this.clientDetails.charms;
         console.log(this.clientDetails);
@@ -65,7 +66,10 @@ export class ChangeClientComponent {
 
   updateButton(){
     this.buttonEnabled = !!this.clientDetails.name && !!this.clientDetails.surname
-    && !!this.clientDetails.gender && !!this.clientDetails.charmId && !!this.clientDetails.dateOfBirth;
+    && !!this.clientDetails.gender && !!this.clientDetails.charmId && !!this.clientDetails.dateOfBirth
+    && !!this.clientDetails.factAddress.street && !!this.clientDetails.factAddress.house
+    && !!this.clientDetails.factAddress.flat && !!this.clientDetails.phones.home
+    && !!this.clientDetails.phones.work && !!this.clientDetails.phones.mobile[0];
   }
 
 

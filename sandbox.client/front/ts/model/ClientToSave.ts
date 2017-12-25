@@ -18,7 +18,6 @@ export class ClientToSave {
     this.surname = o.surname;
     this.dateOfBirth = o.dateOfBirth;
     this.charmId = o.charmId;
-    this.phones = o.phones;
     this.gender = o.gender;
     this.patronymic = o.patronymic;
     this.factAddress = o.factAddress;

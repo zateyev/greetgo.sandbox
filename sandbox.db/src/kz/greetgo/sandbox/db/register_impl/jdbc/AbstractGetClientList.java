@@ -15,29 +15,46 @@ public abstract class AbstractGetClientList {
 
   protected void prepareSql() {
     select();
-    sql.append(" from client c where 1=1");
+    sql.append(" from client c join charm ch on c.charm_id = ch.id where 1=1");
 
     if (in.filterByFio != null && in.filterByFio.length() > 0) {
-      sql.append(" and ((surname like '?%') or ( like '?%') or ( like '?%'))");
+      sql.append(" and ( (c.surname like ?||'%') or ( c.name like ?||'%') or ( c.patronymic like ?||'%') )");
       sqlParams.add(in.filterByFio);
       sqlParams.add(in.filterByFio);
       sqlParams.add(in.filterByFio);
     }
 
+    sql.append(" and c.actual = 1");
+
     appendSorting();
 
     appendOffsetLimit();
+
   }
 
   protected void appendSorting() {
     if (in.sort == null) return;
     switch (in.sort) {
-      case "asd":
-        sql.append(" order by asd");
+      case "age":
+        sql.append(" order by name");
         return;
-      case "dsa":
-        sql.append(" order by dsa");
+      case "ageDesc":
+        sql.append(" order by age desc");
         return;
+      case "total":
+        sql.append(" order by total");
+        return;
+      case "totalDesc":
+        sql.append(" order by total desc");
+        return;
+      case "max":
+        sql.append(" order by max");
+      case "maxDesc":
+        sql.append(" order by max desc");
+      case "min":
+        sql.append(" order by min");
+      case "minDesc":
+        sql.append(" order by min desc");
     }
 
   }

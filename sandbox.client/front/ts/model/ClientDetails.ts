@@ -36,7 +36,6 @@ export class ClientDetails {
     this.gender = o.gender;
     this.charmId = o.charmId;
     this.dateOfBirth = o.dateOfBirth;
-    this.phones = o.phones;
     this.charms = o.charms;
     this.factAddress = o.factAddress;
     this.regAddress = o.regAddress;
