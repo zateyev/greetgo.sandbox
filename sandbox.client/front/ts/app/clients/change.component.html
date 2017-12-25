@@ -119,7 +119,6 @@
                     {{op.name}}
                   </option>
                 </select>
-
                 <span style="color: red">*</span>
               </div>
             </div>
@@ -128,7 +127,8 @@
         <div class="row">
           <hr>
           <div class="col-xs-12">
-            Адрес проживания (фактический): <br><br>
+            Адрес проживания (фактический): <span style="color: red">*</span><br><br>
+
           </div>
         </div>
         <div class="row">
@@ -139,7 +139,6 @@
                 <input [(ngModel)]="clientDetails.factAddress.street"
                        [ngModelOptions]="{standalone: true}"
                        (keyup)="updateButton()"
-                       name="ul1"
                        type="text" class="inputForm">
               </div>
             </div>
@@ -150,7 +149,6 @@
               <div class="col-xs-8"><input
                 [(ngModel)]="clientDetails.factAddress.house"
                 [ngModelOptions]="{standalone: true}"
-                name="home1"
                 (keyup)="updateButton()"
                 type="text" class="inputForm"></div>
             </div>
@@ -162,7 +160,6 @@
                 [(ngModel)]="clientDetails.factAddress.flat"
                 [ngModelOptions]="{standalone: true}"
                 (keyup)="updateButton()"
-                name="kv1"
                 type="text" class="inputForm"></div>
             </div>
 
@@ -221,7 +218,9 @@
                 [(ngModel)]="clientDetails.phones.home"
                 [ngModelOptions]="{standalone: true}"
                 (keyup)="updateButton()"
-                type="text" class="inputForm"></div>
+                type="text" class="inputForm">
+                <span style="color: red">*</span>
+              </div>
             </div>
           </div>
           <div class="col-xs-4">
@@ -231,7 +230,8 @@
                 [(ngModel)]="clientDetails.phones.work"
                 [ngModelOptions]="{standalone: true}"
                 (keyup)="updateButton()"
-                type="text" class="inputForm"></div>
+                type="text" class="inputForm">
+                <span style="color: red">*</span></div>
             </div>
 
 
@@ -246,7 +246,8 @@
                 [(ngModel)]="clientDetails.phones.mobile[0]"
                 [ngModelOptions]="{standalone: true}"
                 (keyup)="updateButton()"
-                type="text" class="inputForm"></div>
+                type="text" class="inputForm">
+                <span style="color: red">*</span></div>
             </div>
           </div>
           <div class="col-xs-4">

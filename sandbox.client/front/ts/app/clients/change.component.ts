@@ -66,7 +66,10 @@ export class ChangeClientComponent {
 
   updateButton(){
     this.buttonEnabled = !!this.clientDetails.name && !!this.clientDetails.surname
-    && !!this.clientDetails.gender && !!this.clientDetails.charmId && !!this.clientDetails.dateOfBirth;
+    && !!this.clientDetails.gender && !!this.clientDetails.charmId && !!this.clientDetails.dateOfBirth
+    && !!this.clientDetails.factAddress.street && !!this.clientDetails.factAddress.house
+    && !!this.clientDetails.factAddress.flat && !!this.clientDetails.phones.home
+    && !!this.clientDetails.phones.work && !!this.clientDetails.phones.mobile[0];
   }
 
 
