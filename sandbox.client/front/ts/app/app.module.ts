@@ -14,7 +14,7 @@ import {ModalFormComponent} from "./forms/modal-form.component";
     BrowserModule, HttpModule, JsonpModule, FormsModule
   ],
   declarations: [
-    RootComponent, LoginComponent, MainFormComponent, ClientListComponent//, ModalFormComponent
+    RootComponent, LoginComponent, MainFormComponent, ClientListComponent, ModalFormComponent
   ],
   bootstrap: [RootComponent],
   providers: [HttpService],
