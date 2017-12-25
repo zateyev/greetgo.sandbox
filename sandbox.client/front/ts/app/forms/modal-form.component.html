@@ -1,79 +1,82 @@
-<form #modal-form="ngForm">
-<div>
-  <div>
-    <label>Фамилия</label>
-    <input name="surname" [(NgModel)]="client.surname"/>
-  </div>
-  <div>
-    <label>Имя</label>
-    <input name="name" [(NgModel)]="client.name"/>
-  </div>
-  <div>
-    <label>Отчество</label>
-    <input name="patronymic" [(NgModel)]="client.patronymic"/>
-  </div>
-  <div>
-    <label>Пол</label>
-    <p><input name="gender" type="radio" value="male" [(NgModel)]="client.gender"/>Мужской</p>
-    <p><input name="gender" type="radio" value="female" [(NgModel)]="client.gender"/>Женский</p>
-  </div>
-  <div>
-    <label>Дата рождения</label>
-    <input type="number" name="birth_date" [(NgModel)]="client.birth_date"/>
-  </div>
-  <div>
-    <label>Характер</label>
-    <select name="charm" [(NgModel)]="client.charm"/>
-      <option *ngFor="let charm of charms" [value]="charm">
-        {{charm}}
-      </option>
-    </select>
-  </div>
+<div class="main-form">
+  <form>
+    <div class="content">
+      <div class="field">
+        <label>Фамилия</label>
+        <input name="surname" type="text" ngModel="{{client.surname}}"/>
+      </div>
+      <div class="field">
+        <label>Имя</label>
+        <input name="name" type="text" ngModel="{{client.name}}"/>
+      </div>
+      <div class="field">
+        <label>Отчество</label>
+        <inpu name="patronymic" type="text" ngModel="{{client.patronymic}}"/>
+      </div>
+      <div class="field">
+        <label>Пол</label>
+        <p><input name="gender" type="radio" value="male" ngModel="{{client.gender}}"/>Мужской</p>
+        <p><input name="gender" type="radio" value="female" ngModel="{{client.gender}}"/>Женский</p>
+      </div>
+      <div class="field">
+        <label>Дата рождения</label>
+        <input type="date" name="birth_date" ngModel="{{client.birth_date}}"/>
+      </div>
+      <div>
+        <label>Характер</label>
+          <select name="charm" ngModel="{{client.charm}}">
+            <option *ngFor="let charm of charms" value="charm">
+              {{charm}}
+            </option>
+          </select>
+     </div>
 
-  <div>Адрес проживания</div>
-  <div>
-    <label>Улица</label>
-    <input name="factAddrStreet" [(NgModel)]="client.factAddrStreet"/>
-  </div>
-  <div>
-    <label>Дом</label>
-    <input name="factAddrHouse" [(NgModel)]="client.factAddrHouse"/>
-  </div>
-  <div>
-    <label>Квартира</label>
-    <input name="factAddrFlat" [(NgModel)]="client.factAddrFlat"/>
-  </div>
+      <div class="field">Адрес проживания</div>
+      <div class="field">
+        <label>Улица</label>
+        <input name="factAddrStreet" ngModel="{{client.factAddrStreet}}"/>
+      </div>
+      <div class="field">
+        <label>Дом</label>
+        <input name="factAddrHouse" ngModel="{{client.factAddrHouse}}"/>
+      </div>
+      <div class="field">
+        <label>Квартира</label>
+        <input name="factAddrFlat" ngModel="{{client.factAddrFlat}}"/>
+      </div>
 
-  <div>Адрес регистрации</div>
-  <div>
-    <label>Улица</label>
-    <input name="regAddrStreet" [(NgModel)]="client.regAddrStreet"/>
-  </div>
-  <div>
-    <label>Дом</label>
-    <input name="regAddrHouse" [(NgModel)]="client.regAddrHouse"/>
-  </div>
-  <div>
-    <label>Квартира</label>
-    <input name="regAddrFlat" [(NgModel)]="client.regAddrFlat"/>
-  </div>
+      <div class="field">Адрес регистрации</div>
+      <div class="field">
+        <label>Улица</label>
+        <input name="regAddrStreet" ngModel="{{client.regAddrStreet}}"/>
+      </div>
+      <div class="field">
+        <label>Дом</label>
+        <input name="regAddrHouse" ngModel="{{client.regAddrHouse}}"/>
+      </div>
+      <div class="field">
+        <label>Квартира</label>
+        <input name="regAddrFlat" ngModel="{{client.regAddrFlat}}"/>
+      </div>
 
-  <div>Телефоны</div>
-  <div>
-    <label>Домашний</label>
-    <input type="number" name="homePhone" [(NgModel)]="client.homePhone"/>
-  </div>
-  <div>
-    <label>Рабочий</label>
-    <input type="number" name="workPhone" [(NgModel)]="client.workPhone"/>
-  </div>
-  <div>
-    <label>Сотовый</label>
-    <input type="number" name="mobilePhone" [(NgModel)]="client.mobilePhone"/>
-  </div>
+      <div class="field">Телефоны</div>
+      <div class="field">
+        <label>Домашний</label>
+        <input type="number" name="homePhone" ngModel="{{client.homePhone}}"/>
+      </div>
+      <div class="field">
+        <label>Рабочий</label>
+        <input type="number" name="workPhone" ngModel="{{client.workPhone}}"/>
+      </div>
+      <div class="field">
+        <label>Сотовый</label>
+        <input type="number" name="mobilePhone" ngModel="{{client.mobilePhone}}"/>
+      </div>
 
-  <div>
-    <button (click)="addClient()">Добавить</button>
-  </div>
+      <div>
+        <button (click)="addClient()">Добавить</button>
+        <button (click)="closeModalForm()">Закрыть</button>
+      </div>
+    </div>
+  </form>
 </div>
-</form>

@@ -20,11 +20,13 @@ import {HttpService} from "../HttpService";
       </div>
       
       <client-list></client-list>
-      
+
     </div>`,
 })
 export class MainFormComponent {
   @Output() exit = new EventEmitter<void>();
+
+
 
   userInfo: UserInfo | null = null;
   loadUserInfoButtonEnabled: boolean = true;

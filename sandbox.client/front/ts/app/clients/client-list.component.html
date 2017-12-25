@@ -21,9 +21,11 @@
 
     </tbody>
   </table>
-
-  <div><button class="buttonStyle editingButtons">+</button></div>
+  <div><button class="buttonStyle editingButtons" (click)="addClient()">+</button></div>
   <div><button class="buttonStyle editingButtons">...</button></div>
   <div><button class="buttonStyle editingButtons">-</button></div>
 
+  <modal-form-component
+    *ngIf="showModal"
+    (closeModal)="closeModalForm()"></modal-form-component>
 </div>
