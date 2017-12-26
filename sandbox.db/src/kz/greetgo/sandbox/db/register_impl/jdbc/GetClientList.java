@@ -18,11 +18,16 @@ public class GetClientList extends AbstractGetClientList implements ConnectionCa
   }
 
   @Override
+  protected void appendGroupBy() {
+    sql.append(" Group by c.id, charm");
+  }
+
+  @Override
   protected void appendOffsetLimit() {
     if (in.count > 0) {
-      sql.append(" offset ? limit ?");
-      sqlParams.add(in.skipFirst);
+      sql.append(" limit ? offset ?");
       sqlParams.add(in.count);
+      sqlParams.add(in.skipFirst);
     }
   }
 
@@ -63,7 +68,10 @@ public class GetClientList extends AbstractGetClientList implements ConnectionCa
   protected void select() {
     sql.append("select c.id, c.surname, c.name, c.patronymic, " +
       " ch.name as charm," +
-      " extract(year from age(c.birth_date)) as age");
+      " extract(year from age(c.birth_date)) as age," +
+      " sum(c_ac.money) as total," +
+      " max(c_ac.money) as max," +
+      " min(c_ac.money) as min");
   }
 
 
@@ -73,6 +81,9 @@ public class GetClientList extends AbstractGetClientList implements ConnectionCa
     ret.fio = makeFio(rs.getString("surname"), rs.getString("name"), rs.getString("patronymic"));
     ret.age = rs.getInt("age");
     ret.charm = rs.getString("charm");
+    ret.totalAccountBalance = (long)rs.getFloat("total");
+    ret.maxAccountBalance = (long)rs.getFloat("max");
+    ret.minAccountBalance = (long)rs.getFloat("min");
     return ret;
   }
 

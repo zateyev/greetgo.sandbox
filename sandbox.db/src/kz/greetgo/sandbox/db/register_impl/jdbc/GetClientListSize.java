@@ -14,9 +14,10 @@ public class GetClientListSize extends AbstractGetClientList implements Connecti
   }
 
   @Override
-  protected void appendOffsetLimit() {
-    //ignore
-  }
+  protected void appendGroupBy() {}
+
+  @Override
+  protected void appendOffsetLimit() {}
 
   @Override
   protected void appendSorting() { }
@@ -42,7 +43,7 @@ public class GetClientListSize extends AbstractGetClientList implements Connecti
 
       try (ResultSet rs = ps.executeQuery()) {
 
-        if (!rs.next()) throw new RuntimeException("Result res Exception");
+        if (!rs.next()) throw new RuntimeException("Result Set Incorrect");
 
         return rs.getLong(1);
 

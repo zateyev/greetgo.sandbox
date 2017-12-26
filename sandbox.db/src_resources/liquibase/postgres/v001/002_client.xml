@@ -52,4 +52,48 @@
     ]]></sql>
   </changeSet>
 
+  <changeSet author="jgolibzhan" id="create-table-Client_account">
+    <sql endDelimiter=";;"><![CDATA[
+      CREATE TABLE client_account (
+        id varchar(32) NOT NULL,
+        client varchar(32) NOT NULL,
+        "money" float8 NULL,
+        "number" varchar(15) NULL,
+        registered_at timestamp NULL,
+        actual int2 NOT NULL DEFAULT 0,
+        UNIQUE (id),
+        PRIMARY KEY (id, client),
+        FOREIGN KEY (client) REFERENCES client(id)
+      )
+    ]]></sql>
+  </changeSet>
+
+  <changeSet author="jgolibzhan" id="create-table-transaction_type">
+    <sql endDelimiter=";;"><![CDATA[
+      CREATE TABLE transaction_type (
+        id varchar(32) NOT NULL,
+        code varchar(32) NULL,
+        "name" varchar(100) NULL,
+        actual int2 NOT NULL DEFAULT 0,
+        PRIMARY KEY (id)
+      )
+    ]]></sql>
+  </changeSet>
+
+  <changeSet author="jgolibzhan" id="create-table-client_account_transaction">
+    <sql endDelimiter=";;"><![CDATA[
+      CREATE TABLE client_account_transaction (
+        id varchar(32) NOT NULL,
+        account varchar(32) NULL,
+        "money" float8 NULL,
+        finished_at timestamp NULL,
+        "type" varchar(32) NULL,
+        actual int2 NOT NULL DEFAULT 0,
+        PRIMARY KEY (id),
+        FOREIGN KEY (account) REFERENCES client_account(id),
+        FOREIGN KEY (type) REFERENCES transaction_type(id)
+      )
+    ]]></sql>
+  </changeSet>
+
 </databaseChangeLog>
