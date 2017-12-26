@@ -3,10 +3,14 @@ package kz.greetgo.sandbox.db.report.ClientRecord;
 import kz.greetgo.msoffice.xlsx.gen.Sheet;
 import kz.greetgo.msoffice.xlsx.gen.Xlsx;
 import kz.greetgo.sandbox.controller.model.ClientRecord;
+import kz.greetgo.util.RND;
 
+import java.io.FileOutputStream;
 import java.io.OutputStream;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 public class ClientRecordListReportViewXslx implements ClientRecordListReportView {
   private OutputStream out;
@@ -64,5 +68,33 @@ public class ClientRecordListReportViewXslx implements ClientRecordListReportVie
   @Override
   public void finish() {
     xlsx.complete(out);
+  }
+
+  public static void main(String[] args) throws Exception {
+
+    OutputStream stream = new FileOutputStream("hello.xlsx");
+
+    ClientRecordListReportViewXslx view = new ClientRecordListReportViewXslx(stream);
+
+    view.start(new Date());
+    List<ClientRecord> row = new ArrayList<>();
+    for (int i = 0; i < 300; i++) {
+      ClientRecord r = new ClientRecord();
+
+      r.fio = RND.str(10) + " " + RND.str(10) + " " + RND.str(10);
+      r.age = RND.plusInt(100);
+      r.charm = RND.str(6);
+      r.minAccountBalance = (long) RND.plusInt(9999);
+      r.totalAccountBalance = (long) RND.plusInt(9999);
+      r.maxAccountBalance = (long) RND.plusInt(9999);
+
+      row.add(r);
+    }
+    for (ClientRecord r:
+         row) {
+      view.append(r);
+    }
+
+    view.finish();
   }
 }
