@@ -52,8 +52,8 @@ public class ClientRegisterImpl implements ClientRegister {
 
   @Override
   public ClientRecord saveClient(ClientToSave clientToSave) {
-
     java.sql.Date dateOfBirth = java.sql.Date.valueOf(clientToSave.dateOfBirth);
+
     clientToSave.gender = clientToSave.gender.toLowerCase();
 
     if (clientToSave.id != null) {
@@ -149,6 +149,7 @@ public class ClientRegisterImpl implements ClientRegister {
     clientDao.get().deleteClient(id);
     clientDao.get().deleteClientAddress(id);
     clientDao.get().deleteClientPhone(id);
+    clientDao.get().deleteClientAccount(id);
   }
 
   @Override

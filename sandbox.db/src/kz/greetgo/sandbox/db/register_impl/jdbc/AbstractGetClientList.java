@@ -15,7 +15,9 @@ public abstract class AbstractGetClientList {
 
   protected void prepareSql() {
     select();
-    sql.append(" from client c join charm ch on c.charm_id = ch.id where 1=1");
+    sql.append(" from client c join charm ch on c.charm_id = ch.id " +
+      " join client_account c_ac on c_ac.client = c.id" +
+      " where 1=1");
 
     if (in.filterByFio != null && in.filterByFio.length() > 0) {
       sql.append(" and ( (c.surname like ?||'%') or ( c.name like ?||'%') or ( c.patronymic like ?||'%') )");
@@ -26,17 +28,21 @@ public abstract class AbstractGetClientList {
 
     sql.append(" and c.actual = 1");
 
+    appendGroupBy();
+
     appendSorting();
 
     appendOffsetLimit();
 
   }
 
+  protected abstract void appendGroupBy();
+
   protected void appendSorting() {
     if (in.sort == null) return;
     switch (in.sort) {
       case "age":
-        sql.append(" order by name");
+        sql.append(" order by age");
         return;
       case "ageDesc":
         sql.append(" order by age desc");
@@ -49,12 +55,18 @@ public abstract class AbstractGetClientList {
         return;
       case "max":
         sql.append(" order by max");
+        return;
       case "maxDesc":
         sql.append(" order by max desc");
+        return;
       case "min":
         sql.append(" order by min");
+        return;
       case "minDesc":
         sql.append(" order by min desc");
+        return;
+      default:
+        return;
     }
 
   }

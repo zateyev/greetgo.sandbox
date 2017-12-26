@@ -34,6 +34,9 @@ public interface ClientDao {
   @Update("update client_phone set actual = 0 where client = #{id}")
   void deleteClientPhone(@Param("id") String id);
 
+  @Update("update client_account set actual = 0 where id = #{id}")
+  void deleteClientAccount(@Param("id") String id);
+
   @Update("update client set ${fieldName} = #{value} where id = #{clientId}")
   void updateClientField(@Param("clientId") String id, @Param("fieldName") String fieldName,
                          @Param("value") Object value);
@@ -96,4 +99,5 @@ public interface ClientDao {
 
   @Select("select number from client_phone where type = 'mobile' and client = #{id} and actual = 1")
   List<String> getMobilePhone(String id);
+
 }

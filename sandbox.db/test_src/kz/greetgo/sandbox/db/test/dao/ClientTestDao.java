@@ -9,6 +9,7 @@ import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
 import org.apache.ibatis.annotations.Update;
 
+import java.util.Date;
 import java.util.List;
 
 public interface ClientTestDao {
@@ -57,7 +58,10 @@ public interface ClientTestDao {
   @Update("update client set actual = 0")
   void deleteAllClients();
 
-  @Select("select id from client where actual = 1")
+  @Select("select client.id from client join charm on client.charm_id = charm.id" +
+    " join client_account on client_account.client = client.id" +
+    " where client.actual = 1" +
+    " group by client.id")
   List<String> getListOfIds();
 
   @Insert("insert into client_addr(client, type, street, house, flat, actual)" +
@@ -90,4 +94,16 @@ public interface ClientTestDao {
   void insertPhones(@Param("id") String clientId,
                     @Param("type") String type,
                     @Param("number") String number);
+
+  @Insert("insert into client_account(id, client, money, number, registered_at, actual)" +
+    "values (#{id}, #{client}, #{money}, #{number}, #{registered_at}, 1)")
+  void insertClientAccount(
+    @Param("id") String id,
+    @Param("client") String client,
+    @Param("money") float money,
+    @Param("number") String number,
+    @Param("registered_at") Date registeredAt);
+
+  @Update("update client_account set actual = 0")
+  void deleteAllAccounts();
 }
