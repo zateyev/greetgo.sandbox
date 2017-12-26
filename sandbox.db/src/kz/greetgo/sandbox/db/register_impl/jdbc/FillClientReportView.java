@@ -2,22 +2,24 @@ package kz.greetgo.sandbox.db.register_impl.jdbc;
 
 import kz.greetgo.db.ConnectionCallback;
 import kz.greetgo.sandbox.controller.model.ClientListRequest;
-import kz.greetgo.sandbox.controller.model.ClientRecord;
+import kz.greetgo.sandbox.db.register_impl.jdbc.reports.ClientReportView;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import java.util.ArrayList;
-import java.util.List;
 
-public class GetClientList extends AbstractGetClientList implements ConnectionCallback<List<ClientRecord>> {
+public class FillClientReportView extends AbstractGetClientList implements ConnectionCallback<Void> {
+  private final String personId;
+  private final ClientReportView view;
 
-  public GetClientList(ClientListRequest in) {
-    super(in);
+  public FillClientReportView(ClientListRequest clientListRequest, String personId, ClientReportView view) {
+    super(clientListRequest);
+    this.personId = personId;
+    this.view = view;
   }
 
   @Override
-  public List<ClientRecord> doInConnection(Connection connection) throws Exception {
+  public Void doInConnection(Connection connection) throws Exception {
 
     prepareSql();
 
@@ -33,16 +35,14 @@ public class GetClientList extends AbstractGetClientList implements ConnectionCa
 
       try (ResultSet rs = ps.executeQuery()) {
 
-        List<ClientRecord> ret = new ArrayList<>();
+        view.begin();
 
         while (rs.next()) {
-
-          ret.add(readRecord(rs));
-
+          view.addRecord(readRecord(rs));
         }
 
-        return ret;
-
+        view.finish("Ивано");
+        return null;
       }
 
     }

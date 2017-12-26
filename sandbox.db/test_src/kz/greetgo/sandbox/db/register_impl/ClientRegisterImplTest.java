@@ -566,6 +566,7 @@ public class ClientRegisterImplTest extends ParentTestNg {
     String clientId = RND.str(10);
     String clientId2 = RND.str(10);
     String charmId = RND.str(10);
+
     clientTestDao.get().insertCharm(
       charmId,
       RND.str(10)

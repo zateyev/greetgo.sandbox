@@ -2,11 +2,18 @@ package kz.greetgo.sandbox.db.register_impl;
 
 import kz.greetgo.depinject.core.Bean;
 import kz.greetgo.depinject.core.BeanGetter;
-import kz.greetgo.sandbox.controller.model.*;
+import kz.greetgo.sandbox.controller.model.ClientDetails;
+import kz.greetgo.sandbox.controller.model.ClientListRequest;
+import kz.greetgo.sandbox.controller.model.ClientPhones;
+import kz.greetgo.sandbox.controller.model.ClientRecord;
+import kz.greetgo.sandbox.controller.model.ClientToSave;
 import kz.greetgo.sandbox.controller.register.ClientRegister;
 import kz.greetgo.sandbox.db.dao.ClientDao;
+import kz.greetgo.sandbox.db.register_impl.jdbc.FillClientReportView;
 import kz.greetgo.sandbox.db.register_impl.jdbc.GetClientList;
 import kz.greetgo.sandbox.db.register_impl.jdbc.GetClientListSize;
+import kz.greetgo.sandbox.db.register_impl.jdbc.reports.ClientReportView;
+import kz.greetgo.sandbox.db.register_impl.jdbc.reports.ClientReportViewPdf;
 import kz.greetgo.sandbox.db.util.JdbcSandbox;
 
 import java.io.OutputStream;
@@ -152,9 +159,21 @@ public class ClientRegisterImpl implements ClientRegister {
     clientDao.get().deleteClientAccount(id);
   }
 
+  private static ClientReportView createClientReportView(OutputStream outputStream, String contentType) {
+    switch (contentType) {
+      case "asd":
+        return new ClientReportViewPdf(outputStream);
+    }
+
+    throw new IllegalArgumentException("Unknown contentType = " + contentType);
+  }
+
   @Override
   public void download(ClientListRequest clientListRequest, OutputStream outputStream, String contentType, String personId) throws Exception {
-    throw new UnsupportedOperationException();
+
+    ClientReportView view = createClientReportView(outputStream, contentType);
+
+    jdbc.get().execute(new FillClientReportView(clientListRequest, personId, view));
   }
 
 }
