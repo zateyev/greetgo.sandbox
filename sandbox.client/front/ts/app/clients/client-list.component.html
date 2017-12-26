@@ -1,0 +1,31 @@
+<div>
+
+  <table class="client-list">
+    <tbody>
+    <tr>
+      <th>ФИО</th>
+      <th>Характер</th>
+      <th>Возраст</th>
+      <th>Общий остаток счетов</th>
+      <th>Максимальный остаток</th>
+      <th>Минимальный остаток</th>
+    </tr>
+    <tr>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+    </tr>
+
+    </tbody>
+  </table>
+  <div><button class="buttonStyle editingButtons" (click)="addClient()">+</button></div>
+  <div><button class="buttonStyle editingButtons">...</button></div>
+  <div><button class="buttonStyle editingButtons">-</button></div>
+
+  <modal-form-component
+    *ngIf="showModal"
+    (closeModal)="closeModalForm()"></modal-form-component>
+</div>

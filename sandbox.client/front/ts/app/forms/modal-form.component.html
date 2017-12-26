@@ -1,0 +1,84 @@
+<div class="main-form">
+  <form>
+    <div class="content">
+      <div class="field">
+        <label>Фамилия</label>
+        <input name="surname" type="text" ngModel="{{client.surname}}"/>
+      </div>
+      <div class="field">
+        <label>Имя</label>
+        <input name="name" type="text" ngModel="{{client.name}}"/>
+      </div>
+      <div class="field">
+        <label>Отчество</label>
+        <input name="patronymic" type="text" ngModel="{{client.patronymic}}"/>
+      </div>
+      <div class="field">
+        <label>Пол</label>
+        <div class="radioButton">
+        <p><input name="gender" type="radio" value="male" ngModel="{{client.gender}}"/>Мужской</p>
+        <p><input name="gender" type="radio" value="female" ngModel="{{client.gender}}"/>Женский</p>
+        </div>
+      </div>
+      <div class="field">
+        <label>Дата рождения</label>
+        <input id="birthDate" type="date" name="birth_date" ngModel="{{client.birth_date}}"/>
+      </div>
+      <div class="field">
+        <label>Характер</label>
+          <select id="selectCharm" name="charm" ngModel="{{client.charm}}">
+            <option *ngFor="let charm of charms" value="charm">
+              {{charm}}
+            </option>
+          </select>
+     </div>
+
+      <div class="text-inscription">Адрес проживания</div>
+      <div class="field">
+        <label>Улица</label>
+        <input name="factAddrStreet" ngModel="{{client.factAddrStreet}}"/>
+      </div>
+      <div class="field">
+        <label>Дом</label>
+        <input name="factAddrHouse" ngModel="{{client.factAddrHouse}}"/>
+      </div>
+      <div class="field">
+        <label>Квартира</label>
+        <input name="factAddrFlat" ngModel="{{client.factAddrFlat}}"/>
+      </div>
+
+      <div class="text-inscription">Адрес регистрации</div>
+      <div class="field">
+        <label>Улица</label>
+        <input name="regAddrStreet" ngModel="{{client.regAddrStreet}}"/>
+      </div>
+      <div class="field">
+        <label>Дом</label>
+        <input name="regAddrHouse" ngModel="{{client.regAddrHouse}}"/>
+      </div>
+      <div class="field">
+        <label>Квартира</label>
+        <input name="regAddrFlat" ngModel="{{client.regAddrFlat}}"/>
+      </div>
+
+      <div class="text-inscription">Телефоны</div>
+      <div class="field">
+        <label>Домашний</label>
+        <input type="number" name="homePhone" ngModel="{{client.homePhone}}"/>
+      </div>
+      <div class="field">
+        <label>Рабочий</label>
+        <input type="number" name="workPhone" ngModel="{{client.workPhone}}"/>
+      </div>
+      <div class="field">
+        <label>Сотовый</label>
+        <input type="number" name="mobilePhone" ngModel="{{client.mobilePhone}}"/>
+      </div>
+
+      <div>
+        <button class="modalButtons" (click)="addClient()">Добавить</button>
+        <button class="modalButtons" (click)="closeModalForm()">Закрыть</button>
+      </div>
+    </div>
+  </form>
+</div>
