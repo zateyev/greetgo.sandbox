@@ -8,9 +8,12 @@ import kz.greetgo.sandbox.db.test.util.ParentTestNg;
 import kz.greetgo.util.RND;
 import org.testng.annotations.Test;
 
-import java.util.ArrayList;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.OutputStream;
 import java.util.Date;
 import java.util.List;
+import java.util.zip.CheckedOutputStream;
 
 import static org.fest.assertions.api.Assertions.assertThat;
 
@@ -284,29 +287,29 @@ public class ClientRegisterImplTest extends ParentTestNg {
 
     clientTestDao.get().insertAdrr(clientId,
       "reg",
-      "reg",
-      "reg",
-      "reg");
+      RND.str(5),
+      RND.str(5),
+      RND.intStr(3));
     clientTestDao.get().insertAdrr(clientId,
       "fact",
-      "fact",
-      "fact",
-      "fact");
+      RND.str(5),
+      RND.str(5),
+      RND.intStr(3));
 
     clientTestDao.get().insertPhones(
       clientId,
       "work",
-      "123132"
+      RND.intStr(8)
     );
     clientTestDao.get().insertPhones(
       clientId,
       "home",
-      "123133"
+      RND.intStr(8)
     );
     clientTestDao.get().insertPhones(
       clientId,
       "mobile",
-      "83787878"
+      RND.intStr(8)
     );
 
     ClientToSave clUpdated = new ClientToSave();
@@ -750,46 +753,22 @@ public class ClientRegisterImplTest extends ParentTestNg {
 
 
   @Test
-  public void loadTestData() {
-    clientTestDao.get().deleteAllClients();
-    clientTestDao.get().deleteAllCharms();
-    clientTestDao.get().deleteAllPhones();
+  public void download_Xlsx() throws Exception {
 
-    String charmId = RND.str(5);
-    String charmName = RND.str(10);
-    clientTestDao.get().insertCharm(charmId, charmName);
-    clientTestDao.get().insertCharm(RND.str(10), RND.str(10));
+    ClientListRequest req = new ClientListRequest();
+    req.count = 0;
 
-    ClientAddress fact = new ClientAddress();
-    ClientAddress reg = new ClientAddress();
-    ClientPhones phones = new ClientPhones();
-    fact.street = "street";
-    fact.house = "house";
-    fact.flat = "flat";
-    reg.street = "street";
-    reg.house = "house";
-    reg.flat = "flat";
-    phones.work = "98778561214";
-    phones.home = "98778132564";
-    phones.mobile.add("98778654564");
+    OutputStream stream = new FileOutputStream("hello.xlsx");
 
-    for (int i = 0; i < 50; i++) {
-      ClientToSave save = new ClientToSave();
-      save.name = RND.str(10);
-      save.surname = RND.str(10);
-      save.patronymic = RND.str(10);
-      save.charmId = charmId;
-      save.dateOfBirth = "1990-10-10";
-      save.gender = "male";
-      save.factAddress = fact;
-      save.regAddress = reg;
-      save.phones = phones;
+    //
+    //
+    clientRegister.get().download(req, stream, "xlsx", "p1");
+    //
+    //
 
-      ClientRecord rec = clientRegister.get().saveClient(save);
-    }
+
 
   }
-
 
 
 }

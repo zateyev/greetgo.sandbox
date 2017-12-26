@@ -7,9 +7,11 @@ import kz.greetgo.sandbox.controller.register.ClientRegister;
 import kz.greetgo.sandbox.db.dao.ClientDao;
 import kz.greetgo.sandbox.db.register_impl.jdbc.GetClientList;
 import kz.greetgo.sandbox.db.register_impl.jdbc.GetClientListSize;
+import kz.greetgo.sandbox.db.report.ClientRecord.ClientRecordListReportViewXslx;
 import kz.greetgo.sandbox.db.util.JdbcSandbox;
 
 import java.io.OutputStream;
+import java.util.Date;
 import java.util.List;
 
 @Bean
@@ -152,9 +154,30 @@ public class ClientRegisterImpl implements ClientRegister {
     clientDao.get().deleteClientAccount(id);
   }
 
+
   @Override
   public void download(ClientListRequest clientListRequest, OutputStream outputStream, String contentType, String personId) throws Exception {
-    throw new UnsupportedOperationException();
+
+    if (contentType.contains("pdf")) {
+      throw new RuntimeException("Неподдерживается пока");
+    } else {
+      ClientRecordListReportViewXslx view = new ClientRecordListReportViewXslx(outputStream);
+
+      try {
+        view.start(new Date());
+
+        clientListRequest.count = 0;
+
+        List<ClientRecord> rec = jdbc.get().execute(new GetClientList(clientListRequest));
+
+        for (ClientRecord r : rec) {
+          view.append(r);
+        }
+
+      } finally {
+        view.finish();
+      }
+    }
   }
 
 }

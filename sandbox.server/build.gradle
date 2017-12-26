@@ -2,4 +2,6 @@ dependencies {
   compile project(':sandbox.db')
 
   compile "kz.greetgo.mvc:greetgo.mvc.war:$greetgoMvcVersion"
+  compile "kz.greetgo:greetgo.msoffice:0.4.23"
+
 }
