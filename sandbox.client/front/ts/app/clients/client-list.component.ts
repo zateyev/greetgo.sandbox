@@ -1,5 +1,8 @@
-import {Component, OnInit} from "@angular/core";
+import {Component, OnInit, ViewChild} from "@angular/core";
 import {HttpService} from "../HttpService";
+import {ClientRecord} from "../../model/ClientRecord";
+import {ClientFormComponent} from "./client-form.component";
+
 @Component({
   selector: "client-list",
   template: require('./client-list.component.html')
@@ -8,20 +11,30 @@ export class ClientListComponent implements OnInit {
 
   constructor(private httpService: HttpService) {}
 
-  showModal: boolean = false;
+  list: ClientRecord[] = [];
+  selectedId: string | null = "a10";
+
+  @ViewChild("clientForm") clientForm: ClientFormComponent;
 
   ngOnInit(): void {
-    this.httpService.post("/client/list", {})
+    this.httpService.get("/client/list").toPromise().then(result => {
+
+      this.list = result.json().map(a => ClientRecord.copy(a));
+
+      console.log(this.list);
+
+    }, error => {
+      console.log(error);
+    });
+
   }
 
-  addClient(){
-
-    this.showModal = true;
-
+  addClient() {
+    this.clientForm.show(null);
   }
 
-  closeModalForm(){
-    this.showModal = false;
+  editClient() {
+    this.clientForm.show(this.selectedId);
   }
 
 }

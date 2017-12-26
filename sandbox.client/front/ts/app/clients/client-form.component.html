@@ -1,5 +1,9 @@
 <div class="main-form">
-  <form>
+  <div *ngIf="shown">
+
+    <div class="title" *ngIf="!!clientId">Изменение клиента</div>
+    <div class="title" *ngIf="!clientId">Создание клиента</div>
+
     <div class="content">
       <div class="field">
         <label>Фамилия</label>
@@ -16,8 +20,8 @@
       <div class="field">
         <label>Пол</label>
         <div class="radioButton">
-        <p><input name="gender" type="radio" value="male" ngModel="{{client.gender}}"/>Мужской</p>
-        <p><input name="gender" type="radio" value="female" ngModel="{{client.gender}}"/>Женский</p>
+          <p><input name="gender" type="radio" value="male" ngModel="{{client.gender}}"/>Мужской</p>
+          <p><input name="gender" type="radio" value="female" ngModel="{{client.gender}}"/>Женский</p>
         </div>
       </div>
       <div class="field">
@@ -26,12 +30,12 @@
       </div>
       <div class="field">
         <label>Характер</label>
-          <select id="selectCharm" name="charm" ngModel="{{client.charm}}">
-            <option *ngFor="let charm of charms" value="charm">
-              {{charm}}
-            </option>
-          </select>
-     </div>
+        <select id="selectCharm" name="charm" ngModel="{{client.charm}}">
+          <option *ngFor="let charm of charms" value="charm">
+            {{charm}}
+          </option>
+        </select>
+      </div>
 
       <div class="text-inscription">Адрес проживания</div>
       <div class="field">
@@ -77,8 +81,8 @@
 
       <div>
         <button class="modalButtons" (click)="addClient()">Добавить</button>
-        <button class="modalButtons" (click)="closeModalForm()">Закрыть</button>
+        <button class="modalButtons" (click)="shown = false">Закрыть</button>
       </div>
     </div>
-  </form>
+  </div>
 </div>

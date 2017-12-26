@@ -4,10 +4,11 @@ import {HttpService} from "../HttpService";
 
 
 @Component({
-  selector: "modal-form-component",
-  template: require('./modal-form.component.html'),
+  selector: "client-form",
+  template: require('./client-form.component.html'),
 })
-export class ModalFormComponent implements OnInit{
+export class ClientFormComponent implements OnInit {
+  shown: boolean = false;
   client: ClientDetailsRecord = new ClientDetailsRecord();
   charms: string[] = ["Сангвиник", "Холерик", "Флегматик", "Меланхолик"];
 
@@ -19,8 +20,15 @@ export class ModalFormComponent implements OnInit{
 
   }
 
-  closeModalForm(){
+  closeModalForm() {
     this.closeModal.emit();
+  }
+
+  clientId: string | null;
+
+  show(clientId: string | null) {
+    this.clientId = clientId;
+    this.shown = true;
   }
 
 }
