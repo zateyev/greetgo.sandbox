@@ -159,7 +159,7 @@ public class ClientRegisterImpl implements ClientRegister {
   public void download(ClientListRequest clientListRequest, OutputStream outputStream, String contentType, String personId) throws Exception {
 
     if (contentType.contains("pdf")) {
-      throw new RuntimeException("Неподдерживается пока");
+      throw new RuntimeException("Неподдерживается пока"); //TODO
     } else {
       ClientRecordListReportViewXslx view = new ClientRecordListReportViewXslx(outputStream);
 
