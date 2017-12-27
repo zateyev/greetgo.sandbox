@@ -41,6 +41,8 @@ public class ClientRegisterImpl implements ClientRegister {
       ret.factAddress = clientDao.get().getFactAddress(id);
       ret.regAddress = clientDao.get().getRegAddress(id);
       ClientPhones phones = new ClientPhones();
+
+      //Khamit Можно ли сделать через 1 запрос - 1
       phones.home = clientDao.get().getHomePhone(id);
       phones.work = clientDao.get().getWorkPhone(id);
       phones.mobile = clientDao.get().getMobilePhone(id);
@@ -60,6 +62,8 @@ public class ClientRegisterImpl implements ClientRegister {
     clientToSave.gender = clientToSave.gender.toLowerCase();
 
     if (clientToSave.id != null) {
+
+      //Khamit mojno li sdelat odnim query - 1
       clientDao.get().updateClientField(clientToSave.id, "name", clientToSave.name);
       clientDao.get().updateClientField(clientToSave.id, "surname", clientToSave.surname);
       clientDao.get().updateClientField(clientToSave.id, "patronymic", clientToSave.patronymic);
@@ -157,6 +161,8 @@ public class ClientRegisterImpl implements ClientRegister {
 
   @Override
   public void deleteClient(String id) {
+    //Khamit esli est veroyatnost prihoda null, to delai if(null) return, chtoby zrya vremya bazi ne tratit - 1
+
     clientDao.get().deleteClient(id);
     clientDao.get().deleteClientAddress(id);
     clientDao.get().deleteClientPhone(id);

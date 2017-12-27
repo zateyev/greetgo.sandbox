@@ -24,6 +24,8 @@ public class GetClientListSize extends AbstractGetClientList implements Connecti
 
   @Override
   protected void select() {
+    //Khamit distinct - 1
+
     sql.append("select count(distinct c.id)");
   }
 
@@ -32,6 +34,8 @@ public class GetClientListSize extends AbstractGetClientList implements Connecti
     prepareSql();
 
     try (PreparedStatement ps = connection.prepareStatement(sql.toString())) {
+
+      //Khamit Sout ubrat ili zamenit na trace esli nujno - 1
       System.out.println(sql.toString());
 
       {

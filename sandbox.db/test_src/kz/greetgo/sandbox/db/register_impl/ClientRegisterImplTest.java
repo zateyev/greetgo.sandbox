@@ -21,6 +21,7 @@ public class ClientRegisterImplTest extends ParentTestNg {
 
   public BeanGetter<ClientTestDao> clientTestDao;
 
+
   @Test
   public void getClient_CREATE() throws Exception {
 
@@ -61,11 +62,16 @@ public class ClientRegisterImplTest extends ParentTestNg {
     java.sql.Date birthDate = java.sql.Date.valueOf("1991-11-11");
 
     clientTestDao.get().insert(clientId);
+
+
+    //Khamit davai ne odinakoview znacheniya - 1
     clientTestDao.get().insertAdrr(clientId,
       "reg",
       "reg",
       "reg",
       "reg");
+
+    //Khamit davai ne odinakoview znacheniya - 1
     clientTestDao.get().insertAdrr(clientId,
       "fact",
       "fact",
@@ -77,11 +83,13 @@ public class ClientRegisterImplTest extends ParentTestNg {
       "work",
       "878754878"
     );
+
     clientTestDao.get().insertPhones(
       clientId,
       "home",
       "878712878"
     );
+
     clientTestDao.get().insertPhones(
       clientId,
       "mobile",
@@ -114,10 +122,14 @@ public class ClientRegisterImplTest extends ParentTestNg {
     assertThat(details.charms).hasSize(2);
     assertThat(details.charms.get(0).name).isEqualTo(charmName2);
     assertThat(details.charms.get(1).name).isEqualTo(charmName1);
+
+
+    //Khamit inache ne poimew pravilno li eto - 1
     assertThat(details.factAddress.street).isEqualTo("fact");
     assertThat(details.factAddress.house).isEqualTo("fact");
     assertThat(details.factAddress.flat).isEqualTo("fact");
 
+    //Khamit inache ne poimew pravilno li eto - 1
     assertThat(details.regAddress.street).isEqualTo("reg");
     assertThat(details.regAddress.house).isEqualTo("reg");
     assertThat(details.regAddress.flat).isEqualTo("reg");
@@ -152,6 +164,9 @@ public class ClientRegisterImplTest extends ParentTestNg {
     clientRegister.get().deleteClient(clientId);
     //
     //
+
+
+    //Khamit ne provereni account, address, phone i t.d. - 1
     assertThat(clientTestDao.get().getActualClient(clientId)).isEqualTo(0);
     assertThat(clientTestDao.get().getActualClient(clientId2)).isEqualTo(1);
 
@@ -159,6 +174,9 @@ public class ClientRegisterImplTest extends ParentTestNg {
 
   @Test
   public void deleteClient_NULLid() {
+
+
+    //Khamit ochisti tablicu - 1
 
     String clientId = RND.str(5);
 
@@ -181,6 +199,8 @@ public class ClientRegisterImplTest extends ParentTestNg {
     clientRegister.get().deleteClient(null);
     //
     //
+
+    //Khamit inache tut ne poimew udalil li uje suwestvuiuwie dannie - 1
 
     assertThat(clientTestDao.get().getActualClient(clientId)).isEqualTo(1);
     assertThat(clientTestDao.get().getActualClient(clientId2)).isEqualTo(1);
@@ -207,6 +227,7 @@ public class ClientRegisterImplTest extends ParentTestNg {
     reg.street = "street";
     reg.house = "house";
     reg.flat = "flat";
+
 
     phones.home = "7878787878787";
     phones.work = "7878787878788";
@@ -479,10 +500,12 @@ public class ClientRegisterImplTest extends ParentTestNg {
     List<String> detList = clientTestDao.get().getListOfIds();
 
     assertThat(list).hasSize(5);
+    //Khamit sdelai assert dlya vseh 5 - 1
     assertThat(detList.get(10)).isEqualTo(list.get(0).id);
 
   }
 
+  //Khamit fliter pochemu (fio) nazvanie metoda, net proverki na surname i patronymic - 1
   @Test
   public void getList_CheckFilteredList() {
     String charmId = RND.str(5);
@@ -498,6 +521,7 @@ public class ClientRegisterImplTest extends ParentTestNg {
     for (int i = 0; i < 10; i++) {
       String clientId = RND.str(10);
 
+      //Khamit V otdelni method - 1
       clientTestDao.get().insertClient(
         clientId,
         "Иванов" + clientName,
@@ -551,6 +575,7 @@ public class ClientRegisterImplTest extends ParentTestNg {
 
     assertThat(list).hasSize(10);
 
+    //Khamit check if realy Ivan - 1
 
   }
 
@@ -870,6 +895,8 @@ public class ClientRegisterImplTest extends ParentTestNg {
     //
 
     assertThat(list).hasSize(3);
+
+    //Khamit cherez god testi nachnut padat' - 1
     assertThat(list.get(0).age).isEqualTo(17);
     assertThat(list.get(1).age).isEqualTo(7);
     assertThat(list.get(2).age).isEqualTo(2);
@@ -910,6 +937,8 @@ public class ClientRegisterImplTest extends ParentTestNg {
     //
 
     assertThat(list).hasSize(3);
+    //Khamit cherez god testi nachnut padat' - 1
+
     assertThat(list.get(0).age).isEqualTo(2);
     assertThat(list.get(1).age).isEqualTo(7);
     assertThat(list.get(2).age).isEqualTo(17);
@@ -925,6 +954,8 @@ public class ClientRegisterImplTest extends ParentTestNg {
 
     String charmId = RND.str(10);
     insertCharm(charmId);
+
+    //Khamit dobav proverku na actual, i vstabliay dannie udovletvoryaiuwie filtru - 1
 
     for (int i = 0; i < 50; i++) {
       String clientId = RND.str(10);

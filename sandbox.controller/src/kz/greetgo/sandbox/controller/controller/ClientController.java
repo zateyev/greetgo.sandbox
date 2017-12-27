@@ -21,6 +21,8 @@ public class ClientController implements Controller {
 
   public BeanGetter<ClientRegister> clientRegister;
 
+  //Khamit pochemu size and data v raznih kontrollerah? - 1
+
   @ToJson
   @Mapping("/getSize")
   public long getSize(

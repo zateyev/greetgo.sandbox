@@ -15,10 +15,14 @@ public abstract class AbstractGetClientList {
 
   protected void prepareSql() {
     select();
+    //Khamit show only client having at least obe active account - 1
+
     sql.append(" from client c join charm ch on c.charm_id = ch.id " +
       " join client_account c_ac on c_ac.client = c.id" +
       " where 1=1");
 
+
+    //Khamit string.isEmpty(). esli fio="  " ili fio=" pushkin" - 1
     if (in.filterByFio != null && in.filterByFio.length() > 0) {
       sql.append(" and ( (c.surname like ?||'%') or ( c.name like ?||'%') or ( c.patronymic like ?||'%') )");
       sqlParams.add(in.filterByFio);
@@ -65,6 +69,8 @@ public abstract class AbstractGetClientList {
       case "minDesc":
         sql.append(" order by min desc");
         return;
+
+        //Khamit return or throw exception - 1
       default:
         return;
     }
