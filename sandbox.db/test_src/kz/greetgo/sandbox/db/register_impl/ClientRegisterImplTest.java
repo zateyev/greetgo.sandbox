@@ -8,7 +8,8 @@ import kz.greetgo.sandbox.db.test.util.ParentTestNg;
 import kz.greetgo.util.RND;
 import org.testng.annotations.Test;
 
-import java.util.ArrayList;
+import java.io.FileOutputStream;
+import java.io.OutputStream;
 import java.util.Date;
 import java.util.List;
 
@@ -284,29 +285,29 @@ public class ClientRegisterImplTest extends ParentTestNg {
 
     clientTestDao.get().insertAdrr(clientId,
       "reg",
-      "reg",
-      "reg",
-      "reg");
+      RND.str(5),
+      RND.str(5),
+      RND.intStr(3));
     clientTestDao.get().insertAdrr(clientId,
       "fact",
-      "fact",
-      "fact",
-      "fact");
+      RND.str(5),
+      RND.str(5),
+      RND.intStr(3));
 
     clientTestDao.get().insertPhones(
       clientId,
       "work",
-      "123132"
+      RND.intStr(8)
     );
     clientTestDao.get().insertPhones(
       clientId,
       "home",
-      "123133"
+      RND.intStr(8)
     );
     clientTestDao.get().insertPhones(
       clientId,
       "mobile",
-      "83787878"
+      RND.intStr(8)
     );
 
     ClientToSave clUpdated = new ClientToSave();
@@ -552,81 +553,131 @@ public class ClientRegisterImplTest extends ParentTestNg {
   }
 
   @Test
-  public void getList_CheckSortedList_max() {
+  public void getList_CheckSortedList_totalAsc() {
 
-    clientTestDao.get().deleteAllCharms();
-    clientTestDao.get().deleteAllClients();
-    clientTestDao.get().deleteAllAccounts();
+    deleteAll();
+
+    ClientListRequest req = new ClientListRequest();
+    req.sort = "total";
+    req.count = 5;
+    req.skipFirst = 0;
+
+    String clientId1 = RND.str(10);
+    String clientId2 = RND.str(10);
+    String clientId3 = RND.str(10);
+    String charmId = RND.str(10);
+
+    insertCharm(charmId);
+
+    insertClient(clientId1, charmId);
+    insertClient(clientId2, charmId);
+    insertClient(clientId3, charmId);
+
+    insertAccount(clientId1, 25.47f);
+    insertAccount(clientId1, 15.47f);
+    insertAccount(clientId1, 21.47f);
+
+    insertAccount(clientId2, 232);
+    insertAccount(clientId2, 522);
+
+    insertAccount(clientId3, 5);
+    insertAccount(clientId3, 1);
+    insertAccount(clientId3, 2);
+    insertAccount(clientId3, 3);
+
+
+    //
+    //
+    List<ClientRecord> list = clientRegister.get().getList(req);
+    //
+    //
+
+    assertThat(list).hasSize(3);
+    assertThat(list.get(0).totalAccountBalance).isEqualTo(11);
+    assertThat(list.get(1).totalAccountBalance).isEqualTo(62);
+    assertThat(list.get(2).totalAccountBalance).isEqualTo(754);
+
+  }
+
+  @Test
+  public void getList_CheckSortedList_totalDesc() {
+
+    deleteAll();
+
+    ClientListRequest req = new ClientListRequest();
+    req.sort = "totalDesc";
+    req.count = 5;
+    req.skipFirst = 0;
+
+    String clientId1 = RND.str(10);
+    String clientId2 = RND.str(10);
+    String clientId3 = RND.str(10);
+    String charmId = RND.str(10);
+
+    insertCharm(charmId);
+
+    insertClient(clientId1, charmId);
+    insertClient(clientId2, charmId);
+    insertClient(clientId3, charmId);
+
+    insertAccount(clientId1, 25.47f);
+    insertAccount(clientId1, 15.47f);
+    insertAccount(clientId1, 21.47f);
+
+    insertAccount(clientId2, 232);
+    insertAccount(clientId2, 522);
+
+    insertAccount(clientId3, 5);
+    insertAccount(clientId3, 1);
+    insertAccount(clientId3, 2);
+    insertAccount(clientId3, 3);
+
+
+    //
+    //
+    List<ClientRecord> list = clientRegister.get().getList(req);
+    //
+    //
+
+    assertThat(list).hasSize(3);
+    assertThat(list.get(0).totalAccountBalance).isEqualTo(754);
+    assertThat(list.get(1).totalAccountBalance).isEqualTo(62);
+    assertThat(list.get(2).totalAccountBalance).isEqualTo(11);
+
+  }
+
+  @Test
+  public void getList_CheckSortedList_maxAsc() {
+
+    deleteAll();
 
     ClientListRequest req = new ClientListRequest();
     req.sort = "max";
     req.count = 5;
     req.skipFirst = 0;
 
-    String clientId = RND.str(10);
+    String clientId1 = RND.str(10);
     String clientId2 = RND.str(10);
+    String clientId3 = RND.str(10);
     String charmId = RND.str(10);
-    clientTestDao.get().insertCharm(
-      charmId,
-      RND.str(10)
-    );
 
-    clientTestDao.get().insertClient(
-      clientId,
-      RND.str(10),
-      RND.str(10),
-      RND.str(10),
-      java.sql.Date.valueOf("1990-10-10"),
-      "male",
-      charmId
-    );
+    insertCharm(charmId);
 
-    clientTestDao.get().insertClient(
-      clientId2,
-      RND.str(10),
-      RND.str(10),
-      RND.str(10),
-      java.sql.Date.valueOf("1990-10-10"),
-      "male",
-      charmId
-    );
+    insertClient(clientId1, charmId);
+    insertClient(clientId2, charmId);
+    insertClient(clientId3, charmId);
 
-    clientTestDao.get().insertClientAccount(
-      RND.str(10),
-      clientId,
-      15223.4f,
-      RND.str(5),
-      new Date()
-    );
-    clientTestDao.get().insertClientAccount(
-      RND.str(10),
-      clientId,
-      23f,
-      RND.str(5),
-      new Date()
-    );
-    clientTestDao.get().insertClientAccount(
-      RND.str(10),
-      clientId,
-      4545.4f,
-      RND.str(5),
-      new Date()
-    );
+    insertAccount(clientId1, 25.47f);
+    insertAccount(clientId1, 15.47f);
+    insertAccount(clientId1, 21.47f);
 
-    clientTestDao.get().insertClientAccount(
-      RND.str(10),
-      clientId2,
-      11f,
-      RND.str(5),
-      new Date()
-    );
-    clientTestDao.get().insertClientAccount(
-      RND.str(10),
-      clientId2,
-      0.4f,
-      RND.str(5),
-      new Date()
-    );
+    insertAccount(clientId2, 232);
+    insertAccount(clientId2, 522);
+
+    insertAccount(clientId3, 5);
+    insertAccount(clientId3, 1);
+    insertAccount(clientId3, 2);
+    insertAccount(clientId3, 3);
 
 
     //
@@ -635,65 +686,220 @@ public class ClientRegisterImplTest extends ParentTestNg {
     //
     //
 
-    assertThat(list).hasSize(2);
-    assertThat(list.get(0).maxAccountBalance).isEqualTo(11);
+    assertThat(list).hasSize(3);
+    assertThat(list.get(0).maxAccountBalance).isEqualTo(5);
+    assertThat(list.get(1).maxAccountBalance).isEqualTo(25);
+    assertThat(list.get(2).maxAccountBalance).isEqualTo(522);
 
   }
 
   @Test
-  public void getList_CheckFilteredList_age(){
+  public void getList_CheckSortedList_maxDesc() {
 
-    clientTestDao.get().deleteAllCharms();
-    clientTestDao.get().deleteAllClients();
-    clientTestDao.get().deleteAllAccounts();
+    deleteAll();
+
+    ClientListRequest req = new ClientListRequest();
+    req.sort = "maxDesc";
+    req.count = 5;
+    req.skipFirst = 0;
+
+    String clientId1 = RND.str(10);
+    String clientId2 = RND.str(10);
+    String clientId3 = RND.str(10);
+    String charmId = RND.str(10);
+
+    insertCharm(charmId);
+
+    insertClient(clientId1, charmId);
+    insertClient(clientId2, charmId);
+    insertClient(clientId3, charmId);
+
+    insertAccount(clientId1, 25.47f);
+    insertAccount(clientId1, 15.47f);
+    insertAccount(clientId1, 21.47f);
+
+    insertAccount(clientId2, 232);
+    insertAccount(clientId2, 522);
+
+    insertAccount(clientId3, 5);
+    insertAccount(clientId3, 1);
+    insertAccount(clientId3, 2);
+    insertAccount(clientId3, 3);
+
+
+    //
+    //
+    List<ClientRecord> list = clientRegister.get().getList(req);
+    //
+    //
+
+    assertThat(list).hasSize(3);
+    assertThat(list.get(0).maxAccountBalance).isEqualTo(522);
+    assertThat(list.get(1).maxAccountBalance).isEqualTo(25);
+    assertThat(list.get(2).maxAccountBalance).isEqualTo(5);
+
+  }
+
+  @Test
+  public void getList_CheckSortedList_minAsc() {
+
+    deleteAll();
+
+    ClientListRequest req = new ClientListRequest();
+    req.sort = "min";
+    req.count = 5;
+    req.skipFirst = 0;
+
+    String clientId1 = RND.str(10);
+    String clientId2 = RND.str(10);
+    String clientId3 = RND.str(10);
+    String charmId = RND.str(10);
+
+    insertCharm(charmId);
+
+    insertClient(clientId1, charmId);
+    insertClient(clientId2, charmId);
+    insertClient(clientId3, charmId);
+
+    insertAccount(clientId1, 25.47f);
+    insertAccount(clientId1, 15.47f);
+    insertAccount(clientId1, 21.47f);
+
+    insertAccount(clientId2, 232);
+    insertAccount(clientId2, 522);
+
+    insertAccount(clientId3, 5);
+    insertAccount(clientId3, 1);
+    insertAccount(clientId3, 2);
+    insertAccount(clientId3, 3);
+
+
+    //
+    //
+    List<ClientRecord> list = clientRegister.get().getList(req);
+    //
+    //
+
+    assertThat(list).hasSize(3);
+    assertThat(list.get(0).minAccountBalance).isEqualTo(1);
+    assertThat(list.get(1).minAccountBalance).isEqualTo(15);
+    assertThat(list.get(2).minAccountBalance).isEqualTo(232);
+
+  }
+
+  @Test
+  public void getList_CheckSortedList_minDesc() {
+
+    deleteAll();
+
+    ClientListRequest req = new ClientListRequest();
+    req.sort = "minDesc";
+    req.count = 5;
+    req.skipFirst = 0;
+
+    String clientId1 = RND.str(10);
+    String clientId2 = RND.str(10);
+    String clientId3 = RND.str(10);
+    String charmId = RND.str(10);
+
+    insertCharm(charmId);
+
+    insertClient(clientId1, charmId);
+    insertClient(clientId2, charmId);
+    insertClient(clientId3, charmId);
+
+    insertAccount(clientId1, 25.47f);
+    insertAccount(clientId1, 15.47f);
+    insertAccount(clientId1, 21.47f);
+
+    insertAccount(clientId2, 232);
+    insertAccount(clientId2, 522);
+
+    insertAccount(clientId3, 5);
+    insertAccount(clientId3, 1);
+    insertAccount(clientId3, 2);
+    insertAccount(clientId3, 3);
+
+
+    //
+    //
+    List<ClientRecord> list = clientRegister.get().getList(req);
+    //
+    //
+
+    assertThat(list).hasSize(3);
+    assertThat(list.get(0).minAccountBalance).isEqualTo(232);
+    assertThat(list.get(1).minAccountBalance).isEqualTo(15);
+    assertThat(list.get(2).minAccountBalance).isEqualTo(1);
+
+  }
+
+  @Test
+  public void getList_CheckFilteredList_ageDesc(){
+
+    deleteAll();
+
+    ClientListRequest req = new ClientListRequest();
+    req.sort = "ageDesc";
+    req.count = 5;
+    req.skipFirst = 0;
+
+    String charmId = RND.str(10);
+
+    String clientId = RND.str(10);
+    String clientId2 = RND.str(10);
+    String clientId3 = RND.str(10);
+
+    insertCharm(charmId);
+
+    insertClientWithDate(clientId, charmId, "2010-07-07");
+    insertClientWithDate(clientId2, charmId, "2015-07-07");
+    insertClientWithDate(clientId3, charmId, "2000-07-07");
+
+    insertAccount(clientId, 456456f);
+    insertAccount(clientId, 456f);
+    insertAccount(clientId2,654.45f);
+    insertAccount(clientId3,654.45f);
+
+    //
+    //
+    List<ClientRecord> list = clientRegister.get().getList(req);
+    //
+    //
+
+    assertThat(list).hasSize(3);
+    assertThat(list.get(0).age).isEqualTo(17);
+    assertThat(list.get(1).age).isEqualTo(7);
+    assertThat(list.get(2).age).isEqualTo(2);
+
+  }
+
+  @Test
+  public void getList_CheckFilteredList_ageAsc(){
+
+    deleteAll();
 
     ClientListRequest req = new ClientListRequest();
     req.sort = "age";
     req.count = 5;
     req.skipFirst = 0;
 
+    String charmId = RND.str(10);
+
     String clientId = RND.str(10);
     String clientId2 = RND.str(10);
-    String charmId = RND.str(10);
-    clientTestDao.get().insertCharm(
-      charmId,
-      RND.str(10)
-    );
+    String clientId3 = RND.str(10);
 
-    clientTestDao.get().insertClient(
-      clientId,
-      RND.str(10),
-      RND.str(10),
-      RND.str(10),
-      java.sql.Date.valueOf("1991-10-10"),
-      "male",
-      charmId
-    );
-    clientTestDao.get().insertClient(
-      clientId2,
-      RND.str(10),
-      RND.str(10),
-      RND.str(10),
-      java.sql.Date.valueOf("2000-10-10"),
-      "male",
-      charmId
-    );
+    insertCharm(charmId);
 
-    clientTestDao.get().insertClientAccount(
-      RND.str(10),
-      clientId,
-      15223.4f,
-      RND.str(5),
-      new Date()
-    );
+    insertClientWithDate(clientId, charmId, "2010-07-07");
+    insertClientWithDate(clientId2, charmId, "2015-07-07");
+    insertClientWithDate(clientId3, charmId, "2000-07-07");
 
-    clientTestDao.get().insertClientAccount(
-      RND.str(10),
-      clientId2,
-      15223.4f,
-      RND.str(5),
-      new Date()
-    );
+    insertAccount(clientId, 456456f);
+    insertAccount(clientId, 456f);
+    insertAccount(clientId2,654.45f);
+    insertAccount(clientId3,654.45f);
 
     //
     //
@@ -701,9 +907,10 @@ public class ClientRegisterImplTest extends ParentTestNg {
     //
     //
 
-    assertThat(list).hasSize(2);
-    assertThat(list.get(0).age).isEqualTo(17);
-    assertThat(list.get(1).age).isEqualTo(26);
+    assertThat(list).hasSize(3);
+    assertThat(list.get(0).age).isEqualTo(2);
+    assertThat(list.get(1).age).isEqualTo(7);
+    assertThat(list.get(2).age).isEqualTo(17);
 
   }
   @Test
@@ -715,27 +922,23 @@ public class ClientRegisterImplTest extends ParentTestNg {
 
     req.filterByFio  = "a";
 
+    String charmId = RND.str(10);
+    insertCharm(charmId);
+
     for (int i = 0; i < 50; i++) {
       String clientId = RND.str(10);
-      String charmId = RND.str(10);
-      clientTestDao.get().insertCharm(charmId, RND.str(10));
-      clientTestDao.get().deleteAllCharms();
+
       clientTestDao.get().insertClient(
         clientId,
         "a" + RND.str(10),
-        "a" +  RND.str(10),
-        "a" +  RND.str(10),
+        "a" + RND.str(10),
+        "a" + RND.str(10),
         java.sql.Date.valueOf("1990-10-10"),
         "male",
         charmId
       );
-      clientTestDao.get().insertClientAccount(
-        RND.str(10),
-        clientId,
-        15223.4f,
-        RND.str(5),
-        new Date()
-      );
+
+      insertAccount(clientId, 265.841f);
     }
 
     //
@@ -750,46 +953,65 @@ public class ClientRegisterImplTest extends ParentTestNg {
 
 
   @Test
-  public void loadTestData() {
-    clientTestDao.get().deleteAllClients();
-    clientTestDao.get().deleteAllCharms();
-    clientTestDao.get().deleteAllPhones();
+  public void download_Xlsx() throws Exception {
 
-    String charmId = RND.str(5);
-    String charmName = RND.str(10);
-    clientTestDao.get().insertCharm(charmId, charmName);
-    clientTestDao.get().insertCharm(RND.str(10), RND.str(10));
+    ClientListRequest req = new ClientListRequest();
+    req.count = 0;
 
-    ClientAddress fact = new ClientAddress();
-    ClientAddress reg = new ClientAddress();
-    ClientPhones phones = new ClientPhones();
-    fact.street = "street";
-    fact.house = "house";
-    fact.flat = "flat";
-    reg.street = "street";
-    reg.house = "house";
-    reg.flat = "flat";
-    phones.work = "98778561214";
-    phones.home = "98778132564";
-    phones.mobile.add("98778654564");
+    OutputStream stream = new FileOutputStream("hello.xlsx");
 
-    for (int i = 0; i < 50; i++) {
-      ClientToSave save = new ClientToSave();
-      save.name = RND.str(10);
-      save.surname = RND.str(10);
-      save.patronymic = RND.str(10);
-      save.charmId = charmId;
-      save.dateOfBirth = "1990-10-10";
-      save.gender = "male";
-      save.factAddress = fact;
-      save.regAddress = reg;
-      save.phones = phones;
+    //
+    //
+    clientRegister.get().download(req, stream, "xlsx", "p1");
+    //
+    //
 
-      ClientRecord rec = clientRegister.get().saveClient(save);
-    }
 
   }
 
+  public void deleteAll(){
+    clientTestDao.get().deleteAllCharms();
+    clientTestDao.get().deleteAllClients();
+    clientTestDao.get().deleteAllAccounts();
+  }
+
+  public void insertCharm(String charmId) {
+    clientTestDao.get().insertCharm(charmId, RND.str(10));
+  }
+
+  public void insertClient(String clientId, String charmId) {
+    clientTestDao.get().insertClient(
+      clientId,
+      RND.str(10),
+      RND.str(10),
+      RND.str(10),
+      java.sql.Date.valueOf("1990-10-10"),
+      "male",
+      charmId
+    );
+  }
+
+  public void insertClientWithDate(String clientId, String charmId, String date){
+    clientTestDao.get().insertClient(
+      clientId,
+      RND.str(10),
+      RND.str(10),
+      RND.str(10),
+      java.sql.Date.valueOf(date),
+      "male",
+      charmId
+    );
+  }
+
+  public void insertAccount(String clientId, float money) {
+    clientTestDao.get().insertClientAccount(
+      RND.str(10),
+      clientId,
+      money,
+      RND.str(5),
+      new Date()
+    );
+  }
 
 
 }
