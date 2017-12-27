@@ -7,28 +7,23 @@ import java.util.List;
 
 public abstract class AbstractGetClientList {
   protected final ClientListRequest in;
-
   public AbstractGetClientList(ClientListRequest in) {this.in = in;}
 
   protected final StringBuilder sql = new StringBuilder();
+
   protected final List<Object> sqlParams = new ArrayList<>();
 
   protected void prepareSql() {
-    select();
-    //Khamit show only client having at least obe active account - 1
 
-    sql.append(" from client c join charm ch on c.charm_id = ch.id " +
-      " join client_account c_ac on c_ac.client = c.id" +
-      " where 1=1");
+    appendSelect();
 
+    sql.append(" from client c");
 
-    //Khamit string.isEmpty(). esli fio="  " ili fio=" pushkin" - 1
-    if (in.filterByFio != null && in.filterByFio.length() > 0) {
-      sql.append(" and ( (c.surname like ?||'%') or ( c.name like ?||'%') or ( c.patronymic like ?||'%') )");
-      sqlParams.add(in.filterByFio);
-      sqlParams.add(in.filterByFio);
-      sqlParams.add(in.filterByFio);
-    }
+    appendJoin();
+
+    sql.append(" where 1=1");
+
+    appendFilter();
 
     sql.append(" and c.actual = 1");
 
@@ -40,7 +35,13 @@ public abstract class AbstractGetClientList {
 
   }
 
+  protected abstract void appendJoin();
+
   protected abstract void appendGroupBy();
+
+  protected abstract void appendOffsetLimit();
+
+  protected abstract void appendSelect();
 
   protected void appendSorting() {
     if (in.sort == null) return;
@@ -69,15 +70,19 @@ public abstract class AbstractGetClientList {
       case "minDesc":
         sql.append(" order by min desc");
         return;
-
-        //Khamit return or throw exception - 1
       default:
-        return;
+        throw new RuntimeException("Undeclared column name for sort");
     }
 
   }
 
-  protected abstract void appendOffsetLimit();
+  protected void appendFilter() {
+    if (in.filterByFio != null && in.filterByFio.isEmpty()) {
+      sql.append(" and ( (c.surname like ?||'%') or ( c.name like ?||'%') or ( c.patronymic like ?||'%') )");
+      sqlParams.add(in.filterByFio);
+      sqlParams.add(in.filterByFio);
+      sqlParams.add(in.filterByFio);
+    }
+  }
 
-  protected abstract void select();
 }

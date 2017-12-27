@@ -37,35 +37,27 @@ public class GetClientList extends AbstractGetClientList implements ConnectionCa
     prepareSql();
 
     try (PreparedStatement ps = connection.prepareStatement(sql.toString())) {
-      System.out.println(sql.toString());
 
+      System.out.println(sql.toString()); // GOLIBtmp
       {
         int index = 1;
         for (Object param : sqlParams) {
           ps.setObject(index++, param);
         }
       }
-
       try (ResultSet rs = ps.executeQuery()) {
-
         List<ClientRecord> ret = new ArrayList<>();
-
         while (rs.next()) {
-
           ret.add(readRecord(rs));
-
         }
-
         return ret;
-
       }
-
     }
 
   }
 
   @Override
-  protected void select() {
+  protected void appendSelect() {
     sql.append("select c.id, c.surname, c.name, c.patronymic, " +
       " ch.name as charm," +
       " extract(year from age(c.birth_date)) as age," +
@@ -74,6 +66,11 @@ public class GetClientList extends AbstractGetClientList implements ConnectionCa
       " min(c_ac.money) as min");
   }
 
+  @Override
+  protected void appendJoin() {
+    sql.append( " join charm ch on c.charm_id = ch.id " +
+      " join client_account c_ac on c_ac.client = c.id");
+  }
 
   private ClientRecord readRecord(ResultSet rs) throws SQLException {
     ClientRecord ret = new ClientRecord();

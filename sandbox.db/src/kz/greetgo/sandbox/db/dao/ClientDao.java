@@ -15,10 +15,10 @@ import java.util.List;
 public interface ClientDao {
 
 
-  @Select("select * from Charm where actual = 1 order by name")
+  @Select("Select * from Charm where actual = 1 order by name")
   List<CharmRecord> loadCharmList();
 
-  @Select("select c.charm_id charmId," +
+  @Select("Select c.charm_id charmId," +
     " c.birth_date dateOfBirth," +
     " c.current_gender gender," +
     " c.* from Client c" +
@@ -35,7 +35,7 @@ public interface ClientDao {
   @Update("update client_phone set actual = 0 where client = #{id}")
   void deleteClientPhone(@Param("id") String id);
 
-  @Update("update client_account set actual = 0 where id = #{id}")
+  @Update("update client_account set actual = 0 where client = #{id}")
   void deleteClientAccount(@Param("id") String id);
 
   @Update("update client set ${fieldName} = #{value} where id = #{clientId}")
@@ -54,7 +54,7 @@ public interface ClientDao {
                     @Param("charm_id") String charmId);
 
 
-  @Select("select c.id, c.surname || ' ' || c.name || ' ' ||c.patronymic as fio,  ch.name as charm, " +
+  @Select("Select c.id, c.surname || ' ' || c.name || ' ' ||c.patronymic as fio,  ch.name as charm, " +
     " extract(year from age(c.birth_date)) as age, " +
     " sum(c_ac.money) as totalAccountBalance, max(c_ac.money) as maxAccountBalance," +
     " min(c_ac.money) as minAccountBalance from client c " +
@@ -71,10 +71,10 @@ public interface ClientDao {
                           @Param("fieldName") String fieldName,
                           @Param("value") Object value);
 
-  @Select("select street, house, flat from client_addr where client = #{id} and type = 'fact' and actual = 1")
+  @Select("Select street, house, flat from client_addr where client = #{id} and type = 'fact' and actual = 1")
   ClientAddress getFactAddress(@Param("id") String id);
 
-  @Select("select street, house, flat from client_addr where client = #{id} and type = 'reg' and actual = 1")
+  @Select("Select street, house, flat from client_addr where client = #{id} and type = 'reg' and actual = 1")
   ClientAddress getRegAddress(String id);
 
   @Insert("insert into client_addr(client, street, house, flat, type, actual) " +
@@ -102,13 +102,13 @@ public interface ClientDao {
     @Param("number") String number,
     @Param("registered_at") Date registeredAt);
 
-  @Select("select number from client_phone where type = 'home' and client = #{id} and actual = 1")
+  @Select("Select number from client_phone where type = 'home' and client = #{id} and actual = 1")
   String getHomePhone(@Param("id") String id);
 
-  @Select("select number from client_phone where type = 'work' and client = #{id} and actual = 1")
+  @Select("Select number from client_phone where type = 'work' and client = #{id} and actual = 1")
   String getWorkPhone(@Param("id") String id);
 
-  @Select("select number from client_phone where type = 'mobile' and client = #{id} and actual = 1")
+  @Select("Select number from client_phone where type = 'mobile' and client = #{id} and actual = 1")
   List<String> getMobilePhone(String id);
 
 }
