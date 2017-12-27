@@ -310,6 +310,8 @@ public class ClientRegisterImplTest extends ParentTestNg {
       RND.intStr(8)
     );
 
+    insertAccountWithMoney(clientId, 15961);
+
     ClientToSave clUpdated = new ClientToSave();
     ClientAddress fact = new ClientAddress();
     ClientAddress reg = new ClientAddress();
@@ -917,8 +919,7 @@ public class ClientRegisterImplTest extends ParentTestNg {
   public void getSize_ofFilteredList() {
 
     ClientListRequest req = new ClientListRequest();
-    clientTestDao.get().deleteAllClients();
-    clientTestDao.get().deleteAllCharms();
+    deleteAll();
 
     req.filterByFio  = "a";
 
@@ -950,6 +951,43 @@ public class ClientRegisterImplTest extends ParentTestNg {
     assertThat(size).isEqualTo(50);
 
   }
+
+  @Test
+  public void getSize_ofList() {
+
+    ClientListRequest req = new ClientListRequest();
+    deleteAll();
+
+    String charmId = RND.str(10);
+    insertCharm(charmId);
+
+    for (int i = 0; i < 50; i++) {
+      String clientId = RND.str(10);
+
+      clientTestDao.get().insertClient(
+        clientId,
+        "a" + RND.str(10),
+        "a" + RND.str(10),
+        "a" + RND.str(10),
+        java.sql.Date.valueOf("1990-10-10"),
+        "male",
+        charmId
+      );
+
+      insertAccountWithMoney(clientId, 265.841f);
+    }
+
+    //
+    //
+    long size = clientRegister.get().getSize(req);
+    //
+    //
+
+    assertThat(size).isEqualTo(50);
+
+  }
+
+
 
 
   @Test

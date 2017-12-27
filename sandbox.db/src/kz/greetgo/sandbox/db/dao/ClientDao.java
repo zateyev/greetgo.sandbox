@@ -54,13 +54,14 @@ public interface ClientDao {
                     @Param("charm_id") String charmId);
 
 
-  @Select("select c.id as id, " +
-    " c.surname || ' ' || c.name || ' ' || c.patronymic AS fio, " +
-    " ch.name AS charm, " +
-    " extract(year from age(c.birth_date)) as age " +
-    " from client c join charm ch on (c.charm_id = ch.id) " +
-    " where c.actual = 1 and ch.actual = 1 " +
-    " and c.id = #{id}")
+  @Select("select c.id, c.surname || ' ' || c.name || ' ' ||c.patronymic as fio,  ch.name as charm, " +
+    " extract(year from age(c.birth_date)) as age, " +
+    " sum(c_ac.money) as totalAccountBalance, max(c_ac.money) as maxAccountBalance," +
+    " min(c_ac.money) as minAccountBalance from client c " +
+    " join charm ch on c.charm_id = ch.id" +
+    " join client_account c_ac on c_ac.client = c.id" +
+    " where 1=1 and c.actual = 1 and c.id = #{id}" +
+    " group by c.id, charm")
   ClientRecord getClientRecord(@Param("id") String id);
 
 

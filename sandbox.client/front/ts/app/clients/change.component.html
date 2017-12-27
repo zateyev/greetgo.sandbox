@@ -217,7 +217,7 @@
               <div class="col-xs-8"><input
                 [(ngModel)]="clientDetails.phones.home"
                 [ngModelOptions]="{standalone: true}"
-                (keyup)="updateButton()"
+                (keyup)="updateButton();"
                 type="text" class="inputForm">
                 <span style="color: red">*</span>
               </div>
@@ -229,7 +229,7 @@
               <div class="col-xs-8"><input
                 [(ngModel)]="clientDetails.phones.work"
                 [ngModelOptions]="{standalone: true}"
-                (keyup)="updateButton()"
+                (keyup)="updateButton();"
                 type="text" class="inputForm">
                 <span style="color: red">*</span></div>
             </div>
@@ -245,7 +245,7 @@
               <div class="col-xs-8"><input
                 [(ngModel)]="clientDetails.phones.mobile[0]"
                 [ngModelOptions]="{standalone: true}"
-                (keyup)="updateButton()"
+                (keyup)="updateButton();"
                 type="text" class="inputForm">
                 <span style="color: red">*</span></div>
             </div>
@@ -282,7 +282,7 @@
                    [disabled] = "!buttonEnabled"
                    (click)="closeForm()" type="submit" value="Добавить">
             <span *ngIf="!buttonEnabled"
-              class="pull-right" style="color: red">* поля объязательны для заполнения</span>
+              class="pull-right" style="color: red">{{errorMessage}}</span>
           </div>
         </div>
       </form>
