@@ -17,7 +17,7 @@ import LessNpmImportPlugin from "less-plugin-npm-import";
 import fs from "fs";
 
 import sourceMaps from "gulp-sourcemaps";
-import hash from "gulp-hash";
+// import hash from "gulp-hash";
 import less from "gulp-less";
 import sass from "gulp-sass";
 import cleanCSS from "gulp-clean-css";
@@ -256,14 +256,14 @@ task('less', function () {
 
   if (!isStand) {
     p = p.pipe(cleanCSS());
-    p = p.pipe(hash());
+    // p = p.pipe(hash());
   }
 
   p = p.pipe(isStand ? sourceMaps.write() : sourceMaps.write('.'));
   p = p.pipe(gulp.dest(outDir()));
 
   if (!isStand) {
-    p = p.pipe(hash.manifest("manifest_less.json"));
+    // p = p.pipe(hash.manifest("manifest_less.json"));
     p = p.pipe(gulp.dest(path.resolve(__dirname, "build")));
   }
 
@@ -290,7 +290,7 @@ task('sass', function () {
 
   if (!isStand) {
     p = p.pipe(cleanCSS());
-    p = p.pipe(hash());
+    // p = p.pipe(hash());
   }
 
   p = p.pipe(isStand ? sourceMaps.write() : sourceMaps.write('.'));
@@ -298,7 +298,7 @@ task('sass', function () {
   p = p.pipe(gulp.dest(outDir()));
 
   if (!isStand) {
-    p = p.pipe(hash.manifest("manifest_sass.json"));
+    // p = p.pipe(hash.manifest("manifest_sass.json"));
     p = p.pipe(gulp.dest(path.resolve(__dirname, "build")));
   }
 

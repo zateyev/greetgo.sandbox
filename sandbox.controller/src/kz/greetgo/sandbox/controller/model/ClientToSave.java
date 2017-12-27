@@ -1,8 +1,5 @@
 package kz.greetgo.sandbox.controller.model;
 
-import kz.greetgo.sandbox.controller.model.ClientAddress;
-import kz.greetgo.sandbox.controller.model.ClientPhones;
-
 public class ClientToSave {
   public String id;
   public String name;
