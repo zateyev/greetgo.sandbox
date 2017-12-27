@@ -9,6 +9,7 @@ import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
 import org.apache.ibatis.annotations.Update;
 
+import java.util.Date;
 import java.util.List;
 
 public interface ClientDao {
@@ -90,6 +91,15 @@ public interface ClientDao {
   void insertClientPhone(@Param("id") String id,
                          @Param("number") String number,
                          @Param("type") String type);
+
+  @Insert("insert into client_account(id, client, money, number, registered_at, actual)" +
+    "values (#{id}, #{client}, #{money}, #{number}, #{registered_at}, 1)")
+  void insertClientAccount(
+    @Param("id") String id,
+    @Param("client") String client,
+    @Param("money") float money,
+    @Param("number") String number,
+    @Param("registered_at") Date registeredAt);
 
   @Select("select number from client_phone where type = 'home' and client = #{id} and actual = 1")
   String getHomePhone(@Param("id") String id);

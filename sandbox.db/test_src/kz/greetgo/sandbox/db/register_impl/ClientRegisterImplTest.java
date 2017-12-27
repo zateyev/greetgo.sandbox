@@ -835,7 +835,7 @@ public class ClientRegisterImplTest extends ParentTestNg {
   }
 
   @Test
-  public void getList_CheckFilteredList_ageAccountBalanceDesc(){
+  public void getList_CheckSortedList_ClientAgeDesc() {
 
     deleteAll();
 
@@ -875,7 +875,7 @@ public class ClientRegisterImplTest extends ParentTestNg {
   }
 
   @Test
-  public void getList_CheckFilteredList_ageAccountBalanceAsc(){
+  public void getList_CheckSortedList_ClientAgeAsc() {
 
     deleteAll();
 

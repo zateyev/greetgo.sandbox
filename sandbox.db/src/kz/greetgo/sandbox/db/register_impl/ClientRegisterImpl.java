@@ -9,6 +9,7 @@ import kz.greetgo.sandbox.db.register_impl.jdbc.GetClientList;
 import kz.greetgo.sandbox.db.register_impl.jdbc.GetClientListSize;
 import kz.greetgo.sandbox.db.report.ClientRecord.ClientRecordListReportViewXslx;
 import kz.greetgo.sandbox.db.util.JdbcSandbox;
+import kz.greetgo.util.RND;
 
 import java.io.OutputStream;
 import java.util.Date;
@@ -138,6 +139,14 @@ public class ClientRegisterImpl implements ClientRegister {
           s,
           "mobile"
         );
+
+      clientDao.get().insertClientAccount(
+        idGen.get().newId(),
+        clientToSave.id,
+        0,
+        RND.intStr(10),
+        new Date()
+      );
 
     }
 
