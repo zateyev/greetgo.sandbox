@@ -24,7 +24,7 @@ public class GetClientListSize extends AbstractGetClientList implements Connecti
 
   @Override
   protected void select() {
-    sql.append("select count(*)");
+    sql.append("select count(distinct c.id)");
   }
 
   @Override

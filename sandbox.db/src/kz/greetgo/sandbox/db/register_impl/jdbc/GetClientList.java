@@ -19,7 +19,7 @@ public class GetClientList extends AbstractGetClientList implements ConnectionCa
 
   @Override
   protected void appendGroupBy() {
-    sql.append(" Group by c.id, charm");
+    sql.append(" group by c.id, charm");
   }
 
   @Override

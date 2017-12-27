@@ -310,6 +310,8 @@ public class ClientRegisterImplTest extends ParentTestNg {
       RND.intStr(8)
     );
 
+    insertAccountWithMoney(clientId, 15961);
+
     ClientToSave clUpdated = new ClientToSave();
     ClientAddress fact = new ClientAddress();
     ClientAddress reg = new ClientAddress();
@@ -553,7 +555,7 @@ public class ClientRegisterImplTest extends ParentTestNg {
   }
 
   @Test
-  public void getList_CheckSortedList_totalAsc() {
+  public void getList_CheckSortedList_totalAccountBalanceAsc() {
 
     deleteAll();
 
@@ -569,21 +571,21 @@ public class ClientRegisterImplTest extends ParentTestNg {
 
     insertCharm(charmId);
 
-    insertClient(clientId1, charmId);
-    insertClient(clientId2, charmId);
-    insertClient(clientId3, charmId);
+    insertClientWithCharm(clientId1, charmId);
+    insertClientWithCharm(clientId2, charmId);
+    insertClientWithCharm(clientId3, charmId);
 
-    insertAccount(clientId1, 25.47f);
-    insertAccount(clientId1, 15.47f);
-    insertAccount(clientId1, 21.47f);
+    insertAccountWithMoney(clientId1, 25.47f);
+    insertAccountWithMoney(clientId1, 15.47f);
+    insertAccountWithMoney(clientId1, 21.47f);
 
-    insertAccount(clientId2, 232);
-    insertAccount(clientId2, 522);
+    insertAccountWithMoney(clientId2, 232);
+    insertAccountWithMoney(clientId2, 522);
 
-    insertAccount(clientId3, 5);
-    insertAccount(clientId3, 1);
-    insertAccount(clientId3, 2);
-    insertAccount(clientId3, 3);
+    insertAccountWithMoney(clientId3, 5);
+    insertAccountWithMoney(clientId3, 1);
+    insertAccountWithMoney(clientId3, 2);
+    insertAccountWithMoney(clientId3, 3);
 
 
     //
@@ -600,7 +602,7 @@ public class ClientRegisterImplTest extends ParentTestNg {
   }
 
   @Test
-  public void getList_CheckSortedList_totalDesc() {
+  public void getList_CheckSortedList_totalAccountBalanceDesc() {
 
     deleteAll();
 
@@ -616,21 +618,21 @@ public class ClientRegisterImplTest extends ParentTestNg {
 
     insertCharm(charmId);
 
-    insertClient(clientId1, charmId);
-    insertClient(clientId2, charmId);
-    insertClient(clientId3, charmId);
+    insertClientWithCharm(clientId1, charmId);
+    insertClientWithCharm(clientId2, charmId);
+    insertClientWithCharm(clientId3, charmId);
 
-    insertAccount(clientId1, 25.47f);
-    insertAccount(clientId1, 15.47f);
-    insertAccount(clientId1, 21.47f);
+    insertAccountWithMoney(clientId1, 25.47f);
+    insertAccountWithMoney(clientId1, 15.47f);
+    insertAccountWithMoney(clientId1, 21.47f);
 
-    insertAccount(clientId2, 232);
-    insertAccount(clientId2, 522);
+    insertAccountWithMoney(clientId2, 232);
+    insertAccountWithMoney(clientId2, 522);
 
-    insertAccount(clientId3, 5);
-    insertAccount(clientId3, 1);
-    insertAccount(clientId3, 2);
-    insertAccount(clientId3, 3);
+    insertAccountWithMoney(clientId3, 5);
+    insertAccountWithMoney(clientId3, 1);
+    insertAccountWithMoney(clientId3, 2);
+    insertAccountWithMoney(clientId3, 3);
 
 
     //
@@ -647,7 +649,7 @@ public class ClientRegisterImplTest extends ParentTestNg {
   }
 
   @Test
-  public void getList_CheckSortedList_maxAsc() {
+  public void getList_CheckSortedList_maxAccountBalanceAsc() {
 
     deleteAll();
 
@@ -663,21 +665,21 @@ public class ClientRegisterImplTest extends ParentTestNg {
 
     insertCharm(charmId);
 
-    insertClient(clientId1, charmId);
-    insertClient(clientId2, charmId);
-    insertClient(clientId3, charmId);
+    insertClientWithCharm(clientId1, charmId);
+    insertClientWithCharm(clientId2, charmId);
+    insertClientWithCharm(clientId3, charmId);
 
-    insertAccount(clientId1, 25.47f);
-    insertAccount(clientId1, 15.47f);
-    insertAccount(clientId1, 21.47f);
+    insertAccountWithMoney(clientId1, 25.47f);
+    insertAccountWithMoney(clientId1, 15.47f);
+    insertAccountWithMoney(clientId1, 21.47f);
 
-    insertAccount(clientId2, 232);
-    insertAccount(clientId2, 522);
+    insertAccountWithMoney(clientId2, 232);
+    insertAccountWithMoney(clientId2, 522);
 
-    insertAccount(clientId3, 5);
-    insertAccount(clientId3, 1);
-    insertAccount(clientId3, 2);
-    insertAccount(clientId3, 3);
+    insertAccountWithMoney(clientId3, 5);
+    insertAccountWithMoney(clientId3, 1);
+    insertAccountWithMoney(clientId3, 2);
+    insertAccountWithMoney(clientId3, 3);
 
 
     //
@@ -694,7 +696,7 @@ public class ClientRegisterImplTest extends ParentTestNg {
   }
 
   @Test
-  public void getList_CheckSortedList_maxDesc() {
+  public void getList_CheckSortedList_maxAccountBalanceDesc() {
 
     deleteAll();
 
@@ -710,21 +712,21 @@ public class ClientRegisterImplTest extends ParentTestNg {
 
     insertCharm(charmId);
 
-    insertClient(clientId1, charmId);
-    insertClient(clientId2, charmId);
-    insertClient(clientId3, charmId);
+    insertClientWithCharm(clientId1, charmId);
+    insertClientWithCharm(clientId2, charmId);
+    insertClientWithCharm(clientId3, charmId);
 
-    insertAccount(clientId1, 25.47f);
-    insertAccount(clientId1, 15.47f);
-    insertAccount(clientId1, 21.47f);
+    insertAccountWithMoney(clientId1, 25.47f);
+    insertAccountWithMoney(clientId1, 15.47f);
+    insertAccountWithMoney(clientId1, 21.47f);
 
-    insertAccount(clientId2, 232);
-    insertAccount(clientId2, 522);
+    insertAccountWithMoney(clientId2, 232);
+    insertAccountWithMoney(clientId2, 522);
 
-    insertAccount(clientId3, 5);
-    insertAccount(clientId3, 1);
-    insertAccount(clientId3, 2);
-    insertAccount(clientId3, 3);
+    insertAccountWithMoney(clientId3, 5);
+    insertAccountWithMoney(clientId3, 1);
+    insertAccountWithMoney(clientId3, 2);
+    insertAccountWithMoney(clientId3, 3);
 
 
     //
@@ -741,7 +743,7 @@ public class ClientRegisterImplTest extends ParentTestNg {
   }
 
   @Test
-  public void getList_CheckSortedList_minAsc() {
+  public void getList_CheckSortedList_minAccountBalanceAsc() {
 
     deleteAll();
 
@@ -757,21 +759,21 @@ public class ClientRegisterImplTest extends ParentTestNg {
 
     insertCharm(charmId);
 
-    insertClient(clientId1, charmId);
-    insertClient(clientId2, charmId);
-    insertClient(clientId3, charmId);
+    insertClientWithCharm(clientId1, charmId);
+    insertClientWithCharm(clientId2, charmId);
+    insertClientWithCharm(clientId3, charmId);
 
-    insertAccount(clientId1, 25.47f);
-    insertAccount(clientId1, 15.47f);
-    insertAccount(clientId1, 21.47f);
+    insertAccountWithMoney(clientId1, 25.47f);
+    insertAccountWithMoney(clientId1, 15.47f);
+    insertAccountWithMoney(clientId1, 21.47f);
 
-    insertAccount(clientId2, 232);
-    insertAccount(clientId2, 522);
+    insertAccountWithMoney(clientId2, 232);
+    insertAccountWithMoney(clientId2, 522);
 
-    insertAccount(clientId3, 5);
-    insertAccount(clientId3, 1);
-    insertAccount(clientId3, 2);
-    insertAccount(clientId3, 3);
+    insertAccountWithMoney(clientId3, 5);
+    insertAccountWithMoney(clientId3, 1);
+    insertAccountWithMoney(clientId3, 2);
+    insertAccountWithMoney(clientId3, 3);
 
 
     //
@@ -788,7 +790,7 @@ public class ClientRegisterImplTest extends ParentTestNg {
   }
 
   @Test
-  public void getList_CheckSortedList_minDesc() {
+  public void getList_CheckSortedList_minAccountBalanceDesc() {
 
     deleteAll();
 
@@ -804,21 +806,21 @@ public class ClientRegisterImplTest extends ParentTestNg {
 
     insertCharm(charmId);
 
-    insertClient(clientId1, charmId);
-    insertClient(clientId2, charmId);
-    insertClient(clientId3, charmId);
+    insertClientWithCharm(clientId1, charmId);
+    insertClientWithCharm(clientId2, charmId);
+    insertClientWithCharm(clientId3, charmId);
 
-    insertAccount(clientId1, 25.47f);
-    insertAccount(clientId1, 15.47f);
-    insertAccount(clientId1, 21.47f);
+    insertAccountWithMoney(clientId1, 25.47f);
+    insertAccountWithMoney(clientId1, 15.47f);
+    insertAccountWithMoney(clientId1, 21.47f);
 
-    insertAccount(clientId2, 232);
-    insertAccount(clientId2, 522);
+    insertAccountWithMoney(clientId2, 232);
+    insertAccountWithMoney(clientId2, 522);
 
-    insertAccount(clientId3, 5);
-    insertAccount(clientId3, 1);
-    insertAccount(clientId3, 2);
-    insertAccount(clientId3, 3);
+    insertAccountWithMoney(clientId3, 5);
+    insertAccountWithMoney(clientId3, 1);
+    insertAccountWithMoney(clientId3, 2);
+    insertAccountWithMoney(clientId3, 3);
 
 
     //
@@ -835,7 +837,7 @@ public class ClientRegisterImplTest extends ParentTestNg {
   }
 
   @Test
-  public void getList_CheckFilteredList_ageDesc(){
+  public void getList_CheckSortedList_ClientAgeDesc() {
 
     deleteAll();
 
@@ -856,10 +858,10 @@ public class ClientRegisterImplTest extends ParentTestNg {
     insertClientWithDate(clientId2, charmId, "2015-07-07");
     insertClientWithDate(clientId3, charmId, "2000-07-07");
 
-    insertAccount(clientId, 456456f);
-    insertAccount(clientId, 456f);
-    insertAccount(clientId2,654.45f);
-    insertAccount(clientId3,654.45f);
+    insertAccountWithMoney(clientId, 456456f);
+    insertAccountWithMoney(clientId, 456f);
+    insertAccountWithMoney(clientId2,654.45f);
+    insertAccountWithMoney(clientId3,654.45f);
 
     //
     //
@@ -875,7 +877,7 @@ public class ClientRegisterImplTest extends ParentTestNg {
   }
 
   @Test
-  public void getList_CheckFilteredList_ageAsc(){
+  public void getList_CheckSortedList_ClientAgeAsc() {
 
     deleteAll();
 
@@ -896,10 +898,10 @@ public class ClientRegisterImplTest extends ParentTestNg {
     insertClientWithDate(clientId2, charmId, "2015-07-07");
     insertClientWithDate(clientId3, charmId, "2000-07-07");
 
-    insertAccount(clientId, 456456f);
-    insertAccount(clientId, 456f);
-    insertAccount(clientId2,654.45f);
-    insertAccount(clientId3,654.45f);
+    insertAccountWithMoney(clientId, 456456f);
+    insertAccountWithMoney(clientId, 456f);
+    insertAccountWithMoney(clientId2,654.45f);
+    insertAccountWithMoney(clientId3,654.45f);
 
     //
     //
@@ -917,8 +919,7 @@ public class ClientRegisterImplTest extends ParentTestNg {
   public void getSize_ofFilteredList() {
 
     ClientListRequest req = new ClientListRequest();
-    clientTestDao.get().deleteAllClients();
-    clientTestDao.get().deleteAllCharms();
+    deleteAll();
 
     req.filterByFio  = "a";
 
@@ -938,7 +939,7 @@ public class ClientRegisterImplTest extends ParentTestNg {
         charmId
       );
 
-      insertAccount(clientId, 265.841f);
+      insertAccountWithMoney(clientId, 265.841f);
     }
 
     //
@@ -950,6 +951,43 @@ public class ClientRegisterImplTest extends ParentTestNg {
     assertThat(size).isEqualTo(50);
 
   }
+
+  @Test
+  public void getSize_ofList() {
+
+    ClientListRequest req = new ClientListRequest();
+    deleteAll();
+
+    String charmId = RND.str(10);
+    insertCharm(charmId);
+
+    for (int i = 0; i < 50; i++) {
+      String clientId = RND.str(10);
+
+      clientTestDao.get().insertClient(
+        clientId,
+        "a" + RND.str(10),
+        "a" + RND.str(10),
+        "a" + RND.str(10),
+        java.sql.Date.valueOf("1990-10-10"),
+        "male",
+        charmId
+      );
+
+      insertAccountWithMoney(clientId, 265.841f);
+    }
+
+    //
+    //
+    long size = clientRegister.get().getSize(req);
+    //
+    //
+
+    assertThat(size).isEqualTo(50);
+
+  }
+
+
 
 
   @Test
@@ -970,6 +1008,8 @@ public class ClientRegisterImplTest extends ParentTestNg {
   }
 
   public void deleteAll(){
+    clientTestDao.get().deleteAllAddr();
+    clientTestDao.get().deleteAllPhones();
     clientTestDao.get().deleteAllCharms();
     clientTestDao.get().deleteAllClients();
     clientTestDao.get().deleteAllAccounts();
@@ -979,7 +1019,7 @@ public class ClientRegisterImplTest extends ParentTestNg {
     clientTestDao.get().insertCharm(charmId, RND.str(10));
   }
 
-  public void insertClient(String clientId, String charmId) {
+  public void insertClientWithCharm(String clientId, String charmId) {
     clientTestDao.get().insertClient(
       clientId,
       RND.str(10),
@@ -1003,7 +1043,7 @@ public class ClientRegisterImplTest extends ParentTestNg {
     );
   }
 
-  public void insertAccount(String clientId, float money) {
+  public void insertAccountWithMoney(String clientId, float money) {
     clientTestDao.get().insertClientAccount(
       RND.str(10),
       clientId,

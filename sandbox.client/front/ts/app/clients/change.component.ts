@@ -4,7 +4,6 @@ import {ClientRecord} from "../../model/ClientRecord";
 import {HttpService} from "../HttpService";
 import {ClientToSave} from "../../model/ClientToSave";
 import {CharmRecord} from "../../model/CharmRecord";
-import {ClientAddress} from "../../model/ClientAddress";
 @Component({
   selector: 'change-component',
   template: require('./change.component.html'),
@@ -21,6 +20,7 @@ export class ChangeClientComponent {
 
   /////////////////////////////////////////////////////
   errors: string = "";
+  errorMessage: string;
   /////////////////////////////////////////////////////
   buttonEnabled: boolean = false;
   add:boolean = false;
@@ -70,6 +70,13 @@ export class ChangeClientComponent {
     && !!this.clientDetails.factAddress.street && !!this.clientDetails.factAddress.house
     && !!this.clientDetails.factAddress.flat && !!this.clientDetails.phones.home
     && !!this.clientDetails.phones.work && !!this.clientDetails.phones.mobile[0];
+    this.errorMessage = "* поля объязательны для заполнения"
+    if (this.buttonEnabled === true) {
+      this.buttonEnabled = this.clientDetails.phones.home !== this.clientDetails.phones.work
+        && this.clientDetails.phones.home !== this.clientDetails.phones.mobile[0]
+        && this.clientDetails.phones.work !== this.clientDetails.phones.mobile[0];
+      this.errorMessage = "Номера телефонов не могут быть одинаковыми"
+    }
   }
 
 
