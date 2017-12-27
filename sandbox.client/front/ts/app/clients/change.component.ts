@@ -20,7 +20,7 @@ export class ChangeClientComponent {
 
   /////////////////////////////////////////////////////
   errors: string = "";
-  errorMessage: string = "* поля объязательны для заполнения"
+  errorMessage: string;
   /////////////////////////////////////////////////////
   buttonEnabled: boolean = false;
   add:boolean = false;
@@ -70,6 +70,7 @@ export class ChangeClientComponent {
     && !!this.clientDetails.factAddress.street && !!this.clientDetails.factAddress.house
     && !!this.clientDetails.factAddress.flat && !!this.clientDetails.phones.home
     && !!this.clientDetails.phones.work && !!this.clientDetails.phones.mobile[0];
+    this.errorMessage = "* поля объязательны для заполнения"
     if (this.buttonEnabled === true) {
       this.buttonEnabled = this.clientDetails.phones.home !== this.clientDetails.phones.work
         && this.clientDetails.phones.home !== this.clientDetails.phones.mobile[0]
