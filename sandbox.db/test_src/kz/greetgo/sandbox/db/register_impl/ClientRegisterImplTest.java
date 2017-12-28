@@ -545,60 +545,23 @@ public class ClientRegisterImplTest extends ParentTestNg {
 
   //Khamit fliter pochemu (fio) nazvanie metoda, net proverki na surname i patronymic - 1
   @Test
-  public void getList_CheckFilteredList() {
+  public void getList_CheckFilteredList_byName() {
     String charmId = RND.str(5);
-    String charmName = RND.str(10);
-    clientTestDao.get().deleteAllAddr();
-    clientTestDao.get().deleteAllCharms();
-    clientTestDao.get().deleteAllClients();
-    clientTestDao.get().deleteAllAccounts();
-    String clientName = RND.str(10);
 
+    deleteAll();
 
-    clientTestDao.get().insertCharm(charmId, charmName);
+    insertCharm(charmId);
     for (int i = 0; i < 10; i++) {
       String clientId = RND.str(10);
-
-      //Khamit V otdelni method - 1
-      clientTestDao.get().insertClient(
-        clientId,
-        "Иванов" + clientName,
-        RND.str(10),
-        RND.str(10),
-        java.sql.Date.valueOf("1990-10-10"),
-        "male",
-        charmId
-      );
-
-      clientTestDao.get().insertClientAccount(
-        RND.str(10),
-        clientId,
-        (float) RND.plusDouble(999999, 2),
-        RND.str(5),
-        new Date()
-      );
+      insertClientWithName(clientId, charmId, "Иван" + RND.str(5));
+      insertAccount(clientId);
     }
 
     for (int i = 0; i < 10; i++) {
       String clientId = RND.str(10);
 
-      clientTestDao.get().insertClient(
-        clientId,
-        clientName,
-        RND.str(10),
-        RND.str(10),
-        java.sql.Date.valueOf("1990-10-10"),
-        "male",
-        charmId
-      );
-
-      clientTestDao.get().insertClientAccount(
-        RND.str(10),
-        clientId,
-        (float) RND.plusDouble(999999, 2),
-        RND.str(5),
-        new Date()
-      );
+      insertClient(clientId, charmId);
+      insertAccount(clientId);
     }
 
 
@@ -612,8 +575,7 @@ public class ClientRegisterImplTest extends ParentTestNg {
     //
 
     assertThat(list).hasSize(10);
-
-    //Khamit check if realy Ivan - 1
+    for (ClientRecord rec : list) assertThat(rec.fio).contains("Иван");
 
   }
 
@@ -1089,6 +1051,55 @@ public class ClientRegisterImplTest extends ParentTestNg {
     clientTestDao.get().insertCharm(charmId, RND.str(10));
   }
 
+  private void insertClient(String clientId, String charmId) {
+    clientTestDao.get().insertClient(
+      clientId,
+      RND.str(10),
+      RND.str(10),
+      RND.str(10),
+      java.sql.Date.valueOf("1991-12-12"),
+      "male",
+      charmId
+    );
+  }
+
+  private void insertClientWithName(String clientId, String charmId, String name) {
+    clientTestDao.get().insertClient(
+      clientId,
+      name,
+      RND.str(10),
+      RND.str(10),
+      java.sql.Date.valueOf("1991-12-12"),
+      "male",
+      charmId
+    );
+  }
+
+  private void insertClientWithSurname(String clientId, String charmId, String surname) {
+    clientTestDao.get().insertClient(
+      clientId,
+      RND.str(10),
+      surname,
+      RND.str(10),
+      java.sql.Date.valueOf("1991-12-12"),
+      "male",
+      charmId
+    );
+  }
+
+  private void insertClientWithPatronymic(String clientId, String charmId, String patronymic) {
+    clientTestDao.get().insertClient(
+      clientId,
+      RND.str(10),
+      RND.str(10),
+      patronymic,
+      java.sql.Date.valueOf("1991-12-12"),
+      "male",
+      charmId
+    );
+  }
+
+
   private void insertClientWithCharm(String clientId, String charmId) {
     clientTestDao.get().insertClient(
       clientId,
@@ -1108,18 +1119,6 @@ public class ClientRegisterImplTest extends ParentTestNg {
       RND.str(10),
       RND.str(10),
       java.sql.Date.valueOf(date),
-      "male",
-      charmId
-    );
-  }
-
-  private void insertClient(String clientId, String charmId){
-    clientTestDao.get().insertClient(
-      clientId,
-      RND.str(10),
-      RND.str(10),
-      RND.str(10),
-      java.sql.Date.valueOf("1991-12-12"),
       "male",
       charmId
     );
