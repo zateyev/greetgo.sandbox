@@ -77,9 +77,9 @@ public class GetClientList extends AbstractGetClientList implements ConnectionCa
     ret.fio = makeFio(rs.getString("surname"), rs.getString("name"), rs.getString("patronymic"));
     ret.age = rs.getInt("age");
     ret.charm = rs.getString("charm");
-    ret.totalAccountBalance = (long)rs.getFloat("total");
-    ret.maxAccountBalance = (long)rs.getFloat("max");
-    ret.minAccountBalance = (long)rs.getFloat("min");
+    ret.totalAccountBalance = rs.getFloat("total");
+    ret.maxAccountBalance = rs.getFloat("max");
+    ret.minAccountBalance = rs.getFloat("min");
     return ret;
   }
 

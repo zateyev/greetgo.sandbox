@@ -658,8 +658,8 @@ public class ClientRegisterImplTest extends ParentTestNg {
     //
 
     assertThat(list).hasSize(3);
-    assertThat(list.get(0).totalAccountBalance).isEqualTo(11);
-    assertThat(list.get(1).totalAccountBalance).isEqualTo(62);
+    assertThat(list.get(0).totalAccountBalance).isEqualTo(5+1+2+3);
+    assertThat(list.get(1).totalAccountBalance).isEqualTo(62.41f);
     assertThat(list.get(2).totalAccountBalance).isEqualTo(754);
 
   }
