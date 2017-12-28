@@ -10,6 +10,7 @@ import org.testng.annotations.Test;
 
 import java.io.FileOutputStream;
 import java.io.OutputStream;
+import java.time.Year;
 import java.util.Date;
 import java.util.List;
 
@@ -932,11 +933,11 @@ public class ClientRegisterImplTest extends ParentTestNg {
     //
 
     assertThat(list).hasSize(3);
+    int year = Year.now().getValue();
 
-    //Khamit cherez god testi nachnut padat' - 1
-    assertThat(list.get(0).age).isEqualTo(17);
-    assertThat(list.get(1).age).isEqualTo(7);
-    assertThat(list.get(2).age).isEqualTo(2);
+    assertThat(list.get(0).age).isEqualTo(year-2000);
+    assertThat(list.get(1).age).isEqualTo(year-2010);
+    assertThat(list.get(2).age).isEqualTo(year-2015);
 
   }
 
@@ -974,11 +975,12 @@ public class ClientRegisterImplTest extends ParentTestNg {
     //
 
     assertThat(list).hasSize(3);
-    //Khamit cherez god testi nachnut padat' - 1
 
-    assertThat(list.get(0).age).isEqualTo(2);
-    assertThat(list.get(1).age).isEqualTo(7);
-    assertThat(list.get(2).age).isEqualTo(17);
+    int year = Year.now().getValue();
+
+    assertThat(list.get(0).age).isEqualTo(year -2015);
+    assertThat(list.get(1).age).isEqualTo(year -2010);
+    assertThat(list.get(2).age).isEqualTo(year -2000);
 
   }
   @Test

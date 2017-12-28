@@ -38,7 +38,6 @@ public class GetClientList extends AbstractGetClientList implements ConnectionCa
 
     try (PreparedStatement ps = connection.prepareStatement(sql.toString())) {
 
-      System.out.println(sql.toString()); // GOLIBtmp
       {
         int index = 1;
         for (Object param : sqlParams) {
