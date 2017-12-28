@@ -25,8 +25,8 @@ export class ListComponent implements OnInit {
   list: ClientRecord[] = [];
 
   currentPage: number = 0;
-  sort: string = "fio";
-  filter: string = "";
+  sort: string;
+  filter: string;
 
   listInfo: ClientListRequest = new ClientListRequest();
   fileTypeForDownload: string = null;

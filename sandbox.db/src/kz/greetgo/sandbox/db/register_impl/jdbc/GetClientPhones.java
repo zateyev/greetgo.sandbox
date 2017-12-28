@@ -24,7 +24,6 @@ public class GetClientPhones implements ConnectionCallback<ClientPhones> {
   public ClientPhones doInConnection(Connection connection) throws Exception {
 
     try (PreparedStatement ps = connection.prepareStatement(sql.toString())) {
-      System.out.println(sql.toString()); //GOLIBtmp
 
       {
         int index = 1;

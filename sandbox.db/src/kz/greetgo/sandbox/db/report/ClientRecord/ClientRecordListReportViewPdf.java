@@ -92,9 +92,9 @@ public class ClientRecordListReportViewPdf  {
 
   }
 
-  private static String readFloat(long balance) {
-    Long aLong = new Long(balance);
-    return aLong.toString();
+  private static String readFloat(float balance) {
+    Float fFloat = new Float(balance);
+    return fFloat.toString();
   }
 
   private static String readInt(int age) {

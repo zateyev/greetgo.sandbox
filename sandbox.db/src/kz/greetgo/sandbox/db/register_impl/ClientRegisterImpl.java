@@ -24,7 +24,6 @@ public class ClientRegisterImpl implements ClientRegister {
 
   @Override
   public long getSize(ClientListRequest clientListRequest) {
-    clientListRequest.filterByFio = clientListRequest.filterByFio.trim();
     return jdbc.get().execute(new GetClientListSize(clientListRequest));
   }
 

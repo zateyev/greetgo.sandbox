@@ -448,8 +448,7 @@ public class ClientRegisterImplTest extends ParentTestNg {
   @Test
   public void getList_CheckReturnedRecord() {
 
-    clientTestDao.get().deleteAllClients();
-    clientTestDao.get().deleteAllCharms();
+    deleteAll();
     String id = RND.str(10);
     String charmId = RND.str(5);
     String charmName = RND.str(10);
@@ -1035,9 +1034,9 @@ public class ClientRegisterImplTest extends ParentTestNg {
 
       clientTestDao.get().insertClient(
         clientId,
-        "a" + RND.str(10),
-        "a" + RND.str(10),
-        "a" + RND.str(10),
+        RND.str(10),
+        RND.str(10),
+        RND.str(10),
         java.sql.Date.valueOf("1990-10-10"),
         "male",
         charmId

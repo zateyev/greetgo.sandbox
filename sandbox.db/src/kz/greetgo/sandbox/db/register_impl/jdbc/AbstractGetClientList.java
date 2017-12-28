@@ -43,6 +43,7 @@ public abstract class AbstractGetClientList {
 
   protected abstract void appendSelect();
 
+
   protected void appendSorting() {
     if (in.sort == null) return;
     switch (in.sort) {
@@ -71,17 +72,18 @@ public abstract class AbstractGetClientList {
         sql.append(" order by min desc");
         return;
       default:
-        throw new RuntimeException("Undeclared column name for sort");
+        throw new RuntimeException("Undeclared column name for sort: " + in.sort);
     }
 
   }
 
   protected void appendFilter() {
-    if (in.filterByFio != null && in.filterByFio.isEmpty()) {
+    if (in.filterByFio != null && !in.filterByFio.isEmpty()) {
+      String s = in.filterByFio.trim();
       sql.append(" and ( (c.surname like ?||'%') or ( c.name like ?||'%') or ( c.patronymic like ?||'%') )");
-      sqlParams.add(in.filterByFio);
-      sqlParams.add(in.filterByFio);
-      sqlParams.add(in.filterByFio);
+      sqlParams.add(s);
+      sqlParams.add(s);
+      sqlParams.add(s);
     }
   }
 
