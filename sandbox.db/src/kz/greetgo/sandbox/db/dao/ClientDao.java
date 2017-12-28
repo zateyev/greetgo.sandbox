@@ -94,19 +94,13 @@ public interface ClientDao {
                          @Param("type") String type);
 
   @Insert("insert into client_account(id, client, money, number, registered_at, actual)" +
-    "values (#{id}, #{client}, #{money}, #{number}, #{registered_at}, 1)")
+          "values (#{id}, #{client}, #{money}, #{number}, #{registered_at}, 1)")
   void insertClientAccount(
     @Param("id") String id,
     @Param("client") String client,
     @Param("money") float money,
     @Param("number") String number,
     @Param("registered_at") Date registeredAt);
-
-  @Select("Select number from client_phone where type = 'home' and client = #{id} and actual = 1")
-  String getHomePhone(@Param("id") String id);
-
-  @Select("Select number from client_phone where type = 'work' and client = #{id} and actual = 1")
-  String getWorkPhone(@Param("id") String id);
 
   @Select("Select number from client_phone where type = 'mobile' and client = #{id} and actual = 1")
   List<String> getMobilePhone(String id);

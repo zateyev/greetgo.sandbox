@@ -7,6 +7,7 @@ import kz.greetgo.sandbox.controller.register.ClientRegister;
 import kz.greetgo.sandbox.db.dao.ClientDao;
 import kz.greetgo.sandbox.db.register_impl.jdbc.GetClientList;
 import kz.greetgo.sandbox.db.register_impl.jdbc.GetClientListSize;
+import kz.greetgo.sandbox.db.register_impl.jdbc.GetClientPhones;
 import kz.greetgo.sandbox.db.report.ClientRecord.ClientRecordListReportViewXslx;
 import kz.greetgo.sandbox.db.util.JdbcSandbox;
 import kz.greetgo.util.RND;
@@ -43,11 +44,7 @@ public class ClientRegisterImpl implements ClientRegister {
       ret.regAddress = clientDao.get().getRegAddress(id);
       ClientPhones phones = new ClientPhones();
 
-      //Khamit Можно ли сделать через 1 запрос - 1
-      phones.home = clientDao.get().getHomePhone(id);
-      phones.work = clientDao.get().getWorkPhone(id);
-      phones.mobile = clientDao.get().getMobilePhone(id);
-      ret.phones = phones;
+      ret.phones = jdbc.get().execute(new GetClientPhones(id));
     }
     ret.charms = clientDao.get().loadCharmList();
 

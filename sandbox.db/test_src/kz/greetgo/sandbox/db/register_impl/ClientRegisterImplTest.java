@@ -93,6 +93,12 @@ public class ClientRegisterImplTest extends ParentTestNg {
       "3333345"
     );
 
+    clientTestDao.get().insertPhones(
+      clientId,
+      "mobile",
+      "4444445"
+    );
+
     clientTestDao.get().update(clientId, "charm_id", charmId1);
     clientTestDao.get().update(clientId, "surname", surname);
     clientTestDao.get().update(clientId, "name", name);
@@ -131,6 +137,7 @@ public class ClientRegisterImplTest extends ParentTestNg {
     assertThat(details.phones.work).isEqualTo("1111145");
     assertThat(details.phones.home).isEqualTo("2222245");
     assertThat(details.phones.mobile.get(0)).isEqualTo("3333345");
+    assertThat(details.phones.mobile.get(1)).isEqualTo("4444445");
 
   }
 
