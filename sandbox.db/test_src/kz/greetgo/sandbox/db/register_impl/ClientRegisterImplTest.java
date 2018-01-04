@@ -469,9 +469,9 @@ public class ClientRegisterImplTest extends ParentTestNg {
     assertThat(list.get(0).fio).isEqualTo(rc.fio);
     assertThat(list.get(0).age).isEqualTo(rc.age);
     assertThat(list.get(0).charm).isEqualTo(charmName);
-    assertThat(list.get(0).totalAccountBalance).isEqualTo(money.longValue());
-    assertThat(list.get(0).maxAccountBalance).isEqualTo(money.longValue());
-    assertThat(list.get(0).minAccountBalance).isEqualTo(money.longValue());
+    assertThat(list.get(0).totalAccountBalance).isEqualTo(money);
+    assertThat(list.get(0).maxAccountBalance).isEqualTo(money);
+    assertThat(list.get(0).minAccountBalance).isEqualTo(money);
 
   }
 
@@ -998,28 +998,23 @@ public class ClientRegisterImplTest extends ParentTestNg {
     ClientListRequest req = new ClientListRequest();
     deleteAll();
 
-    req.filterByFio  = "a";
+    req.filterByFio = "abba";
 
     String charmId = RND.str(10);
     insertCharm(charmId);
 
-    //Khamit dobav proverku na actual, i vstabliay dannie udovletvoryaiuwie filtru - 1
-
-    for (int i = 0; i < 50; i++) {
+    for (int i = 0; i < 5; i++) {
       String clientId = RND.str(10);
-
-      clientTestDao.get().insertClient(
-        clientId,
-        "a" + RND.str(10),
-        "a" + RND.str(10),
-        "a" + RND.str(10),
-        java.sql.Date.valueOf("1990-10-10"),
-        "male",
-        charmId
-      );
-
-      insertAccountWithMoney(clientId, 265.841f);
+      insertClient(clientId, charmId);
     }
+
+    String clientId = RND.str(10);
+    String clientId2 = RND.str(10);
+    String clientId3 = RND.str(10);
+
+    insertClientWithName(clientId, charmId, "abba" + RND.str(5));
+    insertClientWithSurname(clientId2, charmId, "abba" + RND.str(5));
+    insertClientWithPatronymic(clientId3, charmId, "abba" + RND.str(5));
 
     //
     //
@@ -1027,7 +1022,14 @@ public class ClientRegisterImplTest extends ParentTestNg {
     //
     //
 
-    assertThat(size).isEqualTo(50);
+    ClientRecord det = clientTestDao.get().getClient(clientId);
+    ClientRecord det2 = clientTestDao.get().getClient(clientId2);
+    ClientRecord det3 = clientTestDao.get().getClient(clientId3);
+
+    assertThat(size).isEqualTo(3);
+    assertThat(det.fio).contains("abba");
+    assertThat(det2.fio).contains("abba");
+    assertThat(det3.fio).contains("abba");
 
   }
 

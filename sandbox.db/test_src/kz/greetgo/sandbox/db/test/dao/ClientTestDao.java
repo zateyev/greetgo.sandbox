@@ -20,8 +20,8 @@ public interface ClientTestDao {
   @Select("Select c.surname || ' ' || c.name || ' ' || c.patronymic AS fio, " +
     " ch.name AS charm, " +
     " extract(year from age(c.birth_date)) as age" +
-    " from client c join charm ch on (c.charm_id = ch.id) where c.actual = 1 and ch.actual = 1")
-  ClientRecord getClient(@Param("id") String id);
+    " from client c join charm ch on (c.charm_id = ch.id) where c.actual = 1 and c.id = #{id}")
+  ClientRecord getClient(@Param("id") String clientId);
 
   @Select("Select c.current_gender gender," +
     " c.charm_id charmId," +
