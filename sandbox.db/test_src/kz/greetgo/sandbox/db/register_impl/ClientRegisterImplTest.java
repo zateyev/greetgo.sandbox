@@ -524,7 +524,6 @@ public class ClientRegisterImplTest extends ParentTestNg {
 
   }
 
-  //Khamit fliter pochemu (fio) nazvanie metoda, net proverki na surname i patronymic - 1
   @Test
   public void getList_CheckFilteredList_byName() {
     String charmId = RND.str(5);
@@ -532,6 +531,7 @@ public class ClientRegisterImplTest extends ParentTestNg {
     deleteAll();
 
     insertCharm(charmId);
+
     for (int i = 0; i < 10; i++) {
       String clientId = RND.str(10);
       insertClientWithName(clientId, charmId, "Иван" + RND.str(5));
@@ -540,11 +540,77 @@ public class ClientRegisterImplTest extends ParentTestNg {
 
     for (int i = 0; i < 10; i++) {
       String clientId = RND.str(10);
-
       insertClient(clientId, charmId);
       insertAccount(clientId);
     }
 
+    ClientListRequest req = new ClientListRequest();
+    req.filterByFio = "Иван";
+
+    //
+    //
+    List<ClientRecord> list = clientRegister.get().getList(req);
+    //
+    //
+
+    assertThat(list).hasSize(10);
+    for (ClientRecord rec : list) assertThat(rec.fio).contains("Иван");
+
+  }
+
+  @Test
+  public void getList_CheckFilteredList_bySurname() {
+    String charmId = RND.str(5);
+
+    deleteAll();
+
+    insertCharm(charmId);
+
+    for (int i = 0; i < 10; i++) {
+      String clientId = RND.str(10);
+      insertClientWithSurname(clientId, charmId, "Иван" + RND.str(5));
+      insertAccount(clientId);
+    }
+
+    for (int i = 0; i < 10; i++) {
+      String clientId = RND.str(10);
+      insertClient(clientId, charmId);
+      insertAccount(clientId);
+    }
+
+    ClientListRequest req = new ClientListRequest();
+    req.filterByFio = "Иван";
+
+    //
+    //
+    List<ClientRecord> list = clientRegister.get().getList(req);
+    //
+    //
+
+    assertThat(list).hasSize(10);
+    for (ClientRecord rec : list) assertThat(rec.fio).contains("Иван");
+
+  }
+
+  @Test
+  public void getList_CheckFilteredList_byPatronymic() {
+    String charmId = RND.str(5);
+
+    deleteAll();
+
+    insertCharm(charmId);
+
+    for (int i = 0; i < 10; i++) {
+      String clientId = RND.str(10);
+      insertClientWithPatronymic(clientId, charmId, "Иван" + RND.str(5));
+      insertAccount(clientId);
+    }
+
+    for (int i = 0; i < 10; i++) {
+      String clientId = RND.str(10);
+      insertClient(clientId, charmId);
+      insertAccount(clientId);
+    }
 
     ClientListRequest req = new ClientListRequest();
     req.filterByFio = "Иван";
