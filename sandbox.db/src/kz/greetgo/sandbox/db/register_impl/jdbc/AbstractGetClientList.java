@@ -6,7 +6,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 public abstract class AbstractGetClientList {
+
+  // FIXME: 1/4/18 show only clients having at least one active account
+
   protected final ClientListRequest in;
+
   public AbstractGetClientList(ClientListRequest in) {this.in = in;}
 
   protected final StringBuilder sql = new StringBuilder();
