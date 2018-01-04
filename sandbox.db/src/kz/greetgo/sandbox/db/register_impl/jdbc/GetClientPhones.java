@@ -28,6 +28,7 @@ public class GetClientPhones implements ConnectionCallback<ClientPhones> {
       {
         int index = 1;
         for (Object p : sqlParams) {
+          // FIXME: 1/4/18 index does not increment
           ps.setObject(index, p);
         }
       }

@@ -366,6 +366,8 @@ public class ClientRegisterImplTest extends ParentTestNg {
     fact.street = "street";
     fact.house = "house";
     fact.flat = "flat";
+
+    // FIXME: 1/4/18 give differet values
     reg.street = "";
     reg.house = "";
     reg.flat = "";
@@ -442,6 +444,9 @@ public class ClientRegisterImplTest extends ParentTestNg {
     Float money = (float) RND.plusDouble(99999, 5);
 
     clientTestDao.get().insertCharm(charmId, charmName);
+
+
+    //FIXME: 1/4/18 you already have method "insertClient". why dont you use that?
     clientTestDao.get().insertClient(
       id,
       RND.str(10),
@@ -672,7 +677,7 @@ public class ClientRegisterImplTest extends ParentTestNg {
     //
 
     assertThat(list).hasSize(3);
-    assertThat(list.get(0).totalAccountBalance).isEqualTo(5+1+2+3);
+    assertThat(list.get(0).totalAccountBalance).isEqualTo(5 + 1 + 2 + 3);
     assertThat(list.get(1).totalAccountBalance).isEqualTo(62.41f);
     assertThat(list.get(2).totalAccountBalance).isEqualTo(754);
 
@@ -913,6 +918,7 @@ public class ClientRegisterImplTest extends ParentTestNg {
 
   }
 
+  // FIXME: 1/4/18 test fails
   @Test
   public void getList_CheckSortedList_ClientAgeDesc() {
 
@@ -937,8 +943,8 @@ public class ClientRegisterImplTest extends ParentTestNg {
 
     insertAccountWithMoney(clientId, 456456f);
     insertAccountWithMoney(clientId, 456f);
-    insertAccountWithMoney(clientId2,654.45f);
-    insertAccountWithMoney(clientId3,654.45f);
+    insertAccountWithMoney(clientId2, 654.45f);
+    insertAccountWithMoney(clientId3, 654.45f);
 
     //
     //
@@ -949,9 +955,9 @@ public class ClientRegisterImplTest extends ParentTestNg {
     assertThat(list).hasSize(3);
     int year = Year.now().getValue();
 
-    assertThat(list.get(0).age).isEqualTo(year-2000);
-    assertThat(list.get(1).age).isEqualTo(year-2010);
-    assertThat(list.get(2).age).isEqualTo(year-2015);
+    assertThat(list.get(0).age).isEqualTo(year - 2000);
+    assertThat(list.get(1).age).isEqualTo(year - 2010);
+    assertThat(list.get(2).age).isEqualTo(year - 2015);
 
   }
 
@@ -979,8 +985,8 @@ public class ClientRegisterImplTest extends ParentTestNg {
 
     insertAccountWithMoney(clientId, 456456f);
     insertAccountWithMoney(clientId, 456f);
-    insertAccountWithMoney(clientId2,654.45f);
-    insertAccountWithMoney(clientId3,654.45f);
+    insertAccountWithMoney(clientId2, 654.45f);
+    insertAccountWithMoney(clientId3, 654.45f);
 
     //
     //
@@ -992,11 +998,12 @@ public class ClientRegisterImplTest extends ParentTestNg {
 
     int year = Year.now().getValue();
 
-    assertThat(list.get(0).age).isEqualTo(year -2015);
-    assertThat(list.get(1).age).isEqualTo(year -2010);
-    assertThat(list.get(2).age).isEqualTo(year -2000);
+    assertThat(list.get(0).age).isEqualTo(year - 2015);
+    assertThat(list.get(1).age).isEqualTo(year - 2010);
+    assertThat(list.get(2).age).isEqualTo(year - 2000);
 
   }
+
   @Test
   public void getSize_ofFilteredList() {
 
@@ -1072,8 +1079,6 @@ public class ClientRegisterImplTest extends ParentTestNg {
     assertThat(size).isEqualTo(50);
 
   }
-
-
 
 
   @Test
@@ -1196,7 +1201,7 @@ public class ClientRegisterImplTest extends ParentTestNg {
     );
   }
 
-  private void insertAccount(String clientId){
+  private void insertAccount(String clientId) {
     clientTestDao.get().insertClientAccount(
       RND.str(10),
       clientId,
@@ -1235,7 +1240,7 @@ public class ClientRegisterImplTest extends ParentTestNg {
     );
   }
 
-  private void insertPhones(String clientId){
+  private void insertPhones(String clientId) {
     clientTestDao.get().insertPhones(
       clientId,
       "home",
