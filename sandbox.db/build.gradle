@@ -6,6 +6,10 @@ dependencies {
   compile "kz.greetgo.mvc:greetgo.mvc.security:$greetgoMvcVersion"
   compile "kz.greetgo:greetgo.msoffice:0.4.23"
 
+  compile 'org.apache.pdfbox:pdfbox:1.8.9'
+  compile 'com.itextpdf:itextpdf:5.5.7'
+  compile "com.google.guava:guava:23.0"
+
   compile group: 'org.postgresql', name: 'postgresql', version: '9.4-1202-jdbc42'
   compile group: 'org.mybatis', name: 'mybatis', version: '3.4.2'
   compile group: 'org.liquibase', name: 'liquibase-core', version: '3.5.1'

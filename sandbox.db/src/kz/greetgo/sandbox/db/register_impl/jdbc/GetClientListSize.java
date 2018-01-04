@@ -14,19 +14,20 @@ public class GetClientListSize extends AbstractGetClientList implements Connecti
   }
 
   @Override
+  protected void appendJoin() {}
+
+  @Override
   protected void appendGroupBy() {}
 
   @Override
   protected void appendOffsetLimit() {}
 
   @Override
-  protected void appendSorting() { }
+  protected void appendSorting() {}
 
   @Override
-  protected void select() {
-    //Khamit distinct - 1
-
-    sql.append("select count(distinct c.id)");
+  protected void appendSelect() {
+    sql.append("select count(1)");
   }
 
   @Override
@@ -34,9 +35,6 @@ public class GetClientListSize extends AbstractGetClientList implements Connecti
     prepareSql();
 
     try (PreparedStatement ps = connection.prepareStatement(sql.toString())) {
-
-      //Khamit Sout ubrat ili zamenit na trace esli nujno - 1
-      System.out.println(sql.toString());
 
       {
         int index = 1;

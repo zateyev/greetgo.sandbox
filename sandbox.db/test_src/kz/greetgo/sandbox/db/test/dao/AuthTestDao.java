@@ -8,10 +8,10 @@ import org.apache.ibatis.annotations.Select;
 import org.apache.ibatis.annotations.Update;
 
 public interface AuthTestDao {
-  @Select("select value from UserParams where personId = #{personId} and name = #{name}")
+  @Select("Select value from UserParams where personId = #{personId} and name = #{name}")
   String loadParamValue(@Param("personId") String personId, @Param("name") UserParamName paramName);
 
-  @Select("select count(1) from UserParams where personId = #{personId} and name = #{name} and value is not null")
+  @Select("Select count(1) from UserParams where personId = #{personId} and name = #{name} and value is not null")
   int countOfUserParams(@Param("personId") String personId, @Param("name") UserParamName paramName);
 
   @Insert("insert into UserParams (personId, name, value) values (#{personId}, #{name}, #{value})")

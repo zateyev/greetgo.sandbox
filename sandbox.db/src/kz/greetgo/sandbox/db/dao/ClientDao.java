@@ -15,10 +15,10 @@ import java.util.List;
 public interface ClientDao {
 
 
-  @Select("select * from Charm where actual = 1 order by name")
+  @Select("Select * from Charm where actual = 1 order by name")
   List<CharmRecord> loadCharmList();
 
-  @Select("select c.charm_id charmId," +
+  @Select("Select c.charm_id charmId," +
     " c.birth_date dateOfBirth," +
     " c.current_gender gender," +
     " c.* from Client c" +
@@ -35,12 +35,39 @@ public interface ClientDao {
   @Update("update client_phone set actual = 0 where client = #{id}")
   void deleteClientPhone(@Param("id") String id);
 
-  @Update("update client_account set actual = 0 where id = #{id}")
+  @Update("update client_account set actual = 0 where client = #{id}")
   void deleteClientAccount(@Param("id") String id);
 
-  @Update("update client set ${fieldName} = #{value} where id = #{clientId}")
-  void updateClientField(@Param("clientId") String id, @Param("fieldName") String fieldName,
-                         @Param("value") Object value);
+  @Update("update client set " +
+    " name = #{name}," +
+    " surname = #{surname}," +
+    " patronymic = #{patronymic}," +
+    " current_gender = #{gender}," +
+    " charm_id = #{charmId}," +
+    " birth_date = #{birthDate}" +
+    " where id = #{clientId}")
+  void updateClient(@Param("clientId") String id,
+                    @Param("name") String name,
+                    @Param("surname") String surname,
+                    @Param("patronymic") String patronymic,
+                    @Param("gender") String gender,
+                    @Param("charmId") String charmId,
+                    @Param("birthDate") java.sql.Date birthDate
+  );
+
+  @Update("update client_addr set" +
+    " street = #{street}," +
+    " house = #{house}," +
+    " flat = #{flat}" +
+    " where client = #{clientId} and" +
+    " type = #{type}")
+  void updateAddress(
+    @Param("clientId") String id,
+    @Param("type") String type,
+    @Param("street") String street,
+    @Param("house") String house,
+    @Param("flat") String flat
+  );
 
 
   @Insert("insert into client (id, name, surname, patronymic, birth_date, current_gender, charm_id, actual) " +
@@ -54,7 +81,7 @@ public interface ClientDao {
                     @Param("charm_id") String charmId);
 
 
-  @Select("select c.id, c.surname || ' ' || c.name || ' ' ||c.patronymic as fio,  ch.name as charm, " +
+  @Select("Select c.id, c.surname || ' ' || c.name || ' ' ||c.patronymic as fio,  ch.name as charm, " +
     " extract(year from age(c.birth_date)) as age, " +
     " sum(c_ac.money) as totalAccountBalance, max(c_ac.money) as maxAccountBalance," +
     " min(c_ac.money) as minAccountBalance from client c " +
@@ -64,17 +91,10 @@ public interface ClientDao {
     " group by c.id, charm")
   ClientRecord getClientRecord(@Param("id") String id);
 
-
-  @Update("update client_addr set ${fieldName} = #{value} where client = #{id} and type = #{type}")
-  void updateAddressField(@Param("id") String id,
-                          @Param("type") String type,
-                          @Param("fieldName") String fieldName,
-                          @Param("value") Object value);
-
-  @Select("select street, house, flat from client_addr where client = #{id} and type = 'fact' and actual = 1")
+  @Select("Select street, house, flat from client_addr where client = #{id} and type = 'fact' and actual = 1")
   ClientAddress getFactAddress(@Param("id") String id);
 
-  @Select("select street, house, flat from client_addr where client = #{id} and type = 'reg' and actual = 1")
+  @Select("Select street, house, flat from client_addr where client = #{id} and type = 'reg' and actual = 1")
   ClientAddress getRegAddress(String id);
 
   @Insert("insert into client_addr(client, street, house, flat, type, actual) " +
@@ -94,21 +114,12 @@ public interface ClientDao {
                          @Param("type") String type);
 
   @Insert("insert into client_account(id, client, money, number, registered_at, actual)" +
-    "values (#{id}, #{client}, #{money}, #{number}, #{registered_at}, 1)")
+          "values (#{id}, #{client}, #{money}, #{number}, #{registered_at}, 1)")
   void insertClientAccount(
     @Param("id") String id,
     @Param("client") String client,
     @Param("money") float money,
     @Param("number") String number,
     @Param("registered_at") Date registeredAt);
-
-  @Select("select number from client_phone where type = 'home' and client = #{id} and actual = 1")
-  String getHomePhone(@Param("id") String id);
-
-  @Select("select number from client_phone where type = 'work' and client = #{id} and actual = 1")
-  String getWorkPhone(@Param("id") String id);
-
-  @Select("select number from client_phone where type = 'mobile' and client = #{id} and actual = 1")
-  List<String> getMobilePhone(String id);
 
 }

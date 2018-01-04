@@ -14,16 +14,16 @@ import java.util.List;
 
 public interface ClientTestDao {
 
-  @Select("select actual from client where id = #{id}")
+  @Select("Select actual from client where id = #{id}")
   int getActualClient(@Param("id") String id);
 
-  @Select("select c.surname || ' ' || c.name || ' ' || c.patronymic AS fio, " +
+  @Select("Select c.surname || ' ' || c.name || ' ' || c.patronymic AS fio, " +
     " ch.name AS charm, " +
     " extract(year from age(c.birth_date)) as age" +
-    " from client c join charm ch on (c.charm_id = ch.id) where c.actual = 1 and ch.actual = 1")
-  ClientRecord getClient(@Param("id") String id);
+    " from client c join charm ch on (c.charm_id = ch.id) where c.actual = 1 and c.id = #{id}")
+  ClientRecord getClient(@Param("id") String clientId);
 
-  @Select("select c.current_gender gender," +
+  @Select("Select c.current_gender gender," +
     " c.charm_id charmId," +
     " c.birth_date dateOfBirth," +
     " c.* " +
@@ -58,10 +58,10 @@ public interface ClientTestDao {
   @Update("update client set actual = 0")
   void deleteAllClients();
 
-  @Select("select client.id from client join charm on client.charm_id = charm.id" +
-    " join client_account on client_account.client = client.id" +
-    " where client.actual = 1" +
-    " group by client.id")
+  @Select("select c.id from client c"+
+    " join charm ch on c.charm_id = ch.id"+
+    " join client_account c_ac on c_ac.client = c.id"+
+    " where 1=1 and c.actual = 1 group by c.id, ch.name")
   List<String> getListOfIds();
 
   @Insert("insert into client_addr(client, type, street, house, flat, actual)" +
@@ -72,16 +72,19 @@ public interface ClientTestDao {
                   @Param("house") String house,
                   @Param("flat") String flat);
 
-  @Select("select street, house, flat from client_addr where client = #{id} and type = 'fact' and actual = 1")
+  @Select("Select street, house, flat from client_addr where client = #{id} and type = 'fact' and actual = 1")
   ClientAddress getFactAddress(@Param("id") String id);
 
-  @Select("select number from client_phone where client = #{id} and type = 'home' and actual = 1")
+  @Select("Select street, house, flat from client_addr where client = #{id} and type = 'reg' and actual = 1")
+  ClientAddress getRegAddress(@Param("id") String id);
+
+  @Select("Select number from client_phone where client = #{id} and type = 'home' and actual = 1")
   String getHomePhone(@Param("id") String id);
 
-  @Select("select number from client_phone where client = #{id} and type = 'work' and actual = 1")
+  @Select("Select number from client_phone where client = #{id} and type = 'work' and actual = 1")
   String getWorkPhone(@Param("id")  String id);
 
-  @Select("select number from client_phone where client = #{id} and type = 'mobile' and actual = 1")
+  @Select("Select number from client_phone where client = #{id} and type = 'mobile' and actual = 1")
   List<String> getMobile(@Param("id")  String id);
 
   @Update("update client_phone set actual = 0")
@@ -106,4 +109,7 @@ public interface ClientTestDao {
 
   @Update("update client_account set actual = 0")
   void deleteAllAccounts();
+
+  @Select("select number from client_account where client = #{id} and actual = 1")
+  String getClientAccount(@Param("id") String clientId);
 }

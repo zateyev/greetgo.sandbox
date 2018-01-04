@@ -7,6 +7,7 @@ import kz.greetgo.sandbox.controller.register.ClientRegister;
 import kz.greetgo.sandbox.db.dao.ClientDao;
 import kz.greetgo.sandbox.db.register_impl.jdbc.GetClientList;
 import kz.greetgo.sandbox.db.register_impl.jdbc.GetClientListSize;
+import kz.greetgo.sandbox.db.register_impl.jdbc.GetClientPhones;
 import kz.greetgo.sandbox.db.report.ClientRecord.ClientRecordListReportViewXslx;
 import kz.greetgo.sandbox.db.util.JdbcSandbox;
 import kz.greetgo.util.RND;
@@ -42,11 +43,7 @@ public class ClientRegisterImpl implements ClientRegister {
       ret.regAddress = clientDao.get().getRegAddress(id);
       ClientPhones phones = new ClientPhones();
 
-      //Khamit Можно ли сделать через 1 запрос - 1
-      phones.home = clientDao.get().getHomePhone(id);
-      phones.work = clientDao.get().getWorkPhone(id);
-      phones.mobile = clientDao.get().getMobilePhone(id);
-      ret.phones = phones;
+      ret.phones = jdbc.get().execute(new GetClientPhones(id));
     }
     ret.charms = clientDao.get().loadCharmList();
 
@@ -57,30 +54,39 @@ public class ClientRegisterImpl implements ClientRegister {
 
   @Override
   public ClientRecord saveClient(ClientToSave clientToSave) {
-    java.sql.Date dateOfBirth = java.sql.Date.valueOf(clientToSave.dateOfBirth);
 
-    clientToSave.gender = clientToSave.gender.toLowerCase();
+    java.sql.Date dateOfBirth = java.sql.Date.valueOf(clientToSave.dateOfBirth);
 
     if (clientToSave.id != null) {
 
-      //Khamit mojno li sdelat odnim query - 1
-      clientDao.get().updateClientField(clientToSave.id, "name", clientToSave.name);
-      clientDao.get().updateClientField(clientToSave.id, "surname", clientToSave.surname);
-      clientDao.get().updateClientField(clientToSave.id, "patronymic", clientToSave.patronymic);
-      clientDao.get().updateClientField(clientToSave.id, "charm_id", clientToSave.charmId);
-      clientDao.get().updateClientField(clientToSave.id, "birth_date", dateOfBirth);
-      clientDao.get().updateClientField(clientToSave.id, "current_gender", clientToSave.gender);
-      clientDao.get().updateClientField(clientToSave.id, "actual", 1);
+      clientDao.get().updateClient(
+        clientToSave.id,
+        clientToSave.name.trim(),
+        clientToSave.surname.trim(),
+        clientToSave.patronymic.trim(),
+        clientToSave.gender.trim().toLowerCase(),
+        clientToSave.charmId,
+        dateOfBirth
+      );
 
-      clientDao.get().updateAddressField(clientToSave.id, "fact", "street", clientToSave.factAddress.street);
-      clientDao.get().updateAddressField(clientToSave.id, "fact", "house", clientToSave.factAddress.house);
-      clientDao.get().updateAddressField(clientToSave.id, "fact", "flat", clientToSave.factAddress.flat);
+      clientDao.get().updateAddress(
+        clientToSave.id,
+        "fact",
+        clientToSave.factAddress.street,
+        clientToSave.factAddress.house,
+        clientToSave.factAddress.flat
+      );
 
-      clientDao.get().updateAddressField(clientToSave.id, "reg", "street", clientToSave.regAddress.street);
-      clientDao.get().updateAddressField(clientToSave.id, "reg", "house", clientToSave.regAddress.house);
-      clientDao.get().updateAddressField(clientToSave.id, "reg", "flat", clientToSave.regAddress.flat);
+      clientDao.get().updateAddress(
+        clientToSave.id,
+        "reg",
+        clientToSave.regAddress.street,
+        clientToSave.regAddress.house,
+        clientToSave.regAddress.flat
+      );
 
       clientDao.get().deleteClientPhone(clientToSave.id);
+
       clientDao.get().insertClientPhone(
         clientToSave.id,
         clientToSave.phones.home,
@@ -161,7 +167,7 @@ public class ClientRegisterImpl implements ClientRegister {
 
   @Override
   public void deleteClient(String id) {
-    //Khamit esli est veroyatnost prihoda null, to delai if(null) return, chtoby zrya vremya bazi ne tratit - 1
+    if (id == null) return;
 
     clientDao.get().deleteClient(id);
     clientDao.get().deleteClientAddress(id);
@@ -174,7 +180,7 @@ public class ClientRegisterImpl implements ClientRegister {
   public void download(ClientListRequest clientListRequest, OutputStream outputStream, String contentType, String personId) throws Exception {
 
     if (contentType.contains("pdf")) {
-      throw new RuntimeException("Неподдерживается пока"); //TODO
+
     } else {
       ClientRecordListReportViewXslx view = new ClientRecordListReportViewXslx(outputStream);
 

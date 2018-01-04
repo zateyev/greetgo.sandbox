@@ -10,6 +10,7 @@ import org.testng.annotations.Test;
 
 import java.io.FileOutputStream;
 import java.io.OutputStream;
+import java.time.Year;
 import java.util.Date;
 import java.util.List;
 
@@ -63,37 +64,40 @@ public class ClientRegisterImplTest extends ParentTestNg {
 
     clientTestDao.get().insert(clientId);
 
-
-    //Khamit davai ne odinakoview znacheniya - 1
     clientTestDao.get().insertAdrr(clientId,
       "reg",
-      "reg",
-      "reg",
-      "reg");
+      "StreetForReg",
+      "HouseForReg",
+      "FlatForReg");
 
-    //Khamit davai ne odinakoview znacheniya - 1
     clientTestDao.get().insertAdrr(clientId,
       "fact",
-      "fact",
-      "fact",
-      "fact");
+      "StreetForFact",
+      "HouseForFact",
+      "FlatForFact");
 
     clientTestDao.get().insertPhones(
       clientId,
       "work",
-      "878754878"
+      "1111145"
     );
 
     clientTestDao.get().insertPhones(
       clientId,
       "home",
-      "878712878"
+      "2222245"
     );
 
     clientTestDao.get().insertPhones(
       clientId,
       "mobile",
-      "83787878"
+      "3333345"
+    );
+
+    clientTestDao.get().insertPhones(
+      clientId,
+      "mobile",
+      "4444445"
     );
 
     clientTestDao.get().update(clientId, "charm_id", charmId1);
@@ -123,72 +127,99 @@ public class ClientRegisterImplTest extends ParentTestNg {
     assertThat(details.charms.get(0).name).isEqualTo(charmName2);
     assertThat(details.charms.get(1).name).isEqualTo(charmName1);
 
+    assertThat(details.factAddress.street).isEqualTo("StreetForFact");
+    assertThat(details.factAddress.house).isEqualTo("HouseForFact");
+    assertThat(details.factAddress.flat).isEqualTo("FlatForFact");
 
-    //Khamit inache ne poimew pravilno li eto - 1
-    assertThat(details.factAddress.street).isEqualTo("fact");
-    assertThat(details.factAddress.house).isEqualTo("fact");
-    assertThat(details.factAddress.flat).isEqualTo("fact");
+    assertThat(details.regAddress.street).isEqualTo("StreetForReg");
+    assertThat(details.regAddress.house).isEqualTo("HouseForReg");
+    assertThat(details.regAddress.flat).isEqualTo("FlatForReg");
 
-    //Khamit inache ne poimew pravilno li eto - 1
-    assertThat(details.regAddress.street).isEqualTo("reg");
-    assertThat(details.regAddress.house).isEqualTo("reg");
-    assertThat(details.regAddress.flat).isEqualTo("reg");
-
-    assertThat(details.phones.home).isEqualTo("878712878");
-    assertThat(details.phones.work).isEqualTo("878754878");
-    assertThat(details.phones.mobile.get(0)).isEqualTo("83787878");
+    assertThat(details.phones.work).isEqualTo("1111145");
+    assertThat(details.phones.home).isEqualTo("2222245");
+    assertThat(details.phones.mobile.get(0)).isEqualTo("3333345");
+    assertThat(details.phones.mobile.get(1)).isEqualTo("4444445");
 
   }
 
 
   @Test
   public void deleteClient_NOTNULLid() throws Exception {
+    deleteAll();
 
     String clientId = RND.str(5);
+    String clientId2 = RND.str(5);
+    String charmId = RND.str(5);
 
-    clientTestDao.get().insert(clientId);
+    insertCharm(charmId);
+    insertClient(clientId, charmId);
+    insertClient(clientId2, charmId);
+    insertAddresses(clientId);
+    insertAddresses(clientId2);
+    insertPhones(clientId);
+    insertPhones(clientId2);
+    insertAccount(clientId);
+    insertAccount(clientId2);
+
     clientTestDao.get().update(clientId, "name", RND.str(10));
     clientTestDao.get().update(clientId, "surname", RND.str(10));
     clientTestDao.get().update(clientId, "patronymic", RND.str(10));
     clientTestDao.get().update(clientId, "actual", 1);
 
-    String clientId2 = RND.str(5);
-
-    clientTestDao.get().insert(clientId2);
     clientTestDao.get().update(clientId2, "name", RND.str(10));
     clientTestDao.get().update(clientId2, "surname", RND.str(10));
     clientTestDao.get().update(clientId2, "patronymic", RND.str(10));
     clientTestDao.get().update(clientId2, "actual", 1);
+
     //
     //
     clientRegister.get().deleteClient(clientId);
     //
     //
 
-
-    //Khamit ne provereni account, address, phone i t.d. - 1
     assertThat(clientTestDao.get().getActualClient(clientId)).isEqualTo(0);
+    assertThat(clientTestDao.get().getFactAddress(clientId)).isNull();
+    assertThat(clientTestDao.get().getRegAddress(clientId)).isNull();
+    assertThat(clientTestDao.get().getHomePhone(clientId)).isNullOrEmpty();
+    assertThat(clientTestDao.get().getWorkPhone(clientId)).isNullOrEmpty();
+    assertThat(clientTestDao.get().getMobile(clientId)).isNullOrEmpty();
+    assertThat(clientTestDao.get().getClientAccount(clientId)).isNullOrEmpty();
+
     assertThat(clientTestDao.get().getActualClient(clientId2)).isEqualTo(1);
+    assertThat(clientTestDao.get().getFactAddress(clientId2)).isNotNull();
+    assertThat(clientTestDao.get().getRegAddress(clientId2)).isNotNull();
+    assertThat(clientTestDao.get().getHomePhone(clientId2)).isNotEmpty();
+    assertThat(clientTestDao.get().getWorkPhone(clientId2)).isNotEmpty();
+    assertThat(clientTestDao.get().getMobile(clientId2)).isNotEmpty();
+    assertThat(clientTestDao.get().getClientAccount(clientId2)).isNotEmpty();
 
   }
+
 
   @Test
   public void deleteClient_NULLid() {
 
-
-    //Khamit ochisti tablicu - 1
+    deleteAll();
 
     String clientId = RND.str(5);
+    String clientId2 = RND.str(5);
+    String charmId = RND.str(5);
 
-    clientTestDao.get().insert(clientId);
+    insertCharm(charmId);
+    insertClient(clientId, charmId);
+    insertClient(clientId2, charmId);
+    insertAddresses(clientId);
+    insertAddresses(clientId2);
+    insertPhones(clientId);
+    insertPhones(clientId2);
+    insertAccount(clientId);
+    insertAccount(clientId2);
+
     clientTestDao.get().update(clientId, "name", RND.str(10));
     clientTestDao.get().update(clientId, "surname", RND.str(10));
     clientTestDao.get().update(clientId, "patronymic", RND.str(10));
     clientTestDao.get().update(clientId, "actual", 1);
 
-    String clientId2 = RND.str(5);
-
-    clientTestDao.get().insert(clientId2);
     clientTestDao.get().update(clientId2, "name", RND.str(10));
     clientTestDao.get().update(clientId2, "surname", RND.str(10));
     clientTestDao.get().update(clientId2, "patronymic", RND.str(10));
@@ -200,10 +231,22 @@ public class ClientRegisterImplTest extends ParentTestNg {
     //
     //
 
-    //Khamit inache tut ne poimew udalil li uje suwestvuiuwie dannie - 1
 
     assertThat(clientTestDao.get().getActualClient(clientId)).isEqualTo(1);
+    assertThat(clientTestDao.get().getFactAddress(clientId)).isNotNull();
+    assertThat(clientTestDao.get().getRegAddress(clientId)).isNotNull();
+    assertThat(clientTestDao.get().getHomePhone(clientId)).isNotEmpty();
+    assertThat(clientTestDao.get().getWorkPhone(clientId)).isNotEmpty();
+    assertThat(clientTestDao.get().getMobile(clientId)).isNotEmpty();
+    assertThat(clientTestDao.get().getClientAccount(clientId)).isNotEmpty();
+
     assertThat(clientTestDao.get().getActualClient(clientId2)).isEqualTo(1);
+    assertThat(clientTestDao.get().getFactAddress(clientId2)).isNotNull();
+    assertThat(clientTestDao.get().getRegAddress(clientId2)).isNotNull();
+    assertThat(clientTestDao.get().getHomePhone(clientId2)).isNotEmpty();
+    assertThat(clientTestDao.get().getWorkPhone(clientId2)).isNotEmpty();
+    assertThat(clientTestDao.get().getMobile(clientId2)).isNotEmpty();
+    assertThat(clientTestDao.get().getClientAccount(clientId2)).isNotEmpty();
 
   }
 
@@ -304,32 +347,9 @@ public class ClientRegisterImplTest extends ParentTestNg {
       "male",
       charmId);
 
-    clientTestDao.get().insertAdrr(clientId,
-      "reg",
-      RND.str(5),
-      RND.str(5),
-      RND.intStr(3));
-    clientTestDao.get().insertAdrr(clientId,
-      "fact",
-      RND.str(5),
-      RND.str(5),
-      RND.intStr(3));
+    insertAddresses(clientId);
 
-    clientTestDao.get().insertPhones(
-      clientId,
-      "work",
-      RND.intStr(8)
-    );
-    clientTestDao.get().insertPhones(
-      clientId,
-      "home",
-      RND.intStr(8)
-    );
-    clientTestDao.get().insertPhones(
-      clientId,
-      "mobile",
-      RND.intStr(8)
-    );
+    insertPhones(clientId);
 
     insertAccountWithMoney(clientId, 15961);
 
@@ -337,22 +357,22 @@ public class ClientRegisterImplTest extends ParentTestNg {
     ClientAddress fact = new ClientAddress();
     ClientAddress reg = new ClientAddress();
     ClientPhones phone = new ClientPhones();
+
     fact.street = "street";
     fact.house = "house";
     fact.flat = "flat";
-    reg.street = "street";
-    reg.house = "house";
-    reg.house = "house";
-    reg.flat = "flat";
+    reg.street = "";
+    reg.house = "";
+    reg.flat = "";
 
-    phone.home = "123132";
-    phone.work = "123133";
-    phone.mobile.add("143132");
+    phone.home = "123123";
+    phone.work = "456456";
+    phone.mobile.add("678678");
 
     clUpdated.id = clientId;
     clUpdated.name = name + "new";
     clUpdated.surname = surname + "new";
-    clUpdated.patronymic = patronymic + "new";
+    clUpdated.patronymic = "";
     clUpdated.dateOfBirth = "1990-11-11";
     clUpdated.gender = "female";
     clUpdated.charmId = charmId;
@@ -367,7 +387,8 @@ public class ClientRegisterImplTest extends ParentTestNg {
     //
 
     ClientDetails actual = clientTestDao.get().loadDetails(rec.id);
-    ClientAddress addr = clientTestDao.get().getFactAddress(rec.id);
+    ClientAddress factAddr = clientTestDao.get().getFactAddress(rec.id);
+    ClientAddress regAddr = clientTestDao.get().getRegAddress(rec.id);
     String homePhone = clientTestDao.get().getHomePhone(rec.id);
     String workPhone = clientTestDao.get().getWorkPhone(rec.id);
     List<String> mobile = clientTestDao.get().getMobile(rec.id);
@@ -376,17 +397,20 @@ public class ClientRegisterImplTest extends ParentTestNg {
     assertThat(actual.surname).isEqualTo(clUpdated.surname);
     assertThat(actual.patronymic).isEqualTo(clUpdated.patronymic);
     assertThat(actual.dateOfBirth).isEqualTo(clUpdated.dateOfBirth);
-    assertThat(addr.street).isEqualTo("street");
-    assertThat(addr.house).isEqualTo("house");
-    assertThat(addr.flat).isEqualTo("flat");
+
+    assertThat(factAddr.street).isEqualTo("street");
+    assertThat(factAddr.house).isEqualTo("house");
+    assertThat(factAddr.flat).isEqualTo("flat");
+
+    assertThat(regAddr.street).isNullOrEmpty();
+    assertThat(regAddr.house).isNullOrEmpty();
+    assertThat(regAddr.flat).isNullOrEmpty();
 
     assertThat(homePhone).isEqualTo(phone.home);
     assertThat(workPhone).isEqualTo(phone.work);
     assertThat(mobile).isEqualTo(phone.mobile);
 
-
   }
-
 
   @Test
   public void getList_emptyList() {
@@ -406,8 +430,7 @@ public class ClientRegisterImplTest extends ParentTestNg {
   @Test
   public void getList_CheckReturnedRecord() {
 
-    clientTestDao.get().deleteAllClients();
-    clientTestDao.get().deleteAllCharms();
+    deleteAll();
     String id = RND.str(10);
     String charmId = RND.str(5);
     String charmName = RND.str(10);
@@ -446,23 +469,19 @@ public class ClientRegisterImplTest extends ParentTestNg {
     assertThat(list.get(0).fio).isEqualTo(rc.fio);
     assertThat(list.get(0).age).isEqualTo(rc.age);
     assertThat(list.get(0).charm).isEqualTo(charmName);
-    assertThat(list.get(0).totalAccountBalance).isEqualTo(money.longValue());
-    assertThat(list.get(0).maxAccountBalance).isEqualTo(money.longValue());
-    assertThat(list.get(0).minAccountBalance).isEqualTo(money.longValue());
+    assertThat(list.get(0).totalAccountBalance).isEqualTo(money);
+    assertThat(list.get(0).maxAccountBalance).isEqualTo(money);
+    assertThat(list.get(0).minAccountBalance).isEqualTo(money);
 
   }
 
   @Test
   public void getList_CheckLimitedList() {
-    clientTestDao.get().deleteAllAddr();
-    clientTestDao.get().deleteAllCharms();
-    clientTestDao.get().deleteAllClients();
-    clientTestDao.get().deleteAllAccounts();
+    deleteAll();
     String charmId = RND.str(5);
-    String charmName = RND.str(10);
     String clientName = RND.str(10);
 
-    clientTestDao.get().insertCharm(charmId, charmName);
+    insertCharm(charmId);
 
     for (int i = 0; i < 25; i++) {
       String clientId = RND.str(10);
@@ -500,69 +519,30 @@ public class ClientRegisterImplTest extends ParentTestNg {
     List<String> detList = clientTestDao.get().getListOfIds();
 
     assertThat(list).hasSize(5);
-    //Khamit sdelai assert dlya vseh 5 - 1
-    assertThat(detList.get(10)).isEqualTo(list.get(0).id);
+    for (int i = 0; i < 5; i++) assertThat(detList.get(10 + i)).isEqualTo(list.get(0 + i).id);
+
 
   }
 
-  //Khamit fliter pochemu (fio) nazvanie metoda, net proverki na surname i patronymic - 1
   @Test
-  public void getList_CheckFilteredList() {
+  public void getList_CheckFilteredList_byName() {
     String charmId = RND.str(5);
-    String charmName = RND.str(10);
-    clientTestDao.get().deleteAllAddr();
-    clientTestDao.get().deleteAllCharms();
-    clientTestDao.get().deleteAllClients();
-    clientTestDao.get().deleteAllAccounts();
-    String clientName = RND.str(10);
 
+    deleteAll();
 
-    clientTestDao.get().insertCharm(charmId, charmName);
+    insertCharm(charmId);
+
     for (int i = 0; i < 10; i++) {
       String clientId = RND.str(10);
-
-      //Khamit V otdelni method - 1
-      clientTestDao.get().insertClient(
-        clientId,
-        "Иванов" + clientName,
-        RND.str(10),
-        RND.str(10),
-        java.sql.Date.valueOf("1990-10-10"),
-        "male",
-        charmId
-      );
-
-      clientTestDao.get().insertClientAccount(
-        RND.str(10),
-        clientId,
-        (float) RND.plusDouble(999999, 2),
-        RND.str(5),
-        new Date()
-      );
+      insertClientWithName(clientId, charmId, "Иван" + RND.str(5));
+      insertAccount(clientId);
     }
 
     for (int i = 0; i < 10; i++) {
       String clientId = RND.str(10);
-
-      clientTestDao.get().insertClient(
-        clientId,
-        clientName,
-        RND.str(10),
-        RND.str(10),
-        java.sql.Date.valueOf("1990-10-10"),
-        "male",
-        charmId
-      );
-
-      clientTestDao.get().insertClientAccount(
-        RND.str(10),
-        clientId,
-        (float) RND.plusDouble(999999, 2),
-        RND.str(5),
-        new Date()
-      );
+      insertClient(clientId, charmId);
+      insertAccount(clientId);
     }
-
 
     ClientListRequest req = new ClientListRequest();
     req.filterByFio = "Иван";
@@ -574,8 +554,75 @@ public class ClientRegisterImplTest extends ParentTestNg {
     //
 
     assertThat(list).hasSize(10);
+    for (ClientRecord rec : list) assertThat(rec.fio).contains("Иван");
 
-    //Khamit check if realy Ivan - 1
+  }
+
+  @Test
+  public void getList_CheckFilteredList_bySurname() {
+    String charmId = RND.str(5);
+
+    deleteAll();
+
+    insertCharm(charmId);
+
+    for (int i = 0; i < 10; i++) {
+      String clientId = RND.str(10);
+      insertClientWithSurname(clientId, charmId, "Иван" + RND.str(5));
+      insertAccount(clientId);
+    }
+
+    for (int i = 0; i < 10; i++) {
+      String clientId = RND.str(10);
+      insertClient(clientId, charmId);
+      insertAccount(clientId);
+    }
+
+    ClientListRequest req = new ClientListRequest();
+    req.filterByFio = "Иван";
+
+    //
+    //
+    List<ClientRecord> list = clientRegister.get().getList(req);
+    //
+    //
+
+    assertThat(list).hasSize(10);
+    for (ClientRecord rec : list) assertThat(rec.fio).contains("Иван");
+
+  }
+
+  @Test
+  public void getList_CheckFilteredList_byPatronymic() {
+    String charmId = RND.str(5);
+
+    deleteAll();
+
+    insertCharm(charmId);
+
+    for (int i = 0; i < 10; i++) {
+      String clientId = RND.str(10);
+      insertClientWithPatronymic(clientId, charmId, "Иван" + RND.str(5));
+      insertAccount(clientId);
+    }
+
+    for (int i = 0; i < 10; i++) {
+      String clientId = RND.str(10);
+      insertClient(clientId, charmId);
+      insertAccount(clientId);
+    }
+
+    ClientListRequest req = new ClientListRequest();
+    req.filterByFio = "Иван";
+
+    //
+    //
+    List<ClientRecord> list = clientRegister.get().getList(req);
+    //
+    //
+
+    assertThat(list).hasSize(10);
+    for (ClientRecord rec : list) assertThat(rec.fio).contains("Иван");
 
   }
 
@@ -620,8 +667,8 @@ public class ClientRegisterImplTest extends ParentTestNg {
     //
 
     assertThat(list).hasSize(3);
-    assertThat(list.get(0).totalAccountBalance).isEqualTo(11);
-    assertThat(list.get(1).totalAccountBalance).isEqualTo(62);
+    assertThat(list.get(0).totalAccountBalance).isEqualTo(5+1+2+3);
+    assertThat(list.get(1).totalAccountBalance).isEqualTo(62.41f);
     assertThat(list.get(2).totalAccountBalance).isEqualTo(754);
 
   }
@@ -895,11 +942,11 @@ public class ClientRegisterImplTest extends ParentTestNg {
     //
 
     assertThat(list).hasSize(3);
+    int year = Year.now().getValue();
 
-    //Khamit cherez god testi nachnut padat' - 1
-    assertThat(list.get(0).age).isEqualTo(17);
-    assertThat(list.get(1).age).isEqualTo(7);
-    assertThat(list.get(2).age).isEqualTo(2);
+    assertThat(list.get(0).age).isEqualTo(year-2000);
+    assertThat(list.get(1).age).isEqualTo(year-2010);
+    assertThat(list.get(2).age).isEqualTo(year-2015);
 
   }
 
@@ -937,11 +984,12 @@ public class ClientRegisterImplTest extends ParentTestNg {
     //
 
     assertThat(list).hasSize(3);
-    //Khamit cherez god testi nachnut padat' - 1
 
-    assertThat(list.get(0).age).isEqualTo(2);
-    assertThat(list.get(1).age).isEqualTo(7);
-    assertThat(list.get(2).age).isEqualTo(17);
+    int year = Year.now().getValue();
+
+    assertThat(list.get(0).age).isEqualTo(year -2015);
+    assertThat(list.get(1).age).isEqualTo(year -2010);
+    assertThat(list.get(2).age).isEqualTo(year -2000);
 
   }
   @Test
@@ -950,28 +998,23 @@ public class ClientRegisterImplTest extends ParentTestNg {
     ClientListRequest req = new ClientListRequest();
     deleteAll();
 
-    req.filterByFio  = "a";
+    req.filterByFio = "abba";
 
     String charmId = RND.str(10);
     insertCharm(charmId);
 
-    //Khamit dobav proverku na actual, i vstabliay dannie udovletvoryaiuwie filtru - 1
-
-    for (int i = 0; i < 50; i++) {
+    for (int i = 0; i < 5; i++) {
       String clientId = RND.str(10);
-
-      clientTestDao.get().insertClient(
-        clientId,
-        "a" + RND.str(10),
-        "a" + RND.str(10),
-        "a" + RND.str(10),
-        java.sql.Date.valueOf("1990-10-10"),
-        "male",
-        charmId
-      );
-
-      insertAccountWithMoney(clientId, 265.841f);
+      insertClient(clientId, charmId);
     }
+
+    String clientId = RND.str(10);
+    String clientId2 = RND.str(10);
+    String clientId3 = RND.str(10);
+
+    insertClientWithName(clientId, charmId, "abba" + RND.str(5));
+    insertClientWithSurname(clientId2, charmId, "abba" + RND.str(5));
+    insertClientWithPatronymic(clientId3, charmId, "abba" + RND.str(5));
 
     //
     //
@@ -979,7 +1022,14 @@ public class ClientRegisterImplTest extends ParentTestNg {
     //
     //
 
-    assertThat(size).isEqualTo(50);
+    ClientRecord det = clientTestDao.get().getClient(clientId);
+    ClientRecord det2 = clientTestDao.get().getClient(clientId2);
+    ClientRecord det3 = clientTestDao.get().getClient(clientId3);
+
+    assertThat(size).isEqualTo(3);
+    assertThat(det.fio).contains("abba");
+    assertThat(det2.fio).contains("abba");
+    assertThat(det3.fio).contains("abba");
 
   }
 
@@ -997,9 +1047,9 @@ public class ClientRegisterImplTest extends ParentTestNg {
 
       clientTestDao.get().insertClient(
         clientId,
-        "a" + RND.str(10),
-        "a" + RND.str(10),
-        "a" + RND.str(10),
+        RND.str(10),
+        RND.str(10),
+        RND.str(10),
         java.sql.Date.valueOf("1990-10-10"),
         "male",
         charmId
@@ -1038,7 +1088,7 @@ public class ClientRegisterImplTest extends ParentTestNg {
 
   }
 
-  public void deleteAll(){
+  private void deleteAll() {
     clientTestDao.get().deleteAllAddr();
     clientTestDao.get().deleteAllPhones();
     clientTestDao.get().deleteAllCharms();
@@ -1046,11 +1096,60 @@ public class ClientRegisterImplTest extends ParentTestNg {
     clientTestDao.get().deleteAllAccounts();
   }
 
-  public void insertCharm(String charmId) {
+  private void insertCharm(String charmId) {
     clientTestDao.get().insertCharm(charmId, RND.str(10));
   }
 
-  public void insertClientWithCharm(String clientId, String charmId) {
+  private void insertClient(String clientId, String charmId) {
+    clientTestDao.get().insertClient(
+      clientId,
+      RND.str(10),
+      RND.str(10),
+      RND.str(10),
+      java.sql.Date.valueOf("1991-12-12"),
+      "male",
+      charmId
+    );
+  }
+
+  private void insertClientWithName(String clientId, String charmId, String name) {
+    clientTestDao.get().insertClient(
+      clientId,
+      name,
+      RND.str(10),
+      RND.str(10),
+      java.sql.Date.valueOf("1991-12-12"),
+      "male",
+      charmId
+    );
+  }
+
+  private void insertClientWithSurname(String clientId, String charmId, String surname) {
+    clientTestDao.get().insertClient(
+      clientId,
+      RND.str(10),
+      surname,
+      RND.str(10),
+      java.sql.Date.valueOf("1991-12-12"),
+      "male",
+      charmId
+    );
+  }
+
+  private void insertClientWithPatronymic(String clientId, String charmId, String patronymic) {
+    clientTestDao.get().insertClient(
+      clientId,
+      RND.str(10),
+      RND.str(10),
+      patronymic,
+      java.sql.Date.valueOf("1991-12-12"),
+      "male",
+      charmId
+    );
+  }
+
+
+  private void insertClientWithCharm(String clientId, String charmId) {
     clientTestDao.get().insertClient(
       clientId,
       RND.str(10),
@@ -1062,7 +1161,7 @@ public class ClientRegisterImplTest extends ParentTestNg {
     );
   }
 
-  public void insertClientWithDate(String clientId, String charmId, String date){
+  private void insertClientWithDate(String clientId, String charmId, String date) {
     clientTestDao.get().insertClient(
       clientId,
       RND.str(10),
@@ -1074,13 +1173,60 @@ public class ClientRegisterImplTest extends ParentTestNg {
     );
   }
 
-  public void insertAccountWithMoney(String clientId, float money) {
+  private void insertAccount(String clientId){
+    clientTestDao.get().insertClientAccount(
+      RND.str(10),
+      clientId,
+      (float) RND.plusDouble(99999, 5),
+      RND.str(5),
+      new Date()
+    );
+  }
+
+  private void insertAccountWithMoney(String clientId, float money) {
     clientTestDao.get().insertClientAccount(
       RND.str(10),
       clientId,
       money,
       RND.str(5),
       new Date()
+    );
+  }
+
+
+  private void insertAddresses(String clientId) {
+    clientTestDao.get().insertAdrr(
+      clientId,
+      "fact",
+      RND.str(10),
+      RND.str(10),
+      RND.str(10)
+    );
+
+    clientTestDao.get().insertAdrr(
+      clientId,
+      "reg",
+      RND.str(10),
+      RND.str(10),
+      RND.str(10)
+    );
+  }
+
+  private void insertPhones(String clientId){
+    clientTestDao.get().insertPhones(
+      clientId,
+      "home",
+      RND.intStr(10)
+    );
+    clientTestDao.get().insertPhones(
+      clientId,
+      "work",
+      RND.intStr(10)
+    );
+    clientTestDao.get().insertPhones(
+      clientId,
+      "mobile",
+      RND.intStr(10)
     );
   }
 

@@ -8,9 +8,7 @@ public class ClientRecord {
   public String charm;
   public int age;
 
-  //Khamit puchemu long? - 1
-
-  public long totalAccountBalance;
-  public long maxAccountBalance;
-  public long minAccountBalance;
+  public float totalAccountBalance;
+  public float maxAccountBalance;
+  public float minAccountBalance;
 }

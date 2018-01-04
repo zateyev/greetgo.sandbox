@@ -7,7 +7,5 @@ export class ClientListRequest {
   constructor() {
     this.skipFirst = 0;
     this.count = 5;
-    this.sort = "";
-    this.filterByFio = "";
   }
 }

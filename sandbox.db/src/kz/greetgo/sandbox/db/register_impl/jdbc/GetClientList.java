@@ -37,7 +37,6 @@ public class GetClientList extends AbstractGetClientList implements ConnectionCa
     prepareSql();
 
     try (PreparedStatement ps = connection.prepareStatement(sql.toString())) {
-      System.out.println(sql.toString());
 
       {
         int index = 1;
@@ -45,27 +44,19 @@ public class GetClientList extends AbstractGetClientList implements ConnectionCa
           ps.setObject(index++, param);
         }
       }
-
       try (ResultSet rs = ps.executeQuery()) {
-
         List<ClientRecord> ret = new ArrayList<>();
-
         while (rs.next()) {
-
           ret.add(readRecord(rs));
-
         }
-
         return ret;
-
       }
-
     }
 
   }
 
   @Override
-  protected void select() {
+  protected void appendSelect() {
     sql.append("select c.id, c.surname, c.name, c.patronymic, " +
       " ch.name as charm," +
       " extract(year from age(c.birth_date)) as age," +
@@ -74,6 +65,11 @@ public class GetClientList extends AbstractGetClientList implements ConnectionCa
       " min(c_ac.money) as min");
   }
 
+  @Override
+  protected void appendJoin() {
+    sql.append( " join charm ch on c.charm_id = ch.id " +
+      " join client_account c_ac on c_ac.client = c.id");
+  }
 
   private ClientRecord readRecord(ResultSet rs) throws SQLException {
     ClientRecord ret = new ClientRecord();
@@ -81,9 +77,9 @@ public class GetClientList extends AbstractGetClientList implements ConnectionCa
     ret.fio = makeFio(rs.getString("surname"), rs.getString("name"), rs.getString("patronymic"));
     ret.age = rs.getInt("age");
     ret.charm = rs.getString("charm");
-    ret.totalAccountBalance = (long)rs.getFloat("total");
-    ret.maxAccountBalance = (long)rs.getFloat("max");
-    ret.minAccountBalance = (long)rs.getFloat("min");
+    ret.totalAccountBalance = rs.getFloat("total");
+    ret.maxAccountBalance = rs.getFloat("max");
+    ret.minAccountBalance = rs.getFloat("min");
     return ret;
   }
 
