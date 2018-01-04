@@ -3,12 +3,17 @@ package kz.greetgo.sandbox.db.register_impl;
 import kz.greetgo.depinject.core.BeanGetter;
 import kz.greetgo.sandbox.controller.model.*;
 import kz.greetgo.sandbox.controller.register.ClientRegister;
+import kz.greetgo.sandbox.db.migration.Migration;
+import kz.greetgo.sandbox.db.migration.SAXPars;
 import kz.greetgo.sandbox.db.test.dao.ClientTestDao;
 import kz.greetgo.sandbox.db.test.util.ParentTestNg;
 import kz.greetgo.util.RND;
 import org.testng.annotations.Test;
+import org.xml.sax.SAXException;
 
+import javax.xml.parsers.ParserConfigurationException;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.OutputStream;
 import java.time.Year;
 import java.util.Date;
@@ -1085,7 +1090,25 @@ public class ClientRegisterImplTest extends ParentTestNg {
     //
     //
 
+  }
 
+  @Test
+  public void testMigration() throws ParserConfigurationException, SAXException, IOException {
+    Migration m = new Migration();
+    m.parseRecordData();
+
+    ClientToSave cl = m.getClient();
+
+    //
+    //
+    clientTestDao.get().insertClient(
+      cl.id,
+      cl.name,
+      cl.surname,
+      cl.patronymic,
+      java.sql.Date.valueOf(cl.dateOfBirth),
+      cl.gender,
+      cl.charmId);
   }
 
   private void deleteAll() {

@@ -7,6 +7,7 @@ import java.util.List;
 
 public abstract class AbstractGetClientList {
   protected final ClientListRequest in;
+
   public AbstractGetClientList(ClientListRequest in) {this.in = in;}
 
   protected final StringBuilder sql = new StringBuilder();
