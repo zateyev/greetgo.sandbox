@@ -347,32 +347,9 @@ public class ClientRegisterImplTest extends ParentTestNg {
       "male",
       charmId);
 
-    clientTestDao.get().insertAdrr(clientId,
-      "reg",
-      RND.str(5),
-      RND.str(5),
-      RND.intStr(3));
-    clientTestDao.get().insertAdrr(clientId,
-      "fact",
-      RND.str(5),
-      RND.str(5),
-      RND.intStr(3));
+    insertAddresses(clientId);
 
-    clientTestDao.get().insertPhones(
-      clientId,
-      "work",
-      RND.intStr(8)
-    );
-    clientTestDao.get().insertPhones(
-      clientId,
-      "home",
-      RND.intStr(8)
-    );
-    clientTestDao.get().insertPhones(
-      clientId,
-      "mobile",
-      RND.intStr(8)
-    );
+    insertPhones(clientId);
 
     insertAccountWithMoney(clientId, 15961);
 
@@ -380,22 +357,22 @@ public class ClientRegisterImplTest extends ParentTestNg {
     ClientAddress fact = new ClientAddress();
     ClientAddress reg = new ClientAddress();
     ClientPhones phone = new ClientPhones();
+
     fact.street = "street";
     fact.house = "house";
     fact.flat = "flat";
-    reg.street = "street";
-    reg.house = "house";
-    reg.house = "house";
-    reg.flat = "flat";
+    reg.street = "";
+    reg.house = "";
+    reg.flat = "";
 
-    phone.home = "123132";
-    phone.work = "123133";
-    phone.mobile.add("143132");
+    phone.home = "123123";
+    phone.work = "456456";
+    phone.mobile.add("678678");
 
     clUpdated.id = clientId;
     clUpdated.name = name + "new";
     clUpdated.surname = surname + "new";
-    clUpdated.patronymic = patronymic + "new";
+    clUpdated.patronymic = "";
     clUpdated.dateOfBirth = "1990-11-11";
     clUpdated.gender = "female";
     clUpdated.charmId = charmId;
@@ -410,7 +387,8 @@ public class ClientRegisterImplTest extends ParentTestNg {
     //
 
     ClientDetails actual = clientTestDao.get().loadDetails(rec.id);
-    ClientAddress addr = clientTestDao.get().getFactAddress(rec.id);
+    ClientAddress factAddr = clientTestDao.get().getFactAddress(rec.id);
+    ClientAddress regAddr = clientTestDao.get().getRegAddress(rec.id);
     String homePhone = clientTestDao.get().getHomePhone(rec.id);
     String workPhone = clientTestDao.get().getWorkPhone(rec.id);
     List<String> mobile = clientTestDao.get().getMobile(rec.id);
@@ -419,17 +397,20 @@ public class ClientRegisterImplTest extends ParentTestNg {
     assertThat(actual.surname).isEqualTo(clUpdated.surname);
     assertThat(actual.patronymic).isEqualTo(clUpdated.patronymic);
     assertThat(actual.dateOfBirth).isEqualTo(clUpdated.dateOfBirth);
-    assertThat(addr.street).isEqualTo("street");
-    assertThat(addr.house).isEqualTo("house");
-    assertThat(addr.flat).isEqualTo("flat");
+
+    assertThat(factAddr.street).isEqualTo("street");
+    assertThat(factAddr.house).isEqualTo("house");
+    assertThat(factAddr.flat).isEqualTo("flat");
+
+    assertThat(regAddr.street).isNullOrEmpty();
+    assertThat(regAddr.house).isNullOrEmpty();
+    assertThat(regAddr.flat).isNullOrEmpty();
 
     assertThat(homePhone).isEqualTo(phone.home);
     assertThat(workPhone).isEqualTo(phone.work);
     assertThat(mobile).isEqualTo(phone.mobile);
 
-
   }
-
 
   @Test
   public void getList_emptyList() {
