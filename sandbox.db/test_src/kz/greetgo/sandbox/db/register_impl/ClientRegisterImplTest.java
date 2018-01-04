@@ -4,7 +4,6 @@ import kz.greetgo.depinject.core.BeanGetter;
 import kz.greetgo.sandbox.controller.model.*;
 import kz.greetgo.sandbox.controller.register.ClientRegister;
 import kz.greetgo.sandbox.db.migration.Migration;
-import kz.greetgo.sandbox.db.migration.SAXPars;
 import kz.greetgo.sandbox.db.test.dao.ClientTestDao;
 import kz.greetgo.sandbox.db.test.util.ParentTestNg;
 import kz.greetgo.util.RND;
@@ -15,7 +14,10 @@ import javax.xml.parsers.ParserConfigurationException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.time.LocalDate;
 import java.time.Year;
+import java.time.temporal.ChronoUnit;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
@@ -367,10 +369,9 @@ public class ClientRegisterImplTest extends ParentTestNg {
     fact.house = "house";
     fact.flat = "flat";
 
-    // FIXME: 1/4/18 give differet values
-    reg.street = "";
-    reg.house = "";
-    reg.flat = "";
+    reg.street = "regSTR";
+    reg.house = "regHS";
+    reg.flat = "regFLT";
 
     phone.home = "123123";
     phone.work = "456456";
@@ -409,9 +410,9 @@ public class ClientRegisterImplTest extends ParentTestNg {
     assertThat(factAddr.house).isEqualTo("house");
     assertThat(factAddr.flat).isEqualTo("flat");
 
-    assertThat(regAddr.street).isNullOrEmpty();
-    assertThat(regAddr.house).isNullOrEmpty();
-    assertThat(regAddr.flat).isNullOrEmpty();
+    assertThat(regAddr.street).isEqualTo("regSTR");
+    assertThat(regAddr.house).isEqualTo("regHS");
+    assertThat(regAddr.flat).isEqualTo("regFLT");
 
     assertThat(homePhone).isEqualTo(phone.home);
     assertThat(workPhone).isEqualTo(phone.work);
@@ -445,25 +446,9 @@ public class ClientRegisterImplTest extends ParentTestNg {
 
     clientTestDao.get().insertCharm(charmId, charmName);
 
+    insertClient(id, charmId);
 
-    //FIXME: 1/4/18 you already have method "insertClient". why dont you use that?
-    clientTestDao.get().insertClient(
-      id,
-      RND.str(10),
-      RND.str(10),
-      RND.str(10),
-      java.sql.Date.valueOf("1990-10-10"),
-      "male",
-      charmId
-    );
-
-    clientTestDao.get().insertClientAccount(
-      RND.str(5),
-      id,
-      money,
-      RND.str(5),
-      new Date()
-    );
+    insertAccountWithMoney(id, money);
 
     ClientListRequest req = new ClientListRequest();
 
@@ -725,7 +710,7 @@ public class ClientRegisterImplTest extends ParentTestNg {
 
     assertThat(list).hasSize(3);
     assertThat(list.get(0).totalAccountBalance).isEqualTo(754);
-    assertThat(list.get(1).totalAccountBalance).isEqualTo(62);
+    assertThat(list.get(1).totalAccountBalance).isEqualTo(62.41f);
     assertThat(list.get(2).totalAccountBalance).isEqualTo(11);
 
   }
@@ -772,7 +757,7 @@ public class ClientRegisterImplTest extends ParentTestNg {
 
     assertThat(list).hasSize(3);
     assertThat(list.get(0).maxAccountBalance).isEqualTo(5);
-    assertThat(list.get(1).maxAccountBalance).isEqualTo(25);
+    assertThat(list.get(1).maxAccountBalance).isEqualTo(25.47f);
     assertThat(list.get(2).maxAccountBalance).isEqualTo(522);
 
   }
@@ -819,7 +804,7 @@ public class ClientRegisterImplTest extends ParentTestNg {
 
     assertThat(list).hasSize(3);
     assertThat(list.get(0).maxAccountBalance).isEqualTo(522);
-    assertThat(list.get(1).maxAccountBalance).isEqualTo(25);
+    assertThat(list.get(1).maxAccountBalance).isEqualTo(25.47f);
     assertThat(list.get(2).maxAccountBalance).isEqualTo(5);
 
   }
@@ -866,7 +851,7 @@ public class ClientRegisterImplTest extends ParentTestNg {
 
     assertThat(list).hasSize(3);
     assertThat(list.get(0).minAccountBalance).isEqualTo(1);
-    assertThat(list.get(1).minAccountBalance).isEqualTo(15);
+    assertThat(list.get(1).minAccountBalance).isEqualTo(15.47f);
     assertThat(list.get(2).minAccountBalance).isEqualTo(232);
 
   }
@@ -913,7 +898,7 @@ public class ClientRegisterImplTest extends ParentTestNg {
 
     assertThat(list).hasSize(3);
     assertThat(list.get(0).minAccountBalance).isEqualTo(232);
-    assertThat(list.get(1).minAccountBalance).isEqualTo(15);
+    assertThat(list.get(1).minAccountBalance).isEqualTo(15.47f);
     assertThat(list.get(2).minAccountBalance).isEqualTo(1);
 
   }
@@ -953,11 +938,9 @@ public class ClientRegisterImplTest extends ParentTestNg {
     //
 
     assertThat(list).hasSize(3);
-    int year = Year.now().getValue();
-
-    assertThat(list.get(0).age).isEqualTo(year - 2000);
-    assertThat(list.get(1).age).isEqualTo(year - 2010);
-    assertThat(list.get(2).age).isEqualTo(year - 2015);
+    assertThat(list.get(0).age).isEqualTo(getAge(2000,07,07));
+    assertThat(list.get(1).age).isEqualTo(getAge(2010,07,07));
+    assertThat(list.get(2).age).isEqualTo(getAge(2015,07,07));
 
   }
 
@@ -996,11 +979,9 @@ public class ClientRegisterImplTest extends ParentTestNg {
 
     assertThat(list).hasSize(3);
 
-    int year = Year.now().getValue();
-
-    assertThat(list.get(0).age).isEqualTo(year - 2015);
-    assertThat(list.get(1).age).isEqualTo(year - 2010);
-    assertThat(list.get(2).age).isEqualTo(year - 2000);
+    assertThat(list.get(0).age).isEqualTo(getAge(2015,07,07));
+    assertThat(list.get(1).age).isEqualTo(getAge(2010,07,07));
+    assertThat(list.get(2).age).isEqualTo(getAge(2000,07,07));
 
   }
 
@@ -1097,24 +1078,11 @@ public class ClientRegisterImplTest extends ParentTestNg {
 
   }
 
-  @Test
-  public void testMigration() throws ParserConfigurationException, SAXException, IOException {
-    Migration m = new Migration();
-    m.parseRecordData();
 
-    ClientToSave cl = m.getClient();
 
-    //
-    //
-    clientTestDao.get().insertClient(
-      cl.id,
-      cl.name,
-      cl.surname,
-      cl.patronymic,
-      java.sql.Date.valueOf(cl.dateOfBirth),
-      cl.gender,
-      cl.charmId);
-  }
+
+
+
 
   private void deleteAll() {
     clientTestDao.get().deleteAllAddr();
@@ -1256,6 +1224,11 @@ public class ClientRegisterImplTest extends ParentTestNg {
       "mobile",
       RND.intStr(10)
     );
+  }
+
+  private int getAge(int i, int i1, int i2) {
+    LocalDate now = LocalDate.now();
+    return (int)ChronoUnit.YEARS.between(LocalDate.of(i, i1, i2), now);
   }
 
 
