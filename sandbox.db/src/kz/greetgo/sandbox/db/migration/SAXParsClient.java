@@ -13,13 +13,7 @@ public class SAXParsClient extends DefaultHandler {
 
   private final List<String> pathList = new ArrayList<>();
 
-  private final List<ClientToSave> clientList = new ArrayList<>();
-
   private final ClientToSave client = new ClientToSave();
-
-  public List<ClientToSave> getClientList(){
-    return this.clientList;
-  }
 
   protected String path() {
     StringBuilder sb = new StringBuilder();
@@ -125,9 +119,10 @@ public class SAXParsClient extends DefaultHandler {
     }
 
     if ("/cia/client".equals(path)) {
-      clientList.add(client);
+
       return;
     }
   }
+
 
 }

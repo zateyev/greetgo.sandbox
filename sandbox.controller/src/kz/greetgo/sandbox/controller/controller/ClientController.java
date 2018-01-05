@@ -54,7 +54,7 @@ public class ClientController implements Controller {
     OutputStream outputStream = tunnel.getResponseOutputStream();
 
     if (contentType.contains("pdf")) {
-      tunnel.setResponseHeader("content-disposition", "attachment; filename=\"report.pdf\"");
+      tunnel.setResponseHeader("content-disposition", "attachment; filename=\"report.pdf\"");//TODO название отчета когда генерирован
     } else {
       tunnel.setResponseHeader("content-disposition", "attachment; filename=\"report.xlsx\"");
     }

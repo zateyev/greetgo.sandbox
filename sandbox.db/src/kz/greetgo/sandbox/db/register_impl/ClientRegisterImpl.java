@@ -4,6 +4,7 @@ import kz.greetgo.depinject.core.Bean;
 import kz.greetgo.depinject.core.BeanGetter;
 import kz.greetgo.sandbox.controller.model.*;
 import kz.greetgo.sandbox.controller.register.ClientRegister;
+import kz.greetgo.sandbox.db.configs.DbConfig;
 import kz.greetgo.sandbox.db.dao.ClientDao;
 import kz.greetgo.sandbox.db.register_impl.jdbc.*;
 import kz.greetgo.sandbox.db.report.ClientRecord.ClientRecordListReportViewPdf;

@@ -6,6 +6,7 @@ import kz.greetgo.sandbox.controller.register.ClientRegister;
 import kz.greetgo.sandbox.db.migration.Migration;
 import kz.greetgo.sandbox.db.test.dao.ClientTestDao;
 import kz.greetgo.sandbox.db.test.util.ParentTestNg;
+import kz.greetgo.sandbox.db.util.JdbcSandbox;
 import kz.greetgo.util.RND;
 import org.testng.annotations.Test;
 import org.xml.sax.SAXException;
@@ -1061,6 +1062,8 @@ public class ClientRegisterImplTest extends ParentTestNg {
     //
     //
 
+
+
   }
 
   @Test
@@ -1080,10 +1083,10 @@ public class ClientRegisterImplTest extends ParentTestNg {
   }
 
 
+  public BeanGetter<JdbcSandbox> jdbc;
   @Test
   public void testMigrate() throws IOException, SAXException, ParserConfigurationException {
-    Migration m = new Migration();
-    m.migrate();
+
   }
 
 

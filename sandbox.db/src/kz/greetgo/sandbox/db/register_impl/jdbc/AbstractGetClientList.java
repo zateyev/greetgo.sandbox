@@ -1,92 +1,61 @@
 package kz.greetgo.sandbox.db.register_impl.jdbc;
 
 import kz.greetgo.sandbox.controller.model.ClientListRequest;
+import kz.greetgo.sandbox.controller.model.ClientRecord;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 
-public abstract class AbstractGetClientList {
+public class AbstractGetClientList extends AbstractGetClientLogic {
 
-  protected final ClientListRequest in;
+  public AbstractGetClientList(ClientListRequest in) {
+    super(in);
+  }
 
-  public AbstractGetClientList(ClientListRequest in) {this.in = in;}
+  private static String makeFio(String surname, String name, String patronymic) {
+    return surname + ' ' + name + (patronymic == null ? "" : " " + patronymic);
+  }
 
-  protected final StringBuilder sql = new StringBuilder();
+  protected ClientRecord rsToClient(ResultSet rs) throws SQLException {
+    ClientRecord ret = new ClientRecord();
+    ret.id = rs.getString("id");
+    ret.fio = makeFio(rs.getString("surname"), rs.getString("name"), rs.getString("patronymic"));
+    ret.age = rs.getInt("age");
+    ret.charm = rs.getString("charm");
+    ret.totalAccountBalance = rs.getFloat("total");
+    ret.maxAccountBalance = rs.getFloat("max");
+    ret.minAccountBalance = rs.getFloat("min");
+    return ret;
+  }
 
-  protected final List<Object> sqlParams = new ArrayList<>();
-
-  protected void prepareSql() {
-
-    appendSelect();
-
-    sql.append(" from client c");
-
-    appendJoin();
-
-    sql.append(" where 1=1");
-
-    appendFilter();
-
-    sql.append(" and c.actual = 1");
-
-    appendGroupBy();
-
-    appendSorting();
-
-    appendOffsetLimit();
+  @Override
+  protected void appendJoin() {
+    sql.append(" join charm ch on c.charm_id = ch.id " +
+      " join client_account c_ac on c_ac.client = c.id");
 
   }
 
-  protected abstract void appendJoin();
-
-  protected abstract void appendGroupBy();
-
-  protected abstract void appendOffsetLimit();
-
-  protected abstract void appendSelect();
-
-
-  protected void appendSorting() {
-    if (in.sort == null) return;
-    switch (in.sort) {
-      case "age":
-        sql.append(" order by age");
-        return;
-      case "ageDesc":
-        sql.append(" order by age desc");
-        return;
-      case "total":
-        sql.append(" order by total");
-        return;
-      case "totalDesc":
-        sql.append(" order by total desc");
-        return;
-      case "max":
-        sql.append(" order by max");
-        return;
-      case "maxDesc":
-        sql.append(" order by max desc");
-        return;
-      case "min":
-        sql.append(" order by min");
-        return;
-      case "minDesc":
-        sql.append(" order by min desc");
-        return;
-      default:
-        throw new RuntimeException("Undeclared column name for sort: " + in.sort);
-    }
-
+  @Override
+  protected void appendGroupBy() {
+    sql.append(" group by c.id, charm");
   }
 
-  protected void appendFilter() {
-    if (in.filterByFio != null && !in.filterByFio.isEmpty()) {
-      String s = in.filterByFio.trim();
-      sql.append(" and ( (c.surname like ?||'%') or ( c.name like ?||'%') or ( c.patronymic like ?||'%') )");
-      sqlParams.add(s);
-      sqlParams.add(s);
-      sqlParams.add(s);
+  @Override
+  protected void appendOffsetLimit() {
+    if (in.count > 0) {
+      sql.append(" limit ? offset ?");
+      sqlParams.add(in.count);
+      sqlParams.add(in.skipFirst);
     }
   }
 
+  @Override
+  protected void appendSelect() {
+    sql.append("select c.id, c.surname, c.name, c.patronymic, " +
+      " ch.name as charm," +
+      " extract(year from age(c.birth_date)) as age," +
+      " sum(c_ac.money) as total," +
+      " max(c_ac.money) as max," +
+      " min(c_ac.money) as min");
+  }
 }
