@@ -12,6 +12,8 @@ import kz.greetgo.sandbox.controller.register.ClientRegister;
 import kz.greetgo.sandbox.controller.util.Controller;
 
 import java.io.OutputStream;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
 
 
@@ -49,14 +51,17 @@ public class ClientController implements Controller {
                        RequestTunnel tunnel
   ) throws Exception {
 
+    SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+    String date = sdf.format(new Date());
+
     tunnel.setResponseContentType(contentType);
 
     OutputStream outputStream = tunnel.getResponseOutputStream();
 
     if (contentType.contains("pdf")) {
-      tunnel.setResponseHeader("content-disposition", "attachment; filename=\"report.pdf\"");//TODO название отчета когда генерирован
+      tunnel.setResponseHeader("content-disposition", "attachment; filename=\"List_of_clients-" + date + ".pdf\"");
     } else {
-      tunnel.setResponseHeader("content-disposition", "attachment; filename=\"report.xlsx\"");
+      tunnel.setResponseHeader("content-disposition", "attachment; filename=\"List_of_clients-" + date + ".xlsx\"");
     }
     clientRegister.get().download(clientListRequest, outputStream, contentType, personId);
 
