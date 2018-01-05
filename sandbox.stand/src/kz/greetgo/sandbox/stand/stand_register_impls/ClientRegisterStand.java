@@ -11,6 +11,7 @@ import kz.greetgo.sandbox.controller.register.ClientRegister;
 import kz.greetgo.sandbox.db.stand.beans.StandClientDb;
 import kz.greetgo.sandbox.db.stand.beans.StandDb;
 import kz.greetgo.sandbox.db.stand.model.ClientDot;
+import kz.greetgo.util.RND;
 import kz.greetgo.util.ServerUtil;
 
 import java.io.InputStream;
@@ -24,7 +25,7 @@ public class ClientRegisterStand implements ClientRegister {
 
   @Override
   public long getSize(ClientListRequest clientListRequest) {
-    if ("".equals(clientListRequest.filterByFio)) {
+    if (clientListRequest.filterByFio == null) {
       return al.get().clientStorage.size();
     } else return 0;
   }
@@ -35,20 +36,18 @@ public class ClientRegisterStand implements ClientRegister {
     List<ClientDot> fullList = new ArrayList(al.get().clientStorage.values());
     List<ClientRecord> list = new ArrayList<>();
 
-    System.out.println("List Info" + clientListRequest.count + " " + clientListRequest.sort);
-
     for (int i = clientListRequest.skipFirst; i < clientListRequest.skipFirst+clientListRequest.count; i++) {
+      if (i >= fullList.size()) break;
       list.add(fullList.get(i).toClientRecord());
-      if (clientListRequest.skipFirst + clientListRequest.count > fullList.size()) break;
     }
 
-    ClientRecord nn = fullList.get(3).toClientRecord();
+    ClientRecord nn = fullList.get(1).toClientRecord();
 
     List<ClientRecord> list2 = new ArrayList<>();
     list2.add(nn);
 
-    if ("".equals(clientListRequest.filterByFio)) return list;
-    else return list2;
+    if (clientListRequest.filterByFio != null && !"".equals(clientListRequest.filterByFio)) return list2;
+    else return list;
   }
 
   @Override
@@ -56,21 +55,16 @@ public class ClientRegisterStand implements ClientRegister {
     if (id != null) return al.get().clientStorage.get(id).toClientDetails();
     else {
       ClientDetails det = new ClientDetails();
-      // FIXME: 1/5/18 выборка по айди не работает
       det.charms = al.get().clientStorage.get("1").toClientDetails().charms;
       return det;
     }
   }
 
 
-  // FIXME: 1/5/18 Почему объявлен глобавльный атрибут? И почему у глобального атрибута такое непонятное название?
-  int i = 50;
-
   @Override
   public ClientRecord saveClient(ClientToSave clientToSave) {
-    i++;
     ClientDot clientDot = new ClientDot();
-    if (clientToSave.id == null) clientToSave.id = Integer.toString(i);
+    if (clientToSave.id == null) clientToSave.id = RND.str(5);
     else clientDot = al.get().clientStorage.get(clientToSave.id);
 
 
@@ -80,10 +74,18 @@ public class ClientRegisterStand implements ClientRegister {
     clientDot.surname = clientToSave.surname;
     clientDot.patronymic = clientToSave.patronymic;
     clientDot.gender = clientToSave.gender;
-    clientDot.temper = clientToSave.charmId;
+    clientDot.charmId = clientToSave.charmId;
     clientDot.dateOfBirth = clientToSave.dateOfBirth;
+    clientDot.homePhone = clientToSave.phones.home;
+    clientDot.workPhone = clientToSave.phones.work;
+    clientDot.mobilePhone = clientToSave.phones.mobile;
+    clientDot.factFlat = clientToSave.factAddress.flat;
+    clientDot.factHouse = clientToSave.factAddress.house;
+    clientDot.factStreet = clientToSave.factAddress.street;
+    clientDot.regFlat = clientToSave.regAddress.flat;
+    clientDot.regHouse = clientToSave.regAddress.house;
+    clientDot.regStreet = clientToSave.regAddress.street;
 
-    System.out.println("client phones mobile" + clientToSave.phones.mobile);
 
     al.get().clientStorage.put(clientToSave.id, clientDot);
 

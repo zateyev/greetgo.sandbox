@@ -130,7 +130,6 @@ export class ListComponent implements OnInit {
       return;
     }
     if (this.list.length === 0) {
-      console.log("empty list find");
       this.pagination.getTotalSizeOfList();
       if (this.currentPage > 0) this.pagination.setCurrentPage(this.currentPage - 1);
       else this.pagination.setCurrentPage(this.currentPage);

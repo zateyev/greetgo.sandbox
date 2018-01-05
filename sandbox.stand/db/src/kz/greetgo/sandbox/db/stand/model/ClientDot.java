@@ -2,26 +2,31 @@ package kz.greetgo.sandbox.db.stand.model;
 
 import kz.greetgo.sandbox.controller.model.*;
 
+import java.util.List;
+
 public class ClientDot {
 
   public String id;
   public String name;
   public String surname;
   public String patronymic;
-  public String temper;
+  public String charm;
+  public String charmId;
   public String dateOfBirth;
-  public long balance;
+  public float balance;
   ///////////DETAILS
   public String gender;
-  public String address;
-  public String address2;
-  public String phone;
+  public String regStreet, regHouse, regFlat;
+  public String factStreet, factHouse, factFlat;
+  public String homePhone;
+  public String workPhone;
+  public List<String> mobilePhone;
 
   public ClientRecord toClientRecord() {
     ClientRecord rec = new ClientRecord();
     rec.id = this.id;
     rec.fio = this.surname + " " + this.name + " " + this.patronymic;
-    rec.charm = this.temper;
+    rec.charm = this.charm;
     int year = Integer.parseInt(this.dateOfBirth.trim().substring(0, 4));
     rec.age = 2017 - year;
     rec.totalAccountBalance = this.balance;
@@ -30,7 +35,6 @@ public class ClientDot {
     return rec;
   }
 
-  // FIXME: 1/5/18 метод возвращает неправильные данные
   public ClientDetails toClientDetails() {
     ClientDetails rec = new ClientDetails();
 
@@ -39,8 +43,8 @@ public class ClientDot {
     rec.surname = this.surname;
     rec.patronymic = this.patronymic;
     rec.dateOfBirth = String.valueOf(this.dateOfBirth);
-    rec.gender = "male";
-    rec.charmId = "1";
+    rec.gender = this.gender;
+    rec.charmId = this.charmId;
 
 
     CharmRecord charmRecord = new CharmRecord();
@@ -62,17 +66,19 @@ public class ClientDot {
     ClientAddress fact = new ClientAddress();
     ClientAddress reg = new ClientAddress();
 
-    phones.home = "87782332332";
-    phones.work = "87782332332";
-    phones.mobile.add("87782332332");
-    phones.mobile.add("87878787877");
+    phones.home = this.homePhone;
+    phones.work = this.workPhone;
+    phones.mobile = this.mobilePhone;
 
-    fact.street = "street";
-    reg.street = "street";
-    fact.house = "house";
-    reg.house = "house";
-    fact.flat = "flat";
-    reg.flat = "flat";
+
+    fact.street = factStreet;
+    fact.house = factHouse;
+    fact.flat = factFlat;
+
+
+    reg.street = regStreet;
+    reg.house = regFlat;
+    reg.flat = regFlat;
 
     rec.factAddress = fact;
     rec.regAddress = reg;
