@@ -54,9 +54,9 @@ public class ClientController implements Controller {
     OutputStream outputStream = tunnel.getResponseOutputStream();
 
     if (contentType.contains("pdf")) {
-      tunnel.setResponseHeader("content-disposition", "attachment; filename=\"asd.pdf\"");
+      tunnel.setResponseHeader("content-disposition", "attachment; filename=\"report.pdf\"");
     } else {
-      tunnel.setResponseHeader("content-disposition", "attachment; filename=\"asd.xlsx\"");
+      tunnel.setResponseHeader("content-disposition", "attachment; filename=\"report.xlsx\"");
     }
     clientRegister.get().download(clientListRequest, outputStream, contentType, personId);
 

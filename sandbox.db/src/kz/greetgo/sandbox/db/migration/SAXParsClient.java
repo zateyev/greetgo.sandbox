@@ -1,6 +1,5 @@
 package kz.greetgo.sandbox.db.migration;
 
-import kz.greetgo.sandbox.controller.model.ClientAddress;
 import kz.greetgo.sandbox.controller.model.ClientPhones;
 import kz.greetgo.sandbox.controller.model.ClientToSave;
 import org.xml.sax.Attributes;
@@ -10,25 +9,16 @@ import org.xml.sax.helpers.DefaultHandler;
 import java.util.ArrayList;
 import java.util.List;
 
-public class SAXPars extends DefaultHandler {
+public class SAXParsClient extends DefaultHandler {
 
   private final List<String> pathList = new ArrayList<>();
 
+  private final List<ClientToSave> clientList = new ArrayList<>();
+
   private final ClientToSave client = new ClientToSave();
-  ClientPhones ph = new ClientPhones();
 
-  public ClientToSave getClient() {
-
-    client.dateOfBirth = "1988-12-12";
-    ph.home = "9898";
-    ph.work = "1239898";
-    ph.mobile.add("9432898");
-    ClientAddress ad = new ClientAddress();
-    client.phones = ph;
-    client.regAddress = ad;
-    client.factAddress = ad;
-
-    return client;
+  public List<ClientToSave> getClientList(){
+    return this.clientList;
   }
 
   protected String path() {
@@ -87,12 +77,36 @@ public class SAXPars extends DefaultHandler {
 
     String path = path();
 
-    if ("/client".equals(path)) {
+    if ("/cia/client".equals(path)) {
       client.id = attributes.getValue("id");
       return;
     }
-    if ("/client/name".equals(path)) {
+    if ("/cia/client/name".equals(path)) {
       client.name = attributes.getValue("value");
+      return;
+    }
+
+    if ("/cia/client/surname".equals(path)) {
+      client.surname = attributes.getValue("value");
+      return;
+    }
+
+    if ("/cia/client/patronymic".equals(path)) {
+      client.patronymic= attributes.getValue("value");
+      return;
+    }
+
+    if ("/cia/client/gender".equals(path)) {
+      client.gender = attributes.getValue("value");
+      return;
+    }
+
+    if ("/cia/client/charm".equals(path)) {
+      client.charmId = attributes.getValue("value");
+      return;
+    }
+    if ("/cia/client/birth".equals(path)) {
+      client.dateOfBirth = attributes.getValue("value");
       return;
     }
   }
@@ -103,10 +117,16 @@ public class SAXPars extends DefaultHandler {
 
     if ("/client/homePhone".equals(path)) {
 
+      ClientPhones ph = new ClientPhones();
       ph.home = text();
       client.phones = ph;
       return;
 
+    }
+
+    if ("/cia/client".equals(path)) {
+      clientList.add(client);
+      return;
     }
   }
 

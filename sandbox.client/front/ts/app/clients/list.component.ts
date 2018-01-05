@@ -29,7 +29,7 @@ export class ListComponent implements OnInit {
   filter: string;
 
   listInfo: ClientListRequest = new ClientListRequest();
-  fileTypeForDownload: string = null;
+  fileTypeForDownload: string = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
 
   constructor(private httpService: HttpService) {
   }

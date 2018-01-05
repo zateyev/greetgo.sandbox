@@ -3,21 +3,15 @@ package kz.greetgo.sandbox.db.register_impl;
 import kz.greetgo.depinject.core.BeanGetter;
 import kz.greetgo.sandbox.controller.model.*;
 import kz.greetgo.sandbox.controller.register.ClientRegister;
-import kz.greetgo.sandbox.db.migration.Migration;
 import kz.greetgo.sandbox.db.test.dao.ClientTestDao;
 import kz.greetgo.sandbox.db.test.util.ParentTestNg;
 import kz.greetgo.util.RND;
 import org.testng.annotations.Test;
-import org.xml.sax.SAXException;
 
-import javax.xml.parsers.ParserConfigurationException;
 import java.io.FileOutputStream;
-import java.io.IOException;
 import java.io.OutputStream;
 import java.time.LocalDate;
-import java.time.Year;
 import java.time.temporal.ChronoUnit;
-import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
@@ -260,8 +254,7 @@ public class ClientRegisterImplTest extends ParentTestNg {
   @Test
   public void saveClient_NULLid() {
 
-    clientTestDao.get().deleteAllClients();
-    clientTestDao.get().deleteAllCharms();
+    deleteAll();
 
     ClientToSave cl = new ClientToSave();
     ClientAddress fact = new ClientAddress();
@@ -271,18 +264,18 @@ public class ClientRegisterImplTest extends ParentTestNg {
     String charmId = RND.str(10);
     String charmName = RND.str(10);
 
-    fact.street = "street";
-    fact.house = "house";
-    fact.flat = "flat";
-    reg.street = "street";
-    reg.house = "house";
-    reg.flat = "flat";
+    fact.street = "streetFACT";
+    fact.house = "houseFACT";
+    fact.flat = "flatFACT";
+    reg.street = "streetREG";
+    reg.house = "houseREG";
+    reg.flat = "flatREG";
 
 
-    phones.home = "7878787878787";
-    phones.work = "7878787878788";
-    phones.mobile.add("7878787878887");
-    phones.mobile.add("7888787878787");
+    phones.home = "123412341234";
+    phones.work = "345634563456";
+    phones.mobile.add("456745674567");
+    phones.mobile.add("678967896798");
 
 
     clientTestDao.get().insertCharm(charmId, charmName);
@@ -305,7 +298,8 @@ public class ClientRegisterImplTest extends ParentTestNg {
     //
 
     ClientDetails actual = clientTestDao.get().loadDetails(rec.id);
-    ClientAddress addr = clientTestDao.get().getFactAddress(rec.id);
+    ClientAddress factAddress = clientTestDao.get().getFactAddress(rec.id);
+    ClientAddress regAddress = clientTestDao.get().getRegAddress(rec.id);
     String homePhone = clientTestDao.get().getHomePhone(rec.id);
     String workPhone = clientTestDao.get().getWorkPhone(rec.id);
     List<String> mobile = clientTestDao.get().getMobile(rec.id);
@@ -319,9 +313,13 @@ public class ClientRegisterImplTest extends ParentTestNg {
     assertThat(actual.dateOfBirth).isEqualTo(cl.dateOfBirth);
     assertThat(actual.gender).isEqualTo(cl.gender);
 
-    assertThat(addr.street).isEqualTo("street");
-    assertThat(addr.house).isEqualTo("house");
-    assertThat(addr.flat).isEqualTo("flat");
+    assertThat(factAddress.street).isEqualTo("streetFACT");
+    assertThat(factAddress.house).isEqualTo("houseFACT");
+    assertThat(factAddress.flat).isEqualTo("flatFACT");
+
+    assertThat(regAddress.street).isEqualTo("streetREG");
+    assertThat(regAddress.house).isEqualTo("houseREG");
+    assertThat(regAddress.flat).isEqualTo("flatREG");
 
     assertThat(homePhone).isEqualTo(phones.home);
     assertThat(workPhone).isEqualTo(phones.work);
@@ -341,9 +339,7 @@ public class ClientRegisterImplTest extends ParentTestNg {
     String charmName = RND.str(10);
 
     clientTestDao.get().insertCharm(charmId, charmName);
-    clientTestDao.get().deleteAllClients();
-    clientTestDao.get().deleteAllPhones();
-    clientTestDao.get().deleteAllAddr();
+    deleteAll();
 
     clientTestDao.get().insertClient(
       clientId,
@@ -481,23 +477,9 @@ public class ClientRegisterImplTest extends ParentTestNg {
     for (int i = 0; i < 25; i++) {
       String clientId = RND.str(10);
 
-      clientTestDao.get().insertClient(
-        clientId,
-        clientName,
-        RND.str(10),
-        RND.str(10),
-        java.sql.Date.valueOf("1990-10-10"),
-        "male",
-        charmId
-      );
+      insertClientWithName(clientId,charmId,clientName);
+      insertAccount(clientId);
 
-      clientTestDao.get().insertClientAccount(
-        RND.str(10),
-        clientId,
-        (float) RND.plusDouble(999999, 2),
-        RND.str(5),
-        new Date()
-      );
     }
 
 
@@ -903,7 +885,6 @@ public class ClientRegisterImplTest extends ParentTestNg {
 
   }
 
-  // FIXME: 1/4/18 test fails
   @Test
   public void getList_CheckSortedList_ClientAgeDesc() {
 
@@ -1226,9 +1207,9 @@ public class ClientRegisterImplTest extends ParentTestNg {
     );
   }
 
-  private int getAge(int i, int i1, int i2) {
+  private int getAge(int year, int month, int day) {
     LocalDate now = LocalDate.now();
-    return (int)ChronoUnit.YEARS.between(LocalDate.of(i, i1, i2), now);
+    return (int) ChronoUnit.YEARS.between(LocalDate.of(year, month, day), now);
   }
 
 
