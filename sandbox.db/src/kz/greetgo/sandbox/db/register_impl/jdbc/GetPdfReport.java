@@ -23,6 +23,7 @@ public class GetPdfReport extends AbstractGetClientList implements ConnectionCal
   @Override
   public Void doInConnection(Connection connection) throws Exception {
     prepareSql();
+
     try (PreparedStatement ps = connection.prepareStatement(sql.toString())) {
 
       try (ResultSet rs = ps.executeQuery()) {

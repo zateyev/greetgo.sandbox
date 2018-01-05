@@ -180,14 +180,8 @@ public class ClientRegisterImpl implements ClientRegister {
 
     if (contentType.contains("pdf")) {
 
-     /* ClientRecordListReportViewPdf pdf = new ClientRecordListReportViewPdf();
-
-      clientListRequest.count = 0;
-      List<ClientRecord> rec = jdbc.get().execute(new GetClientList(clientListRequest));
-
-      pdf.generate(outputStream, rec);*/
-
      ClientRecordListReportViewPdf pdf = new ClientRecordListReportViewPdf();
+      clientListRequest.count = 0;
      try{
        pdf.start(outputStream);
 
@@ -201,11 +195,10 @@ public class ClientRegisterImpl implements ClientRegister {
 
     } else {
       ClientRecordListReportViewXslx xslx = new ClientRecordListReportViewXslx(outputStream);
+      clientListRequest.count = 0;
 
       try {
         xslx.start(new Date());
-
-        clientListRequest.count = 0;
 
        jdbc.get().execute(new GetXlsxReport(xslx, clientListRequest));
 
