@@ -36,6 +36,4 @@ public class GetPdfReport extends AbstractGetClientList implements ConnectionCal
       return null;
     }
   }
-
-
 }

@@ -482,7 +482,7 @@ public class ClientRegisterImplTest extends ParentTestNg {
     for (int i = 0; i < 25; i++) {
       String clientId = RND.str(10);
 
-      insertClientWithName(clientId,charmId,clientName);
+      insertClientWithName(clientId, charmId, clientName);
       insertAccount(clientId);
 
     }
@@ -924,9 +924,9 @@ public class ClientRegisterImplTest extends ParentTestNg {
     //
 
     assertThat(list).hasSize(3);
-    assertThat(list.get(0).age).isEqualTo(getAge(2000,07,07));
-    assertThat(list.get(1).age).isEqualTo(getAge(2010,07,07));
-    assertThat(list.get(2).age).isEqualTo(getAge(2015,07,07));
+    assertThat(list.get(0).age).isEqualTo(getAge(2000, 07, 07));
+    assertThat(list.get(1).age).isEqualTo(getAge(2010, 07, 07));
+    assertThat(list.get(2).age).isEqualTo(getAge(2015, 07, 07));
 
   }
 
@@ -965,9 +965,9 @@ public class ClientRegisterImplTest extends ParentTestNg {
 
     assertThat(list).hasSize(3);
 
-    assertThat(list.get(0).age).isEqualTo(getAge(2015,07,07));
-    assertThat(list.get(1).age).isEqualTo(getAge(2010,07,07));
-    assertThat(list.get(2).age).isEqualTo(getAge(2000,07,07));
+    assertThat(list.get(0).age).isEqualTo(getAge(2015, 07, 07));
+    assertThat(list.get(1).age).isEqualTo(getAge(2010, 07, 07));
+    assertThat(list.get(2).age).isEqualTo(getAge(2000, 07, 07));
 
   }
 
@@ -1067,6 +1067,7 @@ public class ClientRegisterImplTest extends ParentTestNg {
   }
 
   @Test
+  // FIXME: 1/5/18 Тест непрвильный. Assert-ов нет
   public void download_pdf() throws Exception {
 
     ClientListRequest req = new ClientListRequest();
@@ -1088,9 +1089,6 @@ public class ClientRegisterImplTest extends ParentTestNg {
   public void testMigrate() throws IOException, SAXException, ParserConfigurationException {
 
   }
-
-
-
 
 
   private void deleteAll() {

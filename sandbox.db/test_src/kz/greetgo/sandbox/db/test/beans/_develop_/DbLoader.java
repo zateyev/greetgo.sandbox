@@ -28,7 +28,7 @@ public class DbLoader {
 
   public void loadTestData() {
     logger.info("Start loading test data...");
-
+    // FIXME: 1/5/18 Задавай читабельные и разные данные
     logger.info("Loading persons...");
     Function<String, String> passwordEncryption = tokenManager.get()::encryptPassword;
     standDb.get().personStorage.values().stream()
