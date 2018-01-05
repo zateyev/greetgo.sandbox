@@ -44,6 +44,7 @@ public class GetPdfReport extends AbstractGetClientList implements ConnectionCal
     return surname + ' ' + name + (patronymic == null ? "" : " " + patronymic);
   }
 
+  // FIXME: 1/5/18 Попробуй избавиться от повторения кода
   private ClientRecord rsToClient(ResultSet rs) throws SQLException {
     ClientRecord ret = new ClientRecord();
     ret.id = rs.getString("id");

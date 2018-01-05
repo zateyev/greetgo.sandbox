@@ -42,6 +42,8 @@ public class ClientController implements Controller {
     return clientRegister.get().getClient(id);
   }
 
+
+  // FIXME: 1/5/18 Задай название метода и значение мапинга так, чтобы интуитивно можно было ответить на вопрос "Download что?"
   @Mapping("/download")
   public void download(@Par("listInfo") @Json ClientListRequest clientListRequest,
                        @Par("contentType") String contentType,
@@ -53,11 +55,14 @@ public class ClientController implements Controller {
 
     OutputStream outputStream = tunnel.getResponseOutputStream();
 
+    // FIXME: 1/5/18 Название файла непонятное
     if (contentType.contains("pdf")) {
       tunnel.setResponseHeader("content-disposition", "attachment; filename=\"report.pdf\"");
     } else {
       tunnel.setResponseHeader("content-disposition", "attachment; filename=\"report.xlsx\"");
     }
+
+    // FIXME: 1/5/18 Задай название метода так, чтобы интуитивно можно было ответить на вопрос "Download что?"
     clientRegister.get().download(clientListRequest, outputStream, contentType, personId);
 
     tunnel.flushBuffer();
