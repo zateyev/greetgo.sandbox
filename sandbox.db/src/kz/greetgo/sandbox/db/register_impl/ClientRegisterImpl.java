@@ -8,6 +8,7 @@ import kz.greetgo.sandbox.db.dao.ClientDao;
 import kz.greetgo.sandbox.db.register_impl.jdbc.GetClientList;
 import kz.greetgo.sandbox.db.register_impl.jdbc.GetClientListSize;
 import kz.greetgo.sandbox.db.register_impl.jdbc.GetClientPhones;
+import kz.greetgo.sandbox.db.register_impl.jdbc.GetXlsxReport;
 import kz.greetgo.sandbox.db.report.ClientRecord.ClientRecordListReportViewPdf;
 import kz.greetgo.sandbox.db.report.ClientRecord.ClientRecordListReportViewXslx;
 import kz.greetgo.sandbox.db.util.JdbcSandbox;
@@ -196,12 +197,14 @@ public class ClientRegisterImpl implements ClientRegister {
         view.start(new Date());
 
         clientListRequest.count = 0;
-
-        List<ClientRecord> rec = jdbc.get().execute(new GetClientList(clientListRequest));
+//GGG
+       /* List<ClientRecord> rec = jdbc.get().execute(new GetClientList(clientListRequest));
 
         for (ClientRecord r : rec) {
           view.append(r);
-        }
+        }*/
+
+       jdbc.get().execute(new GetXlsxReport(view, clientListRequest));
 
       } finally {
         view.finish();
