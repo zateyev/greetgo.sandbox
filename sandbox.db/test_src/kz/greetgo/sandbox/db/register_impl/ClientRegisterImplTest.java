@@ -15,9 +15,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.time.LocalDate;
-import java.time.Year;
 import java.time.temporal.ChronoUnit;
-import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
@@ -903,7 +901,6 @@ public class ClientRegisterImplTest extends ParentTestNg {
 
   }
 
-  // FIXME: 1/4/18 test fails
   @Test
   public void getList_CheckSortedList_ClientAgeDesc() {
 
@@ -1078,6 +1075,13 @@ public class ClientRegisterImplTest extends ParentTestNg {
 
   }
 
+  @Test
+  public void testMigrate() throws IOException, SAXException, ParserConfigurationException {
+    Migration m = new Migration();
+    m.migrate();
+
+
+  }
 
 
 
@@ -1226,9 +1230,9 @@ public class ClientRegisterImplTest extends ParentTestNg {
     );
   }
 
-  private int getAge(int i, int i1, int i2) {
+  private int getAge(int year, int month, int day) {
     LocalDate now = LocalDate.now();
-    return (int)ChronoUnit.YEARS.between(LocalDate.of(i, i1, i2), now);
+    return (int) ChronoUnit.YEARS.between(LocalDate.of(year, month, day), now);
   }
 
 
