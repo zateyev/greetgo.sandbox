@@ -6,7 +6,6 @@ import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
 import org.xml.sax.helpers.DefaultHandler;
 
-import java.sql.PreparedStatement;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -84,6 +83,30 @@ public class SAXParsClient extends DefaultHandler {
     }
     if ("/cia/client/name".equals(path)) {
       client.name = attributes.getValue("value");
+      return;
+    }
+
+    if ("/cia/client/surname".equals(path)) {
+      client.surname = attributes.getValue("value");
+      return;
+    }
+
+    if ("/cia/client/patronymic".equals(path)) {
+      client.patronymic= attributes.getValue("value");
+      return;
+    }
+
+    if ("/cia/client/gender".equals(path)) {
+      client.gender = attributes.getValue("value");
+      return;
+    }
+
+    if ("/cia/client/charm".equals(path)) {
+      client.charmId = attributes.getValue("value");
+      return;
+    }
+    if ("/cia/client/birth".equals(path)) {
+      client.dateOfBirth = attributes.getValue("value");
       return;
     }
   }
