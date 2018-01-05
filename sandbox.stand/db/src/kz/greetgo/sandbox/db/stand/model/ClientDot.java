@@ -30,6 +30,7 @@ public class ClientDot {
     return rec;
   }
 
+  // FIXME: 1/5/18 метод возвращает неправильные данные
   public ClientDetails toClientDetails() {
     ClientDetails rec = new ClientDetails();
 
