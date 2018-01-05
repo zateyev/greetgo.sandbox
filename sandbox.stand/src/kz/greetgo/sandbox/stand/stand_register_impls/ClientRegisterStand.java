@@ -45,10 +45,10 @@ public class ClientRegisterStand implements ClientRegister {
     ClientRecord nn = fullList.get(3).toClientRecord();
 
     List<ClientRecord> list2 = new ArrayList<>();
-    //list2.add(nn);
+    list2.add(nn);
 
 
-    if ("".equals(clientListRequest.filterByFio)) return list;
+    if ("".equals(clientListRequest.filterByFio)) return list2;
     else return list2;
   }
 

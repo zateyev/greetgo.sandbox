@@ -13,6 +13,7 @@ export class ClientToSave {
   public phones: ClientPhones;
 
   public assign(o: any): ClientToSave {
+    o.phones.mobile = o.phones.mobile.filter(String);
     this.id = o.id;
     this.name = o.name;
     this.surname = o.surname;

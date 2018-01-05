@@ -37,6 +37,7 @@ export class ListComponent implements OnInit {
   ngOnInit(): void {
     this.loading = true;
     this.loadList();
+
   }
 
   openModalChangeForm(id: string) {
