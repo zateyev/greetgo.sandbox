@@ -8,6 +8,7 @@ import kz.greetgo.sandbox.db.dao.ClientDao;
 import kz.greetgo.sandbox.db.register_impl.jdbc.GetClientList;
 import kz.greetgo.sandbox.db.register_impl.jdbc.GetClientListSize;
 import kz.greetgo.sandbox.db.register_impl.jdbc.GetClientPhones;
+import kz.greetgo.sandbox.db.report.ClientRecord.ClientRecordListReportViewPdf;
 import kz.greetgo.sandbox.db.report.ClientRecord.ClientRecordListReportViewXslx;
 import kz.greetgo.sandbox.db.util.JdbcSandbox;
 import kz.greetgo.util.RND;
@@ -180,6 +181,13 @@ public class ClientRegisterImpl implements ClientRegister {
   public void download(ClientListRequest clientListRequest, OutputStream outputStream, String contentType, String personId) throws Exception {
 
     if (contentType.contains("pdf")) {
+
+      ClientRecordListReportViewPdf pdf = new ClientRecordListReportViewPdf();
+
+      clientListRequest.count = 0;
+      List<ClientRecord> rec = jdbc.get().execute(new GetClientList(clientListRequest));
+
+      pdf.generate(outputStream, rec);
 
     } else {
       ClientRecordListReportViewXslx view = new ClientRecordListReportViewXslx(outputStream);

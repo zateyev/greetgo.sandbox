@@ -20,7 +20,7 @@ public class ClientRecordListReportViewPdf  {
 
   private static Font font_10 = null;
 
-  public static void generate(OutputStream out, List<ClientRecord> in) throws IOException, DocumentException{
+  public void generate(OutputStream out, List<ClientRecord> in) throws IOException, DocumentException{
 
     Document pdf = new Document(new Rectangle(842, 595));
 

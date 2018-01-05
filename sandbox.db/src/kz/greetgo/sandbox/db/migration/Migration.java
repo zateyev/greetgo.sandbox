@@ -11,28 +11,30 @@ import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
 public class Migration {
   public BeanGetter<JdbcSandbox> jdbc;
 
-  SAXParsClient saxp = new SAXParsClient();
+  List<ClientToSave> list = new ArrayList<>();
 
   public void migrate() throws ParserConfigurationException, SAXException, IOException {
     parseRecordData();
-    migrateToDB(saxp.getClientList());
   }
 
-  private void migrateToDB(List<ClientToSave> clientList) {
-    jdbc.get().execute(new InsertClients(clientList));
+  private void migrateToDB(SAXParsClient saxParsClient) {
+    jdbc.get().execute(new InsertClients(saxParsClient));
   }
 
   public void parseRecordData() throws SAXException, IOException, ParserConfigurationException {
     SAXParserFactory factory = SAXParserFactory.newInstance();
     factory.setNamespaceAware(true);
     SAXParser parser = factory.newSAXParser();
-
+    SAXParsClient saxp = new SAXParsClient();
     parser.parse(new File("/home/jgolibzhan/IdeaProjects/greetgo.sandbox/build/testxml.xml"), saxp);
+
+    migrateToDB(saxp);
   }
 
 }
