@@ -47,7 +47,7 @@ public class ClientRegisterStand implements ClientRegister {
     List<ClientRecord> list2 = new ArrayList<>();
     //list2.add(nn);
 
-
+    // FIXME: 1/5/18 list2 всегда пустой. фильтрация не работает
     if ("".equals(clientListRequest.filterByFio)) return list;
     else return list2;
   }
@@ -57,12 +57,14 @@ public class ClientRegisterStand implements ClientRegister {
     if (id != null) return al.get().clientStorage.get(id).toClientDetails();
     else {
       ClientDetails det = new ClientDetails();
+      // FIXME: 1/5/18 выборка по айди не работает
       det.charms = al.get().clientStorage.get("1").toClientDetails().charms;
       return det;
     }
   }
 
 
+  // FIXME: 1/5/18 Почему объявлена глобавльный атрибут? И почему у глобального атрибута такое непонятное название?
   int i = 50;
 
   @Override
