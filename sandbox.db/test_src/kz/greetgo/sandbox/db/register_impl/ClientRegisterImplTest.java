@@ -3,7 +3,6 @@ package kz.greetgo.sandbox.db.register_impl;
 import kz.greetgo.depinject.core.BeanGetter;
 import kz.greetgo.sandbox.controller.model.*;
 import kz.greetgo.sandbox.controller.register.ClientRegister;
-import kz.greetgo.sandbox.db.migration.Migration;
 import kz.greetgo.sandbox.db.test.dao.ClientTestDao;
 import kz.greetgo.sandbox.db.test.util.ParentTestNg;
 import kz.greetgo.sandbox.db.util.JdbcSandbox;
@@ -1058,7 +1057,7 @@ public class ClientRegisterImplTest extends ParentTestNg {
 
     //
     //
-    clientRegister.get().download(req, stream, "xlsx", "p1");
+    clientRegister.get().downloadReport(req, stream, "xlsx", "p1");
     //
     //
 
@@ -1077,7 +1076,7 @@ public class ClientRegisterImplTest extends ParentTestNg {
 
     //
     //
-    clientRegister.get().download(req, stream, "pdf", "p1");
+    clientRegister.get().downloadReport(req, stream, "pdf", "p1");
     //
     //
 

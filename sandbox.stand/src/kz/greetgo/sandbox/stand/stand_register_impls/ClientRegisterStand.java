@@ -95,10 +95,10 @@ public class ClientRegisterStand implements ClientRegister {
   }
 
   @Override
-  public void download(ClientListRequest clientListRequest,
-                       OutputStream outputStream,
-                       String contentType,
-                       String personId) throws Exception {
+  public void downloadReport(ClientListRequest clientListRequest,
+                             OutputStream outputStream,
+                             String contentType,
+                             String personId) throws Exception {
 
     if (contentType.contains("pdf")) {
       try (InputStream in = StandDb.class.getResourceAsStream("getClientListReport.pdf")) {

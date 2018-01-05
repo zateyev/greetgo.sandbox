@@ -45,30 +45,28 @@ public class ClientController implements Controller {
   }
 
 
-  // FIXME: 1/5/18 Задай название метода и значение мапинга так, чтобы интуитивно можно было ответить на вопрос "Download что?"
-  @Mapping("/download")
-  public void download(@Par("listInfo") @Json ClientListRequest clientListRequest,
-                       @Par("contentType") String contentType,
-                       @ParSession("personId") String personId,
-                       RequestTunnel tunnel
+  @Mapping("/downloadReport")
+  public void downloadReport(@Par("listInfo") @Json ClientListRequest clientListRequest,
+                             @Par("contentType") String contentType,
+                             @ParSession("personId") String personId,
+                             RequestTunnel tunnel
   ) throws Exception {
 
     SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+
     String date = sdf.format(new Date());
 
     tunnel.setResponseContentType(contentType);
 
     OutputStream outputStream = tunnel.getResponseOutputStream();
 
-    // FIXME: 1/5/18 Название файла непонятное
     if (contentType.contains("pdf")) {
       tunnel.setResponseHeader("content-disposition", "attachment; filename=\"List_of_clients-" + date + ".pdf\"");
     } else {
       tunnel.setResponseHeader("content-disposition", "attachment; filename=\"List_of_clients-" + date + ".xlsx\"");
     }
 
-    // FIXME: 1/5/18 Задай название метода так, чтобы интуитивно можно было ответить на вопрос "Download что?"
-    clientRegister.get().download(clientListRequest, outputStream, contentType, personId);
+    clientRegister.get().downloadReport(clientListRequest, outputStream, contentType, personId);
 
     tunnel.flushBuffer();
 

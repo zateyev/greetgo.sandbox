@@ -177,7 +177,7 @@ public class ClientRegisterImpl implements ClientRegister {
 
 
   @Override
-  public void download(ClientListRequest clientListRequest, OutputStream outputStream, String contentType, String personId) throws Exception {
+  public void downloadReport(ClientListRequest clientListRequest, OutputStream outputStream, String contentType, String personId) throws Exception {
 
     if (contentType.contains("pdf")) {
 

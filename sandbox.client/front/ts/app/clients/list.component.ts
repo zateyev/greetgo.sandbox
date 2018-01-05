@@ -119,7 +119,7 @@ export class ListComponent implements OnInit {
     let listInfo = encodeURIComponent(JSON.stringify(this.listInfo));
     let contentType = this.fileTypeForDownload;
     let token = encodeURIComponent(this.httpService.token);
-    window.open(this.httpService.url("/client/download?contentType=" + contentType
+    window.open(this.httpService.url("/client/downloadReport?contentType=" + contentType
       + "&listInfo=" + listInfo + "&token=" + token));
   }
 
