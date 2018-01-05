@@ -5,9 +5,8 @@ import kz.greetgo.depinject.core.BeanGetter;
 import kz.greetgo.sandbox.controller.model.*;
 import kz.greetgo.sandbox.controller.register.ClientRegister;
 import kz.greetgo.sandbox.db.dao.ClientDao;
-import kz.greetgo.sandbox.db.register_impl.jdbc.GetClientList;
-import kz.greetgo.sandbox.db.register_impl.jdbc.GetClientListSize;
-import kz.greetgo.sandbox.db.register_impl.jdbc.GetClientPhones;
+import kz.greetgo.sandbox.db.register_impl.jdbc.*;
+import kz.greetgo.sandbox.db.report.ClientRecord.ClientRecordListReportViewPdf;
 import kz.greetgo.sandbox.db.report.ClientRecord.ClientRecordListReportViewXslx;
 import kz.greetgo.sandbox.db.util.JdbcSandbox;
 import kz.greetgo.util.RND;
@@ -181,22 +180,30 @@ public class ClientRegisterImpl implements ClientRegister {
 
     if (contentType.contains("pdf")) {
 
+     ClientRecordListReportViewPdf pdf = new ClientRecordListReportViewPdf();
+      clientListRequest.count = 0;
+     try{
+       pdf.start(outputStream);
+
+       pdf.initContent();
+
+       jdbc.get().execute(new GetPdfReport(pdf, clientListRequest));
+     }
+     finally {
+       pdf.close(outputStream);
+     }
+
     } else {
-      ClientRecordListReportViewXslx view = new ClientRecordListReportViewXslx(outputStream);
+      ClientRecordListReportViewXslx xslx = new ClientRecordListReportViewXslx(outputStream);
+      clientListRequest.count = 0;
 
       try {
-        view.start(new Date());
+        xslx.start(new Date());
 
-        clientListRequest.count = 0;
-
-        List<ClientRecord> rec = jdbc.get().execute(new GetClientList(clientListRequest));
-
-        for (ClientRecord r : rec) {
-          view.append(r);
-        }
+       jdbc.get().execute(new GetXlsxReport(xslx, clientListRequest));
 
       } finally {
-        view.finish();
+        xslx.finish();
       }
     }
   }

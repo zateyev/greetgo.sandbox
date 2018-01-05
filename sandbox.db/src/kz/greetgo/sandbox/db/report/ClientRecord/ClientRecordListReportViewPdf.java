@@ -20,22 +20,23 @@ public class ClientRecordListReportViewPdf  {
 
   private static Font font_10 = null;
 
-  public static void generate(OutputStream out, List<ClientRecord> in) throws IOException, DocumentException{
+  Document pdf = new Document(new Rectangle(842, 595));
 
-    Document pdf = new Document(new Rectangle(842, 595));
+  public void generate(OutputStream out, List<ClientRecord> in) throws IOException, DocumentException{
 
+    start(out);
 
-    start(pdf, out);
+    initContent();
 
-    initFont();
+    for(ClientRecord rec: in){
+      append(rec);
+    }
 
-    initContent(pdf, in);
-
-    close(pdf, out);
+    close(out);
 
   }
 
-  private static void close(Document pdf, OutputStream out) throws IOException {
+  public void close(OutputStream out) throws IOException {
     pdf.close();
     out.close();
   }
@@ -50,8 +51,8 @@ public class ClientRecordListReportViewPdf  {
     font_10 = new Font(baseFont, 10, Font.NORMAL);
   }
 
+  public void initHeader() throws DocumentException {
 
-  private static void initContent(Document pdf, List<ClientRecord> in) throws DocumentException {
     SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy");
     String titleStr = "Список клиентов на дату " + dateFormat.format(new Date());
 
@@ -59,16 +60,23 @@ public class ClientRecordListReportViewPdf  {
     head.setAlignment(Element.ALIGN_CENTER);
     emptyLine(head, 1);
     pdf.add(head);
+  }
 
 
-    Paragraph para = new Paragraph();
-    para.setFont(font_10);
-    para.add("\n");
+  public void initContent() throws DocumentException, IOException {
+    initFont();
+    initHeader();
+
 
     PdfPTable table = new PdfPTable(6);
     table.setHorizontalAlignment(Element.ALIGN_LEFT);
     table.setWidthPercentage(100);
     table.setWidths(new int[] { 3, 2, 1, 2, 2, 2});
+
+
+    Paragraph para = new Paragraph();
+    para.setFont(font_10);
+    para.add("\n");
 
     initTableHeader(table, "ФИО");
     initTableHeader(table, "Характер");
@@ -77,16 +85,27 @@ public class ClientRecordListReportViewPdf  {
     initTableHeader(table, "Максимальный остаток счетов");
     initTableHeader(table, "Минимальный остаток счетов");
 
-    for (ClientRecord row:
-         in) {
-      initTableCell(table, row.fio);
-      initTableCell(table, row.charm);
-      initTableCell(table, readInt(row.age));
-      initTableCell(table, readFloat(row.totalAccountBalance));
-      initTableCell(table, readFloat(row.maxAccountBalance));
-      initTableCell(table, readFloat(row.minAccountBalance));
-    }
 
+    para.add(table);
+    pdf.add(para);
+
+
+  }
+
+  public void append(ClientRecord row) throws DocumentException {
+
+    Paragraph para = new Paragraph();
+    PdfPTable table = new PdfPTable(6);
+    table.setHorizontalAlignment(Element.ALIGN_LEFT);
+    table.setWidthPercentage(100);
+    table.setWidths(new int[] { 3, 2, 1, 2, 2, 2});
+
+    initTableCell(table, row.fio);
+    initTableCell(table, row.charm);
+    initTableCell(table, readInt(row.age));
+    initTableCell(table, readFloat(row.totalAccountBalance));
+    initTableCell(table, readFloat(row.maxAccountBalance));
+    initTableCell(table, readFloat(row.minAccountBalance));
     para.add(table);
     pdf.add(para);
 
@@ -102,7 +121,7 @@ public class ClientRecordListReportViewPdf  {
     return integer.toString();
   }
 
-  private static void start(Document pdf, OutputStream out) throws DocumentException {
+  public void start(OutputStream out) throws DocumentException {
     PdfWriter.getInstance(pdf, out);
     pdf.open();
   }

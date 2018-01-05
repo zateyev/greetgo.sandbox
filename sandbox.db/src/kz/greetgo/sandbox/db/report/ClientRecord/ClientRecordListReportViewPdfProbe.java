@@ -29,6 +29,7 @@ public class ClientRecordListReportViewPdfProbe {
     }
 
 
-    ClientRecordListReportViewPdf.generate(file, list);
+    ClientRecordListReportViewPdf pdf = new ClientRecordListReportViewPdf();
+    pdf.generate(file, list);
   }
 }

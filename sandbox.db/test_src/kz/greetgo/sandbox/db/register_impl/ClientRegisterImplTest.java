@@ -3,12 +3,16 @@ package kz.greetgo.sandbox.db.register_impl;
 import kz.greetgo.depinject.core.BeanGetter;
 import kz.greetgo.sandbox.controller.model.*;
 import kz.greetgo.sandbox.controller.register.ClientRegister;
+import kz.greetgo.sandbox.db.migration.Migration;
 import kz.greetgo.sandbox.db.test.dao.ClientTestDao;
 import kz.greetgo.sandbox.db.test.util.ParentTestNg;
 import kz.greetgo.util.RND;
 import org.testng.annotations.Test;
+import org.xml.sax.SAXException;
 
+import javax.xml.parsers.ParserConfigurationException;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.OutputStream;
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
@@ -1059,7 +1063,28 @@ public class ClientRegisterImplTest extends ParentTestNg {
 
   }
 
+  @Test
+  public void download_pdf() throws Exception {
 
+    ClientListRequest req = new ClientListRequest();
+    req.count = 0;
+
+    OutputStream stream = new FileOutputStream("hello.pdf");
+
+    //
+    //
+    clientRegister.get().download(req, stream, "pdf", "p1");
+    //
+    //
+
+  }
+
+
+  @Test
+  public void testMigrate() throws IOException, SAXException, ParserConfigurationException {
+    Migration m = new Migration();
+    m.migrate();
+  }
 
 
 
