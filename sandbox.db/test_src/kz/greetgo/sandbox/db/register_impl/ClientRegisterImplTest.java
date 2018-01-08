@@ -527,11 +527,15 @@ public class ClientRegisterImplTest extends ParentTestNg {
     //
     //
     List<ClientRecord> list = clientRegister.get().getList(req);
+
     //
     //
 
     assertThat(list).hasSize(10);
-    for (ClientRecord rec : list) assertThat(rec.fio).contains("Иван");
+    for (ClientRecord rec : list) {
+
+      assertThat(rec.fio).contains("Иван");
+    }
 
   }
 
@@ -1044,6 +1048,8 @@ public class ClientRegisterImplTest extends ParentTestNg {
 
   public BeanGetter<JdbcSandbox> jdbc;
 
+
+  // FIXME: 1/8/18 Тесты должны покрывать все случаи (сортировка и тд)
   @Test
   public void download_Xlsx() throws Exception {
     String charmId = RND.str(5), clientId = RND.str(5);
