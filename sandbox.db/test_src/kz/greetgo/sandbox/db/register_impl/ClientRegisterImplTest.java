@@ -3,17 +3,13 @@ package kz.greetgo.sandbox.db.register_impl;
 import kz.greetgo.depinject.core.BeanGetter;
 import kz.greetgo.sandbox.controller.model.*;
 import kz.greetgo.sandbox.controller.register.ClientRegister;
-import kz.greetgo.sandbox.db.migration.Migration;
+import kz.greetgo.sandbox.db.register_impl.jdbc.FillClientReportView;
 import kz.greetgo.sandbox.db.test.dao.ClientTestDao;
 import kz.greetgo.sandbox.db.test.util.ParentTestNg;
+import kz.greetgo.sandbox.db.util.JdbcSandbox;
 import kz.greetgo.util.RND;
 import org.testng.annotations.Test;
-import org.xml.sax.SAXException;
 
-import javax.xml.parsers.ParserConfigurationException;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.OutputStream;
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 import java.util.Date;
@@ -157,8 +153,8 @@ public class ClientRegisterImplTest extends ParentTestNg {
     String charmId = RND.str(5);
 
     insertCharm(charmId);
-    insertClient(clientId, charmId);
-    insertClient(clientId2, charmId);
+    insertClientWithCharm(clientId, charmId);
+    insertClientWithCharm(clientId2, charmId);
     insertAddresses(clientId);
     insertAddresses(clientId2);
     insertPhones(clientId);
@@ -211,8 +207,8 @@ public class ClientRegisterImplTest extends ParentTestNg {
     String charmId = RND.str(5);
 
     insertCharm(charmId);
-    insertClient(clientId, charmId);
-    insertClient(clientId2, charmId);
+    insertClientWithCharm(clientId, charmId);
+    insertClientWithCharm(clientId2, charmId);
     insertAddresses(clientId);
     insertAddresses(clientId2);
     insertPhones(clientId);
@@ -446,7 +442,7 @@ public class ClientRegisterImplTest extends ParentTestNg {
 
     clientTestDao.get().insertCharm(charmId, charmName);
 
-    insertClient(id, charmId);
+    insertClientWithCharm(id, charmId);
 
     insertAccountWithMoney(id, money);
 
@@ -521,7 +517,7 @@ public class ClientRegisterImplTest extends ParentTestNg {
 
     for (int i = 0; i < 10; i++) {
       String clientId = RND.str(10);
-      insertClient(clientId, charmId);
+      insertClientWithCharm(clientId, charmId);
       insertAccount(clientId);
     }
 
@@ -555,7 +551,7 @@ public class ClientRegisterImplTest extends ParentTestNg {
 
     for (int i = 0; i < 10; i++) {
       String clientId = RND.str(10);
-      insertClient(clientId, charmId);
+      insertClientWithCharm(clientId, charmId);
       insertAccount(clientId);
     }
 
@@ -589,7 +585,7 @@ public class ClientRegisterImplTest extends ParentTestNg {
 
     for (int i = 0; i < 10; i++) {
       String clientId = RND.str(10);
-      insertClient(clientId, charmId);
+      insertClientWithCharm(clientId, charmId);
       insertAccount(clientId);
     }
 
@@ -983,7 +979,7 @@ public class ClientRegisterImplTest extends ParentTestNg {
 
     for (int i = 0; i < 5; i++) {
       String clientId = RND.str(10);
-      insertClient(clientId, charmId);
+      insertClientWithCharm(clientId, charmId);
     }
 
     String clientId = RND.str(10);
@@ -1046,47 +1042,45 @@ public class ClientRegisterImplTest extends ParentTestNg {
 
   }
 
+  public BeanGetter<JdbcSandbox> jdbc;
 
   @Test
   public void download_Xlsx() throws Exception {
+    String charmId = RND.str(5), clientId = RND.str(5);
+    deleteAll();
+    insertCharm(charmId);
+
+    clientTestDao.get().insertClient(
+      clientId,
+      "Иван",
+      "Иванов",
+      "Иванович",
+      java.sql.Date.valueOf("2000-01-01"),
+      "male",
+      charmId
+    );
+
+    insertAccountWithMoney(clientId, 25.25f);
 
     ClientListRequest req = new ClientListRequest();
     req.count = 0;
 
-    OutputStream stream = new FileOutputStream("hello.xlsx");
+    ReportTestView testView = new ReportTestView();
 
     //
     //
-    clientRegister.get().download(req, stream, "xlsx", "p1");
+    jdbc.get().execute(new FillClientReportView(testView, req, "p1"));
     //
     //
+
+    assertThat(testView.row.get(0).fio).isEqualTo("Иванов Иван Иванович");
+    assertThat(testView.row.get(0).age).isEqualTo(18);
+    assertThat(testView.row.get(0).totalAccountBalance).isEqualTo(25.25f);
+    assertThat(testView.row.get(0).minAccountBalance).isEqualTo(25.25f);
+    assertThat(testView.row.get(0).maxAccountBalance).isEqualTo(25.25f);
+
 
   }
-
-  @Test
-  // FIXME: 1/5/18 Тест непрвильный. Assert-ов нет
-  public void download_pdf() throws Exception {
-
-    ClientListRequest req = new ClientListRequest();
-    req.count = 0;
-
-    OutputStream stream = new FileOutputStream("hello.pdf");
-
-    //
-    //
-    clientRegister.get().download(req, stream, "pdf", "p1");
-    //
-    //
-
-  }
-
-
-  @Test
-  public void testMigrate() throws IOException, SAXException, ParserConfigurationException {
-    Migration m = new Migration();
-    m.migrate();
-  }
-
 
   private void deleteAll() {
     clientTestDao.get().deleteAllAddr();
@@ -1100,7 +1094,7 @@ public class ClientRegisterImplTest extends ParentTestNg {
     clientTestDao.get().insertCharm(charmId, RND.str(10));
   }
 
-  private void insertClient(String clientId, String charmId) {
+  private void insertClientWithCharm(String clientId, String charmId) {
     clientTestDao.get().insertClient(
       clientId,
       RND.str(10),
@@ -1143,19 +1137,6 @@ public class ClientRegisterImplTest extends ParentTestNg {
       RND.str(10),
       patronymic,
       java.sql.Date.valueOf("1991-12-12"),
-      "male",
-      charmId
-    );
-  }
-
-
-  private void insertClientWithCharm(String clientId, String charmId) {
-    clientTestDao.get().insertClient(
-      clientId,
-      RND.str(10),
-      RND.str(10),
-      RND.str(10),
-      java.sql.Date.valueOf("1990-10-10"),
       "male",
       charmId
     );

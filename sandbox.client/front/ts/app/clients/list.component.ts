@@ -37,6 +37,7 @@ export class ListComponent implements OnInit {
   ngOnInit(): void {
     this.loading = true;
     this.loadList();
+
   }
 
   openModalChangeForm(id: string) {
@@ -118,7 +119,7 @@ export class ListComponent implements OnInit {
     let listInfo = encodeURIComponent(JSON.stringify(this.listInfo));
     let contentType = this.fileTypeForDownload;
     let token = encodeURIComponent(this.httpService.token);
-    window.open(this.httpService.url("/client/download?contentType=" + contentType
+    window.open(this.httpService.url("/report/clientList?contentType=" + contentType
       + "&listInfo=" + listInfo + "&token=" + token));
   }
 
@@ -129,7 +130,6 @@ export class ListComponent implements OnInit {
       return;
     }
     if (this.list.length === 0) {
-      console.log("empty list find");
       this.pagination.getTotalSizeOfList();
       if (this.currentPage > 0) this.pagination.setCurrentPage(this.currentPage - 1);
       else this.pagination.setCurrentPage(this.currentPage);

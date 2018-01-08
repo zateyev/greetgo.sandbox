@@ -10,9 +10,9 @@ import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ClientRecordListReportViewPdfProbe {
+public class ClientReportViewPdfProbe {
   public static void main(String[] args) throws IOException, DocumentException {
-    OutputStream file = new FileOutputStream("otchet.pdf");
+    OutputStream file = new FileOutputStream("ViewTest.pdf");
 
     List<ClientRecord> list = new ArrayList<>();
 
@@ -29,7 +29,7 @@ public class ClientRecordListReportViewPdfProbe {
     }
 
 
-    ClientRecordListReportViewPdf pdf = new ClientRecordListReportViewPdf();
-    pdf.generate(file, list);
+    ClientReportViewPdf pdf = new ClientReportViewPdf(file);
+    pdf.generate(file, list, "name");
   }
 }

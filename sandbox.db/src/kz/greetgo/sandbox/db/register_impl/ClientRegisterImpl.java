@@ -6,8 +6,9 @@ import kz.greetgo.sandbox.controller.model.*;
 import kz.greetgo.sandbox.controller.register.ClientRegister;
 import kz.greetgo.sandbox.db.dao.ClientDao;
 import kz.greetgo.sandbox.db.register_impl.jdbc.*;
-import kz.greetgo.sandbox.db.report.ClientRecord.ClientRecordListReportViewPdf;
-import kz.greetgo.sandbox.db.report.ClientRecord.ClientRecordListReportViewXslx;
+import kz.greetgo.sandbox.db.report.ClientRecord.ClientReportView;
+import kz.greetgo.sandbox.db.report.ClientRecord.ClientReportViewPdf;
+import kz.greetgo.sandbox.db.report.ClientRecord.ClientReportViewXslx;
 import kz.greetgo.sandbox.db.util.JdbcSandbox;
 import kz.greetgo.util.RND;
 
@@ -175,37 +176,26 @@ public class ClientRegisterImpl implements ClientRegister {
   }
 
 
-  @Override
-  public void download(ClientListRequest clientListRequest, OutputStream outputStream, String contentType, String personId) throws Exception {
-
-    if (contentType.contains("pdf")) {
-
-     ClientRecordListReportViewPdf pdf = new ClientRecordListReportViewPdf();
-      clientListRequest.count = 0;
-     try{
-       pdf.start(outputStream);
-
-       pdf.initContent();
-
-       jdbc.get().execute(new GetPdfReport(pdf, clientListRequest));
-     }
-     finally {
-       pdf.close(outputStream);
-     }
-
-    } else {
-      ClientRecordListReportViewXslx xslx = new ClientRecordListReportViewXslx(outputStream);
-      clientListRequest.count = 0;
-
-      try {
-        xslx.start(new Date());
-
-       jdbc.get().execute(new GetXlsxReport(xslx, clientListRequest));
-
-      } finally {
-        xslx.finish();
-      }
+  private static ClientReportView createClientReportView(OutputStream outputStream, String contentType) {
+    switch (contentType) {
+      case "application/pdf":
+        return new ClientReportViewPdf(outputStream);
+      case "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet":
+        return new ClientReportViewXslx(outputStream);
     }
+
+    throw new IllegalArgumentException("Unknown contentType = " + contentType);
+  }
+
+  @Override
+  public void downloadReport(ClientListRequest clientListRequest,
+                             OutputStream outputStream,
+                             String contentType,
+                             String personId) throws Exception {
+
+    ClientReportView view =  createClientReportView(outputStream, contentType);
+    jdbc.get().execute(new FillClientReportView(view, clientListRequest, personId));
+
   }
 
 }

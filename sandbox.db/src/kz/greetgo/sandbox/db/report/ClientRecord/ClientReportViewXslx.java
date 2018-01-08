@@ -12,10 +12,10 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-public class ClientRecordListReportViewXslx implements ClientRecordListReportView {
+public class ClientReportViewXslx implements ClientReportView {
   private OutputStream out;
 
-  public ClientRecordListReportViewXslx(OutputStream out) {
+  public ClientReportViewXslx(OutputStream out) {
     this.out = out;
   }
 
@@ -24,20 +24,19 @@ public class ClientRecordListReportViewXslx implements ClientRecordListReportVie
 
 
   @Override
-  public void start(Date onDate) {
+  public void start() {
     sheet = xlsx.newSheet(true);
+    final SimpleDateFormat f = new SimpleDateFormat("dd/MM/yyyy");
 
-    sheet.setWidth(1, 45);
+    sheet.setWidth(1, 90);
     sheet.setWidth(1, 25);
     sheet.setWidth(1, 10);
     sheet.setWidth(1, 20);
     sheet.setWidth(1, 20);
     sheet.setWidth(1, 20);
 
-    final SimpleDateFormat f = new SimpleDateFormat("dd/MM/yyyy");
-
     sheet.row().height(27.75).start();
-    sheet.cellStr(2, "Список клиентов на дату: " + f.format(onDate));
+    sheet.cellStr(2, "Список клиентов на дату: " + f.format(new Date()));
     sheet.row().finish();
     sheet.skipRow();
 
@@ -66,19 +65,25 @@ public class ClientRecordListReportViewXslx implements ClientRecordListReportVie
   }
 
   @Override
-  public void finish() {
+  public void finish(String fio) {
+
+    sheet.skipRow();
+    sheet.row().start();
+    sheet.cellStr(1, "Отчет сформирован для: " + fio);
     xlsx.complete(out);
   }
 
   public static void main(String[] args) throws Exception {
 
-    OutputStream stream = new FileOutputStream("hello.xlsx");
+    OutputStream stream = new FileOutputStream("ViewTest.xlsx");
 
-    ClientRecordListReportViewXslx view = new ClientRecordListReportViewXslx(stream);
+    ClientReportViewXslx view = new ClientReportViewXslx(stream);
 
-    view.start(new Date());
+    view.start();
+
     List<ClientRecord> row = new ArrayList<>();
-    for (int i = 0; i < 300; i++) {
+
+    for (int i = 0; i < 100; i++) {
       ClientRecord r = new ClientRecord();
 
       r.fio = RND.str(10) + " " + RND.str(10) + " " + RND.str(10);
@@ -90,11 +95,10 @@ public class ClientRecordListReportViewXslx implements ClientRecordListReportVie
 
       row.add(r);
     }
-    for (ClientRecord r:
-         row) {
+    for (ClientRecord r: row) {
       view.append(r);
     }
 
-    view.finish();
+    view.finish("FIO for test");
   }
 }

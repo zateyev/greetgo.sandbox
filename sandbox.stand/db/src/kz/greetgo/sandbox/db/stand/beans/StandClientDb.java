@@ -8,6 +8,7 @@ import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 @Bean
 public class StandClientDb implements HasAfterInject {
@@ -68,14 +69,28 @@ public class StandClientDb implements HasAfterInject {
         d.patronymic = "";
         d.surname = "";
     }
-    d.temper = splitLine[4].trim();
-    d.dateOfBirth = splitLine[5].trim();
-    d.balance = Long.parseLong(splitLine[6].trim());
-
     d.gender = splitLine[3].trim();
-    d.phone = splitLine[7].trim();
-    d.address = splitLine[8].trim();
+    d.charm = splitLine[4].trim();
+    d.dateOfBirth = splitLine[5].trim();
+    d.balance = Float.parseFloat(splitLine[6].trim());
 
+    String phones[] = splitLine[7].trim().split("\\s+");
+
+    d.homePhone = phones[0];
+    d.workPhone = phones[1];
+    d.mobilePhone = new ArrayList<>();
+    d.mobilePhone.add(phones[2]);
+
+    String regAddress[] = splitLine[8].trim().split("\\s+");
+    d.regStreet = regAddress[0];
+    d.regHouse = regAddress[1];
+    d.regFlat = regAddress[2];
+    String factAddress[] = splitLine[8].trim().split("\\s+");
+    d.factStreet = factAddress[0];
+    d.factHouse = factAddress[1];
+    d.factFlat = factAddress[2];
+
+    d.charmId = splitLine[9].trim();
 
     clientStorage.put(d.id, d);
   }

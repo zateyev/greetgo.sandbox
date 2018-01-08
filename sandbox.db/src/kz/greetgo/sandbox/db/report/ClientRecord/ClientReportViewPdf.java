@@ -16,31 +16,68 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 
-public class ClientRecordListReportViewPdf  {
+public class ClientReportViewPdf implements ClientReportView {
 
   private static Font font_10 = null;
 
-  Document pdf = new Document(new Rectangle(842, 595));
+  private Document pdf;
 
-  public void generate(OutputStream out, List<ClientRecord> in) throws IOException, DocumentException{
+  private OutputStream out;
 
-    start(out);
+  public ClientReportViewPdf(OutputStream out) {
+    this.out = out;
+  }
 
-    initContent();
+  public void generate(OutputStream out, List<ClientRecord> in, String fio) throws IOException, DocumentException{
+
+    start();
 
     for(ClientRecord rec: in){
       append(rec);
     }
 
-    close(out);
+    finish(fio);
 
   }
 
-  public void close(OutputStream out) throws IOException {
+
+
+
+  @Override
+  public void start() throws DocumentException, IOException {
+    pdf = new Document(new Rectangle(842, 595));
+    PdfWriter.getInstance(pdf, out);
+    pdf.open();
+    initContent();
+  }
+
+  @Override
+  public void append(ClientRecord row) throws DocumentException {
+
+    Paragraph para = new Paragraph();
+    PdfPTable table = new PdfPTable(6);
+    table.setHorizontalAlignment(Element.ALIGN_LEFT);
+    table.setWidthPercentage(100);
+    table.setWidths(new int[] { 3, 2, 1, 2, 2, 2});
+
+    initTableCell(table, row.fio);
+    initTableCell(table, row.charm);
+    initTableCell(table, readInt(row.age));
+    initTableCell(table, readFloat(row.totalAccountBalance));
+    initTableCell(table, readFloat(row.maxAccountBalance));
+    initTableCell(table, readFloat(row.minAccountBalance));
+    para.add(table);
+    pdf.add(para);
+
+  }
+
+  @Override
+  public void finish(String fio) throws IOException, DocumentException {
+    initFooter(fio);
     pdf.close();
     out.close();
-  }
 
+  }
 
   private static void initFont() throws IOException, DocumentException {
     kz.greetgo.sandbox.db.report.FontFactory fontFactory = new FontFactory();
@@ -92,23 +129,12 @@ public class ClientRecordListReportViewPdf  {
 
   }
 
-  public void append(ClientRecord row) throws DocumentException {
+  public void initFooter(String fio) throws DocumentException {
+    Paragraph footer = new Paragraph("Отчет сформирован для: " + fio, font_10);
 
-    Paragraph para = new Paragraph();
-    PdfPTable table = new PdfPTable(6);
-    table.setHorizontalAlignment(Element.ALIGN_LEFT);
-    table.setWidthPercentage(100);
-    table.setWidths(new int[] { 3, 2, 1, 2, 2, 2});
-
-    initTableCell(table, row.fio);
-    initTableCell(table, row.charm);
-    initTableCell(table, readInt(row.age));
-    initTableCell(table, readFloat(row.totalAccountBalance));
-    initTableCell(table, readFloat(row.maxAccountBalance));
-    initTableCell(table, readFloat(row.minAccountBalance));
-    para.add(table);
-    pdf.add(para);
-
+    footer.setAlignment(Element.ALIGN_RIGHT);
+    emptyLine(footer, 1);
+    pdf.add(footer);
   }
 
   private static String readFloat(float balance) {
@@ -119,11 +145,6 @@ public class ClientRecordListReportViewPdf  {
   private static String readInt(int age) {
     Integer integer = new Integer(age);
     return integer.toString();
-  }
-
-  public void start(OutputStream out) throws DocumentException {
-    PdfWriter.getInstance(pdf, out);
-    pdf.open();
   }
 
   private static void emptyLine(Paragraph paragraph, int number) {

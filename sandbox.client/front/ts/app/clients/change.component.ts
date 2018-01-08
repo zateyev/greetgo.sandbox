@@ -37,7 +37,6 @@ export class ChangeClientComponent {
       this.change = true; // change value for button
       this.httpService.post("/client/getClient", {id: id})
         .toPromise().then(res => {
-          console.log(res.json());
         this.clientDetails = new ClientDetails().assign(res.json());
         this.charms = this.clientDetails.charms;
         console.log(this.clientDetails);
@@ -82,7 +81,6 @@ export class ChangeClientComponent {
 
   closeForm() {
     this.errors = "savingClient";
-
     this.clientToSave.assign(this.clientDetails);
     console.log(this.clientToSave);
     if (this.clientToSave.name == null || this.clientToSave.surname == null){

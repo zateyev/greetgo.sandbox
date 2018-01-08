@@ -7,7 +7,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 
-public class GetClientListSize extends AbstractGetClientList implements ConnectionCallback<Long> {
+public class GetClientListSize extends AbstractGetClientLogic implements ConnectionCallback<Long> {
 
   public GetClientListSize(ClientListRequest in) {
     super(in);
