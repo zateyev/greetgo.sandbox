@@ -4,8 +4,11 @@ import kz.greetgo.depinject.core.Bean;
 import kz.greetgo.depinject.core.BeanGetter;
 import kz.greetgo.sandbox.controller.model.*;
 import kz.greetgo.sandbox.controller.register.ClientRegister;
-import kz.greetgo.sandbox.db.dao.ClientDao;
-import kz.greetgo.sandbox.db.register_impl.jdbc.*;
+import kz.greetgo.sandbox.db.dao.postgres.ClientDaoPostgres;
+import kz.greetgo.sandbox.db.register_impl.jdbc.FillClientReportView;
+import kz.greetgo.sandbox.db.register_impl.jdbc.GetClientList;
+import kz.greetgo.sandbox.db.register_impl.jdbc.GetClientListSize;
+import kz.greetgo.sandbox.db.register_impl.jdbc.GetClientPhones;
 import kz.greetgo.sandbox.db.report.ClientRecord.ClientReportView;
 import kz.greetgo.sandbox.db.report.ClientRecord.ClientReportViewPdf;
 import kz.greetgo.sandbox.db.report.ClientRecord.ClientReportViewXslx;
@@ -18,7 +21,7 @@ import java.util.List;
 
 @Bean
 public class ClientRegisterImpl implements ClientRegister {
-  public BeanGetter<ClientDao> clientDao;
+  public BeanGetter<ClientDaoPostgres> clientDao;
 
   public BeanGetter<JdbcSandbox> jdbc;
 

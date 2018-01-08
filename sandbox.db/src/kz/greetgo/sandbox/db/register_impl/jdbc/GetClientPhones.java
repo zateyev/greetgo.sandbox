@@ -31,6 +31,7 @@ public class GetClientPhones implements ConnectionCallback<ClientPhones> {
           ps.setObject(index++, p);
         }
       }
+
       try (ResultSet rs = ps.executeQuery()) {
         ClientPhones phones = new ClientPhones();
         while (rs.next()) {

@@ -30,6 +30,8 @@ public class MigrationCia {
   }
 
   String clientTable;
+  String addressTable;
+  String phoneTable;
 
   public void migrate() throws Exception {
     createTempTables();
@@ -42,21 +44,46 @@ public class MigrationCia {
     String date = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
 
     clientTable = "tmp_client_" + date;
+    addressTable = "tmp_client_address_" + date;
+    phoneTable  = "tmp_client_phone_" + date;
 
     exec("create table " + clientTable + "(" +
       "  no bigint not null," +
       "  id varchar(50)," +
       "  surname varchar(300)," +
       "  name varchar(300)," +
+      "  patronymic varchar(300)," +
+      "  gender varchar(10)," +
+      "  charm varchar(100)," +
+      "  birth varchar(15)," +
 
       "  primary key(no)" +
       ")");
+
+    exec(
+      "create table " + addressTable + "(" +
+        " client varchar(50)," +
+        " type varchar(10)," +
+        " street varchar(50), " +
+        " house varchar(10)," +
+        " flat varchar(10)," +
+
+        " primary key(client, type)" +
+        ")"
+    );
 
   }
 
 
   void uploadFileToTempTables() throws Exception {
-    try (CiaHandler ciaHandler = new CiaHandler(maxBatchSize, clientTable, connection)) {
+
+    try (CiaHandler ciaHandler = new CiaHandler(
+      maxBatchSize,
+      clientTable,
+      addressTable,
+      phoneTable,
+      connection)) {
+
       XMLReader reader = XMLReaderFactory.createXMLReader();
       reader.setContentHandler(ciaHandler);
 

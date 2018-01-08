@@ -47,6 +47,45 @@ public class MigrationCiaTest extends ParentTestNg {
     migration.createTempTables();
   }
 
+  @Test
+  public void uploadFileToTempTables() throws Exception {
+
+    MigrationCia migration = new MigrationCia();
+    migration.connection = connection;
+    migration.inFile = createInFile("cia_test_1.xml");
+
+    migration.createTempTables();
+    migration.uploadFileToTempTables();
+
+    Map<Object, Map<String, Object>> client = loadTable("no", migration.clientTable);
+    Map<Object, Map<String, Object>> address = loadTable("client", migration.addressTable);
+
+    assertThat(client).hasSize(2);
+    assertThat(address).hasSize(2);
+
+    assertThat(client.get(1L).get("id")).isEqualTo("4-DU8-32-H7");
+    assertThat(client.get(1L).get("surname")).isEqualTo("Иванов");
+    assertThat(client.get(1L).get("name")).isEqualTo("Иван");
+    assertThat(client.get(1L).get("patronymic")).isEqualTo("Иваныч");
+    assertThat(client.get(1L).get("gender")).isEqualTo("MALE");
+    assertThat(client.get(1L).get("charm")).isEqualTo("Уситчивый");
+    assertThat(client.get(1L).get("birth")).isEqualTo("1980-11-12");
+
+
+    assertThat(address.get(1L).get("type")).isEqualTo("fact");
+    assertThat(address.get(1L).get("street")).isEqualTo("Панфилова");
+    assertThat(address.get(1L).get("house")).isEqualTo("23A");
+    assertThat(address.get(1L).get("flat")).isEqualTo("22");
+
+    assertThat(address.get(1L).get("type")).isEqualTo("reg");
+    assertThat(address.get(1L).get("street")).isEqualTo("Абая");
+    assertThat(address.get(1L).get("house")).isEqualTo("24A");
+    assertThat(address.get(1L).get("flat")).isEqualTo("2");
+
+
+  }
+
+
   private File createInFile(String resourceName) throws Exception {
     File ret = new File("build/inFile_" + RND.intStr(10) + "_" + resourceName);
     ret.getParentFile().mkdirs();
@@ -90,22 +129,5 @@ public class MigrationCiaTest extends ParentTestNg {
 
       }
     }
-  }
-
-  @Test
-  public void uploadFileToTempTables() throws Exception {
-    MigrationCia migration = new MigrationCia();
-    migration.connection = connection;
-    migration.inFile = createInFile("cia_test_1.xml");
-
-    migration.createTempTables();
-    migration.uploadFileToTempTables();
-
-    Map<Object, Map<String, Object>> data = loadTable("no", migration.clientTable);
-    assertThat(data).hasSize(2);
-    assertThat(data.get(1L).get("id")).isEqualTo("4-DU8-32-H7");
-    assertThat(data.get(1L).get("surname")).isEqualTo("Иванов");
-    assertThat(data.get(1L).get("name")).isEqualTo("Иван");
-    assertThat(data.get(1L).get("patronymic")).isEqualTo("Иваныч");
   }
 }
