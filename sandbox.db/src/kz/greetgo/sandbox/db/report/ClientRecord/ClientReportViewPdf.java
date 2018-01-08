@@ -36,7 +36,7 @@ public class ClientReportViewPdf implements ClientReportView {
       append(rec);
     }
 
-    finish("Fio");
+    finish(fio);
 
   }
 
@@ -72,8 +72,8 @@ public class ClientReportViewPdf implements ClientReportView {
   }
 
   @Override
-  public void finish(String fio) throws IOException {
-
+  public void finish(String fio) throws IOException, DocumentException {
+    initFooter(fio);
     pdf.close();
     out.close();
 
@@ -127,6 +127,14 @@ public class ClientReportViewPdf implements ClientReportView {
     pdf.add(para);
 
 
+  }
+
+  public void initFooter(String fio) throws DocumentException {
+    Paragraph footer = new Paragraph("Отчет сформирован для: " + fio, font_10);
+
+    footer.setAlignment(Element.ALIGN_RIGHT);
+    emptyLine(footer, 1);
+    pdf.add(footer);
   }
 
   private static String readFloat(float balance) {

@@ -30,6 +30,6 @@ public class ClientReportViewPdfProbe {
 
 
     ClientReportViewPdf pdf = new ClientReportViewPdf(file);
-    //TODO
+    pdf.generate(file, list, "name");
   }
 }

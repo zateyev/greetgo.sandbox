@@ -10,5 +10,5 @@ public interface ClientReportView {
 
   void append(ClientRecord row) throws DocumentException;
 
-  void finish(String fio) throws IOException;
+  void finish(String fio) throws IOException, DocumentException;
 }
