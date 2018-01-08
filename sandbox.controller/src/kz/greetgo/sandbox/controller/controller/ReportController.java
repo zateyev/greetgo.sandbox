@@ -23,7 +23,7 @@ public class ReportController implements Controller {
   public BeanGetter<ClientRegister> clientRegister;
 
   @Mapping("/clientList")
-  public void DownloadClientList(@Par("listInfo") @Json ClientListRequest clientListRequest,
+  public void downloadClientList(@Par("listInfo") @Json ClientListRequest clientListRequest,
                              @Par("contentType") String contentType,
                              @ParSession("personId") String personId,
                              RequestTunnel tunnel

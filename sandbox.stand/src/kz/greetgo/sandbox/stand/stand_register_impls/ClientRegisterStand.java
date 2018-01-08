@@ -34,20 +34,27 @@ public class ClientRegisterStand implements ClientRegister {
   @Override
   public List<ClientRecord> getList(ClientListRequest clientListRequest) {
     List<ClientDot> fullList = new ArrayList(al.get().clientStorage.values());
+
+    if (clientListRequest.filterByFio != null && !clientListRequest.filterByFio.trim().isEmpty()) {
+      List<ClientRecord> filteredClientList = new ArrayList<>();
+      String term = clientListRequest.filterByFio.trim();
+      for (ClientDot clientDot : fullList) {
+        if (clientDot.name.contains(term) || clientDot.surname.contains(term) || (clientDot.patronymic != null && clientDot.patronymic.contains(term))) {
+          filteredClientList.add(clientDot.toClientRecord());
+        }
+      }
+
+      return filteredClientList;
+    }
+
     List<ClientRecord> list = new ArrayList<>();
 
-    for (int i = clientListRequest.skipFirst; i < clientListRequest.skipFirst+clientListRequest.count; i++) {
+    for (int i = clientListRequest.skipFirst; i < clientListRequest.skipFirst + clientListRequest.count; i++) {
       if (i >= fullList.size()) break;
       list.add(fullList.get(i).toClientRecord());
     }
 
-    ClientRecord nn = fullList.get(1).toClientRecord();
-
-    List<ClientRecord> list2 = new ArrayList<>();
-    list2.add(nn);
-
-    if (clientListRequest.filterByFio != null && !"".equals(clientListRequest.filterByFio)) return list2;
-    else return list;
+    return list;
   }
 
   @Override
@@ -97,6 +104,7 @@ public class ClientRegisterStand implements ClientRegister {
     al.get().clientStorage.remove(id);
   }
 
+  // FIXME: 1/8/18 название должно быть понятное
   @Override
   public void downloadReport(ClientListRequest clientListRequest,
                              OutputStream outputStream,

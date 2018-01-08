@@ -23,7 +23,7 @@ public class GetClientPhones implements ConnectionCallback<ClientPhones> {
   @Override
   public ClientPhones doInConnection(Connection connection) throws Exception {
 
-    try (PreparedStatement ps = connection.prepareStatement(sql.toString())) {
+    try (PreparedStatement ps = connection.prepareStatement(sql)) {
 
       {
         int index = 1;
