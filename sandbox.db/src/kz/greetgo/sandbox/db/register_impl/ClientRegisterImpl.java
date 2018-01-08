@@ -193,6 +193,8 @@ public class ClientRegisterImpl implements ClientRegister {
                              String contentType,
                              String personId) throws Exception {
 
+    // FIXME: 1/8/18 В файле должны быть все клиенты, которые есть в базе
+
     ClientReportView view =  createClientReportView(outputStream, contentType);
     jdbc.get().execute(new FillClientReportView(view, clientListRequest, personId));
 
