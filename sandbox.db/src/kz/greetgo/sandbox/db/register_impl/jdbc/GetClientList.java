@@ -17,6 +17,15 @@ public class GetClientList extends AbstractGetClientList implements ConnectionCa
   }
 
   @Override
+  protected void appendOffsetLimit() {
+    if (in.count > 0) {
+      sql.append(" limit ? offset ?");
+      sqlParams.add(in.count);
+      sqlParams.add(in.skipFirst);
+    }
+  }
+
+  @Override
   public List<ClientRecord> doInConnection(Connection connection) throws Exception {
 
     prepareSql();

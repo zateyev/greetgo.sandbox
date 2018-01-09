@@ -27,6 +27,9 @@ public class FillClientReportView extends AbstractGetClientList implements Conne
   }
 
   @Override
+  protected void appendOffsetLimit() {}
+
+  @Override
   public Void doInConnection(Connection connection) throws Exception {
 
     try(PreparedStatement ps = connection.prepareStatement(getNameSql)){

@@ -23,6 +23,7 @@
         current_gender varchar(10),
         charm_id varchar(32) references Charm,
         birth_date date,
+        cia_id varchar(50) unique,
         actual smallint not null default 0
       )
     ]]></sql>

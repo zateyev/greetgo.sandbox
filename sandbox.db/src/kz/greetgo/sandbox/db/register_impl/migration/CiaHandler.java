@@ -1,5 +1,9 @@
 package kz.greetgo.sandbox.db.register_impl.migration;
 
+import kz.greetgo.sandbox.controller.model.ClientDetails;
+import kz.greetgo.sandbox.db.register_impl.migration.models.Address;
+import kz.greetgo.sandbox.db.register_impl.migration.models.Client;
+import kz.greetgo.sandbox.db.register_impl.migration.models.Phone;
 import org.xml.sax.Attributes;
 
 import java.sql.Connection;
@@ -10,52 +14,118 @@ public class CiaHandler extends TagHandler implements AutoCloseable {
 
   private final int maxBatchSize;
 
-  private PreparedStatement clientPS;
+  private PreparedStatement clientPS, addressPS, phonePS;
   private final Connection connection;
 
-  public CiaHandler(int maxBatchSize, String clientTable, Connection connection) throws SQLException {
+  public CiaHandler(int maxBatchSize,
+                    String clientTable,
+                    String addressTable,
+                    String phoneTable,
+                    Connection connection) throws SQLException {
+
     this.maxBatchSize = maxBatchSize;
     this.connection = connection;
     connection.setAutoCommit(false);
     clientPS = connection.prepareStatement(
-      "insert into " + clientTable + " (no, id, surname, name) values (?, ?, ?, ?)"
+      "insert into " + clientTable + " (no, id, surname, name, patronymic, gender, charm, birth) " +
+        "values (?, ?, ?, ?, ?, ?, ?, ?)"
+    );
+
+    addressPS = connection.prepareStatement(
+      "insert into " + addressTable + " (client, type, street, house, flat) " +
+        "VALUES (?, ?, ?, ?, ?)"
+    );
+
+    phonePS = connection.prepareStatement(
+      "insert INTO " + phoneTable  + " (client, type, number )  " +
+        " VALUES (?, ?, ?)"
     );
   }
 
   int batchSize = 0;
   int recordsCount = 0;
 
-  private void eddBatch() throws SQLException {
+  private void addBatch() throws SQLException {
+
     clientPS.setLong(1, no);
-    clientPS.setString(2, id);
-    clientPS.setString(3, surname);
-    clientPS.setString(4, name);
+    clientPS.setString(2, client.id);
+    clientPS.setString(3, client.surname);
+    clientPS.setString(4, client.name);
+    clientPS.setString(5, client.patronymic);
+    clientPS.setString(6, client.gender);
+    clientPS.setString(7, client.charm);
+    clientPS.setString(8, client.birth);
     clientPS.addBatch();
+
+    addressPS.setString(1, factAddress.client);
+    addressPS.setString(2, "fact");
+    addressPS.setString(3, factAddress.street);
+    addressPS.setString(4, factAddress.house);
+    addressPS.setString(5, factAddress.flat);
+    addressPS.addBatch();
+
+    addressPS.setString(1, regAddress.client);
+    addressPS.setString(2, "reg");
+    addressPS.setString(3, regAddress.street);
+    addressPS.setString(4, regAddress.house);
+    addressPS.setString(5, regAddress.flat);
+    addressPS.addBatch();
+
+    for( String p : phone.work){
+      phonePS.setString(1, client.id);
+      phonePS.setString(2, "work");
+      phonePS.setString(3, p);
+      phonePS.addBatch();
+    }
+
+    for( String p : phone.home){
+      phonePS.setString(1, client.id);
+      phonePS.setString(2, "home");
+      phonePS.setString(3, p);
+      phonePS.addBatch();
+    }
+
+    for( String p : phone.mobile){
+      phonePS.setString(1, client.id);
+      phonePS.setString(2, "mobile");
+      phonePS.setString(3, p);
+      phonePS.addBatch();
+    }
+
+
     recordsCount++;
     batchSize++;
 
     if (batchSize >= maxBatchSize) {
-      clientPS.executeBatch();
-      connection.commit();
-      batchSize = 0;
+      executeBatch();
     }
+  }
+
+  private void executeBatch() throws SQLException {
+    clientPS.executeBatch();
+    addressPS.executeBatch();
+    phonePS.executeBatch();
+
+    connection.commit();
+    batchSize = 0;
   }
 
   @Override
   public void close() throws Exception {
 
     if (batchSize > 0) {
-      clientPS.executeBatch();
-      connection.commit();
-      batchSize = 0;
+      executeBatch();
     }
 
     clientPS.close();
     connection.setAutoCommit(true);
   }
 
-  String id;
-  String surname, name;
+  Client client = new Client();
+  Address factAddress = new Address();
+  Address regAddress = new Address();
+  Phone phone = new Phone();
+
   long no = 0;
 
   @Override
@@ -63,19 +133,53 @@ public class CiaHandler extends TagHandler implements AutoCloseable {
     String path = path();
 
     if ("/cia/client".equals(path)) {
-      id = attributes.getValue("id");
+      client.id = attributes.getValue("id");
+      factAddress.client = regAddress.client = attributes.getValue("id");
       no++;
-      surname = name = null;
       return;
     }
 
     if ("/cia/client/surname".equals(path)) {
-      surname = attributes.getValue("value");
+      client.surname = attributes.getValue("value");
       return;
     }
 
     if ("/cia/client/name".equals(path)) {
-      name = attributes.getValue("value");
+      client.name = attributes.getValue("value");
+      return;
+    }
+
+    if ("/cia/client/patronymic".equals(path)) {
+      client.patronymic = attributes.getValue("value");
+      return;
+    }
+
+    if ("/cia/client/gender".equals(path)) {
+      client.gender = attributes.getValue("value");
+      return;
+    }
+
+    if ("/cia/client/charm".equals(path)) {
+      client.charm = attributes.getValue("value");
+      return;
+    }
+
+    if ("/cia/client/birth".equals(path)) {
+      client.birth = attributes.getValue("value");
+      return;
+    }
+
+    if ("/cia/client/address/fact".equals(path)) {
+      factAddress.street = attributes.getValue("street");
+      factAddress.house = attributes.getValue("house");
+      factAddress.flat = attributes.getValue("flat");
+      return;
+    }
+
+    if ("/cia/client/address/register".equals(path)) {
+      regAddress.street = attributes.getValue("street");
+      regAddress.house = attributes.getValue("house");
+      regAddress.flat = attributes.getValue("flat");
       return;
     }
 
@@ -84,12 +188,32 @@ public class CiaHandler extends TagHandler implements AutoCloseable {
   @Override
   protected void endTag() throws Exception {
     String path = path();
+
+    if("/cia/client/homePhone".equals(path)){
+      phone.home.add(text());
+    }
+
+    if("/cia/client/mobilePhone".equals(path)){
+      phone.mobile.add(text());
+    }
+
+    if("/cia/client/workPhone".equals(path)){
+      phone.work.add(text());
+    }
+
     if ("/cia/client".equals(path)) {
 
-      eddBatch();
+      addBatch();
+
+      client = new Client();
+      regAddress = new Address();
+      factAddress = new Address();
+      phone = new Phone();
 
       return;
     }
+
+
   }
 
 

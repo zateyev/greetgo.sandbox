@@ -104,12 +104,12 @@ public class ClientRegisterStand implements ClientRegister {
     al.get().clientStorage.remove(id);
   }
 
-  // FIXME: 1/8/18 название должно быть понятное
+
   @Override
-  public void downloadReport(ClientListRequest clientListRequest,
-                             OutputStream outputStream,
-                             String contentType,
-                             String personId) throws Exception {
+  public void getClientListForReport(ClientListRequest clientListRequest,
+                                     OutputStream outputStream,
+                                     String contentType,
+                                     String personId) throws Exception {
 
     if (contentType.contains("pdf")) {
       try (InputStream in = StandDb.class.getResourceAsStream("getClientListReport.pdf")) {

@@ -4,8 +4,11 @@ import kz.greetgo.depinject.core.Bean;
 import kz.greetgo.depinject.core.BeanGetter;
 import kz.greetgo.sandbox.controller.model.*;
 import kz.greetgo.sandbox.controller.register.ClientRegister;
-import kz.greetgo.sandbox.db.dao.ClientDao;
-import kz.greetgo.sandbox.db.register_impl.jdbc.*;
+import kz.greetgo.sandbox.db.dao.postgres.ClientDaoPostgres;
+import kz.greetgo.sandbox.db.register_impl.jdbc.FillClientReportView;
+import kz.greetgo.sandbox.db.register_impl.jdbc.GetClientList;
+import kz.greetgo.sandbox.db.register_impl.jdbc.GetClientListSize;
+import kz.greetgo.sandbox.db.register_impl.jdbc.GetClientPhones;
 import kz.greetgo.sandbox.db.report.ClientRecord.ClientReportView;
 import kz.greetgo.sandbox.db.report.ClientRecord.ClientReportViewPdf;
 import kz.greetgo.sandbox.db.report.ClientRecord.ClientReportViewXslx;
@@ -18,7 +21,7 @@ import java.util.List;
 
 @Bean
 public class ClientRegisterImpl implements ClientRegister {
-  public BeanGetter<ClientDao> clientDao;
+  public BeanGetter<ClientDaoPostgres> clientDao;
 
   public BeanGetter<JdbcSandbox> jdbc;
 
@@ -41,7 +44,6 @@ public class ClientRegisterImpl implements ClientRegister {
       ret = clientDao.get().loadDetails(id);
       ret.factAddress = clientDao.get().getFactAddress(id);
       ret.regAddress = clientDao.get().getRegAddress(id);
-      ClientPhones phones = new ClientPhones();
 
       ret.phones = jdbc.get().execute(new GetClientPhones(id));
     }
@@ -188,12 +190,10 @@ public class ClientRegisterImpl implements ClientRegister {
   }
 
   @Override
-  public void downloadReport(ClientListRequest clientListRequest,
-                             OutputStream outputStream,
-                             String contentType,
-                             String personId) throws Exception {
-
-    // FIXME: 1/8/18 В файле должны быть все клиенты, которые есть в базе
+  public void getClientListForReport(ClientListRequest clientListRequest,
+                                     OutputStream outputStream,
+                                     String contentType,
+                                     String personId) throws Exception {
 
     ClientReportView view =  createClientReportView(outputStream, contentType);
     jdbc.get().execute(new FillClientReportView(view, clientListRequest, personId));

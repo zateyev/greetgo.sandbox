@@ -20,8 +20,8 @@ public interface ClientRegister {
 
   void deleteClient(String id);
 
-  void downloadReport(ClientListRequest clientListRequest,
-                      OutputStream outputStream,
-                      String contentType,
-                      String personId) throws Exception;
+  void getClientListForReport(ClientListRequest clientListRequest,
+                              OutputStream outputStream,
+                              String contentType,
+                              String personId) throws Exception;
 }

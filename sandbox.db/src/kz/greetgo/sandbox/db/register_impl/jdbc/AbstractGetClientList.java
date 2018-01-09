@@ -6,7 +6,7 @@ import kz.greetgo.sandbox.controller.model.ClientRecord;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-public class AbstractGetClientList extends AbstractGetClientLogic {
+public abstract class AbstractGetClientList extends AbstractGetClientLogic {
 
   public AbstractGetClientList(ClientListRequest in) {
     super(in);
@@ -41,13 +41,7 @@ public class AbstractGetClientList extends AbstractGetClientLogic {
   }
 
   @Override
-  protected void appendOffsetLimit() {
-    if (in.count > 0) {
-      sql.append(" limit ? offset ?");
-      sqlParams.add(in.count);
-      sqlParams.add(in.skipFirst);
-    }
-  }
+  protected abstract void appendOffsetLimit();
 
   @Override
   protected void appendSelect() {
