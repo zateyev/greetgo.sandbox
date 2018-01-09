@@ -1,0 +1,71 @@
+body {
+  padding-top: 90px;
+}
+
+table th {
+  text-align: center;
+}
+
+table th, table td {
+  padding: 10px;
+}
+
+.btn-change-info {
+  background-color: #59B2E0;
+  outline: none;
+  color: #fff;
+  font-size: 14px;
+  font-weight: bold;
+  padding: 14px;
+  text-transform: uppercase;
+  border-color: #59B2E6;
+  display: block;
+  margin: 8px;
+}
+.btn-login:hover,
+.btn-login:focus {
+  color: #fff;
+  background-color: #53A3CD;
+  border-color: #53A3CD;
+}
+
+.btn-sort {
+  background-color: #59B2E0;
+  outline: none;
+  color: #fff;
+  font-size: 10px;
+  font-weight: bold;
+  padding: 4px;
+  text-transform: uppercase;
+  border-color: #59B2E6;
+  display: inline;
+}
+.btn-sort:hover,
+.btn-sort:focus {
+  color: #fff;
+  background-color: #53A3CD;
+  border-color: #53A3CD;
+}
+
+.btn-list-number {
+  background-color: #59B2E0;
+  outline: none;
+  color: #fff;
+  font-size: 14px;
+  padding: 4px;
+  margin: 4px ;
+  text-transform: uppercase;
+  border-color: #59B2E6;
+}
+.btn-list-number:hover,
+.btn-list-number:focus {
+  color: #fff;
+  background-color: #53A3CD;
+  border-color: #53A3CD;
+}
+
+.table-header {
+  font-size: 14px;
+  text-align: center;
+  vertical-align: middle;
+}
