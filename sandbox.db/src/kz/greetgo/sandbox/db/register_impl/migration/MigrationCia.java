@@ -8,10 +8,10 @@ import org.xml.sax.helpers.XMLReaderFactory;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.SQLException;
+import java.sql.Statement;
 import java.text.SimpleDateFormat;
-import java.util.HashMap;
-import java.util.Map;
 
 
 public class MigrationCia {
@@ -23,6 +23,9 @@ public class MigrationCia {
   private IdGenerator id = new IdGenerator();
 
   private void exec(String sql) throws SQLException {
+
+    sql = sql.replaceAll("TMP_CLIENT", clientTable);
+
     try (Statement statement = connection.createStatement()) {
       long startedAt = System.nanoTime();
       statement.execute(sql);
@@ -109,79 +112,8 @@ public class MigrationCia {
   }
 
   void mainMigrationOperation() throws SQLException {
-
-    String charmId;
-
-    String insertClient = "" +
-      " insert into client (id, name, surname, patronymic, current_gender, charm_id, birth_date, cia_id, actual)" +
-      " values(?, ?, ?, ?, ?, ?, ?, ?, 1)" +
-      " on conflict(cia_id) do " +
-      " update set name = EXCLUDED.name," +
-      " surname = excluded.surname," +
-      " patronymic = excluded.patronymic," +
-      " current_gender = excluded.current_gender," +
-      " charm_id = excluded.charm_id," +
-      " birth_date = excluded.birth_date," +
-      " actual = 1";
-
-    String insertCharm = "insert into charm(id, name, actual) VALUES (?, ?, 1)";
-    String getCharms = "select id, name from charm where actual = 1";
-
-    Map<String, String> charms = new HashMap<>();
-
-    try (PreparedStatement charmPS = connection.prepareStatement(getCharms)) {
-      try (ResultSet rs = charmPS.executeQuery()) {
-        while (rs.next()) {
-
-          charms.put(rs.getString(2), rs.getString(1));
-
-        }
-      }
-    }
-
-    try (PreparedStatement tmpPS = connection.prepareStatement(
-      "select * from " + clientTable)
-    ) {
-
-      try (ResultSet tmpRS = tmpPS.executeQuery()) {
-
-        while (tmpRS.next()) {
-          if(charms.containsKey(tmpRS.getString("charm"))){
-            charmId = charms.get(tmpRS.getString("charm"));
-          }
-          else{
-            charmId = id.newId();
-
-            try(PreparedStatement charmPS = connection.prepareStatement(insertCharm)){
-              charmPS.setString(1, charmId);
-              charmPS.setString(2, tmpRS.getString("charm"));
-              charmPS.execute();
-            }
-          }
-
-          try (PreparedStatement mainPS = connection.prepareStatement(insertClient)) {
-
-            {
-              int index = 1;
-              mainPS.setString(index++, id.newId());
-              mainPS.setString(index++, tmpRS.getString("name"));
-              mainPS.setString(index++, tmpRS.getString("surname"));
-              mainPS.setString(index++, tmpRS.getString("patronymic"));
-              mainPS.setString(index++, tmpRS.getString("gender").toLowerCase());
-              mainPS.setString(index++, charmId);
-              mainPS.setDate(index++, getDate(tmpRS.getString("birth")));
-              mainPS.setString(index++, tmpRS.getString("id"));
-              mainPS.execute();
-            }
-
-          }
-
-        }
-
-      }
-
-    }
-
+    exec("update TMP_CLIENT where status = 4");
+    exec("insert into client select * from TMP_CLIENT where status = 4");
   }
 
 

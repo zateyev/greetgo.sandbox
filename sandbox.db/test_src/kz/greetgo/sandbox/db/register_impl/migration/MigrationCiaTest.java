@@ -246,4 +246,6 @@ public class MigrationCiaTest extends ParentTestNg {
     }
   }
 
+  //TODO проверить если файл не валидный
+
 }
