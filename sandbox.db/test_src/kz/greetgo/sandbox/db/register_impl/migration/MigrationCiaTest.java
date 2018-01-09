@@ -1,6 +1,10 @@
 package kz.greetgo.sandbox.db.register_impl.migration;
 
 import kz.greetgo.depinject.core.BeanGetter;
+import kz.greetgo.sandbox.controller.model.ClientDetails;
+import kz.greetgo.sandbox.db.register_impl.migration.models.Address;
+import kz.greetgo.sandbox.db.register_impl.migration.models.Phone;
+import kz.greetgo.sandbox.db.test.dao.ClientTestDao;
 import kz.greetgo.sandbox.db.test.util.ParentTestNg;
 import kz.greetgo.util.RND;
 import kz.greetgo.util.ServerUtil;
@@ -25,6 +29,8 @@ import static org.fest.assertions.api.Assertions.assertThat;
 public class MigrationCiaTest extends ParentTestNg {
 
   public BeanGetter<MigrationManager> migrationManager;
+
+  public BeanGetter<ClientTestDao> clientTestDao;
 
   Connection connection;
 
@@ -58,10 +64,10 @@ public class MigrationCiaTest extends ParentTestNg {
     migration.uploadFileToTempTables();
 
     Map<Object, Map<String, Object>> client = loadTable("no", migration.clientTable);
-    Map<Object, Map<String, Object>> address = loadTable("client", migration.addressTable);
+    Map<String, Address> address = getAddressById(migration.addressTable, "4-DU8-32-H7");
+    Phone phones = getPhoneById(migration.phoneTable, "4-DU8-32-H7");
 
     assertThat(client).hasSize(2);
-    assertThat(address).hasSize(2);
 
     assertThat(client.get(1L).get("id")).isEqualTo("4-DU8-32-H7");
     assertThat(client.get(1L).get("surname")).isEqualTo("Иванов");
@@ -71,16 +77,48 @@ public class MigrationCiaTest extends ParentTestNg {
     assertThat(client.get(1L).get("charm")).isEqualTo("Уситчивый");
     assertThat(client.get(1L).get("birth")).isEqualTo("1980-11-12");
 
+    assertThat(address.get("fact").client).isEqualTo("4-DU8-32-H7");
+    assertThat(address.get("fact").street).isEqualTo("Панфилова");
+    assertThat(address.get("fact").house).isEqualTo("23A");
+    assertThat(address.get("fact").flat).isEqualTo("22");
 
-    assertThat(address.get(1L).get("type")).isEqualTo("fact");
-    assertThat(address.get(1L).get("street")).isEqualTo("Панфилова");
-    assertThat(address.get(1L).get("house")).isEqualTo("23A");
-    assertThat(address.get(1L).get("flat")).isEqualTo("22");
+    assertThat(address.get("reg").client).isEqualTo("4-DU8-32-H7");
+    assertThat(address.get("reg").street).isEqualTo("Абая");
+    assertThat(address.get("reg").house).isEqualTo("24A");
+    assertThat(address.get("reg").flat).isEqualTo("2");
 
-    assertThat(address.get(1L).get("type")).isEqualTo("reg");
-    assertThat(address.get(1L).get("street")).isEqualTo("Абая");
-    assertThat(address.get(1L).get("house")).isEqualTo("24A");
-    assertThat(address.get(1L).get("flat")).isEqualTo("2");
+    assertThat(phones.home).hasSize(1);
+    assertThat(phones.mobile).hasSize(3);
+    assertThat(phones.work).hasSize(2);
+
+    assertThat(phones.home.get(0)).isEqualTo("+7-123-111-22-33");
+    assertThat(phones.mobile.get(0)).isEqualTo("+7-123-111-33-33");
+    assertThat(phones.mobile.get(1)).isEqualTo("+7-123-111-44-33");
+    assertThat(phones.mobile.get(2)).isEqualTo("+7-123-111-55-33");
+    assertThat(phones.work.get(0)).isEqualTo("+7-123-111-00-33 вн. 3343");
+    assertThat(phones.work.get(1)).isEqualTo("+7-123-111-00-33 вн. 3344");
+
+  }
+
+  @Test
+  public void mainMigration() throws Exception {
+
+    MigrationCia migration = new MigrationCia();
+    migration.connection = connection;
+    migration.inFile = createInFile("cia_test_1.xml");
+
+    migration.createTempTables();
+    migration.uploadFileToTempTables();
+    migration.mainMigrationOperation();
+
+
+    ClientDetails det = clientTestDao.get().getClientByCiaId("4-DU8-32-H7");
+
+    assertThat(det.name).isEqualTo("Иван");
+    assertThat(det.surname).isEqualTo("Иванов");
+    assertThat(det.patronymic).isEqualTo("Иваныч");
+    assertThat(det.gender).isEqualTo("male");
+    assertThat(det.dateOfBirth).isEqualTo("1980-11-12");
 
 
   }
@@ -97,6 +135,7 @@ public class MigrationCiaTest extends ParentTestNg {
 
     return ret;
   }
+
 
   @SuppressWarnings("SameParameterValue")
   private Map<Object, Map<String, Object>> loadTable(String keyField, String table) throws SQLException {
@@ -130,4 +169,81 @@ public class MigrationCiaTest extends ParentTestNg {
       }
     }
   }
+
+  private Map<String, Address> getAddressById(String table, String client) throws SQLException {
+    try (PreparedStatement ps = connection.prepareStatement("select * from " + table + " where client  = ?")) {
+
+      {
+        ps.setString(1, client);
+      }
+
+      try (ResultSet rs = ps.executeQuery()) {
+
+        Map<String, Address> map = new HashMap<>();
+
+        while (rs.next()) {
+          if ("reg".equals(rs.getString("type"))) {
+
+            Address tmp = new Address();
+
+            tmp.client = rs.getString("client");
+            tmp.street = rs.getString("street");
+            tmp.house = rs.getString("house");
+            tmp.flat = rs.getString("flat");
+
+            map.put("reg", tmp);
+          }
+
+          if ("fact".equals(rs.getString("type"))) {
+
+            Address tmp = new Address();
+
+            tmp.client = rs.getString("client");
+            tmp.street = rs.getString("street");
+            tmp.house = rs.getString("house");
+            tmp.flat = rs.getString("flat");
+
+            map.put("fact", tmp);
+          }
+
+        }
+
+        return map;
+
+      }
+    }
+  }
+
+  private Phone getPhoneById(String table, String client) throws SQLException {
+    try (PreparedStatement ps = connection.prepareStatement("select * from " + table + " where client  = ? ORDER by NUMBER ")) {
+
+      {
+        ps.setString(1, client);
+      }
+
+      try (ResultSet rs = ps.executeQuery()) {
+
+        Phone p = new Phone();
+
+        while (rs.next()) {
+          if ("work".equals(rs.getString("type"))) {
+            p.work.add(rs.getString("number"));
+          }
+
+          if ("home".equals(rs.getString("type"))) {
+            System.out.println("setted home");
+            p.home.add(rs.getString("number"));
+          }
+
+          if ("mobile".equals(rs.getString("type"))) {
+            p.mobile.add(rs.getString("number"));
+          }
+        }
+
+        return p;
+      }
+
+    }
+  }
+
 }

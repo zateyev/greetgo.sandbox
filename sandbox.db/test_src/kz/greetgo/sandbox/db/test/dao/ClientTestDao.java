@@ -110,4 +110,10 @@ public interface ClientTestDao {
   @Select("select number from client_account where client = #{id} and actual = 1")
   String getClientAccount(@Param("id") String clientId);
 
+  @Select("Select c.current_gender gender," +
+    " c.charm_id charmId," +
+    " c.birth_date dateOfBirth," +
+    " c.* " +
+    " from Client c where cia_id = #{ciaId}")
+  ClientDetails getClientByCiaId(@Param("ciaId") String ciaId);
 }

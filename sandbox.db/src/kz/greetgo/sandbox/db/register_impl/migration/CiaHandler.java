@@ -14,7 +14,7 @@ public class CiaHandler extends TagHandler implements AutoCloseable {
 
   private final int maxBatchSize;
 
-  private PreparedStatement clientPS, addressPS;
+  private PreparedStatement clientPS, addressPS, phonePS;
   private final Connection connection;
 
   public CiaHandler(int maxBatchSize,
@@ -34,6 +34,11 @@ public class CiaHandler extends TagHandler implements AutoCloseable {
     addressPS = connection.prepareStatement(
       "insert into " + addressTable + " (client, type, street, house, flat) " +
         "VALUES (?, ?, ?, ?, ?)"
+    );
+
+    phonePS = connection.prepareStatement(
+      "insert INTO " + phoneTable  + " (client, type, number )  " +
+        " VALUES (?, ?, ?)"
     );
   }
 
@@ -64,30 +69,52 @@ public class CiaHandler extends TagHandler implements AutoCloseable {
     addressPS.setString(3, regAddress.street);
     addressPS.setString(4, regAddress.house);
     addressPS.setString(5, regAddress.flat);
-
     addressPS.addBatch();
+
+    for( String p : phone.work){
+      phonePS.setString(1, client.id);
+      phonePS.setString(2, "work");
+      phonePS.setString(3, p);
+      phonePS.addBatch();
+    }
+
+    for( String p : phone.home){
+      phonePS.setString(1, client.id);
+      phonePS.setString(2, "home");
+      phonePS.setString(3, p);
+      phonePS.addBatch();
+    }
+
+    for( String p : phone.mobile){
+      phonePS.setString(1, client.id);
+      phonePS.setString(2, "mobile");
+      phonePS.setString(3, p);
+      phonePS.addBatch();
+    }
+
 
     recordsCount++;
     batchSize++;
 
     if (batchSize >= maxBatchSize) {
-      clientPS.executeBatch();
-      addressPS.executeBatch();
-      connection.commit();
-      batchSize = 0;
+      executeBatch();
     }
+  }
+
+  private void executeBatch() throws SQLException {
+    clientPS.executeBatch();
+    addressPS.executeBatch();
+    phonePS.executeBatch();
+
+    connection.commit();
+    batchSize = 0;
   }
 
   @Override
   public void close() throws Exception {
 
     if (batchSize > 0) {
-
-      clientPS.executeBatch();
-      addressPS.executeBatch();
-
-      connection.commit();
-      batchSize = 0;
+      executeBatch();
     }
 
     clientPS.close();
@@ -97,6 +124,7 @@ public class CiaHandler extends TagHandler implements AutoCloseable {
   Client client = new Client();
   Address factAddress = new Address();
   Address regAddress = new Address();
+  Phone phone = new Phone();
 
   long no = 0;
 
@@ -161,11 +189,26 @@ public class CiaHandler extends TagHandler implements AutoCloseable {
   protected void endTag() throws Exception {
     String path = path();
 
+    if("/cia/client/homePhone".equals(path)){
+      phone.home.add(text());
+    }
+
+    if("/cia/client/mobilePhone".equals(path)){
+      phone.mobile.add(text());
+    }
+
+    if("/cia/client/workPhone".equals(path)){
+      phone.work.add(text());
+    }
+
     if ("/cia/client".equals(path)) {
 
       addBatch();
 
       client = new Client();
+      regAddress = new Address();
+      factAddress = new Address();
+      phone = new Phone();
 
       return;
     }

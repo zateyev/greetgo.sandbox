@@ -43,7 +43,7 @@ public class ReportController implements Controller {
       tunnel.setResponseHeader("content-disposition", "attachment; filename=\"List_of_clients-" + date + ".xlsx\"");
     }
 
-    clientRegister.get().downloadReport(clientListRequest, outputStream, contentType, personId);
+    clientRegister.get().getClientListForReport(clientListRequest, outputStream, contentType, personId);
 
     tunnel.flushBuffer();
 

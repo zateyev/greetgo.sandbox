@@ -44,7 +44,6 @@ public class ClientRegisterImpl implements ClientRegister {
       ret = clientDao.get().loadDetails(id);
       ret.factAddress = clientDao.get().getFactAddress(id);
       ret.regAddress = clientDao.get().getRegAddress(id);
-      ClientPhones phones = new ClientPhones();
 
       ret.phones = jdbc.get().execute(new GetClientPhones(id));
     }
@@ -191,12 +190,10 @@ public class ClientRegisterImpl implements ClientRegister {
   }
 
   @Override
-  public void downloadReport(ClientListRequest clientListRequest,
-                             OutputStream outputStream,
-                             String contentType,
-                             String personId) throws Exception {
-
-    // FIXME: 1/8/18 В файле должны быть все клиенты, которые есть в базе
+  public void getClientListForReport(ClientListRequest clientListRequest,
+                                     OutputStream outputStream,
+                                     String contentType,
+                                     String personId) throws Exception {
 
     ClientReportView view =  createClientReportView(outputStream, contentType);
     jdbc.get().execute(new FillClientReportView(view, clientListRequest, personId));
