@@ -11,17 +11,20 @@ import {ClientListInfo} from "../../model/ClientListInfo";
 export class ClientListComponent {
   page: number = 1;
   pages;
-  clients;
-  focusedClientId: number | null = null;
+  clients: ClientListInfo[] = [];
+  focusedClientId: number | null = null;//TODO rename to selected...
+
+  clientClicked(clientId: number) {
+    this.focusedClientId = clientId;
+  }
 
   //TODO: clicking on non-client disables buttons
   @HostListener('document:click', ['$event'])
-    clickout(event) {
-      if(this.eRef.nativeElement.contains(event.target)) {
-
-      } else {
-        this.focusedClientId = null;
-      }
+  clickout(event) {
+    if (this.eRef.nativeElement.contains(event.target)) {
+    } else {
+      this.focusedClientId = null;
+    }
   }
 
   constructor(private httpService: HttpService, private eRef: ElementRef) {
@@ -29,17 +32,15 @@ export class ClientListComponent {
     this.getClientList();
   }
 
+  //TODO переименовать
   private getClientList() {
     this.httpService.get("/client/list", {
-      'page':this.page,
-      'size':this.httpService.pageSize
+      //skipFirstCount
+      'page': this.page,
+      //pageSize
+      'size': this.httpService.pageSize
     }).toPromise().then(result => {
-      this.clients = [];
-      let temp = result.json();
-
-      for(let i = 0; i < temp.length; i++) {
-        this.clients[i] = ClientListInfo.copy(temp[i]);
-      }
+      this.clients = (result.json() as ClientListInfo[]).map(ClientListInfo.copy);
     }, error => {
       console.log(error);
     });
@@ -47,11 +48,11 @@ export class ClientListComponent {
 
   private updatePageNumeration() {
     this.httpService.get("/client/pageNum", {
-      'size':this.httpService.pageSize
+      'size': this.httpService.pageSize
     }).toPromise().then(result => {
       this.pages = [];
 
-      for(let i = 1; i <= result.json(); i++) {
+      for (let i = 1; i <= result.json(); i++) {
         this.pages.push(i);
       }
     }, error => {
@@ -59,7 +60,7 @@ export class ClientListComponent {
     });
   }
 
-  clientClicked(clientId: number) {
-    this.focusedClientId = clientId;
+  edit(clientId: number | null) {
+    //TODO open edit form
   }
 }

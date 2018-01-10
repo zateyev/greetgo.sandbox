@@ -1,12 +1,12 @@
 package kz.greetgo.sandbox.controller.model;
 
+
 public class ClientListInfo {
-  public int id;
+  public long id;
   public String fullName;
   public String charm;
-  public String age;
-  //TODO: numbers?
-  public String totalAccountBalance;
-  public String maxAccountBalance;
-  public String minAccountBalance;
+  public String age;//TODO make number
+  public Integer totalAccountBalance;
+  public Integer maxAccountBalance;
+  public Integer minAccountBalance;
 }

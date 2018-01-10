@@ -36,25 +36,33 @@
       </tr>
       </thead>
       <tbody *ngFor="let client of clients">
-        <tr (click)="clientClicked(client)">
-          <td scope="row">{{client.fullName}}</td>
-          <td>{{client.charm}}</td>
-          <td>{{client.age}}</td>
-          <td>{{client.totalAccountBalance}}</td>
-          <td>{{client.maxAccountBalance}}</td>
-          <td>{{client.minAccountBalance}}</td>
-        </tr>
+      <tr (click)="clientClicked(client.id)" [ngClass]="{active: client.id == focusedClientId}">
+        <td scope="row">{{client.fullName}}</td>
+        <td>{{client.charm}}</td>
+        <td>{{client.age}}</td>
+        <td>{{client.totalAccountBalance}}</td>
+        <td>{{client.maxAccountBalance}}</td>
+        <td>{{client.minAccountBalance}}</td>
+      </tr>
       </tbody>
     </table>
   </div>
   <div class="col-sm-1">
-    <button href="#" class="btn btn-change-info" id="client-list-form-add" (click)="registration = false">
+    <button class="btn btn-change-info"
+            id="client-list-form-add"
+            (click)="edit(null)">
       +
     </button>
-    <button href="#" class=" btn btn-change-info" [disabled]="!focusedClientId" id="client-list-form-inspect" (click)="registration = false">
+    <button class=" btn btn-change-info"
+            [disabled]="!focusedClientId"
+            id="client-list-form-inspect"
+            (click)="edit(focusedClientId)">
       ...
     </button>
-    <button href="#" class="btn btn-change-info" [disabled]="!focusedClientId" id="client-list-form-remove" (click)="registration = false">
+    <button class="btn btn-change-info"
+            [disabled]="!focusedClientId"
+            id="client-list-form-remove"
+            (click)="registration = false">
       -
     </button>
   </div>
