@@ -1,6 +1,5 @@
 package kz.greetgo.sandbox.db.register_impl.migration;
 
-import kz.greetgo.sandbox.controller.model.ClientDetails;
 import kz.greetgo.sandbox.db.register_impl.migration.models.Address;
 import kz.greetgo.sandbox.db.register_impl.migration.models.Client;
 import kz.greetgo.sandbox.db.register_impl.migration.models.Phone;
@@ -26,19 +25,20 @@ public class CiaHandler extends TagHandler implements AutoCloseable {
     this.maxBatchSize = maxBatchSize;
     this.connection = connection;
     connection.setAutoCommit(false);
+
     clientPS = connection.prepareStatement(
-      "insert into " + clientTable + " (no, id, surname, name, patronymic, gender, charm, birth) " +
+      "insert into " + clientTable + " (no, cia_id, surname, name, patronymic, gender, charm, birth) " +
         "values (?, ?, ?, ?, ?, ?, ?, ?)"
     );
 
     addressPS = connection.prepareStatement(
-      "insert into " + addressTable + " (client, type, street, house, flat) " +
-        "VALUES (?, ?, ?, ?, ?)"
+      "insert into " + addressTable + " (no, client, type, street, house, flat) " +
+        "VALUES (?, ?, ?, ?, ?, ?)"
     );
 
     phonePS = connection.prepareStatement(
-      "insert INTO " + phoneTable  + " (client, type, number )  " +
-        " VALUES (?, ?, ?)"
+      "insert INTO " + phoneTable + " (no, client, type, number )  " +
+        " VALUES (?, ?, ?, ?)"
     );
   }
 
@@ -57,38 +57,43 @@ public class CiaHandler extends TagHandler implements AutoCloseable {
     clientPS.setString(8, client.birth);
     clientPS.addBatch();
 
-    addressPS.setString(1, factAddress.client);
-    addressPS.setString(2, "fact");
-    addressPS.setString(3, factAddress.street);
-    addressPS.setString(4, factAddress.house);
-    addressPS.setString(5, factAddress.flat);
+    addressPS.setLong(1, no);
+    addressPS.setString(2, factAddress.clientId);
+    addressPS.setString(3, "fact");
+    addressPS.setString(4, factAddress.street);
+    addressPS.setString(5, factAddress.house);
+    addressPS.setString(6, factAddress.flat);
     addressPS.addBatch();
 
-    addressPS.setString(1, regAddress.client);
-    addressPS.setString(2, "reg");
-    addressPS.setString(3, regAddress.street);
-    addressPS.setString(4, regAddress.house);
-    addressPS.setString(5, regAddress.flat);
+    addressPS.setLong(1, no);
+    addressPS.setString(2, regAddress.clientId);
+    addressPS.setString(3, "reg");
+    addressPS.setString(4, regAddress.street);
+    addressPS.setString(5, regAddress.house);
+    addressPS.setString(6, regAddress.flat);
     addressPS.addBatch();
 
     for( String p : phone.work){
-      phonePS.setString(1, client.id);
-      phonePS.setString(2, "work");
-      phonePS.setString(3, p);
+      phonePS.setLong(1, no);
+      phonePS.setString(2, client.id);
+      phonePS.setString(3, "work");
+      phonePS.setString(4, p);
       phonePS.addBatch();
     }
 
     for( String p : phone.home){
-      phonePS.setString(1, client.id);
-      phonePS.setString(2, "home");
-      phonePS.setString(3, p);
+      phonePS.setLong(1, no);
+      phonePS.setString(2, client.id);
+      phonePS.setString(3, "home");
+      phonePS.setString(4, p);
       phonePS.addBatch();
     }
 
     for( String p : phone.mobile){
-      phonePS.setString(1, client.id);
-      phonePS.setString(2, "mobile");
-      phonePS.setString(3, p);
+      phonePS.setLong(1, no);
+      phonePS.setString(2, client.id);
+      phonePS.setString(3, "mobile");
+      phonePS.setString(4, p);
       phonePS.addBatch();
     }
 
@@ -134,7 +139,7 @@ public class CiaHandler extends TagHandler implements AutoCloseable {
 
     if ("/cia/client".equals(path)) {
       client.id = attributes.getValue("id");
-      factAddress.client = regAddress.client = attributes.getValue("id");
+      factAddress.clientId = regAddress.clientId = attributes.getValue("id");
       no++;
       return;
     }
@@ -215,6 +220,5 @@ public class CiaHandler extends TagHandler implements AutoCloseable {
 
 
   }
-
 
 }

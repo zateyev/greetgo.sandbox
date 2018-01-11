@@ -8,6 +8,7 @@ import org.apache.ibatis.annotations.Update;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 public interface ClientTestDao {
 
@@ -116,4 +117,26 @@ public interface ClientTestDao {
     " c.* " +
     " from Client c where cia_id = #{ciaId}")
   ClientDetails getClientByCiaId(@Param("ciaId") String ciaId);
+
+  @Select("select ch.name from client c join charm ch on c.charm_id = ch.id where cia_id = #{cia_id} and c.actual = 1")
+  String getClientCharmByCiaId(@Param("cia_id") String cia_id);
+
+  @Select("select count(1) from client where actual = 1")
+  int getClientListSize();
+
+
+  @Select("select count(1) from charm where actual = 1")
+  int getCharmListSize();
+
+  @Select("select id from client where cia_id = #{ciaId}")
+  String getClientId(@Param("ciaId") String ciaId);
+
+  @Select("Select number from client_phone where client = #{id} and type = 'home' and actual = 1")
+  List<String> getHomePhones(String id);
+
+  @Select("Select number from client_phone where client = #{id} and type = 'mobile' and actual = 1")
+  List<String> getMobilePhones(String id);
+
+  @Select("Select number from client_phone where client = #{id} and type = 'work' and actual = 1")
+  List<String> getWorkPhones(String id);
 }

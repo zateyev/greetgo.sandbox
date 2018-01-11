@@ -5,9 +5,12 @@
 
   <changeSet author="jgolibzhan" id="create-table-Charm">
     <sql endDelimiter=";;"><![CDATA[
+    CREATE SEQUENCE serial START 101;
       create table Charm (
         id varchar(32) not null primary key,
         name varchar(300),
+        description varchar(500),
+        energy float,
         actual smallint not null default 0
       )
     ]]></sql>
@@ -36,6 +39,7 @@
         street varchar(300),
         house varchar(300),
         flat varchar(300),
+        primary key(client, type),
         actual smallint not null default 0
       )
     ]]></sql>
@@ -46,7 +50,7 @@
       create table Client_phone (
         client varchar(32) references Client,
         type varchar(10),
-        number varchar(15),
+        number varchar(50),
         actual smallint not null default 0,
         primary key(client, number)
       )
