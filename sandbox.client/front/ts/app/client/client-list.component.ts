@@ -1,6 +1,6 @@
 import {Component, ElementRef, HostListener} from "@angular/core";
 import {HttpService} from "../HttpService";
-import {ClientListInfo} from "../../model/ClientListInfo";
+import {ClientRecord} from "../../model/ClientRecord";
 
 @Component({
   selector: 'client-list-component',
@@ -9,58 +9,59 @@ import {ClientListInfo} from "../../model/ClientListInfo";
 })
 
 export class ClientListComponent {
-  page: number = 1;
-  pages;
-  clients: ClientListInfo[] = [];
-  focusedClientId: number | null = null;//TODO rename to selected...
+  curPageNum: number = 1;
+  pageCount: number;
+  pageNums: number[] = [];
+  clientRecords: ClientRecord[] = [];
+  selectedClientRecordId: number | null = null;
 
-  clientClicked(clientId: number) {
-    this.focusedClientId = clientId;
+  clientRecordClicked(clientId: number) {
+    this.selectedClientRecordId = clientId;
   }
 
-  //TODO: clicking on non-client disables buttons
+  //TODO: clicking on non-client record disables buttons
   @HostListener('document:click', ['$event'])
   clickout(event) {
     if (this.eRef.nativeElement.contains(event.target)) {
     } else {
-      this.focusedClientId = null;
+      this.selectedClientRecordId = null;
     }
   }
 
   constructor(private httpService: HttpService, private eRef: ElementRef) {
     this.updatePageNumeration();
-    this.getClientList();
+    this.getClientRecordList();
   }
 
-  //TODO переименовать
-  private getClientList() {
+  private getClientRecordList() {
     this.httpService.get("/client/list", {
-      //skipFirstCount
-      'page': this.page,
-      //pageSize
-      'size': this.httpService.pageSize
+      'clientRecordCountToSkip': this.curPageNum * this.httpService.pageSize,
+      'clientRecordCount': this.httpService.pageSize
     }).toPromise().then(result => {
-      this.clients = (result.json() as ClientListInfo[]).map(ClientListInfo.copy);
+      this.clientRecords = (result.json() as ClientRecord[]).map(ClientRecord.copy);
     }, error => {
       console.log(error);
     });
   }
 
   private updatePageNumeration() {
-    this.httpService.get("/client/pageNum", {
-      'size': this.httpService.pageSize
+    this.httpService.get("/client/pageCount", {
+      'clientRecordCount': this.httpService.pageSize
     }).toPromise().then(result => {
-      this.pages = [];
-
-      for (let i = 1; i <= result.json(); i++) {
-        this.pages.push(i);
+      this.pageCount = result.json() as number;
+      for (let i = 0; i < this.pageCount; i++) {
+        this.pageNums[i] = i + 1;
       }
     }, error => {
       console.log(error);
     });
   }
 
-  edit(clientId: number | null) {
+  editClientRecord(clientRecordId: number | null) {
     //TODO open edit form
+  }
+
+  removeClientRecord(clientRecordId: number) {
+
   }
 }

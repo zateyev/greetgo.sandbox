@@ -1,24 +1,24 @@
 package kz.greetgo.sandbox.controller.register;
 
-import kz.greetgo.sandbox.controller.model.ClientListInfo;
+import kz.greetgo.sandbox.controller.model.ClientRecord;
 
 import java.util.List;
 
 public interface ClientRegister {
   /**
-   * Предоставляет список общей информации о клиентах
+   * Предоставляет список клиентских записей
    *
-   * @param page номер страницы
-   * @param size размер страницы
-   * @return список общей информации о клиенте
+   * @param clientRecordCountToSkip количество пропускаемых клиентских записей (с начала)
+   * @param clientRecordCount количество клиентских записей в одной странице
+   * @return список клиентских записей
    */
-  List<ClientListInfo> getClientList(Integer page, Integer size);
+  List<ClientRecord> getClientRecordList(int clientRecordCountToSkip, int clientRecordCount);
 
   /**
-   * Предоставляет количество страниц
+   * Предоставляет количество страниц клиентских записей
    *
-   * @param size размер страницы
+   * @param clientRecordCount количество клиентских записей в одной странице
    * @return количество страниц
    */
-  Integer getPageNum(Integer size);
+  int getPageCount(int clientRecordCount);
 }

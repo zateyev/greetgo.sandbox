@@ -35,8 +35,8 @@
         </th>
       </tr>
       </thead>
-      <tbody *ngFor="let client of clients">
-      <tr (click)="clientClicked(client.id)" [ngClass]="{active: client.id == focusedClientId}">
+      <tbody *ngFor="let client of clientRecords">
+      <tr (click)="clientRecordClicked(client.id)" [ngClass]="{active: client.id == selectedClientRecordId}">
         <td scope="row">{{client.fullName}}</td>
         <td>{{client.charm}}</td>
         <td>{{client.age}}</td>
@@ -50,25 +50,25 @@
   <div class="col-sm-1">
     <button class="btn btn-change-info"
             id="client-list-form-add"
-            (click)="edit(null)">
+            (click)="editClientRecord(null)">
       +
     </button>
     <button class=" btn btn-change-info"
-            [disabled]="!focusedClientId"
+            [disabled]="!selectedClientRecordId"
             id="client-list-form-inspect"
-            (click)="edit(focusedClientId)">
+            (click)="editClientRecord(selectedClientRecordId)">
       ...
     </button>
     <button class="btn btn-change-info"
-            [disabled]="!focusedClientId"
+            [disabled]="!selectedClientRecordId"
             id="client-list-form-remove"
-            (click)="registration = false">
+            (click)="removeClientRecord(selectedClientRecordId)">
       -
     </button>
   </div>
 </div>
 <div class="text-center">
-  <a *ngFor="let page of pages" href="#" class="btn btn-list-number" (click)="registration = false">
-    {{page}}
+  <a *ngFor="let pageNum of pageNums" href="#" class="btn btn-list-number" (click)="registration = false">
+    {{pageNum}}
   </a>
 </div>
