@@ -508,6 +508,7 @@ public class ClientRegisterImplTest extends ParentTestNg {
     deleteAll();
 
     insertCharm(charmId);
+    ReportTestView testView = new ReportTestView();
 
     for (int i = 0; i < 10; i++) {
       String clientId = RND.str(10);
@@ -521,19 +522,22 @@ public class ClientRegisterImplTest extends ParentTestNg {
       insertAccount(clientId);
     }
 
+
     ClientListRequest req = new ClientListRequest();
     req.filterByFio = "Иван";
 
     //
     //
     List<ClientRecord> list = clientRegister.get().getList(req);
-
+    jdbc.get().execute(new FillClientReportView(testView, req, "p1"));
     //
     //
 
     assertThat(list).hasSize(10);
     for (ClientRecord rec : list) {
-
+      assertThat(rec.fio).contains("Иван");
+    }
+    for(ClientRecord rec: testView.row){
       assertThat(rec.fio).contains("Иван");
     }
 
@@ -546,6 +550,7 @@ public class ClientRegisterImplTest extends ParentTestNg {
     deleteAll();
 
     insertCharm(charmId);
+    ReportTestView testView = new ReportTestView();
 
     for (int i = 0; i < 10; i++) {
       String clientId = RND.str(10);
@@ -565,11 +570,18 @@ public class ClientRegisterImplTest extends ParentTestNg {
     //
     //
     List<ClientRecord> list = clientRegister.get().getList(req);
+    jdbc.get().execute(new FillClientReportView(testView, req, "p1"));
     //
     //
 
     assertThat(list).hasSize(10);
-    for (ClientRecord rec : list) assertThat(rec.fio).contains("Иван");
+    for (ClientRecord rec : list){
+      assertThat(rec.fio).contains("Иван");
+    }
+
+    for(ClientRecord rec: testView.row){
+      assertThat(rec.fio).contains("Иван");
+    }
 
   }
 
@@ -580,6 +592,7 @@ public class ClientRegisterImplTest extends ParentTestNg {
     deleteAll();
 
     insertCharm(charmId);
+    ReportTestView testView = new ReportTestView();
 
     for (int i = 0; i < 10; i++) {
       String clientId = RND.str(10);
@@ -599,11 +612,18 @@ public class ClientRegisterImplTest extends ParentTestNg {
     //
     //
     List<ClientRecord> list = clientRegister.get().getList(req);
+    jdbc.get().execute(new FillClientReportView(testView, req, "p1"));
     //
     //
 
     assertThat(list).hasSize(10);
-    for (ClientRecord rec : list) assertThat(rec.fio).contains("Иван");
+    for (ClientRecord rec : list) {
+      assertThat(rec.fio).contains("Иван");
+    }
+    for(ClientRecord rec: testView.row){
+      assertThat(rec.fio).contains("Иван");
+    }
+
 
   }
 
@@ -613,6 +633,9 @@ public class ClientRegisterImplTest extends ParentTestNg {
     deleteAll();
 
     ClientListRequest req = new ClientListRequest();
+
+    ReportTestView testView = new ReportTestView();
+
     req.sort = "total";
     req.count = 5;
     req.skipFirst = 0;
@@ -644,6 +667,7 @@ public class ClientRegisterImplTest extends ParentTestNg {
     //
     //
     List<ClientRecord> list = clientRegister.get().getList(req);
+    jdbc.get().execute(new FillClientReportView(testView, req, "p1"));
     //
     //
 
@@ -651,6 +675,10 @@ public class ClientRegisterImplTest extends ParentTestNg {
     assertThat(list.get(0).totalAccountBalance).isEqualTo(5 + 1 + 2 + 3);
     assertThat(list.get(1).totalAccountBalance).isEqualTo(62.41f);
     assertThat(list.get(2).totalAccountBalance).isEqualTo(754);
+
+    assertThat(testView.row.get(0).totalAccountBalance).isEqualTo(5 + 1 + 2 + 3);
+    assertThat(testView.row.get(1).totalAccountBalance).isEqualTo(62.41f);
+    assertThat(testView.row.get(2).totalAccountBalance).isEqualTo(754);
 
   }
 
@@ -660,6 +688,9 @@ public class ClientRegisterImplTest extends ParentTestNg {
     deleteAll();
 
     ClientListRequest req = new ClientListRequest();
+
+    ReportTestView testView = new ReportTestView();
+
     req.sort = "totalDesc";
     req.count = 5;
     req.skipFirst = 0;
@@ -691,6 +722,7 @@ public class ClientRegisterImplTest extends ParentTestNg {
     //
     //
     List<ClientRecord> list = clientRegister.get().getList(req);
+    jdbc.get().execute(new FillClientReportView(testView, req, "p1"));
     //
     //
 
@@ -698,6 +730,10 @@ public class ClientRegisterImplTest extends ParentTestNg {
     assertThat(list.get(0).totalAccountBalance).isEqualTo(754);
     assertThat(list.get(1).totalAccountBalance).isEqualTo(62.41f);
     assertThat(list.get(2).totalAccountBalance).isEqualTo(11);
+
+    assertThat(testView.row.get(0).totalAccountBalance).isEqualTo(754);
+    assertThat(testView.row.get(1).totalAccountBalance).isEqualTo(62.41f);
+    assertThat(testView.row.get(2).totalAccountBalance).isEqualTo(11);
 
   }
 
@@ -707,6 +743,9 @@ public class ClientRegisterImplTest extends ParentTestNg {
     deleteAll();
 
     ClientListRequest req = new ClientListRequest();
+
+    ReportTestView testView = new ReportTestView();
+
     req.sort = "max";
     req.count = 5;
     req.skipFirst = 0;
@@ -738,6 +777,7 @@ public class ClientRegisterImplTest extends ParentTestNg {
     //
     //
     List<ClientRecord> list = clientRegister.get().getList(req);
+    jdbc.get().execute(new FillClientReportView(testView, req, "p1"));
     //
     //
 
@@ -746,12 +786,18 @@ public class ClientRegisterImplTest extends ParentTestNg {
     assertThat(list.get(1).maxAccountBalance).isEqualTo(25.47f);
     assertThat(list.get(2).maxAccountBalance).isEqualTo(522);
 
+    assertThat(testView.row.get(0).maxAccountBalance).isEqualTo(5);
+    assertThat(testView.row.get(1).maxAccountBalance).isEqualTo(25.47f);
+    assertThat(testView.row.get(2).maxAccountBalance).isEqualTo(522);
+
   }
 
   @Test
   public void getList_CheckSortedList_maxAccountBalanceDesc() {
 
     deleteAll();
+
+    ReportTestView testView = new ReportTestView();
 
     ClientListRequest req = new ClientListRequest();
     req.sort = "maxDesc";
@@ -785,6 +831,7 @@ public class ClientRegisterImplTest extends ParentTestNg {
     //
     //
     List<ClientRecord> list = clientRegister.get().getList(req);
+    jdbc.get().execute(new FillClientReportView(testView, req, "p1"));
     //
     //
 
@@ -793,12 +840,18 @@ public class ClientRegisterImplTest extends ParentTestNg {
     assertThat(list.get(1).maxAccountBalance).isEqualTo(25.47f);
     assertThat(list.get(2).maxAccountBalance).isEqualTo(5);
 
+    assertThat(testView.row.get(0).maxAccountBalance).isEqualTo(522);
+    assertThat(testView.row.get(1).maxAccountBalance).isEqualTo(25.47f);
+    assertThat(testView.row.get(2).maxAccountBalance).isEqualTo(5);
+
   }
 
   @Test
   public void getList_CheckSortedList_minAccountBalanceAsc() {
 
     deleteAll();
+
+    ReportTestView testView = new ReportTestView();
 
     ClientListRequest req = new ClientListRequest();
     req.sort = "min";
@@ -832,6 +885,7 @@ public class ClientRegisterImplTest extends ParentTestNg {
     //
     //
     List<ClientRecord> list = clientRegister.get().getList(req);
+    jdbc.get().execute(new FillClientReportView(testView, req, "p1"));
     //
     //
 
@@ -840,12 +894,18 @@ public class ClientRegisterImplTest extends ParentTestNg {
     assertThat(list.get(1).minAccountBalance).isEqualTo(15.47f);
     assertThat(list.get(2).minAccountBalance).isEqualTo(232);
 
+    assertThat(testView.row.get(0).minAccountBalance).isEqualTo(1);
+    assertThat(testView.row.get(1).minAccountBalance).isEqualTo(15.47f);
+    assertThat(testView.row.get(2).minAccountBalance).isEqualTo(232);
+
   }
 
   @Test
   public void getList_CheckSortedList_minAccountBalanceDesc() {
 
     deleteAll();
+
+    ReportTestView testView = new ReportTestView();
 
     ClientListRequest req = new ClientListRequest();
     req.sort = "minDesc";
@@ -879,6 +939,8 @@ public class ClientRegisterImplTest extends ParentTestNg {
     //
     //
     List<ClientRecord> list = clientRegister.get().getList(req);
+    jdbc.get().execute(new FillClientReportView(testView, req, "p1"));
+
     //
     //
 
@@ -887,12 +949,17 @@ public class ClientRegisterImplTest extends ParentTestNg {
     assertThat(list.get(1).minAccountBalance).isEqualTo(15.47f);
     assertThat(list.get(2).minAccountBalance).isEqualTo(1);
 
+    assertThat(testView.row.get(0).minAccountBalance).isEqualTo(232);
+    assertThat(testView.row.get(1).minAccountBalance).isEqualTo(15.47f);
+    assertThat(testView.row.get(2).minAccountBalance).isEqualTo(1);
   }
 
   @Test
   public void getList_CheckSortedList_ClientAgeDesc() {
 
     deleteAll();
+
+    ReportTestView testView = new ReportTestView();
 
     ClientListRequest req = new ClientListRequest();
     req.sort = "ageDesc";
@@ -919,6 +986,7 @@ public class ClientRegisterImplTest extends ParentTestNg {
     //
     //
     List<ClientRecord> list = clientRegister.get().getList(req);
+    jdbc.get().execute(new FillClientReportView(testView, req, "p1"));
     //
     //
 
@@ -927,12 +995,17 @@ public class ClientRegisterImplTest extends ParentTestNg {
     assertThat(list.get(1).age).isEqualTo(getAge(2010, 07, 07));
     assertThat(list.get(2).age).isEqualTo(getAge(2015, 07, 07));
 
+    assertThat(testView.row.get(0).age).isEqualTo(getAge(2000, 07, 07));
+    assertThat(testView.row.get(1).age).isEqualTo(getAge(2010, 07, 07));
+    assertThat(testView.row.get(2).age).isEqualTo(getAge(2015, 07, 07));
   }
 
   @Test
   public void getList_CheckSortedList_ClientAgeAsc() {
 
     deleteAll();
+
+    ReportTestView testView = new ReportTestView();
 
     ClientListRequest req = new ClientListRequest();
     req.sort = "age";
@@ -959,6 +1032,7 @@ public class ClientRegisterImplTest extends ParentTestNg {
     //
     //
     List<ClientRecord> list = clientRegister.get().getList(req);
+    jdbc.get().execute(new FillClientReportView(testView, req, "p1"));
     //
     //
 
@@ -967,6 +1041,10 @@ public class ClientRegisterImplTest extends ParentTestNg {
     assertThat(list.get(0).age).isEqualTo(getAge(2015, 07, 07));
     assertThat(list.get(1).age).isEqualTo(getAge(2010, 07, 07));
     assertThat(list.get(2).age).isEqualTo(getAge(2000, 07, 07));
+
+    assertThat(testView.row.get(0).age).isEqualTo(getAge(2015, 07, 07));
+    assertThat(testView.row.get(1).age).isEqualTo(getAge(2010, 07, 07));
+    assertThat(testView.row.get(2).age).isEqualTo(getAge(2000, 07, 07));
 
   }
 
@@ -1052,10 +1130,8 @@ public class ClientRegisterImplTest extends ParentTestNg {
 
   public BeanGetter<JdbcSandbox> jdbc;
 
-
-  // FIXME: 1/8/18 Тесты должны покрывать все случаи (сортировка и тд)
   @Test
-  public void download_Xlsx() throws Exception {
+  public void downloadReport_test() throws Exception {
     String charmId = RND.str(5), clientId = RND.str(5);
     deleteAll();
     insertCharm(charmId);
@@ -1069,7 +1145,6 @@ public class ClientRegisterImplTest extends ParentTestNg {
       "male",
       charmId
     );
-
     insertAccountWithMoney(clientId, 25.25f);
 
     ClientListRequest req = new ClientListRequest();
