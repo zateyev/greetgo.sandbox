@@ -146,12 +146,13 @@ public class MigrationCia {
     exec(
       "update TMP_ADDRESS as ad\n" +
         "set error = 'One of required fields is null'\n" +
-        "from  (select client from TMP_ADDRESS where \n" +
+        "from  (select client, no from TMP_ADDRESS where \n" +
         "street is null \n" +
         "or house is null\n" +
         "or flat is null \n" +
-        "group by client) as a\n" +
-        "where ad.client  = a.client"
+        "group by client, \"no\") as a\n" +
+        "where ad.client  = a.client\n" +
+        "and ad.no = a.no\n"
     );
 
     exec(
@@ -171,9 +172,10 @@ public class MigrationCia {
     );
 
     exec(
-      "insert into charm (name, id, actual) " +
-        " select  distinct(charm), nextval('serial')::text as id, 1 as actual " +
-        " from TMP_CLIENT as tmp where tmp.charm not in(select name from charm where actual = 1) and error is null"
+      "insert into charm (name, id, actual) \n" +
+        " select  distinct(charm), nextval('serial')::text as id, 1 as actual \n" +
+        " from TMP_CLIENT as tmp where tmp.charm not in(select name from charm where actual = 1) " +
+        "and error is null group by charm"
     );
 
     exec(
@@ -196,6 +198,7 @@ public class MigrationCia {
         " from TMP_CLIENT as tmp join charm ch on tmp.charm = ch.name \n" +
         " where status = 'READY_TO_MERGE'\n" +
         " and ch.actual = 1" +
+        " and error is null" +
         " on conflict(cia_id) do update\n" +
         " set name = excluded.name," +
         " surname = excluded.surname,\n" +

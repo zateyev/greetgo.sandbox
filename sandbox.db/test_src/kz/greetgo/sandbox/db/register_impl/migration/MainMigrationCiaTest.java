@@ -35,6 +35,11 @@ public class MainMigrationCiaTest extends ParentTestNg {
 
   @AfterMethod
   public void closeConnection() throws Exception {
+    migrationTestDao.get().dropTables(
+      migration.clientTable,
+      migration.phoneTable,
+      migration.addressTable
+    );
     connection.close();
     connection = null;
   }
@@ -219,6 +224,10 @@ public class MainMigrationCiaTest extends ParentTestNg {
       charmName,
       "cia_id12"
     );
+    insertTmpAdress(1, "cia_id12", "reg");
+    insertTmpAdress(1, "cia_id12", "fact");
+
+    insertTmpPhone(1, "cia_id12", "mobile", "7789997777");
 
     //
     //
@@ -263,15 +272,49 @@ public class MainMigrationCiaTest extends ParentTestNg {
 
     deleteAll();
 
-    insertTmpClient(11);
-    insertTmpClient(12);
-    insertTmpClient(13);
+    insertTmpClientWithCiaID(11, "11");
+    insertTmpClientWithCiaID(12, "22");
+    insertTmpClientWithCiaID(13, "33");
 
-    insertTmpClientNullName(22);
-    insertTmpClientNullSurname(23);
-    insertTmpClientNullBirth(24);
-    insertTmpClientNullCharm(25);
-    insertTmpClientNullGender(26);
+    insertTmpAdress(11, "11", "reg");
+    insertTmpAdress(11, "11", "fact");
+    insertTmpPhone(11, "11", "home", "555");
+
+    insertTmpAdress(12, "22", "reg");
+    insertTmpAdress(12, "22", "fact");
+    insertTmpPhone(12, "22", "home", "555");
+
+    insertTmpAdress(13, "33", "reg");
+    insertTmpAdress(13, "33", "fact");
+    insertTmpPhone(13, "33", "home", "555");
+
+
+
+    insertTmpClientNullName(22, "41");
+    insertTmpAdress(22, "41", "reg");
+    insertTmpAdress(22, "41", "fact");
+    insertTmpPhone(22, "41", "home", "555");
+
+    insertTmpClientNullSurname(23, "42");
+    insertTmpAdress(23, "42", "reg");
+    insertTmpAdress(23, "42", "fact");
+    insertTmpPhone(23, "42", "home", "555");
+
+    insertTmpClientNullBirth(24, "43");
+    insertTmpAdress(24, "43", "reg");
+    insertTmpAdress(24, "43", "fact");
+    insertTmpPhone(24, "43", "home", "555");
+
+    insertTmpClientNullCharm(25, "44");
+    insertTmpAdress(25, "44", "reg");
+    insertTmpAdress(25, "44", "fact");
+    insertTmpPhone(25, "44", "home", "555");
+
+    insertTmpClientNullGender(26, "45");
+    insertTmpAdress(26, "45", "reg");
+    insertTmpAdress(26, "45", "fact");
+    insertTmpPhone(26, "45", "home", "555");
+
 
     //
     //
@@ -293,6 +336,10 @@ public class MainMigrationCiaTest extends ParentTestNg {
     insertTmpClientWithCiaID(1, "ciaId1");
     insertTmpClientWithCiaID(2, "ciaId2");
     insertTmpClientWithCiaID(3, "ciaId3");
+
+    insertTmpPhone(1, "ciaId1", "mobile", "77777");
+    insertTmpPhone(2, "ciaId1", "mobile", "77777");
+    insertTmpPhone(3, "ciaId1", "mobile", "77777");
 
     insertTmpAdress(1, "ciaId1", "reg");
     insertTmpAdress(1, "ciaId1", "fact");
@@ -390,14 +437,23 @@ public class MainMigrationCiaTest extends ParentTestNg {
       RND.str(6)
     );
 
+    migrationTestDao.get().insertPhone(
+      migration.phoneTable,
+      index,
+      ciaId,
+      "mobile",
+      "8778237330"
+    );
+
+
   }
 
-  private void insertTmpClientNullName(int index) {
+  private void insertTmpClientNullName(int index, String ciaId) {
 
     migrationTestDao.get().insertClient(
       migration.clientTable,
       index,
-      RND.str(10),
+      ciaId,
       null,
       RND.str(10),
       RND.str(10),
@@ -408,12 +464,12 @@ public class MainMigrationCiaTest extends ParentTestNg {
 
   }
 
-  private void insertTmpClientNullSurname(int index) {
+  private void insertTmpClientNullSurname(int index, String ciaId) {
 
     migrationTestDao.get().insertClient(
       migration.clientTable,
       index,
-      RND.str(10),
+      ciaId,
       RND.str(10),
       null,
       RND.str(10),
@@ -424,12 +480,12 @@ public class MainMigrationCiaTest extends ParentTestNg {
 
   }
 
-  private void insertTmpClientNullBirth(int index) {
+  private void insertTmpClientNullBirth(int index, String ciaId) {
 
     migrationTestDao.get().insertClient(
       migration.clientTable,
       index,
-      RND.str(10),
+      ciaId,
       RND.str(10),
       RND.str(10),
       RND.str(10),
@@ -440,12 +496,12 @@ public class MainMigrationCiaTest extends ParentTestNg {
 
   }
 
-  private void insertTmpClientNullGender(int index) {
+  private void insertTmpClientNullGender(int index, String ciaId) {
 
     migrationTestDao.get().insertClient(
       migration.clientTable,
       index,
-      RND.str(10),
+      ciaId,
       RND.str(10),
       RND.str(10),
       RND.str(10),
@@ -456,12 +512,12 @@ public class MainMigrationCiaTest extends ParentTestNg {
 
   }
 
-  private void insertTmpClientNullCharm(int index) {
+  private void insertTmpClientNullCharm(int index, String ciaId) {
 
     migrationTestDao.get().insertClient(
       migration.clientTable,
       index,
-      RND.str(10),
+      ciaId,
       RND.str(10),
       RND.str(10),
       RND.str(10),

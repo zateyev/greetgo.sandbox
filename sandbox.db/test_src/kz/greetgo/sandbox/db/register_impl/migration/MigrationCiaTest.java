@@ -3,7 +3,7 @@ package kz.greetgo.sandbox.db.register_impl.migration;
 import kz.greetgo.depinject.core.BeanGetter;
 import kz.greetgo.sandbox.db.register_impl.migration.models.Address;
 import kz.greetgo.sandbox.db.register_impl.migration.models.Phone;
-import kz.greetgo.sandbox.db.test.dao.ClientTestDao;
+import kz.greetgo.sandbox.db.test.dao.MigrationTestDao;
 import kz.greetgo.sandbox.db.test.util.ParentTestNg;
 import kz.greetgo.util.RND;
 import kz.greetgo.util.ServerUtil;
@@ -28,8 +28,7 @@ import static org.fest.assertions.api.Assertions.assertThat;
 public class MigrationCiaTest extends ParentTestNg {
 
   public BeanGetter<MigrationManager> migrationManager;
-
-  public BeanGetter<ClientTestDao> clientTestDao;
+  public BeanGetter<MigrationTestDao> migrationTestDao;
 
   Connection connection;
 
@@ -50,21 +49,39 @@ public class MigrationCiaTest extends ParentTestNg {
     migration.connection = connection;
 
     migration.createTempTables();
+
+    migrationTestDao.get().dropTables(
+      migration.clientTable,
+      migration.phoneTable,
+      migration.addressTable
+    );
+
   }
 
   @Test
   public void uploadFileToTempTables() throws Exception {
+
 
     MigrationCia migration = new MigrationCia();
     migration.connection = connection;
     migration.inFile = createInFile("cia_test_1.xml");
 
     migration.createTempTables();
+    //
+    //
     migration.uploadFileToTempTables();
+    //
+    //
 
     Map<Object, Map<String, Object>> client = loadTable("no", migration.clientTable);
     Map<String, Address> address = getAddressById(migration.addressTable, "4-DU8-32-H7");
     Phone phones = getPhoneById(migration.phoneTable, "4-DU8-32-H7");
+
+    migrationTestDao.get().dropTables(
+      migration.clientTable,
+      migration.phoneTable,
+      migration.addressTable
+    );
 
     assertThat(client).hasSize(2);
 
@@ -141,6 +158,8 @@ public class MigrationCiaTest extends ParentTestNg {
     assertThat(phones.mobile.get(0)).isEqualTo("+7-123-111-33-33");
     assertThat(phones.mobile.get(1)).isEqualTo("+7-123-111-44-33");
     assertThat(phones.mobile.get(2)).isEqualTo("+7-123-111-55-33");
+
+    assertThat(migration.errorLog.toString()).contains("address");
 
   }
 

@@ -1,5 +1,6 @@
 package kz.greetgo.sandbox.db.test.dao;
 
+import org.apache.ibatis.annotations.Delete;
 import org.apache.ibatis.annotations.Insert;
 import org.apache.ibatis.annotations.Param;
 
@@ -38,4 +39,13 @@ public interface MigrationTestDao {
     @Param("ciaId") String ciaId,
     @Param("type") String type,
     @Param("number") String number);
+
+
+  @Delete("drop table ${clientTable};" +
+    " drop table ${phoneTable};" +
+    " drop table ${addressTable}")
+  void dropTables(
+    @Param("clientTable") String clientTable,
+    @Param("phoneTable") String phoneTable,
+    @Param("addressTable") String addressTable);
 }
