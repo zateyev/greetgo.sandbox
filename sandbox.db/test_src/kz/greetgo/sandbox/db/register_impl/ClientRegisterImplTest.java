@@ -984,6 +984,7 @@ public class ClientRegisterImplTest extends ParentTestNg {
     for (int i = 0; i < 5; i++) {
       String clientId = RND.str(10);
       insertClientWithCharm(clientId, charmId);
+      insertAccount(clientId);
     }
 
     String clientId = RND.str(10);
@@ -993,6 +994,9 @@ public class ClientRegisterImplTest extends ParentTestNg {
     insertClientWithName(clientId, charmId, "abba" + RND.str(5));
     insertClientWithSurname(clientId2, charmId, "abba" + RND.str(5));
     insertClientWithPatronymic(clientId3, charmId, "abba" + RND.str(5));
+    insertAccount(clientId);
+    insertAccount(clientId2);
+    insertAccount(clientId3);
 
     //
     //
