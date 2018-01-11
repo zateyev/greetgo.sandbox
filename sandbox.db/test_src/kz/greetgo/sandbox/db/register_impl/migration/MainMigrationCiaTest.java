@@ -397,6 +397,7 @@ public class MainMigrationCiaTest extends ParentTestNg {
   }
 
 
+
   private void insertCharm(String charmId, String charmName) {
     clientTestDao.get().insertCharm(charmId, charmName);
   }

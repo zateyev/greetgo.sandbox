@@ -11,9 +11,7 @@ import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.InputStream;
+import java.io.*;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -162,6 +160,7 @@ public class MigrationCiaTest extends ParentTestNg {
     assertThat(migration.errorLog.toString()).contains("address");
 
   }
+
 
   private File createInFile(String resourceName) throws Exception {
     File ret = new File("build/inFile_" + RND.intStr(10) + "_" + resourceName);
