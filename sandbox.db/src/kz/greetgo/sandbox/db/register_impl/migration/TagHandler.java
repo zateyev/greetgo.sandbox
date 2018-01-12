@@ -25,7 +25,6 @@ public abstract class TagHandler implements ContentHandler {
   @Override
   public void endPrefixMapping(String prefix) throws SAXException { }
 
-
   @Override
   public void ignorableWhitespace(char[] ch, int start, int length) throws SAXException { }
 

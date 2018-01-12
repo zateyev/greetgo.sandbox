@@ -37,7 +37,7 @@ public class FillClientReportView extends AbstractGetClientList implements Conne
       ps.setObject(1, personId);
 
       try(ResultSet rs = ps.executeQuery()){
-        if (!rs.next()) throw new RuntimeException("Result Set Incorrect");
+        if (!rs.next()) throw new RuntimeException("Persons not found");
         makeFio(rs.getString(1), rs.getString(2), rs.getString(3));
       }
 

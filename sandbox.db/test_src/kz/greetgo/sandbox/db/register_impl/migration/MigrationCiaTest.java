@@ -1,10 +1,9 @@
 package kz.greetgo.sandbox.db.register_impl.migration;
 
 import kz.greetgo.depinject.core.BeanGetter;
-import kz.greetgo.sandbox.controller.model.ClientDetails;
 import kz.greetgo.sandbox.db.register_impl.migration.models.Address;
 import kz.greetgo.sandbox.db.register_impl.migration.models.Phone;
-import kz.greetgo.sandbox.db.test.dao.ClientTestDao;
+import kz.greetgo.sandbox.db.test.dao.MigrationTestDao;
 import kz.greetgo.sandbox.db.test.util.ParentTestNg;
 import kz.greetgo.util.RND;
 import kz.greetgo.util.ServerUtil;
@@ -12,9 +11,7 @@ import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.InputStream;
+import java.io.*;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -29,8 +26,7 @@ import static org.fest.assertions.api.Assertions.assertThat;
 public class MigrationCiaTest extends ParentTestNg {
 
   public BeanGetter<MigrationManager> migrationManager;
-
-  public BeanGetter<ClientTestDao> clientTestDao;
+  public BeanGetter<MigrationTestDao> migrationTestDao;
 
   Connection connection;
 
@@ -51,25 +47,43 @@ public class MigrationCiaTest extends ParentTestNg {
     migration.connection = connection;
 
     migration.createTempTables();
+
+    migrationTestDao.get().dropTables(
+      migration.clientTable,
+      migration.phoneTable,
+      migration.addressTable
+    );
+
   }
 
   @Test
   public void uploadFileToTempTables() throws Exception {
+
 
     MigrationCia migration = new MigrationCia();
     migration.connection = connection;
     migration.inFile = createInFile("cia_test_1.xml");
 
     migration.createTempTables();
+    //
+    //
     migration.uploadFileToTempTables();
+    //
+    //
 
     Map<Object, Map<String, Object>> client = loadTable("no", migration.clientTable);
     Map<String, Address> address = getAddressById(migration.addressTable, "4-DU8-32-H7");
     Phone phones = getPhoneById(migration.phoneTable, "4-DU8-32-H7");
 
+    migrationTestDao.get().dropTables(
+      migration.clientTable,
+      migration.phoneTable,
+      migration.addressTable
+    );
+
     assertThat(client).hasSize(2);
 
-    assertThat(client.get(1L).get("id")).isEqualTo("4-DU8-32-H7");
+    assertThat(client.get(1L).get("cia_id")).isEqualTo("4-DU8-32-H7");
     assertThat(client.get(1L).get("surname")).isEqualTo("Иванов");
     assertThat(client.get(1L).get("name")).isEqualTo("Иван");
     assertThat(client.get(1L).get("patronymic")).isEqualTo("Иваныч");
@@ -77,12 +91,12 @@ public class MigrationCiaTest extends ParentTestNg {
     assertThat(client.get(1L).get("charm")).isEqualTo("Уситчивый");
     assertThat(client.get(1L).get("birth")).isEqualTo("1980-11-12");
 
-    assertThat(address.get("fact").client).isEqualTo("4-DU8-32-H7");
+    assertThat(address.get("fact").clientId).isEqualTo("4-DU8-32-H7");
     assertThat(address.get("fact").street).isEqualTo("Панфилова");
     assertThat(address.get("fact").house).isEqualTo("23A");
     assertThat(address.get("fact").flat).isEqualTo("22");
 
-    assertThat(address.get("reg").client).isEqualTo("4-DU8-32-H7");
+    assertThat(address.get("reg").clientId).isEqualTo("4-DU8-32-H7");
     assertThat(address.get("reg").street).isEqualTo("Абая");
     assertThat(address.get("reg").house).isEqualTo("24A");
     assertThat(address.get("reg").flat).isEqualTo("2");
@@ -101,25 +115,49 @@ public class MigrationCiaTest extends ParentTestNg {
   }
 
   @Test
-  public void mainMigration() throws Exception {
+  public void uploadFileToTmpTable_invalidFile() throws Exception {
 
     MigrationCia migration = new MigrationCia();
     migration.connection = connection;
-    migration.inFile = createInFile("cia_test_1.xml");
+    migration.inFile = createInFile("cia_test_invalid.xml");
 
     migration.createTempTables();
     migration.uploadFileToTempTables();
-    migration.mainMigrationOperation();
 
+    Map<Object, Map<String, Object>> client = loadTable("no", migration.clientTable);
+    Map<String, Address> address = getAddressById(migration.addressTable, "4-DU8-32-H7");
+    Phone phones = getPhoneById(migration.phoneTable, "4-DU8-32-H7");
 
-    ClientDetails det = clientTestDao.get().getClientByCiaId("4-DU8-32-H7");
+    assertThat(client).hasSize(1);
 
-    assertThat(det.name).isEqualTo("Иван");
-    assertThat(det.surname).isEqualTo("Иванов");
-    assertThat(det.patronymic).isEqualTo("Иваныч");
-    assertThat(det.gender).isEqualTo("male");
-    assertThat(det.dateOfBirth).isEqualTo("1980-11-12");
+    assertThat(client.get(1L).get("cia_id")).isEqualTo("4-DU8-32-H7");
+    assertThat(client.get(1L).get("surname")).isNull();
+    assertThat(client.get(1L).get("name")).isNull();
+    assertThat(client.get(1L).get("patronymic")).isNull();
+    assertThat(client.get(1L).get("gender")).isEqualTo("MALE");
+    assertThat(client.get(1L).get("charm")).isEqualTo("Уситчивый");
+    assertThat(client.get(1L).get("birth")).isEqualTo("1980-11-12");
 
+    assertThat(address.get("fact").clientId).isEqualTo("4-DU8-32-H7");
+    assertThat(address.get("fact").street).isNull();
+    assertThat(address.get("fact").house).isNull();
+    assertThat(address.get("fact").flat).isNull();
+
+    assertThat(address.get("reg").clientId).isEqualTo("4-DU8-32-H7");
+    assertThat(address.get("reg").street).isEqualTo("Абая");
+    assertThat(address.get("reg").house).isEqualTo("24A");
+    assertThat(address.get("reg").flat).isEqualTo("2");
+
+    assertThat(phones.home).hasSize(1);
+    assertThat(phones.mobile).hasSize(3);
+    assertThat(phones.work).hasSize(0);
+
+    assertThat(phones.home.get(0)).isEqualTo("+7-123-111-22-33");
+    assertThat(phones.mobile.get(0)).isEqualTo("+7-123-111-33-33");
+    assertThat(phones.mobile.get(1)).isEqualTo("+7-123-111-44-33");
+    assertThat(phones.mobile.get(2)).isEqualTo("+7-123-111-55-33");
+
+    assertThat(migration.errorLog.toString()).contains("address");
 
   }
 
@@ -132,7 +170,6 @@ public class MigrationCiaTest extends ParentTestNg {
         ServerUtil.copyStreamsAndCloseIn(in, out);
       }
     }
-
     return ret;
   }
 
@@ -186,7 +223,7 @@ public class MigrationCiaTest extends ParentTestNg {
 
             Address tmp = new Address();
 
-            tmp.client = rs.getString("client");
+            tmp.clientId = rs.getString("client");
             tmp.street = rs.getString("street");
             tmp.house = rs.getString("house");
             tmp.flat = rs.getString("flat");
@@ -198,7 +235,7 @@ public class MigrationCiaTest extends ParentTestNg {
 
             Address tmp = new Address();
 
-            tmp.client = rs.getString("client");
+            tmp.clientId = rs.getString("client");
             tmp.street = rs.getString("street");
             tmp.house = rs.getString("house");
             tmp.flat = rs.getString("flat");
@@ -231,7 +268,6 @@ public class MigrationCiaTest extends ParentTestNg {
           }
 
           if ("home".equals(rs.getString("type"))) {
-            System.out.println("setted home");
             p.home.add(rs.getString("number"));
           }
 
@@ -246,6 +282,5 @@ public class MigrationCiaTest extends ParentTestNg {
     }
   }
 
-  //TODO проверить если файл не валидный
 
 }

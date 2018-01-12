@@ -14,7 +14,9 @@ public class GetClientListSize extends AbstractGetClientLogic implements Connect
   }
 
   @Override
-  protected void appendJoin() {}
+  protected void appendJoin() {
+    sql.append(" join client_account ac on c.id = ac.client");
+  }
 
   @Override
   protected void appendGroupBy() {}
@@ -27,7 +29,7 @@ public class GetClientListSize extends AbstractGetClientLogic implements Connect
 
   @Override
   protected void appendSelect() {
-    sql.append("select count(1)");
+    sql.append("select count(distinct(c.id))");
   }
 
   @Override
