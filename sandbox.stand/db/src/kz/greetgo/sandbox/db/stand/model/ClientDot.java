@@ -2,6 +2,9 @@ package kz.greetgo.sandbox.db.stand.model;
 
 import kz.greetgo.sandbox.controller.model.*;
 
+import java.util.List;
+import java.util.Map;
+
 public class ClientDot {
   public long id;
   public String surname;
@@ -53,12 +56,13 @@ public class ClientDot {
   public ClientRecord toClientRecord() {
     ClientRecord ret = new ClientRecord();
 
+    ret.id = id;
     ret.fullName = surname + " " +lastname + " " + patronymic;
-    ret.charm = String.valueOf(charm.ordinal());
     ret.age = age;
     ret.totalAccountBalance = totalAccountBalance;
     ret.maxAccountBalance = maxAccountBalance;
     ret.minAccountBalance = minAccountBalance;
+    //ret.gender = gender.ordinal();
 
     return ret;
   }

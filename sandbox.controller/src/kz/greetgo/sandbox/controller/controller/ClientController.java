@@ -8,6 +8,7 @@ import kz.greetgo.sandbox.controller.register.ClientRegister;
 import kz.greetgo.sandbox.controller.util.Controller;
 
 import java.util.List;
+import java.util.Map;
 
 @Bean
 @Mapping("/client")
@@ -16,14 +17,26 @@ public class ClientController implements Controller {
   public BeanGetter<ClientRegister> clientRegister;
 
   @ToJson
-  @Mapping("/list")
-  public List<ClientRecord> list(@Par("clientRecordCountToSkip") int clientRecordCountToSkip, @Par("clientRecordCount") int clientRecordCount) {
-    return clientRegister.get().getClientRecordList(clientRecordCountToSkip, clientRecordCount);
+  @Mapping("/init/charm")
+  public Map<Integer, List<String>> initCharmData() {
+    return clientRegister.get().getCharmData();
   }
 
   @ToJson
   @Mapping("/pageCount")
-  public int pageNum(@Par("clientRecordCount") int clientRecordCount) {
+  public long pageCount(@Par("clientRecordCount") long clientRecordCount) {
     return clientRegister.get().getPageCount(clientRecordCount);
+  }
+
+  @ToJson
+  @Mapping("/list")
+  public List<ClientRecord> clientRecordList(@Par("clientRecordCountToSkip") long clientRecordCountToSkip, @Par("clientRecordCount") long clientRecordCount) {
+    return clientRegister.get().getClientRecordList(clientRecordCountToSkip, clientRecordCount);
+  }
+
+  @ToJson
+  @Mapping("/remove")
+  public boolean removeClientRecord(@Par("clientRecordId") long clientRecordId) {
+    return clientRegister.get().removeClientRecord(clientRecordId);
   }
 }

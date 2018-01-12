@@ -3,12 +3,14 @@ package kz.greetgo.sandbox.stand.stand_register_impls;
 import kz.greetgo.depinject.core.Bean;
 import kz.greetgo.depinject.core.BeanGetter;
 import kz.greetgo.sandbox.controller.errors.NotFound;
+import kz.greetgo.sandbox.controller.model.CharmType;
 import kz.greetgo.sandbox.controller.model.ClientRecord;
 import kz.greetgo.sandbox.controller.register.ClientRegister;
 import kz.greetgo.sandbox.db.stand.beans.StandDb;
 import kz.greetgo.sandbox.db.stand.model.ClientDot;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -18,30 +20,57 @@ public class ClientRegisterStand implements ClientRegister {
   public BeanGetter<StandDb> db;
 
   @Override
-  public List<ClientRecord> getClientRecordList(int page, int size) {
-    List<ClientRecord> clientRecords = new ArrayList<>();
+  public Map<Integer, List<String>> getCharmData() {
+    return db.get().charmStorage;
+  }
 
-    /*Map<Long, ClientDot> clientDots = db.get().clientStorage;
+  @Override
+  public long getPageCount(long clientRecordCount) {
+    long ret = db.get().clientStorage.size() / clientRecordCount;
+    if (db.get().clientStorage.size() % clientRecordCount > 0)
+      ret++;
 
-    for(long i = 0; i < clientDots.size(); i++) {
-      System.out.println(clientDots.get(i));
-    }*/
+    return ret;
+  }
 
+  @Override
+  public List<ClientRecord> getClientRecordList(long clientRecordCountToSkip, long clientRecordCount) {
     Map<Long, ClientDot> clientDots = db.get().clientStorage;
+    Map<Integer, List<String>> charms = db.get().charmStorage;
+    List<ClientRecord> clientRecords = new ArrayList<>();
+    long skippedCount = 0L;
+    long pushedCount = 0L;
 
-    for(long i = 0; i < clientDots.size(); i++) {
-      clientRecords.add(clientDots.get(i).toClientRecord());
+    System.out.println(clientDots.size());
+
+    //TODO: Метод PageUtils.cutPage требует полный список и будет заменен, т. к. оптимальнее будет брать кусок непосредственно с базы
+    for (Map.Entry<Long, ClientDot> entry : clientDots.entrySet()) {
+      if (skippedCount < clientRecordCountToSkip) {
+        skippedCount++;
+        continue;
+      }
+
+      if (pushedCount < clientRecordCount && pushedCount + skippedCount < clientDots.size()) {
+        ClientDot clientDot = entry.getValue();
+        ClientRecord clientRecord = clientDot.toClientRecord();
+        clientRecord.charm = charms.get(clientDot.charm.ordinal()).get(clientDot.gender.ordinal());
+        clientRecords.add(clientRecord);
+
+        pushedCount++;
+      } else
+        break;
     }
 
     return clientRecords;
   }
 
   @Override
-  public int getPageCount(int size) {
-    int ret = db.get().personStorage.size() / size;
+  public boolean removeClientRecord(long clientRecordId) {
+    Map<Long, ClientDot> clientDots = db.get().clientStorage;
 
-    if (ret == 0) ret = 1;
+    if (clientDots.remove(clientRecordId) != null)
+      return true;
 
-    return ret;
+    return false;
   }
 }

@@ -9,13 +9,11 @@ import kz.greetgo.sandbox.db.stand.model.PersonDot;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Random;
+import java.util.*;
 
 @Bean
 public class StandDb implements HasAfterInject {
+  public final Map<Integer, List<String>> charmStorage = new HashMap<>();
   public final Map<String, PersonDot> personStorage = new HashMap<>();
   public final Map<Long, ClientDot> clientStorage = new HashMap<>();
 
@@ -23,8 +21,20 @@ public class StandDb implements HasAfterInject {
 
   @Override
   public void afterInject() throws Exception {
+    this.prepareInitData();
     this.parsePersons();
     this.parseClients();
+  }
+
+  private void prepareInitData() {
+    charmStorage.put(CharmType.CALM.ordinal(), Arrays.asList("Неизвестно", "Спокойный", "Спокойная"));
+    charmStorage.put(CharmType.CONSERVATIVE.ordinal(), Arrays.asList("Неизвестно", "Консервативный", "Консервативная"));
+    charmStorage.put(CharmType.CONSCIOUS.ordinal(), Arrays.asList("Неизвестно", "Понимающий", "Понимающая"));
+    charmStorage.put(CharmType.OPEN.ordinal(), Arrays.asList("Неизвестно", "Открытый", "Открытая"));
+    charmStorage.put(CharmType.MYSTERIOUS.ordinal(), Arrays.asList("Неизвестно", "Загадочный", "Загадочная"));
+    charmStorage.put(CharmType.WILD.ordinal(), Arrays.asList("Неизвестно", "Буйный", "Буйная"));
+
+
   }
 
   private void parsePersons() throws Exception {
@@ -106,7 +116,7 @@ public class StandDb implements HasAfterInject {
     c.surname = splitLine[1].trim();
     c.lastname = splitLine[2].trim();
     c.patronymic = splitLine[3].trim();
-    c.gender = this.generateGenderType();
+    c.gender = toGenderType(Integer.parseInt(splitLine[4].trim()));
     c.birthDate = this.generateDate();
     c.charm = this.generateCharmType();
     c.residentialAddressInfo = this.generateResidentialAddress();

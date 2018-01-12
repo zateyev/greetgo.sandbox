@@ -3,6 +3,9 @@ export class ClientRecord {
   public fullName: string;
   public charm: string;
   public age: number/*int*/;
+  //TODO: добавил пол, чтобы можно было определять соответствующий характер
+  // Потом удалил, так как выходили ошибки ERROR TypeError: Cannot read property '4' of undefined
+  //public gender: number/*int*/;
   //TODO: уверены ли мы, что данные придут не null?
   public totalAccountBalance: number/*long*/;
   public maxAccountBalance: number/*long*/;
