@@ -1,8 +1,13 @@
 package kz.greetgo.sandbox.db.test.dao;
 
+import kz.greetgo.sandbox.db.register_impl.migration.models.Account;
+import kz.greetgo.sandbox.db.register_impl.migration.models.Transaction;
 import org.apache.ibatis.annotations.Delete;
 import org.apache.ibatis.annotations.Insert;
 import org.apache.ibatis.annotations.Param;
+import org.apache.ibatis.annotations.Select;
+
+import java.util.List;
 
 public interface MigrationTestDao {
 
@@ -48,4 +53,14 @@ public interface MigrationTestDao {
     @Param("clientTable") String clientTable,
     @Param("phoneTable") String phoneTable,
     @Param("addressTable") String addressTable);
+
+  @Select("select cia_id as ciaId, account_number as number, registered_at as registeredAt " +
+    " from ${tableName} where cia_id = #{ciaId}")
+  List<Account> getAccounts(@Param("tableName") String tableName,
+                            @Param("ciaId") String ciaId);
+
+  @Select("select money, finished_at as finishedAt, transaction_type as type, account_number as accountNumber " +
+    " from ${tableName} where account_number = #{accNum}")
+  List<Transaction> getTransactions(@Param("tableName") String tableName,
+                                    @Param("accNum") String accNum);
 }

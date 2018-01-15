@@ -118,8 +118,8 @@ public interface ClientTestDao {
     " from Client c where cia_id = #{ciaId}")
   ClientDetails getClientByCiaId(@Param("ciaId") String ciaId);
 
-  @Select("select ch.name from client c join charm ch on c.charm_id = ch.id where cia_id = #{cia_id} and c.actual = 1")
-  String getClientCharmByCiaId(@Param("cia_id") String cia_id);
+  @Select("select ch.name from client c join charm ch on c.charm_id = ch.id where cia_id = #{ciaId} and c.actual = 1")
+  String getClientCharmByCiaId(@Param("ciaId") String cia_id);
 
   @Select("select count(1) from client where actual = 1")
   int getClientListSize();

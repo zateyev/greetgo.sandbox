@@ -1,8 +1,11 @@
 package kz.greetgo.sandbox.db.register_impl.migration;
 
+import com.fasterxml.jackson.core.JsonParseException;
 import org.apache.log4j.Logger;
 
 import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -10,7 +13,7 @@ import java.text.SimpleDateFormat;
 
 public class MigrationFrs {
 
-  public File inFile, errorFile;
+  public File inFile, errorsFile;
   public Connection connection;
   public int maxBatchSize = 5000;
 
@@ -26,6 +29,7 @@ public class MigrationFrs {
   }
 
   String accountTable, transactionTable;
+  String errorLog = new String();
 
   public void migrate() throws Exception {
     createTempTables();
@@ -44,7 +48,7 @@ public class MigrationFrs {
       "create table " + accountTable + "(" +
         " cia_id varchar(50)," +
         " account_number varchar(50)," +
-        " registered_at timestamp," +
+        " registered_at varchar(100)," +
         " status varchar(100) default 'JUST_INSERTED'," +
         " error varchar(100) default null" +
         ")"
@@ -53,7 +57,7 @@ public class MigrationFrs {
     exec(
       "create table " + transactionTable + "(" +
         " money varchar(100)," +
-        " finished_at timestamp," +
+        " finished_at varchar(100)," +
         " transaction_type varchar(300)," +
         " account_number varchar(50)," +
         " status varchar(100) default 'JUST_INSERTED'," +
@@ -63,13 +67,39 @@ public class MigrationFrs {
 
   }
 
-  void uploadFileToTempTables() {
+  void uploadFileToTempTables() throws Exception {
+
+    try (FrsHandler frsHandler = new FrsHandler(
+      connection,
+      inFile,
+      maxBatchSize,
+      accountTable,
+      transactionTable
+    )) {
+      try {
+        frsHandler.parse();
+      } catch (JsonParseException e) {
+        errorLog = e.toString();
+      }
+    }
 
   }
 
   void mainMigrationOperation() {}
 
-  void downloadErrors() {}
+  void downloadErrors() throws IOException {
+
+    String date = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new java.util.Date());
+
+    errorsFile = new File("build/errorsFile_" + date + ".log");
+    errorsFile.getParentFile().mkdirs();
+
+    FileWriter out = new FileWriter(errorsFile);
+    out.write("FileName: " + inFile + "\n");
+    out.write(errorLog.toString());
+    out.close();
+
+  }
 
 
 }

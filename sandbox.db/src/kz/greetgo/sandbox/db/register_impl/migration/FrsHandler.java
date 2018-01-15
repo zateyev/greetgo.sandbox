@@ -30,12 +30,13 @@ public class FrsHandler implements AutoCloseable {
     connection.setAutoCommit(false);
 
     accountPS = connection.prepareStatement(
-      "insert into " + accountTable + "(cia_id, account_number, registered_at)" +
+      "insert into " + accountTable + " (cia_id, account_number, registered_at) " +
         " VALUES (?, ?, ?)"
     );
 
+
     transactionPS = connection.prepareStatement(
-      "insert into " + transactionTable + "(money, finished_at, transaction_type, account_number)" +
+      "insert into " + transactionTable + " (money, finished_at, transaction_type, account_number) " +
         " values (?, ?, ?, ?)"
     );
 
@@ -47,7 +48,7 @@ public class FrsHandler implements AutoCloseable {
   Account account = new Account();
   Transaction transaction = new Transaction();
 
-  public void parse() throws IOException, SQLException {
+  public void parse() throws Exception {
 
     JsonFactory jFactory = new JsonFactory();
 
@@ -59,6 +60,7 @@ public class FrsHandler implements AutoCloseable {
         String value = jPars.getText();
 
         if ("type".equals(fieldName)) {
+
           if ("transaction".equals(value)) {
 
             jPars.nextToken();
@@ -67,17 +69,16 @@ public class FrsHandler implements AutoCloseable {
 
             jPars.nextToken();
             jPars.nextToken();
-            if ("finished_at".equals(jPars.getText())) transaction.finishedAt = jPars.getText();
+            if ("finished_at".equals(jPars.getCurrentName())) transaction.finishedAt = jPars.getText();
+
+            jPars.nextToken();
+            jPars.nextToken();
+            if ("transaction_type".equals(jPars.getCurrentName())) transaction.type = jPars.getText();
 
 
             jPars.nextToken();
             jPars.nextToken();
-            if ("transaction_type".equals(jPars.getText())) transaction.type = jPars.getText();
-
-
-            jPars.nextToken();
-            jPars.nextToken();
-            if ("account_number".equals(jPars.getText())) transaction.accountNumber = jPars.getText();
+            if ("account_number".equals(jPars.getCurrentName())) transaction.accountNumber = jPars.getText();
 
             addTransactionBatch();
             transaction = new Transaction();
@@ -88,7 +89,7 @@ public class FrsHandler implements AutoCloseable {
 
             jPars.nextToken();
             jPars.nextToken();
-            if ("client_id".equals(jPars.getCurrentName())) account.cia_id = jPars.getText();
+            if ("client_id".equals(jPars.getCurrentName())) account.ciaId = jPars.getText();
 
             jPars.nextToken();
             jPars.nextToken();
@@ -111,10 +112,11 @@ public class FrsHandler implements AutoCloseable {
 
   }
 
+
   private void addAccountBatch() throws SQLException {
-    accountPS.setString(1, account.cia_id);
-    accountPS.setString(1, account.number);
-    accountPS.setString(1, account.registeredAt);
+    accountPS.setString(1, account.ciaId);
+    accountPS.setString(2, account.number);
+    accountPS.setString(3, account.registeredAt);
     accountPS.addBatch();
     executeBatch();
   }
@@ -143,9 +145,11 @@ public class FrsHandler implements AutoCloseable {
   }
 
   @Override
-  public void close() throws Exception {
+  public void close() throws SQLException {
     if (batchSize > 0) {
-      executeBatch();
+      transactionPS.executeBatch();
+      accountPS.executeBatch();
+      connection.commit();
     }
     transactionPS.close();
     accountPS.close();

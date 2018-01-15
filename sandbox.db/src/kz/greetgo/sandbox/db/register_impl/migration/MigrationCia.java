@@ -124,6 +124,7 @@ public class MigrationCia {
 
     FileWriter out = new FileWriter(errorsFile);
     out.write(errorLog.toString());
+    out.close();
 
   }
 
@@ -170,7 +171,7 @@ public class MigrationCia {
 
     exec(
       "insert into charm (name, id, actual) \n" +
-        " select  distinct(charm), nextval('serial')::text as id, 1 as actual \n" +
+        " select  charm, nextval('serial')::text as id, 1 as actual \n" +
         " from TMP_CLIENT as tmp where tmp.charm not in(select name from charm where actual = 1) " +
         "and error is null group by charm"
     );
@@ -190,7 +191,7 @@ public class MigrationCia {
 
     exec(
       " insert into client(id, \"name\", surname, patronymic, cia_id, birth_date, current_gender, charm_id, actual)\n" +
-        " select nextval('serial')::text as id, tmp.name, surname, patronymic, cia_id as cia_id, \n" +
+        " select nextval('serial')::text as id, tmp.name, surname, patronymic, cia_id as ciaId, \n" +
         " to_date(birth, 'yyyy-MM-dd') as birth_date, lower(gender) as current_gender, ch.id as charm_id, 1  as actual \n" +
         " from TMP_CLIENT as tmp join charm ch on tmp.charm = ch.name \n" +
         " where status = 'READY_TO_MERGE'\n" +
