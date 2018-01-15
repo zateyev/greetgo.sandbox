@@ -99,7 +99,6 @@ export class ClientListComponent {
         console.log(this.clientRecords.length);
         console.log(this.pageCount);
         console.log(this.curPageNum);
-
         //TODO размер списка должен приходить измененным, но это не так
         if (this.clientRecords.length == 1) {
           this.curPageNum--;
