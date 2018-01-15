@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class PageUtils {
-  public static <T> boolean cutPage(List<T> list, int offset, int pageSize) {
+  public static <T> boolean cutPage(List<T> list, long offset, long pageSize) {
 
     int sizeAtTheBeginning = list.size();
 

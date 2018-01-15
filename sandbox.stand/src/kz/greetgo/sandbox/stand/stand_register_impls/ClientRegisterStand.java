@@ -2,27 +2,20 @@ package kz.greetgo.sandbox.stand.stand_register_impls;
 
 import kz.greetgo.depinject.core.Bean;
 import kz.greetgo.depinject.core.BeanGetter;
-import kz.greetgo.sandbox.controller.errors.NotFound;
-import kz.greetgo.sandbox.controller.model.CharmType;
 import kz.greetgo.sandbox.controller.model.ClientRecord;
+import kz.greetgo.sandbox.controller.model.ClientRecordListRequest;
 import kz.greetgo.sandbox.controller.register.ClientRegister;
 import kz.greetgo.sandbox.db.stand.beans.StandDb;
+import kz.greetgo.sandbox.db.stand.model.CharmDot;
 import kz.greetgo.sandbox.db.stand.model.ClientDot;
+import kz.greetgo.sandbox.stand.util.PageUtils;
 
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Bean
 public class ClientRegisterStand implements ClientRegister {
 
   public BeanGetter<StandDb> db;
-
-  @Override
-  public Map<Integer, List<String>> getCharmData() {
-    return db.get().charmStorage;
-  }
 
   @Override
   public long getPageCount(long clientRecordCount) {
@@ -34,34 +27,129 @@ public class ClientRegisterStand implements ClientRegister {
   }
 
   @Override
-  public List<ClientRecord> getClientRecordList(long clientRecordCountToSkip, long clientRecordCount) {
-    Map<Long, ClientDot> clientDots = db.get().clientStorage;
-    Map<Integer, List<String>> charms = db.get().charmStorage;
+  public List<ClientRecord> getClientRecordList(ClientRecordListRequest clientRecordListRequest) {
+    List<ClientDot> clientDots;
     List<ClientRecord> clientRecords = new ArrayList<>();
-    long skippedCount = 0L;
-    long pushedCount = 0L;
 
-    System.out.println(clientDots.size());
+    System.out.println(clientRecordListRequest.columnSortType);
+    System.out.println(clientRecordListRequest.sortAscend);
 
-    //TODO: Метод PageUtils.cutPage требует полный список и будет заменен, т. к. оптимальнее будет брать кусок непосредственно с базы
-    for (Map.Entry<Long, ClientDot> entry : clientDots.entrySet()) {
-      if (skippedCount < clientRecordCountToSkip) {
-        skippedCount++;
-        continue;
-      }
-
-      if (pushedCount < clientRecordCount && pushedCount + skippedCount < clientDots.size()) {
-        ClientDot clientDot = entry.getValue();
-        ClientRecord clientRecord = clientDot.toClientRecord();
-        clientRecord.charm = charms.get(clientDot.charm.ordinal()).get(clientDot.gender.ordinal());
-        clientRecords.add(clientRecord);
-
-        pushedCount++;
-      } else
+    switch (clientRecordListRequest.columnSortType) {
+      case AGE:
+        clientDots = this.getListByAge(clientRecordListRequest.sortAscend);
         break;
+      case TOTALACCOUNTBALANCE:
+        clientDots = this.getListByTotalAccountBalance(clientRecordListRequest.sortAscend);
+        break;
+      case MAXACCOUNTBALANCE:
+        clientDots = this.getListByMaxAccountBalance(clientRecordListRequest.sortAscend);
+        break;
+      case MINACCOUNTBALANCE:
+        clientDots = this.getListByMinAccountBalance(clientRecordListRequest.sortAscend);
+        break;
+      default:
+        clientDots = this.getDefaultList();
     }
 
+    PageUtils.cutPage(clientDots,
+      clientRecordListRequest.clientRecordCountToSkip,
+      clientRecordListRequest.clientRecordCount);
+
+    for (ClientDot clientDot:clientDots)
+      clientRecords.add(clientDot.toClientRecord());
+
     return clientRecords;
+  }
+
+  private List<ClientDot> getDefaultList() {
+    List<ClientDot> clientDots = new ArrayList<>(db.get().clientStorage.values());
+
+    return clientDots;
+  }
+
+  private List<ClientDot> getListByAge(boolean ascend) {
+    List<ClientDot> clientDots = new ArrayList<>(db.get().clientStorage.values());
+
+    //TODO: lambda + Integer.comparator?
+    if (ascend) {
+      clientDots.sort(new Comparator<ClientDot>() {
+        public int compare(ClientDot o1, ClientDot o2) {
+          return o1.age - o2.age;
+        }
+      });
+    } else {
+      clientDots.sort(new Comparator<ClientDot>() {
+        public int compare(ClientDot o1, ClientDot o2) {
+          return o2.age - o1.age;
+        }
+      });
+    }
+
+    return clientDots;
+  }
+
+  private List<ClientDot> getListByTotalAccountBalance(boolean ascend) {
+    List<ClientDot> clientDots = new ArrayList<>(db.get().clientStorage.values());
+
+    //TODO: lambda + Integer.comparator?
+    if (ascend) {
+      clientDots.sort(new Comparator<ClientDot>() {
+        public int compare(ClientDot o1, ClientDot o2) {
+          return Long.valueOf(o1.totalAccountBalance).compareTo(o2.totalAccountBalance);
+        }
+      });
+    } else {
+      clientDots.sort(new Comparator<ClientDot>() {
+        public int compare(ClientDot o1, ClientDot o2) {
+          return Long.valueOf(o2.totalAccountBalance).compareTo(o1.totalAccountBalance);
+        }
+      });
+    }
+
+    return clientDots;
+  }
+
+  private List<ClientDot> getListByMaxAccountBalance(boolean ascend) {
+    List<ClientDot> clientDots = new ArrayList<>(db.get().clientStorage.values());
+
+    //TODO: lambda + Integer.comparator?
+    if (ascend) {
+      clientDots.sort(new Comparator<ClientDot>() {
+        public int compare(ClientDot o1, ClientDot o2) {
+          return Long.valueOf(o1.maxAccountBalance).compareTo(o2.maxAccountBalance);
+        }
+      });
+    } else {
+      clientDots.sort(new Comparator<ClientDot>() {
+        public int compare(ClientDot o1, ClientDot o2) {
+          return Long.valueOf(o2.maxAccountBalance).compareTo(o1.maxAccountBalance);
+        }
+      });
+    }
+
+    return clientDots;
+  }
+
+
+  private List<ClientDot> getListByMinAccountBalance(boolean ascend) {
+    List<ClientDot> clientDots = new ArrayList<>(db.get().clientStorage.values());
+
+    //TODO: lambda + Integer.comparator?
+    if (ascend) {
+      clientDots.sort(new Comparator<ClientDot>() {
+        public int compare(ClientDot o1, ClientDot o2) {
+          return Long.valueOf(o1.minAccountBalance).compareTo(o2.minAccountBalance);
+        }
+      });
+    } else {
+      clientDots.sort(new Comparator<ClientDot>() {
+        public int compare(ClientDot o1, ClientDot o2) {
+          return Long.valueOf(o2.minAccountBalance).compareTo(o1.minAccountBalance);
+        }
+      });
+    }
+
+    return clientDots;
   }
 
   @Override

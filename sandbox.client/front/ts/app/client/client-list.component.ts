@@ -1,6 +1,8 @@
 import {Component} from "@angular/core";
 import {HttpService} from "../HttpService";
 import {ClientRecord} from "../../model/ClientRecord";
+import {ClientRecordListRequest} from "../../model/ClientRecordListRequest";
+import {ColumnSortType} from "../../model/ColumnSortType";
 
 @Component({
   selector: 'client-list-component',
@@ -13,25 +15,24 @@ export class ClientListComponent {
   curPageNum: number = 0;
   pageCount: number;
   pageNums: number[];
-
-  //charmDictionary: any[];
-
-  clientRecords: ClientRecord[] = [];
-  selectedClientRecordId: number | null = null;
+  records: ClientRecord[] | null = [];
+  selectedRecordId: number | null = null;
+  listRequest: ClientRecordListRequest = new ClientRecordListRequest();
+  activeSortButtonId: string | null;
 
   constructor(private httpService: HttpService) {
-    //this.getInitData();
+    this.listRequest.columnSortType = ColumnSortType.NONE;
+    this.listRequest.sortAscend = false;
+
+    this.refreshClientRecordList();
+  }
+
+  private refreshClientRecordList() {
+    this.selectedRecordId = null;
+    // TODO: что если другой клиент удалил самую последную страницу, а мы нажмем на нее?
     this.updatePageNumeration();
     this.getClientRecordList();
   }
-
-  /*private getInitData() {
-   this.httpService.get("/client/init/charm", {}).toPromise().then(result => {
-   this.charmDictionary = result.json() as any[];
-   }, error => {
-   console.log(error);
-   });
-   }*/
 
   private updatePageNumeration() {
     this.httpService.get("/client/pageCount", {
@@ -48,67 +49,81 @@ export class ClientListComponent {
   }
 
   private getClientRecordList() {
+    this.listRequest.clientRecordCountToSkip = this.curPageNum * this.httpService.pageSize;
+    this.listRequest.clientRecordCount = this.httpService.pageSize;
+
     this.httpService.get("/client/list", {
-      'clientRecordCountToSkip': this.curPageNum * this.httpService.pageSize,
-      'clientRecordCount': this.httpService.pageSize
+      'clientRecordListRequest': JSON.stringify(this.listRequest)
     }).toPromise().then(result => {
-      this.clientRecords = (result.json() as ClientRecord[]).map(ClientRecord.copy);
+      this.records = (result.json() as ClientRecord[]).map(ClientRecord.copy);
     }, error => {
       console.log(error);
     });
   }
 
-  clientRecordClicked(clientId: number) {
-    this.selectedClientRecordId = clientId;
-  }
-
-  //Оно используется
-  onClick(event) {
+  private onClick(event) {
     if (!(<HTMLElement>event.target).classList.contains('client-record'))
-      this.selectedClientRecordId = null;
+      this.selectedRecordId = null;
   }
 
-  pageNumClicked(pageNum: number) {
+  onClientRecordButtonClick(recordId: number) {
+    this.selectedRecordId = recordId;
+  }
+
+  onSortingButtonClick(sortButtonId: string, columnSortTypeName: string, sortAscend: boolean) {
+    /*if(columnSortTypeName == this.listRequest.columnSortType) {
+     if (columnSortTypeName == "NONE")
+     return;
+
+     if (sortAscend == this.listRequest.sortAscend)
+     return;
+     }*/
+
+    this.activeSortButtonId = sortButtonId;
+    this.listRequest.columnSortType = columnSortTypeName as ColumnSortType;
+    this.listRequest.sortAscend = sortAscend;
+    this.curPageNum = 0;
+
+    this.refreshClientRecordList();
+  }
+
+  onPageNumberButtonClick(pageNum: number) {
     // TODO: может ли клиент кликать по текущей странице?
     //if (this.curPageNum == pageNum)
     //  return;
 
     this.curPageNum = pageNum;
-    this.selectedClientRecordId = null;
-    // TODO: что если другой клиент удалил самую последную страницу, а мы нажмем на нее?
-    this.updatePageNumeration();
-    this.getClientRecordList();
+    this.refreshClientRecordList();
   }
 
-  editClientRecord(clientRecordId: number | null) {
+  onClientRecordEditButtonClick(isEditOperation: boolean) {
 
   }
 
-  removeClientRecord(clientRecordId: number) {
-    let ret: boolean = false;
-
+  onClientRecordRemoveButtonClick() {
     this.httpService.get("/client/remove", {
-      'clientRecordId': clientRecordId
+      'clientRecordId': this.selectedRecordId
     }).toPromise().then(result => {
-      ret = result.json() as boolean;
+      let ret = result.json() as boolean;
       console.log("received " + ret);
 
       if (ret) {
-        this.pageNumClicked(this.curPageNum);
+        this.refreshClientRecordList();
 
-        console.log(this.clientRecords.length);
-        console.log(this.pageCount);
-        console.log(this.curPageNum);
+        console.log("this.records.length " + this.records.length);
+        console.log("this.pageCount " + this.pageCount);
+        console.log("this.curPageNum " + this.curPageNum);
         //TODO размер списка должен приходить измененным, но это не так
-        if (this.clientRecords.length == 1) {
+        if (this.records.length == 1) {
           this.curPageNum--;
-
           if (this.curPageNum < 0)
             this.curPageNum = 0;
-          else {
-            this.getClientRecordList();
-          }
+          else
+            this.refreshClientRecordList();
         }
+      } else {
+        alert("Операция удаления не удалась");
+        this.refreshClientRecordList();
       }
     }, error => {
       console.log(error);
