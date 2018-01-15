@@ -113,8 +113,9 @@ public class MigrationCia {
       try (FileInputStream in = new FileInputStream(inFile)) {
         reader.parse(new InputSource(in));
       } catch (SAXParseException e) {
-        errorLog.append("SAX Parse Error: " + e.getMessage() + "\n");
-        errorLog.append("At line [" + e.getLineNumber() + "] " + "Column number: [" + e.getColumnNumber() + "]\n");
+        errorLog.append("SAX Parse Error: ").append(e.getMessage()).append("\n");
+        errorLog.append("At line [").append(e.getLineNumber()).append("] ")
+          .append("Column number: [").append(e.getColumnNumber()).append("]\n");
       }
     }
   }
@@ -126,9 +127,10 @@ public class MigrationCia {
     errorsFile = new File("build/errorsFile_" + date + ".log");
     errorsFile.getParentFile().mkdirs();
 
-    FileWriter out = new FileWriter(errorsFile);
-    out.write(errorLog.toString());
-    out.close();
+    try (FileWriter out = new FileWriter(errorsFile)) {
+      out.write(errorLog.toString());
+
+    }
 
   }
 
