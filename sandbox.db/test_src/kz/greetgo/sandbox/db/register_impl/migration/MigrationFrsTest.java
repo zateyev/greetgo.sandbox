@@ -74,24 +74,24 @@ public class MigrationFrsTest extends ParentTestNg{
     assertThat(accounts).hasSize(1);
     assertThat(transactions).hasSize(2);
 
-    assertThat(accounts.get(0).ciaId).isEqualTo(ciaId);
-    assertThat(accounts.get(0).number).isEqualTo(accNum);
-    assertThat(accounts.get(0).registeredAt).isEqualTo("2011-01-23T23:22:11.456");
+    assertThat(accounts.get(0).client_id).isEqualTo(ciaId);
+    assertThat(accounts.get(0).account_number).isEqualTo(accNum);
+    assertThat(accounts.get(0).registered_at).isEqualTo("2011-01-23T23:22:11.456");
 
-    assertThat(transactions.get(0).accountNumber).isEqualTo(accNum);
-    assertThat(transactions.get(0).finishedAt).isEqualTo("2010-01-23T11:56:11.987");
+    assertThat(transactions.get(0).account_number).isEqualTo(accNum);
+    assertThat(transactions.get(0).finished_at).isEqualTo("2010-01-23T11:56:11.987");
     assertThat(transactions.get(0).money).isEqualTo("+123_000_000_098.13");
-    assertThat(transactions.get(0).type).isEqualTo("Перечисление с госбюджета");
+    assertThat(transactions.get(0).transaction_type).isEqualTo("Перечисление с госбюджета");
 
-    assertThat(transactions.get(1).accountNumber).isEqualTo(accNum);
-    assertThat(transactions.get(1).finishedAt).isEqualTo("2010-01-23T11:56:11.987");
+    assertThat(transactions.get(1).account_number).isEqualTo(accNum);
+    assertThat(transactions.get(1).finished_at).isEqualTo("2010-01-23T11:56:11.987");
     assertThat(transactions.get(1).money).isEqualTo("-23_000_000_034.17");
-    assertThat(transactions.get(1).type).isEqualTo("Вывод средств в офшоры");
+    assertThat(transactions.get(1).transaction_type).isEqualTo("Вывод средств в офшоры");
 
 
   }
 
-  //TODO finish testing invalid
+  //TODO finish testing invalid json
   @Test
   public void uploadFilesToTmpTables_invalidJson() throws Exception {
 
@@ -116,19 +116,19 @@ public class MigrationFrsTest extends ParentTestNg{
     assertThat(accounts).hasSize(1);
     assertThat(transactions).hasSize(2);
 
-    assertThat(accounts.get(0).ciaId).isEqualTo(ciaId);
-    assertThat(accounts.get(0).number).isEqualTo(accNum);
-    assertThat(accounts.get(0).registeredAt).isEqualTo("2011-01-23T23:22:11.456");
+    assertThat(accounts.get(0).client_id).isEqualTo(ciaId);
+    assertThat(accounts.get(0).account_number).isEqualTo(accNum);
+    assertThat(accounts.get(0).registered_at).isEqualTo("2011-01-23T23:22:11.456");
 
-    assertThat(transactions.get(0).accountNumber).isEqualTo(accNum);
-    assertThat(transactions.get(0).finishedAt).isEqualTo("2010-01-23T11:56:11.987");
+    assertThat(transactions.get(0).account_number).isEqualTo(accNum);
+    assertThat(transactions.get(0).finished_at).isEqualTo("2010-01-23T11:56:11.987");
     assertThat(transactions.get(0).money).isEqualTo("+123_000_000_098.13");
-    assertThat(transactions.get(0).type).isEqualTo("Перечисление с госбюджета");
+    assertThat(transactions.get(0).transaction_type).isEqualTo("Перечисление с госбюджета");
 
-    assertThat(transactions.get(1).accountNumber).isEqualTo(accNum);
-    assertThat(transactions.get(1).finishedAt).isEqualTo("2010-01-23T11:56:11.987");
+    assertThat(transactions.get(1).account_number).isEqualTo(accNum);
+    assertThat(transactions.get(1).finished_at).isEqualTo("2010-01-23T11:56:11.987");
     assertThat(transactions.get(1).money).isEqualTo("-23_000_000_034.17");
-    assertThat(transactions.get(1).type).isEqualTo("Вывод средств в офшоры");
+    assertThat(transactions.get(1).transaction_type).isEqualTo("Вывод средств в офшоры");
 
 
   }

@@ -1,15 +1,16 @@
 package kz.greetgo.sandbox.db.register_impl.migration;
 
-import com.fasterxml.jackson.core.JsonParseException;
 import org.apache.log4j.Logger;
 
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.text.SimpleDateFormat;
+import java.util.stream.Stream;
 
 public class MigrationFrs {
 
@@ -69,19 +70,21 @@ public class MigrationFrs {
 
   void uploadFileToTempTables() throws Exception {
 
-    try (FrsHandler frsHandler = new FrsHandler(
+    FrsParser handler = new FrsParser(
       connection,
-      inFile,
       maxBatchSize,
       accountTable,
       transactionTable
-    )) {
-      try {
-        frsHandler.parse();
-      } catch (JsonParseException e) {
-        errorLog = e.toString();
+    );
+
+    try (Stream<String> lines = Files.lines(inFile.toPath())) {
+      for (String line : (Iterable<String>) lines::iterator)
+      {
+        handler.parseAndAddBatch(line);
       }
-    }
+
+      handler.close();
+    }//TODO napisat' catch na JsonParseException v file errorsFile
 
   }
 

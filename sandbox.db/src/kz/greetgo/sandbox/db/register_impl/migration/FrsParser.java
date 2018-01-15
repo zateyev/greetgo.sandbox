@@ -2,29 +2,25 @@ package kz.greetgo.sandbox.db.register_impl.migration;
 
 import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import kz.greetgo.sandbox.db.register_impl.migration.models.Account;
 import kz.greetgo.sandbox.db.register_impl.migration.models.Transaction;
 
-import java.io.File;
-import java.io.IOException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 
-public class FrsHandler implements AutoCloseable {
+public class FrsParser implements AutoCloseable {
 
-  private File inFile;
   private Connection connection;
   private final int maxBatchSize;
   private PreparedStatement accountPS, transactionPS;
 
-  public FrsHandler(Connection connection,
-                    File inFile,
-                    int maxBatchSize,
-                    String accountTable,
-                    String transactionTable) throws SQLException {
+  public FrsParser(Connection connection,
+                   int maxBatchSize,
+                   String accountTable,
+                   String transactionTable) throws SQLException {
 
-    this.inFile = inFile;
     this.connection = connection;
     this.maxBatchSize = maxBatchSize;
     connection.setAutoCommit(false);
@@ -48,11 +44,11 @@ public class FrsHandler implements AutoCloseable {
   Account account = new Account();
   Transaction transaction = new Transaction();
 
-  public void parse() throws Exception {
+  public void parseAndAddBatch(String jsonLine) throws Exception {
 
     JsonFactory jFactory = new JsonFactory();
 
-    try (JsonParser jPars = jFactory.createParser(inFile)) {
+    try (JsonParser jPars = jFactory.createParser(jsonLine)) {
 
       while (jPars.nextToken() != null) {
 
@@ -63,23 +59,8 @@ public class FrsHandler implements AutoCloseable {
 
           if ("transaction".equals(value)) {
 
-            jPars.nextToken();
-            jPars.nextToken();
-            if ("money".equals(jPars.getCurrentName())) transaction.money = jPars.getText();
-
-            jPars.nextToken();
-            jPars.nextToken();
-            if ("finished_at".equals(jPars.getCurrentName())) transaction.finishedAt = jPars.getText();
-
-            jPars.nextToken();
-            jPars.nextToken();
-            if ("transaction_type".equals(jPars.getCurrentName())) transaction.type = jPars.getText();
-
-
-            jPars.nextToken();
-            jPars.nextToken();
-            if ("account_number".equals(jPars.getCurrentName())) transaction.accountNumber = jPars.getText();
-
+            ObjectMapper obj = new ObjectMapper();
+            transaction = obj.readValue(jsonLine, Transaction.class);
             addTransactionBatch();
             transaction = new Transaction();
 
@@ -87,18 +68,8 @@ public class FrsHandler implements AutoCloseable {
 
           if ("new_account".equals(value)) {
 
-            jPars.nextToken();
-            jPars.nextToken();
-            if ("client_id".equals(jPars.getCurrentName())) account.ciaId = jPars.getText();
-
-            jPars.nextToken();
-            jPars.nextToken();
-            if ("account_number".equals(jPars.getCurrentName())) account.number = jPars.getText();
-
-            jPars.nextToken();
-            jPars.nextToken();
-            if ("registered_at".equals(jPars.getCurrentName())) account.registeredAt = jPars.getText();
-
+            ObjectMapper obj = new ObjectMapper();
+            account = obj.readValue(jsonLine, Account.class);
             addAccountBatch();
             account = new Account();
 
@@ -114,18 +85,18 @@ public class FrsHandler implements AutoCloseable {
 
 
   private void addAccountBatch() throws SQLException {
-    accountPS.setString(1, account.ciaId);
-    accountPS.setString(2, account.number);
-    accountPS.setString(3, account.registeredAt);
+    accountPS.setString(1, account.client_id);
+    accountPS.setString(2, account.account_number);
+    accountPS.setString(3, account.registered_at);
     accountPS.addBatch();
     executeBatch();
   }
 
   private void addTransactionBatch() throws SQLException {
     transactionPS.setString(1, transaction.money);
-    transactionPS.setString(2, transaction.finishedAt);
-    transactionPS.setString(3, transaction.type);
-    transactionPS.setString(4, transaction.accountNumber);
+    transactionPS.setString(2, transaction.finished_at);
+    transactionPS.setString(3, transaction.transaction_type);
+    transactionPS.setString(4, transaction.account_number);
     transactionPS.addBatch();
     executeBatch();
   }
@@ -151,6 +122,7 @@ public class FrsHandler implements AutoCloseable {
       accountPS.executeBatch();
       connection.commit();
     }
+
     transactionPS.close();
     accountPS.close();
     connection.setAutoCommit(true);

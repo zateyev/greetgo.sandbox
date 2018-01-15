@@ -57,7 +57,8 @@ public class MainMigrationCiaTest extends ParentTestNg {
       "Vasilich",
       "male",
       "1999-12-12",
-      "newCharm"
+      "newCharm",
+      RND.str(10)
     );
 
     migrationTestDao.get().insertAddress(
@@ -131,7 +132,8 @@ public class MainMigrationCiaTest extends ParentTestNg {
       "Vasilich",
       "male",
       "1999-12-12",
-      "newCharm"
+      "newCharm",
+      RND.str(10)
     );
 
     insertTmpAdress(1, "cia_id1", "reg");
@@ -149,7 +151,8 @@ public class MainMigrationCiaTest extends ParentTestNg {
       "newVasilich",
       "female",
       "1990-12-12",
-      "Charm"
+      "Charm",
+      RND.str(10)
     );
     migrationTestDao.get().insertAddress(
       migration.addressTable,
@@ -416,7 +419,8 @@ public class MainMigrationCiaTest extends ParentTestNg {
       RND.str(10),
       "male",
       "1999-12-12",
-      RND.str(6)
+      RND.str(6),
+      RND.str(10)
     );
 
     migrationTestDao.get().insertAddress(
@@ -460,7 +464,8 @@ public class MainMigrationCiaTest extends ParentTestNg {
       RND.str(10),
       "male",
       "1999-12-12",
-      RND.str(6)
+      RND.str(6),
+      RND.str(10)
     );
 
   }
@@ -476,7 +481,8 @@ public class MainMigrationCiaTest extends ParentTestNg {
       RND.str(10),
       "male",
       "1999-12-12",
-      RND.str(6)
+      RND.str(6),
+      RND.str(10)
     );
 
   }
@@ -492,7 +498,8 @@ public class MainMigrationCiaTest extends ParentTestNg {
       RND.str(10),
       "male",
       null,
-      RND.str(6)
+      RND.str(6),
+      RND.str(10)
     );
 
   }
@@ -508,7 +515,8 @@ public class MainMigrationCiaTest extends ParentTestNg {
       RND.str(10),
       null,
       "1999-12-12",
-      RND.str(6)
+      RND.str(6),
+      RND.str(10)
     );
 
   }
@@ -524,7 +532,8 @@ public class MainMigrationCiaTest extends ParentTestNg {
       RND.str(10),
       "male",
       "1999-12-12",
-      null
+      null,
+      RND.str(10)
     );
 
   }
@@ -540,7 +549,8 @@ public class MainMigrationCiaTest extends ParentTestNg {
       RND.str(10),
       "male",
       "1999-12-12",
-      RND.str(6)
+      RND.str(6),
+      RND.str(10)
     );
 
   }
@@ -556,7 +566,8 @@ public class MainMigrationCiaTest extends ParentTestNg {
       RND.str(10),
       "male",
       "1999-12-12",
-      charmName
+      charmName,
+      RND.str(10)
     );
 
   }
