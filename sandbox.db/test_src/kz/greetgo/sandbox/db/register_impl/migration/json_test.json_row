@@ -1,0 +1,3 @@
+{"type": "transaction","money": "+123_000_000_098.13", "finished_at": "2010-01-23T11:56:11.987","transaction_type": "Перечисление с госбюджета","account_number": "32134KZ343-43546-535436-77656"}
+{"type": "transaction", "money": "-23_000_000_034.17","finished_at": "2010-01-23T11:56:11.987","transaction_type": "Вывод средств в офшоры", "account_number": "32134KZ343-43546-535436-77656"}
+{"type": "new_account","client_id": "4-DU8-32-H7","account_number": "32134KZ343-43546-535436-77656","registered_at": "2011-01-23T23:22:11.456"}

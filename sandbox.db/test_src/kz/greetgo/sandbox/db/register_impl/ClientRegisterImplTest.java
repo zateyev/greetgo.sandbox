@@ -4,6 +4,8 @@ import kz.greetgo.depinject.core.BeanGetter;
 import kz.greetgo.sandbox.controller.model.*;
 import kz.greetgo.sandbox.controller.register.ClientRegister;
 import kz.greetgo.sandbox.db.register_impl.jdbc.FillClientReportView;
+import kz.greetgo.sandbox.db.stand.model.PersonDot;
+import kz.greetgo.sandbox.db.test.dao.AuthTestDao;
 import kz.greetgo.sandbox.db.test.dao.ClientTestDao;
 import kz.greetgo.sandbox.db.test.util.ParentTestNg;
 import kz.greetgo.sandbox.db.util.JdbcSandbox;
@@ -501,6 +503,8 @@ public class ClientRegisterImplTest extends ParentTestNg {
 
   }
 
+  public BeanGetter<AuthTestDao> authTestDao;
+
   @Test
   public void getList_CheckFilteredList_byName() {
     String charmId = RND.str(5);
@@ -508,6 +512,7 @@ public class ClientRegisterImplTest extends ParentTestNg {
     deleteAll();
 
     insertCharm(charmId);
+    insertPerson();
     ReportTestView testView = new ReportTestView();
 
     for (int i = 0; i < 10; i++) {
@@ -550,6 +555,7 @@ public class ClientRegisterImplTest extends ParentTestNg {
     deleteAll();
 
     insertCharm(charmId);
+    insertPerson();
     ReportTestView testView = new ReportTestView();
 
     for (int i = 0; i < 10; i++) {
@@ -592,6 +598,7 @@ public class ClientRegisterImplTest extends ParentTestNg {
     deleteAll();
 
     insertCharm(charmId);
+    insertPerson();
     ReportTestView testView = new ReportTestView();
 
     for (int i = 0; i < 10; i++) {
@@ -633,7 +640,7 @@ public class ClientRegisterImplTest extends ParentTestNg {
     deleteAll();
 
     ClientListRequest req = new ClientListRequest();
-
+    insertPerson();
     ReportTestView testView = new ReportTestView();
 
     req.sort = "total";
@@ -676,6 +683,7 @@ public class ClientRegisterImplTest extends ParentTestNg {
     assertThat(list.get(1).totalAccountBalance).isEqualTo(62.41f);
     assertThat(list.get(2).totalAccountBalance).isEqualTo(754);
 
+    assertThat(testView.row).hasSize(3);
     assertThat(testView.row.get(0).totalAccountBalance).isEqualTo(5 + 1 + 2 + 3);
     assertThat(testView.row.get(1).totalAccountBalance).isEqualTo(62.41f);
     assertThat(testView.row.get(2).totalAccountBalance).isEqualTo(754);
@@ -688,7 +696,7 @@ public class ClientRegisterImplTest extends ParentTestNg {
     deleteAll();
 
     ClientListRequest req = new ClientListRequest();
-
+    insertPerson();
     ReportTestView testView = new ReportTestView();
 
     req.sort = "totalDesc";
@@ -731,6 +739,7 @@ public class ClientRegisterImplTest extends ParentTestNg {
     assertThat(list.get(1).totalAccountBalance).isEqualTo(62.41f);
     assertThat(list.get(2).totalAccountBalance).isEqualTo(11);
 
+    assertThat(testView.row).hasSize(3);
     assertThat(testView.row.get(0).totalAccountBalance).isEqualTo(754);
     assertThat(testView.row.get(1).totalAccountBalance).isEqualTo(62.41f);
     assertThat(testView.row.get(2).totalAccountBalance).isEqualTo(11);
@@ -743,7 +752,7 @@ public class ClientRegisterImplTest extends ParentTestNg {
     deleteAll();
 
     ClientListRequest req = new ClientListRequest();
-
+    insertPerson();
     ReportTestView testView = new ReportTestView();
 
     req.sort = "max";
@@ -786,6 +795,7 @@ public class ClientRegisterImplTest extends ParentTestNg {
     assertThat(list.get(1).maxAccountBalance).isEqualTo(25.47f);
     assertThat(list.get(2).maxAccountBalance).isEqualTo(522);
 
+    assertThat(testView.row).hasSize(3);
     assertThat(testView.row.get(0).maxAccountBalance).isEqualTo(5);
     assertThat(testView.row.get(1).maxAccountBalance).isEqualTo(25.47f);
     assertThat(testView.row.get(2).maxAccountBalance).isEqualTo(522);
@@ -798,7 +808,7 @@ public class ClientRegisterImplTest extends ParentTestNg {
     deleteAll();
 
     ReportTestView testView = new ReportTestView();
-
+    insertPerson();
     ClientListRequest req = new ClientListRequest();
     req.sort = "maxDesc";
     req.count = 5;
@@ -840,6 +850,7 @@ public class ClientRegisterImplTest extends ParentTestNg {
     assertThat(list.get(1).maxAccountBalance).isEqualTo(25.47f);
     assertThat(list.get(2).maxAccountBalance).isEqualTo(5);
 
+    assertThat(testView.row).hasSize(3);
     assertThat(testView.row.get(0).maxAccountBalance).isEqualTo(522);
     assertThat(testView.row.get(1).maxAccountBalance).isEqualTo(25.47f);
     assertThat(testView.row.get(2).maxAccountBalance).isEqualTo(5);
@@ -852,7 +863,7 @@ public class ClientRegisterImplTest extends ParentTestNg {
     deleteAll();
 
     ReportTestView testView = new ReportTestView();
-
+    insertPerson();
     ClientListRequest req = new ClientListRequest();
     req.sort = "min";
     req.count = 5;
@@ -894,6 +905,7 @@ public class ClientRegisterImplTest extends ParentTestNg {
     assertThat(list.get(1).minAccountBalance).isEqualTo(15.47f);
     assertThat(list.get(2).minAccountBalance).isEqualTo(232);
 
+    assertThat(testView.row).hasSize(3);
     assertThat(testView.row.get(0).minAccountBalance).isEqualTo(1);
     assertThat(testView.row.get(1).minAccountBalance).isEqualTo(15.47f);
     assertThat(testView.row.get(2).minAccountBalance).isEqualTo(232);
@@ -906,7 +918,7 @@ public class ClientRegisterImplTest extends ParentTestNg {
     deleteAll();
 
     ReportTestView testView = new ReportTestView();
-
+    insertPerson();
     ClientListRequest req = new ClientListRequest();
     req.sort = "minDesc";
     req.count = 5;
@@ -949,6 +961,8 @@ public class ClientRegisterImplTest extends ParentTestNg {
     assertThat(list.get(1).minAccountBalance).isEqualTo(15.47f);
     assertThat(list.get(2).minAccountBalance).isEqualTo(1);
 
+    assertThat(testView.row).hasSize(3);
+    assertThat(testView.row).hasSize(3);
     assertThat(testView.row.get(0).minAccountBalance).isEqualTo(232);
     assertThat(testView.row.get(1).minAccountBalance).isEqualTo(15.47f);
     assertThat(testView.row.get(2).minAccountBalance).isEqualTo(1);
@@ -960,7 +974,7 @@ public class ClientRegisterImplTest extends ParentTestNg {
     deleteAll();
 
     ReportTestView testView = new ReportTestView();
-
+    insertPerson();
     ClientListRequest req = new ClientListRequest();
     req.sort = "ageDesc";
     req.count = 5;
@@ -995,57 +1009,10 @@ public class ClientRegisterImplTest extends ParentTestNg {
     assertThat(list.get(1).age).isEqualTo(getAge(2010, 07, 07));
     assertThat(list.get(2).age).isEqualTo(getAge(2015, 07, 07));
 
+    assertThat(testView.row).hasSize(3);
     assertThat(testView.row.get(0).age).isEqualTo(getAge(2000, 07, 07));
     assertThat(testView.row.get(1).age).isEqualTo(getAge(2010, 07, 07));
     assertThat(testView.row.get(2).age).isEqualTo(getAge(2015, 07, 07));
-  }
-
-  @Test
-  public void getList_CheckSortedList_ClientAgeAsc() {
-
-    deleteAll();
-
-    ReportTestView testView = new ReportTestView();
-
-    ClientListRequest req = new ClientListRequest();
-    req.sort = "age";
-    req.count = 5;
-    req.skipFirst = 0;
-
-    String charmId = RND.str(10);
-
-    String clientId = RND.str(10);
-    String clientId2 = RND.str(10);
-    String clientId3 = RND.str(10);
-
-    insertCharm(charmId);
-
-    insertClientWithDate(clientId, charmId, "2010-07-07");
-    insertClientWithDate(clientId2, charmId, "2015-07-07");
-    insertClientWithDate(clientId3, charmId, "2000-07-07");
-
-    insertAccountWithMoney(clientId, 456456f);
-    insertAccountWithMoney(clientId, 456f);
-    insertAccountWithMoney(clientId2, 654.45f);
-    insertAccountWithMoney(clientId3, 654.45f);
-
-    //
-    //
-    List<ClientRecord> list = clientRegister.get().getList(req);
-    jdbc.get().execute(new FillClientReportView(testView, req, "p1"));
-    //
-    //
-
-    assertThat(list).hasSize(3);
-
-    assertThat(list.get(0).age).isEqualTo(getAge(2015, 07, 07));
-    assertThat(list.get(1).age).isEqualTo(getAge(2010, 07, 07));
-    assertThat(list.get(2).age).isEqualTo(getAge(2000, 07, 07));
-
-    assertThat(testView.row.get(0).age).isEqualTo(getAge(2015, 07, 07));
-    assertThat(testView.row.get(1).age).isEqualTo(getAge(2010, 07, 07));
-    assertThat(testView.row.get(2).age).isEqualTo(getAge(2000, 07, 07));
-
   }
 
   @Test
@@ -1131,10 +1098,60 @@ public class ClientRegisterImplTest extends ParentTestNg {
   public BeanGetter<JdbcSandbox> jdbc;
 
   @Test
-  public void downloadReport_test() throws Exception {
+  public void getList_CheckSortedList_ClientAgeAsc() {
+
+    deleteAll();
+
+    ReportTestView testView = new ReportTestView();
+    insertPerson();
+    ClientListRequest req = new ClientListRequest();
+    req.sort = "age";
+    req.count = 5;
+    req.skipFirst = 0;
+
+    String charmId = RND.str(10);
+
+    String clientId = RND.str(10);
+    String clientId2 = RND.str(10);
+    String clientId3 = RND.str(10);
+
+    insertCharm(charmId);
+
+    insertClientWithDate(clientId, charmId, "2010-07-07");
+    insertClientWithDate(clientId2, charmId, "2015-07-07");
+    insertClientWithDate(clientId3, charmId, "2000-07-07");
+
+    insertAccountWithMoney(clientId, 456456f);
+    insertAccountWithMoney(clientId, 456f);
+    insertAccountWithMoney(clientId2, 654.45f);
+    insertAccountWithMoney(clientId3, 654.45f);
+
+    //
+    //
+    List<ClientRecord> list = clientRegister.get().getList(req);
+    jdbc.get().execute(new FillClientReportView(testView, req, "p1"));
+    //
+    //
+
+    assertThat(list).hasSize(3);
+
+    assertThat(list.get(0).age).isEqualTo(getAge(2015, 07, 07));
+    assertThat(list.get(1).age).isEqualTo(getAge(2010, 07, 07));
+    assertThat(list.get(2).age).isEqualTo(getAge(2000, 07, 07));
+
+    assertThat(testView.row.get(0).age).isEqualTo(getAge(2015, 07, 07));
+    assertThat(testView.row.get(1).age).isEqualTo(getAge(2010, 07, 07));
+    assertThat(testView.row.get(2).age).isEqualTo(getAge(2000, 07, 07));
+
+  }
+
+  @Test
+  public void downloadReport_test() {
     String charmId = RND.str(5), clientId = RND.str(5);
+
     deleteAll();
     insertCharm(charmId);
+    insertPerson();
 
     clientTestDao.get().insertClient(
       clientId,
@@ -1145,6 +1162,7 @@ public class ClientRegisterImplTest extends ParentTestNg {
       "male",
       charmId
     );
+
     insertAccountWithMoney(clientId, 25.25f);
 
     ClientListRequest req = new ClientListRequest();
@@ -1154,7 +1172,7 @@ public class ClientRegisterImplTest extends ParentTestNg {
 
     //
     //
-    jdbc.get().execute(new FillClientReportView(testView, req, "p1"));
+    jdbc.get().execute(new FillClientReportView(testView, req, "personId"));
     //
     //
 
@@ -1173,6 +1191,17 @@ public class ClientRegisterImplTest extends ParentTestNg {
     clientTestDao.get().deleteAllCharms();
     clientTestDao.get().deleteAllClients();
     clientTestDao.get().deleteAllAccounts();
+  }
+
+  private void insertPerson() {
+    PersonDot person = new PersonDot();
+    person.id = "p1";
+    person.accountName = "pushkin";
+    person.name = "Александр";
+    person.surname = "Пушкин";
+    person.patronymic = "Сергеевич";
+
+    authTestDao.get().insertPersonDot(person);
   }
 
   private void insertCharm(String charmId) {

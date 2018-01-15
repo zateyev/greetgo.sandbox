@@ -71,7 +71,7 @@ public interface ClientDao {
 
 
   @Insert("insert into client (id, name, surname, patronymic, birth_date, current_gender, charm_id, actual) " +
-    "values (#{id}, #{name}, #{surname}, #{patronymic}, #{birth_date}, #{gender}, #{charm_id}, 1); ")
+          "values (#{id}, #{name}, #{surname}, #{patronymic}, #{birth_date}, #{gender}, #{charm_id}, 1); ")
   void insertClient(@Param("id") String id,
                     @Param("name") String name,
                     @Param("surname") String surname,

@@ -6,10 +6,7 @@ import org.xml.sax.SAXParseException;
 import org.xml.sax.XMLReader;
 import org.xml.sax.helpers.XMLReaderFactory;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
+import java.io.*;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -63,8 +60,8 @@ public class MigrationCia {
       "  gender varchar(10)," +
       "  charm varchar(100)," +
       "  birth varchar(15)," +
-      "  status varchar(15) default 'JUST_INSERTED'," +
-      "  error varchar(300) default null," +
+      "  status varchar(100) default 'JUST_INSERTED'," +
+      "  error varchar(100) default null," +
 
       "  primary key(no)" +
       ")");
@@ -125,8 +122,9 @@ public class MigrationCia {
     errorsFile = new File("build/errorsFile_" + date + ".log");
     errorsFile.getParentFile().mkdirs();
 
-    FileOutputStream out = new FileOutputStream(errorsFile);
-    out.write(errorLog.toString().getBytes());
+    FileWriter out = new FileWriter(errorsFile);
+    out.write(errorLog.toString());
+    out.close();
 
   }
 
@@ -173,7 +171,7 @@ public class MigrationCia {
 
     exec(
       "insert into charm (name, id, actual) \n" +
-        " select  distinct(charm), nextval('serial')::text as id, 1 as actual \n" +
+        " select  charm, nextval('serial')::text as id, 1 as actual \n" +
         " from TMP_CLIENT as tmp where tmp.charm not in(select name from charm where actual = 1) " +
         "and error is null group by charm"
     );
@@ -193,7 +191,7 @@ public class MigrationCia {
 
     exec(
       " insert into client(id, \"name\", surname, patronymic, cia_id, birth_date, current_gender, charm_id, actual)\n" +
-        " select nextval('serial')::text as id, tmp.name, surname, patronymic, cia_id as cia_id, \n" +
+        " select nextval('serial')::text as id, tmp.name, surname, patronymic, cia_id as ciaId, \n" +
         " to_date(birth, 'yyyy-MM-dd') as birth_date, lower(gender) as current_gender, ch.id as charm_id, 1  as actual \n" +
         " from TMP_CLIENT as tmp join charm ch on tmp.charm = ch.name \n" +
         " where status = 'READY_TO_MERGE'\n" +

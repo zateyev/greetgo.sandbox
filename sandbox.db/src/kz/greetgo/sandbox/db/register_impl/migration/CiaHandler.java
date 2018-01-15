@@ -123,6 +123,8 @@ public class CiaHandler extends TagHandler implements AutoCloseable {
     }
 
     clientPS.close();
+    addressPS.close();
+    phonePS.close();
     connection.setAutoCommit(true);
   }
 
@@ -139,7 +141,8 @@ public class CiaHandler extends TagHandler implements AutoCloseable {
 
     if ("/cia/client".equals(path)) {
       client.id = attributes.getValue("id");
-      factAddress.clientId = regAddress.clientId = attributes.getValue("id");
+      factAddress.clientId = attributes.getValue("id");
+      regAddress.clientId = attributes.getValue("id");
       no++;
       return;
     }

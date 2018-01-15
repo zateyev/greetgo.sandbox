@@ -33,6 +33,7 @@ public interface AuthTestDao {
                          @Param("fieldValue") Object fieldValue);
 
   @Insert("insert into Person (  id,    accountName,    surname,    name,    patronymic,    encryptedPassword, blocked) " +
-    "                  values (#{id}, #{accountName}, #{surname}, #{name}, #{patronymic}, #{encryptedPassword}, 0)")
+    "                  values (#{id}, #{accountName}, #{surname}, #{name}, #{patronymic}, #{encryptedPassword}, 0)" +
+    " on conflict do nothing")
   void insertPersonDot(PersonDot personDot);
 }
