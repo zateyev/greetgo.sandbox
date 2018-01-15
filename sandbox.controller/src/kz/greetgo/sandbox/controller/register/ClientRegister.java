@@ -1,24 +1,41 @@
 package kz.greetgo.sandbox.controller.register;
 
-import kz.greetgo.sandbox.controller.model.ClientListInfo;
+import kz.greetgo.sandbox.controller.model.CharmType;
+import kz.greetgo.sandbox.controller.model.ClientRecord;
 
 import java.util.List;
+import java.util.Map;
 
 public interface ClientRegister {
   /**
-   * Предоставляет список общей информации о клиентах
+   * Посылает информацию о характере с его эквивалентами на уже определенном языке с учитыванием полов
    *
-   * @param page номер страницы
-   * @param size размер страницы
-   * @return список общей информации о клиенте
+   * @return словарь с кодом характера и списком строковых значения для каждого пола
    */
-  List<ClientListInfo> getClientList(Integer page, Integer size);
+  Map<Integer, List<String>> getCharmData();
 
   /**
-   * Предоставляет количество страниц
+   * Предоставляет количество страниц клиентских записей
    *
-   * @param size размер страницы
+   * @param clientRecordCount количество клиентских записей в одной странице
    * @return количество страниц
    */
-  Integer getPageNum(Integer size);
+  long getPageCount(long clientRecordCount);
+
+  /**
+   * Предоставляет список клиентских записей
+   *
+   * @param clientRecordCountToSkip количество пропускаемых клиентских записей (с начала)
+   * @param clientRecordCount количество клиентских записей в одной странице
+   * @return список клиентских записей
+   */
+  List<ClientRecord> getClientRecordList(long clientRecordCountToSkip, long clientRecordCount);
+
+  /**
+   * Возвращает успешное удаление клиентской записи
+   *
+   * @param clientRecordId идентификатор клиентской записи
+   * @return успешное удаление
+   */
+  boolean removeClientRecord(long clientRecordId);
 }

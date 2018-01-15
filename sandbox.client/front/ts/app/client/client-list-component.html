@@ -1,74 +1,92 @@
+<client-record-component #client_record_modal></client-record-component>
+
 <div class="row">
   <div class="col-lg-11">
     <table class="table table-bordered">
-      <thead class="thead-light">
+      <thead>
       <tr>
-        <th scope="col">
-          ФИО
+        <th class="col-xs-3 center-all">
+          <span class="center-block">ФИО</span>
         </th>
-        <th scope="col">
-          Характер
+        <th class="col-xs-1 center-all">
+          <span class="center-block">Характер</span>
         </th>
-        <th scope="col">
-          Возраст
-          <a href="#" class="btn btn-sort glyphicon glyphicon-arrow-up" (click)="registration = false"></a>
-          <a href="#" class="btn btn-sort glyphicon glyphicon-list" (click)="registration = false"></a>
-          <a href="#" class="btn btn-sort glyphicon glyphicon-arrow-down" (click)="registration = false"></a>
+        <th class="col-xs-1 center-all">
+          <span class="center-block">Возраст</span>
+          <div class="btn-group btn-group-sm">
+            <button class="btn btn-default glyphicon glyphicon-arrow-up" (click)="registration = false"></button>
+            <button class="btn btn-default glyphicon glyphicon-list" (click)="registration = false"></button>
+            <button class="btn btn-default glyphicon glyphicon-arrow-down" (click)="registration = false"></button>
+          </div>
         </th>
-        <th scope="col">
-          Общий остаток счетов
-          <a href="#" class="btn btn-sort glyphicon glyphicon-arrow-up" (click)="registration = false"></a>
-          <a href="#" class="btn btn-sort glyphicon glyphicon-list" (click)="registration = false"></a>
-          <a href="#" class="btn btn-sort glyphicon glyphicon-arrow-down" (click)="registration = false"></a>
+        <th class="col-xs-2 center-all">
+          <span class="center-block">Общий остаток счетов</span>
+          <div class="btn-group btn-group-sm">
+            <button class="btn btn-default glyphicon glyphicon-arrow-up sort-button-active" (click)="registration = false"></button>
+            <button class="btn btn-default glyphicon glyphicon-list" (click)="registration = false"></button>
+            <button class="btn btn-default glyphicon glyphicon-arrow-down" (click)="registration = false"></button>
+          </div>
         </th>
-        <th scope="col">
-          Максимальный остаток
-          <a href="#" class="btn btn-sort glyphicon glyphicon-arrow-up" (click)="registration = false"></a>
-          <a href="#" class="btn btn-sort glyphicon glyphicon-list" (click)="registration = false"></a>
-          <a href="#" class="btn btn-sort glyphicon glyphicon-arrow-down" (click)="registration = false"></a>
+        <th class="col-xs-2 center-all">
+          <span class="center-block">Максимальный остаток</span>
+          <div class="btn-group btn-group-sm">
+            <button class="btn btn-default glyphicon glyphicon-arrow-up" (click)="registration = false"></button>
+            <button class="btn btn-default glyphicon glyphicon-list" (click)="registration = false"></button>
+            <button class="btn btn-default glyphicon glyphicon-arrow-down" (click)="registration = false"></button>
+          </div>
         </th>
-        <th scope="col">
-          Минимальный остаток
-          <a href="#" class="btn btn-sort glyphicon glyphicon-arrow-up" (click)="registration = false"></a>
-          <a href="#" class="btn btn-sort glyphicon glyphicon-list" (click)="registration = false"></a>
-          <a href="#" class="btn btn-sort glyphicon glyphicon-arrow-down" (click)="registration = false"></a>
+        <th class="col-xs-2 center-all">
+          <span class="center-block">Минимальный остаток</span>
+          <div class="btn-group btn-group-sm">
+            <button class="btn btn-default glyphicon glyphicon-arrow-up" (click)="registration = false"></button>
+            <button class="btn btn-default glyphicon glyphicon-list" (click)="registration = false"></button>
+            <button class="btn btn-default glyphicon glyphicon-arrow-down" (click)="registration = false"></button>
+          </div>
         </th>
       </tr>
       </thead>
-      <tbody *ngFor="let client of clients">
-      <tr (click)="clientClicked(client.id)" [ngClass]="{active: client.id == focusedClientId}">
-        <td scope="row">{{client.fullName}}</td>
-        <td>{{client.charm}}</td>
-        <td>{{client.age}}</td>
-        <td>{{client.totalAccountBalance}}</td>
-        <td>{{client.maxAccountBalance}}</td>
-        <td>{{client.minAccountBalance}}</td>
+      <tbody *ngFor="let clientRecord of clientRecords">
+      <tr (click)="clientRecordClicked(clientRecord.id);"
+          [ngClass]="{'bg-success': clientRecord.id == selectedClientRecordId}">
+        <td class="client-record">{{clientRecord.fullName}}</td>
+        <td class="client-record">{{clientRecord.charm}}</td>
+        <td class="client-record">{{clientRecord.age}}</td>
+        <td class="client-record">{{clientRecord.totalAccountBalance}}</td>
+        <td class="client-record">{{clientRecord.maxAccountBalance}}</td>
+        <td class="client-record">{{clientRecord.minAccountBalance}}</td>
       </tr>
       </tbody>
     </table>
   </div>
-  <div class="col-sm-1">
-    <button class="btn btn-change-info"
-            id="client-list-form-add"
-            (click)="edit(null)">
-      +
-    </button>
-    <button class=" btn btn-change-info"
-            [disabled]="!focusedClientId"
-            id="client-list-form-inspect"
-            (click)="edit(focusedClientId)">
-      ...
-    </button>
-    <button class="btn btn-change-info"
-            [disabled]="!focusedClientId"
-            id="client-list-form-remove"
-            (click)="registration = false">
-      -
-    </button>
+  <div class="col-sm-1 text-center">
+    <div class="btn-group-vertical btn-group-lg">
+      <button class="btn btn-success btn-control"
+              id="client-list-form-add"
+              (click)="client_record_modal.show(); editClientRecord(null);">
+        +
+      </button>
+      <button class="btn btn-primary btn-control"
+              [disabled]="selectedClientRecordId == null"
+              id="client-list-form-inspect"
+              (click)="client_record_modal.show(); editClientRecord(selectedClientRecordId)">
+        ...
+      </button>
+      <button class="btn btn-danger btn-control"
+              [disabled]="selectedClientRecordId == null"
+              id="client-list-form-remove"
+              (click)="removeClientRecord(selectedClientRecordId)">
+        -
+      </button>
+    </div>
   </div>
 </div>
 <div class="text-center">
-  <a *ngFor="let page of pages" href="#" class="btn btn-list-number" (click)="registration = false">
-    {{page}}
-  </a>
+  <div class="btn-group btn-group-lg">
+    <button *ngFor="let pageNum of pageNums"
+       class="btn btn-default"
+       [ngClass]="{'active': pageNum == curPageNum + 1}"
+       (click)="pageNumClicked(pageNum-1)">
+      {{pageNum}}
+    </button>
+  </div>
 </div>
