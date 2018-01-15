@@ -79,6 +79,8 @@ public class FrsParser implements AutoCloseable {
 
       }
 
+    }catch (Exception e){
+      System.out.println(e);
     }
 
   }

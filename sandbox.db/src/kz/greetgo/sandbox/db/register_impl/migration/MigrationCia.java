@@ -113,66 +113,73 @@ public class MigrationCia {
       try (FileInputStream in = new FileInputStream(inFile)) {
         reader.parse(new InputSource(in));
       } catch (SAXParseException e) {
-        errorLog.append("SAX Parse Error: " + e.getMessage() + "\n");
-        errorLog.append("At line [" + e.getLineNumber() + "] " + "Column number: [" + e.getColumnNumber() + "]\n");
+        errorLog.append("SAX Parse Error: ").append(e.getMessage()).append("\n");
+        errorLog.append("At line [").append(e.getLineNumber()).append("] ").append("Column number: [").append(e.getColumnNumber()).append("]\n");
       }
     }
   }
 
   void downloadErrors() throws IOException {
 
-    String date = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new java.util.Date());
-
-    errorsFile = new File("build/errorsFile_" + date + ".log");
-    errorsFile.getParentFile().mkdirs();
-
-    FileWriter out = new FileWriter(errorsFile);
-    out.write(errorLog.toString());
-    out.close();
+    try(FileWriter out = new FileWriter(errorsFile)){
+      out.write(errorLog.toString());
+    }
 
   }
 
   void mainMigrationOperation() throws SQLException {
 
     exec(
-      "update TMP_CLIENT set\n" +
-        "error = case\n" +
-        "when \"name\" is null\n" +
-        "then '[Name is null] Client fields cannot be null'\n" +
-        "when surname is null\n" +
-        "then '[Surname is null] Client fields cannot be null'\n" +
-        "when gender is null\n" +
-        "then '[Gender is null] Client fields cannot be null'\n" +
-        "when birth is null\n" +
-        "then '[Birth date is null] Client fields cannot be null'\n" +
-        "when charm is null\n" +
-        "then '[Charm date is null] Client fields cannot be null'\n" +
-        "end\n" +
-        "where \n" +
-        "name is null \n" +
-        "or surname is null \n" +
-        "or birth is null\n" +
-        "or gender is null\n" +
-        "or charm is null"
+      " update TMP_CLIENT set\n" +
+        " error = '[Name is null] Client fields cannot be null'\n" +
+        " where \n" +
+        " name is null and error is null"
     );
 
     exec(
-      "update TMP_CLIENT as ad\n" +
-        "set error = case \n" +
-        "when ad.street is null \n" +
-        "then '[Street is null] Address fields cannot be null'\n" +
-        "when ad.house is null \n" +
-        "then '[House is null] Address fields cannot be null'\n" +
-        "when ad.flat is null \n" +
-        "then '[Flat is null] Address fields cannot be null'\n" +
-        "end\n" +
-        "from  (select client, no from TMP_CLIENT where \n" +
-        "street is null \n" +
-        "or house is null\n" +
-        "or flat is null \n" +
-        "group by client, \"no\") as a\n" +
-        "where ad.client  = a.client\n" +
-        "and ad.no = a.no"
+      "  update TMP_CLIENT set\n" +
+        " error = '[Surname is null] Client fields cannot be null'\n" +
+        " where \n" +
+        " surname is null and error is null"
+    );
+
+    exec(
+      "   update TMP_CLIENT set\n" +
+        " error = '[Gender is null] Client fields cannot be null'\n" +
+        " where \n" +
+        " gender is null and error is null"
+    );
+
+    exec(
+      " update TMP_CLIENT set\n" +
+        " error = '[Birth date is null] Client fields cannot be null'\n" +
+        " where \n" +
+        " birth is null and error is null"
+    );
+
+    exec(
+      " update TMP_CLIENT set\n" +
+        " error = '[Charm is null] Client fields cannot be null'\n" +
+        " where \n" +
+        " charm is null and error is null"
+    );
+
+    exec(
+      " update TMP_ADDRESS set\n" +
+        " error = '[Street is null] Address fields cannot be null'\n" +
+        " where street is null and error is null"
+    );
+
+    exec(
+      " update TMP_ADDRESS set\n" +
+        " error = '[House is null] Address fields cannot be null'\n" +
+        " where house is null and error is null"
+    );
+
+    exec(
+      "  update TMP_ADDRESS set\n" +
+        " error = '[Flat is null] Address fields cannot be null'\n" +
+        " where flat is null and error is null"
     );
 
     exec(
@@ -250,14 +257,14 @@ public class MigrationCia {
       "insert into client_phone(client, type, number, actual)\n" +
         " select c.id, ph.type, ph.number, 1 as actual from client c join TMP_CLIENT as tmp on c.cia_id = tmp.cia_id \n" +
         " join TMP_PHONE as ph on tmp.cia_id = ph.client\n" +
-        " where tmp.\"no\" = ph.\"no\"\n" +
+        " where tmp.no = ph.no\n" +
         " and c.actual = 1" +
         " and tmp.error is null" +
         " and tmp.status = 'READY_TO_MERGE'" +
         " on conflict(client, number) do\n" +
-        " update set \"number\" = excluded.account_number," +
+        " update set \"number\" = excluded.number," +
         " actual  = 1," +
-        " type = excluded.transaction_type\n"
+        " type = excluded.type\n"
     );
 
     exec(

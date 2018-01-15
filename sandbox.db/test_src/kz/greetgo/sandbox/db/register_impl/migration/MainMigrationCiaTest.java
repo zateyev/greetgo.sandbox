@@ -35,11 +35,11 @@ public class MainMigrationCiaTest extends ParentTestNg {
 
   @AfterMethod
   public void closeConnection() throws Exception {
-    migrationTestDao.get().dropTables(
-      migration.clientTable,
-      migration.phoneTable,
-      migration.addressTable
-    );
+//    migrationTestDao.get().dropTables(
+//      migration.clientTable,
+//      migration.phoneTable,
+//      migration.addressTable
+//    );
     connection.close();
     connection = null;
   }

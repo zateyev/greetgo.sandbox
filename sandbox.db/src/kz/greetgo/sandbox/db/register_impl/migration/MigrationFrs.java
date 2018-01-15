@@ -78,24 +78,23 @@ public class MigrationFrs {
     );
 
     try (Stream<String> lines = Files.lines(inFile.toPath())) {
+
       for (String line : (Iterable<String>) lines::iterator)
       {
         handler.parseAndAddBatch(line);
       }
 
+
+
       handler.close();
-    }//TODO napisat' catch na JsonParseException v file errorsFile
+    }
+
 
   }
 
   void mainMigrationOperation() {}
 
   void downloadErrors() throws IOException {
-
-    String date = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new java.util.Date());
-
-    errorsFile = new File("build/errorsFile_" + date + ".log");
-    errorsFile.getParentFile().mkdirs();
 
     FileWriter out = new FileWriter(errorsFile);
     out.write("FileName: " + inFile + "\n");
