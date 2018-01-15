@@ -6,7 +6,10 @@ import org.xml.sax.SAXParseException;
 import org.xml.sax.XMLReader;
 import org.xml.sax.helpers.XMLReaderFactory;
 
-import java.io.*;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -60,6 +63,7 @@ public class MigrationCia {
       "  gender varchar(10)," +
       "  charm varchar(100)," +
       "  birth varchar(15)," +
+      "  generatedId varchar(50)," +
       "  status varchar(100) default 'JUST_INSERTED'," +
       "  error varchar(100) default null," +
 
@@ -131,31 +135,49 @@ public class MigrationCia {
   void mainMigrationOperation() throws SQLException {
 
     exec(
-      "update TMP_CLIENT as tmp\n" +
-        " set\n" +
-        " error = 'One of required fields is null' \n" +
-        " where name is null \n" +
-        " or surname is null \n" +
-        " or birth is null\n" +
-        " or gender is null\n" +
-        " or charm is null"
+      "update TMP_CLIENT set\n" +
+        "error = case\n" +
+        "when \"name\" is null\n" +
+        "then '[Name is null] Client fields cannot be null'\n" +
+        "when surname is null\n" +
+        "then '[Surname is null] Client fields cannot be null'\n" +
+        "when gender is null\n" +
+        "then '[Gender is null] Client fields cannot be null'\n" +
+        "when birth is null\n" +
+        "then '[Birth date is null] Client fields cannot be null'\n" +
+        "when charm is null\n" +
+        "then '[Charm date is null] Client fields cannot be null'\n" +
+        "end\n" +
+        "where \n" +
+        "name is null \n" +
+        "or surname is null \n" +
+        "or birth is null\n" +
+        "or gender is null\n" +
+        "or charm is null"
     );
 
     exec(
-      "update TMP_ADDRESS as ad\n" +
-        "set error = 'One of required fields is null'\n" +
-        "from  (select client, no from TMP_ADDRESS where \n" +
+      "update TMP_CLIENT as ad\n" +
+        "set error = case \n" +
+        "when ad.street is null \n" +
+        "then '[Street is null] Address fields cannot be null'\n" +
+        "when ad.house is null \n" +
+        "then '[House is null] Address fields cannot be null'\n" +
+        "when ad.flat is null \n" +
+        "then '[Flat is null] Address fields cannot be null'\n" +
+        "end\n" +
+        "from  (select client, no from TMP_CLIENT where \n" +
         "street is null \n" +
         "or house is null\n" +
         "or flat is null \n" +
         "group by client, \"no\") as a\n" +
         "where ad.client  = a.client\n" +
-        "and ad.no = a.no\n"
+        "and ad.no = a.no"
     );
 
     exec(
       "update TMP_CLIENT as tmp\n" +
-        "set error = 'Phones not found'\n" +
+        "set error = 'Phones not found for this client'\n" +
         "from (select no from TMP_CLIENT as tm\n" +
         "except select no from TMP_PHONE as ph) as a\n" +
         "where tmp.no = a.no"
@@ -163,7 +185,7 @@ public class MigrationCia {
 
     exec(
       "update TMP_CLIENT as tmp \n" +
-        "set error = 'Address is null for this client'\n" +
+        "set error = 'Fact or registered address have null field for this client'\n" +
         "from TMP_ADDRESS as ad\n" +
         "where tmp.\"no\" = ad.\"no\" \n" +
         "and ad.error is not null"
@@ -171,9 +193,9 @@ public class MigrationCia {
 
     exec(
       "insert into charm (name, id, actual) \n" +
-        " select  charm, nextval('serial')::text as id, 1 as actual \n" +
+        " select  charm, tmp.generatedId as id, 1 as actual \n" +
         " from TMP_CLIENT as tmp where tmp.charm not in(select name from charm where actual = 1) " +
-        "and error is null group by charm"
+        "and error is null group by charm, generatedId"
     );
 
     exec(
@@ -191,7 +213,7 @@ public class MigrationCia {
 
     exec(
       " insert into client(id, \"name\", surname, patronymic, cia_id, birth_date, current_gender, charm_id, actual)\n" +
-        " select nextval('serial')::text as id, tmp.name, surname, patronymic, cia_id as ciaId, \n" +
+        " select tmp.generatedId as id, tmp.name, surname, patronymic, cia_id as ciaId, \n" +
         " to_date(birth, 'yyyy-MM-dd') as birth_date, lower(gender) as current_gender, ch.id as charm_id, 1  as actual \n" +
         " from TMP_CLIENT as tmp join charm ch on tmp.charm = ch.name \n" +
         " where status = 'READY_TO_MERGE'\n" +
@@ -233,9 +255,9 @@ public class MigrationCia {
         " and tmp.error is null" +
         " and tmp.status = 'READY_TO_MERGE'" +
         " on conflict(client, number) do\n" +
-        " update set \"number\" = excluded.number," +
+        " update set \"number\" = excluded.account_number," +
         " actual  = 1," +
-        " type = excluded.type\n"
+        " type = excluded.transaction_type\n"
     );
 
     exec(

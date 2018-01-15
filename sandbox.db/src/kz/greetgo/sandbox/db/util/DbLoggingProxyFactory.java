@@ -13,6 +13,7 @@ import java.util.Locale;
 public class DbLoggingProxyFactory {
 
   public interface SqlViewer {
+
     void gotConnection(String connectionId, long callNanos);
 
     void connectionSetAutoCommit(String connectionId, boolean autoCommit);

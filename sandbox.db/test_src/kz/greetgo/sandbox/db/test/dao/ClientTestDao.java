@@ -91,7 +91,7 @@ public interface ClientTestDao {
   @Update("update client_addr set actual = 0")
   void deleteAllAddr();
 
-  @Insert("insert into client_phone(client, type, number, actual) values (#{id}, #{type}, #{number}, 1)")
+  @Insert("insert into client_phone(client, type, number, actual) values (#{id}, #{transaction_type}, #{account_number}, 1)")
   void insertPhones(@Param("id") String clientId,
                     @Param("type") String type,
                     @Param("number") String number);

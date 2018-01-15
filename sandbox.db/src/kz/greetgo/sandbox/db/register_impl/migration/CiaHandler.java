@@ -1,5 +1,6 @@
 package kz.greetgo.sandbox.db.register_impl.migration;
 
+import kz.greetgo.sandbox.db.register_impl.IdGenerator;
 import kz.greetgo.sandbox.db.register_impl.migration.models.Address;
 import kz.greetgo.sandbox.db.register_impl.migration.models.Client;
 import kz.greetgo.sandbox.db.register_impl.migration.models.Phone;
@@ -15,6 +16,7 @@ public class CiaHandler extends TagHandler implements AutoCloseable {
 
   private PreparedStatement clientPS, addressPS, phonePS;
   private final Connection connection;
+  private IdGenerator id = new IdGenerator();
 
   public CiaHandler(int maxBatchSize,
                     String clientTable,
@@ -27,8 +29,8 @@ public class CiaHandler extends TagHandler implements AutoCloseable {
     connection.setAutoCommit(false);
 
     clientPS = connection.prepareStatement(
-      "insert into " + clientTable + " (no, cia_id, surname, name, patronymic, gender, charm, birth) " +
-        "values (?, ?, ?, ?, ?, ?, ?, ?)"
+      "insert into " + clientTable + " (no, cia_id, surname, name, patronymic, gender, charm, birth, generatedId) " +
+        "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)"
     );
 
     addressPS = connection.prepareStatement(
@@ -55,6 +57,7 @@ public class CiaHandler extends TagHandler implements AutoCloseable {
     clientPS.setString(6, client.gender);
     clientPS.setString(7, client.charm);
     clientPS.setString(8, client.birth);
+    clientPS.setString(9, id.newId());
     clientPS.addBatch();
 
     addressPS.setLong(1, no);
