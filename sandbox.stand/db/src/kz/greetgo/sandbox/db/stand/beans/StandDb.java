@@ -2,14 +2,23 @@ package kz.greetgo.sandbox.db.stand.beans;
 
 import kz.greetgo.depinject.core.Bean;
 import kz.greetgo.depinject.core.HasAfterInject;
-import kz.greetgo.sandbox.controller.model.*;
+import kz.greetgo.sandbox.controller.model.CharmType;
+import kz.greetgo.sandbox.controller.model.GenderType;
+import kz.greetgo.sandbox.controller.model.PhoneInfo;
+import kz.greetgo.sandbox.controller.model.PhoneType;
+import kz.greetgo.sandbox.controller.model.RegistrationAddressInfo;
+import kz.greetgo.sandbox.controller.model.ResidentialAddressInfo;
 import kz.greetgo.sandbox.db.stand.model.ClientDot;
 import kz.greetgo.sandbox.db.stand.model.PersonDot;
 
-
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
-import java.util.*;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Random;
 
 @Bean
 public class StandDb implements HasAfterInject {
@@ -205,17 +214,12 @@ public class StandDb implements HasAfterInject {
   }
 
   // TODO конвертация моделей перезаписывает файл, в том числе статический метод для конвертации чисел в энумераторы
-  private static GenderType toGenderType(int i) {
-    switch (i) {
-      case 0:
-        return GenderType.UNKNOWN;
-      case 1:
-        return GenderType.MALE;
-      case 2:
-        return GenderType.FEMALE;
+  private static GenderType toGenderType(String name) {
+    try {
+      return GenderType.valueOf(name);
+    } catch (IllegalArgumentException | NullPointerException e) {
+      return GenderType.UNKNOWN;
     }
-
-    return null;
   }
 
   private static CharmType toCharmType(int i) {

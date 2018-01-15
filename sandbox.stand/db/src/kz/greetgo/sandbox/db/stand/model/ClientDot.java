@@ -5,6 +5,7 @@ import kz.greetgo.sandbox.controller.model.*;
 import java.util.List;
 import java.util.Map;
 
+//TODO делаем SharmDot с двумя полями: id, name
 public class ClientDot {
   public long id;
   public String surname;
