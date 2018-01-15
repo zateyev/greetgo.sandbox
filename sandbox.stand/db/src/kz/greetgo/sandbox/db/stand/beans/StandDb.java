@@ -2,12 +2,8 @@ package kz.greetgo.sandbox.db.stand.beans;
 
 import kz.greetgo.depinject.core.Bean;
 import kz.greetgo.depinject.core.HasAfterInject;
-import kz.greetgo.sandbox.controller.model.CharmType;
-import kz.greetgo.sandbox.controller.model.GenderType;
-import kz.greetgo.sandbox.controller.model.PhoneInfo;
-import kz.greetgo.sandbox.controller.model.PhoneType;
-import kz.greetgo.sandbox.controller.model.RegistrationAddressInfo;
-import kz.greetgo.sandbox.controller.model.ResidentialAddressInfo;
+import kz.greetgo.sandbox.controller.model.*;
+import kz.greetgo.sandbox.db.stand.model.CharmDot;
 import kz.greetgo.sandbox.db.stand.model.ClientDot;
 import kz.greetgo.sandbox.db.stand.model.PersonDot;
 
@@ -22,7 +18,7 @@ import java.util.Random;
 
 @Bean
 public class StandDb implements HasAfterInject {
-  public final Map<Integer, List<String>> charmStorage = new HashMap<>();
+  public final Map<String, CharmDot> charmStorage = new HashMap<>();
   public final Map<String, PersonDot> personStorage = new HashMap<>();
   public final Map<Long, ClientDot> clientStorage = new HashMap<>();
 
@@ -30,20 +26,49 @@ public class StandDb implements HasAfterInject {
 
   @Override
   public void afterInject() throws Exception {
-    this.prepareInitData();
+    //TODO parse only once, not in separate files
+    this.parseCharms();
     this.parsePersons();
     this.parseClients();
   }
 
-  private void prepareInitData() {
-    charmStorage.put(CharmType.CALM.ordinal(), Arrays.asList("Неизвестно", "Спокойный", "Спокойная"));
-    charmStorage.put(CharmType.CONSERVATIVE.ordinal(), Arrays.asList("Неизвестно", "Консервативный", "Консервативная"));
-    charmStorage.put(CharmType.CONSCIOUS.ordinal(), Arrays.asList("Неизвестно", "Понимающий", "Понимающая"));
-    charmStorage.put(CharmType.OPEN.ordinal(), Arrays.asList("Неизвестно", "Открытый", "Открытая"));
-    charmStorage.put(CharmType.MYSTERIOUS.ordinal(), Arrays.asList("Неизвестно", "Загадочный", "Загадочная"));
-    charmStorage.put(CharmType.WILD.ordinal(), Arrays.asList("Неизвестно", "Буйный", "Буйная"));
+  private void parseCharms() throws Exception {
+    try (BufferedReader br = new BufferedReader(
+      new InputStreamReader(getClass().getResourceAsStream("StandDbCharmData.txt"), "UTF-8"))) {
 
+      int lineNo = 0;
 
+      while (true) {
+        String line = br.readLine();
+        if (line == null) break;
+        lineNo++;
+        String trimmedLine = line.trim();
+        if (trimmedLine.length() == 0) continue;
+        if (trimmedLine.startsWith("#")) continue;
+
+        String[] splitLine = line.split(";");
+
+        String command = splitLine[0].trim();
+        switch (command) {
+          case "CHARM":
+            appendCharm(splitLine, line, lineNo);
+            break;
+
+          default:
+            throw new RuntimeException("Unknown command " + command);
+        }
+      }
+    }
+  }
+
+  private void appendCharm(String[] splitLine, String line, int lineNo) {
+    CharmDot charmDot = new CharmDot();
+
+    charmDot.id = splitLine[1].trim();
+    charmDot.name = splitLine[2].trim();
+    charmDot.isDisabled = false;
+
+    this.charmStorage.put(charmDot.id, charmDot);
   }
 
   private void parsePersons() throws Exception {
@@ -125,9 +150,9 @@ public class StandDb implements HasAfterInject {
     c.surname = splitLine[1].trim();
     c.lastname = splitLine[2].trim();
     c.patronymic = splitLine[3].trim();
-    c.gender = toGenderType(Integer.parseInt(splitLine[4].trim()));
+    c.gender = toGender(Integer.parseInt(splitLine[4].trim()));
     c.birthDate = this.generateDate();
-    c.charm = this.generateCharmType();
+    c.charm = this.generateCharm();
     c.residentialAddressInfo = this.generateResidentialAddress();
     c.registrationAddressInfo = this.generateRegistrationAddressInfo();
     c.phoneInfo = this.generatePhoneInfo();
@@ -140,10 +165,6 @@ public class StandDb implements HasAfterInject {
     clientStorage.put(c.id, c);
   }
 
-  private GenderType generateGenderType() {
-    return toGenderType(this.random.nextInt(GenderType.values().length));
-  }
-
   // https://stackoverflow.com/a/3985467
   private String generateDate() {
     long time = -946771200000L + (Math.abs(this.random.nextLong()) % (70L * 365 * 24 * 60 * 60 * 1000));
@@ -152,8 +173,11 @@ public class StandDb implements HasAfterInject {
     return dt.toString();
   }
 
-  private CharmType generateCharmType() {
-    return toCharmType(this.random.nextInt(CharmType.values().length));
+  private Charm generateCharm() {
+    Object[] values = charmStorage.values().toArray();
+    CharmDot charmDot = (CharmDot) values[this.random.nextInt(values.length)];
+
+    return charmDot.toCharm();
   }
 
   private ResidentialAddressInfo generateResidentialAddress() {
@@ -213,32 +237,8 @@ public class StandDb implements HasAfterInject {
     return salt.toString();
   }
 
-  // TODO конвертация моделей перезаписывает файл, в том числе статический метод для конвертации чисел в энумераторы
-  private static GenderType toGenderType(String name) {
-    try {
-      return GenderType.valueOf(name);
-    } catch (IllegalArgumentException | NullPointerException e) {
-      return GenderType.UNKNOWN;
-    }
-  }
-
-  private static CharmType toCharmType(int i) {
-    switch (i) {
-      case 0:
-        return CharmType.CALM;
-      case 1:
-        return CharmType.WILD;
-      case 2:
-        return CharmType.MYSTERIOUS;
-      case 3:
-        return CharmType.OPEN;
-      case 4:
-        return CharmType.CONSCIOUS;
-      case 5:
-        return CharmType.CONSERVATIVE;
-    }
-
-    return null;
+  private static Gender toGender(int i) {
+    return Gender.values()[i];
   }
 
   private static PhoneType toPhoneType(int i) {

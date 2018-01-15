@@ -1,0 +1,7 @@
+#CHARM; EMPTY; Не указан
+#CHARM; CALM; Спокойный
+CHARM; WILD; Буйный
+CHARM; MYSTERIOUS; Загадочный
+CHARM; OPEN; Открытый
+CHARM; CONSCIOUS; Понимающий
+CHARM; CONSERVATIVE; Консервативный

@@ -11,9 +11,9 @@ public class ClientDot {
   public String surname;
   public String lastname;
   public String patronymic;
-  public GenderType gender;
+  public Gender gender;
   public String birthDate;
-  public CharmType charm;
+  public Charm charm;
   public ResidentialAddressInfo residentialAddressInfo;
   public RegistrationAddressInfo registrationAddressInfo;
   public PhoneInfo phoneInfo;
@@ -23,8 +23,8 @@ public class ClientDot {
   public long maxAccountBalance;
   public long minAccountBalance;
 
-  public ClientInfo toClientInfo() {
-    ClientInfo ret = new ClientInfo();
+  public ClientDetails toClientInfo() {
+    ClientDetails ret = new ClientDetails();
 
     ret.id = id;
     ret.surname = surname;
@@ -58,8 +58,9 @@ public class ClientDot {
     ClientRecord ret = new ClientRecord();
 
     ret.id = id;
-    ret.fullName = surname + " " +lastname + " " + patronymic;
+    ret.fullName = surname + " " + lastname + " " + patronymic;
     ret.age = age;
+    ret.charmName = charm.name;
     ret.totalAccountBalance = totalAccountBalance;
     ret.maxAccountBalance = maxAccountBalance;
     ret.minAccountBalance = minAccountBalance;
@@ -78,7 +79,7 @@ public class ClientDot {
     ret.append("patronymic: ").append(patronymic).append("\n");
     ret.append("gender: ").append(gender.name()).append("\n");
     ret.append("birthdate: ").append(birthDate).append("\n");
-    ret.append("charm: ").append(charm.name()).append("\n");
+    ret.append("charm: ").append(charm.id).append("\n");
 
     ret.append("residentialAddress: ").append(residentialAddressInfo.street).append(" ");
     ret.append(residentialAddressInfo.home).append(" ");
