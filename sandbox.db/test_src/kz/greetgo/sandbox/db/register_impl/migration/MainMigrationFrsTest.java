@@ -61,11 +61,13 @@ public class MainMigrationFrsTest extends ParentTestNg {
     String ciaId1 = RND.str(10);
     String ciaId2 = RND.str(10);
 
+    String accountNum = RND.str(10);
+
     insertClientWithCiaId(ciaId1);
     insertClientWithCiaId(ciaId2);
 
 
-    insertAccount(migration.accountTable, ciaId1, "AccountNumber1", "2011-01-23T23:22:11.456");
+    insertAccount(migration.accountTable, ciaId1, accountNum, "2011-01-23T23:22:11.456");
     insertAccount(migration.accountTable, ciaId2, "AccountNumber2", "2012-01-23T23:22:11.456");
 
     insertTransactions(
@@ -73,21 +75,21 @@ public class MainMigrationFrsTest extends ParentTestNg {
       "+123_015.12",
       "2010-01-23T11:56:11.987",
       "Перечисление с госбюджета",
-      "AccountNumber1");
+      accountNum);
 
     insertTransactions(
       migration.transactionTable,
       "-123_015.12",
       "2010-01-23T11:56:11.987",
       "Перечисление с госбюджета",
-      "AccountNumber1");
+      accountNum);
 
     insertTransactions(
       migration.transactionTable,
       "+123_015.12",
       "2011-01-23T11:56:11.987",
       "Перечисление с госбюджета",
-      "AccountNumber1");
+      accountNum);
 
     insertTransactions(
       migration.transactionTable,
@@ -110,13 +112,13 @@ public class MainMigrationFrsTest extends ParentTestNg {
     //
     //
 
-    ClientAccount account1 = clientTestDao.get().getAccounts("AccountNumber1");
-    List<AccountTransaction> transactions = clientTestDao.get().getTransactions("AccountNumber1");
+    ClientAccount account1 = clientTestDao.get().getAccounts(accountNum);
+    List<AccountTransaction> transactions = clientTestDao.get().getTransactions(accountNum);
     List<String> transactionType = clientTestDao.get().getTransactionType();
     ClientDetails det = clientTestDao.get().getClientByCiaId(ciaId1);
 
     assertThat(account1.client).isEqualTo(det.id);
-    assertThat(account1.money).isEqualTo(0);
+    assertThat(account1.money).isEqualTo(123015.12f);
     assertThat(account1.registered_at.toString()).isEqualTo("Sun Jan 23 23:22:11 ALMT 2011");
     assertThat(transactions).hasSize(3);
     assertThat(transactions.get(0).account_number).isEqualTo(account1.number);
@@ -132,11 +134,12 @@ public class MainMigrationFrsTest extends ParentTestNg {
     deleteAll();
 
     String ciaId1 = RND.str(10);
+    String accountNum = RND.str(10);
 
     insertClientWithCiaId(ciaId1);
 
 
-    insertAccount(migration.accountTable, ciaId1, "AccountNumber1", "2011-01-23T23:22:11.456");
+    insertAccount(migration.accountTable, ciaId1, accountNum, "2011-01-23T23:22:11.456");
 
     insertTransactions(
       migration.transactionTable,
@@ -161,7 +164,7 @@ public class MainMigrationFrsTest extends ParentTestNg {
     //
     //
 
-    ClientAccount account1 = clientTestDao.get().getAccounts("AccountNumber1");
+    ClientAccount account1 = clientTestDao.get().getAccounts(accountNum);
     List<String> transactionType = clientTestDao.get().getTransactionType();
     List<String> allTransactions = clientTestDao.get().getAllTransactions();
     String firstLine = getFirstLine(migration.errorsFile);
@@ -180,12 +183,13 @@ public class MainMigrationFrsTest extends ParentTestNg {
   public void mainMigrationsFrs_RepeatedAccNumber() throws SQLException {
 
     String ciaId1 = RND.str(10);
+    String accountNum = RND.str(10);
 
     insertClientWithCiaId(ciaId1);
 
 
-    insertAccount(migration.accountTable, ciaId1, "AccountNumber1", "2011-01-23T23:22:11.456");
-    insertAccount(migration.accountTable, ciaId1, "AccountNumber1", "2012-01-23T23:22:11.456");
+    insertAccount(migration.accountTable, ciaId1, accountNum, "2011-01-23T23:22:11.456");
+    insertAccount(migration.accountTable, ciaId1, accountNum, "2012-01-23T23:22:11.456");
     //
     //
     migration.mainMigrationOperation();
@@ -194,11 +198,72 @@ public class MainMigrationFrsTest extends ParentTestNg {
     ClientDetails det = clientTestDao.get().getClientByCiaId(ciaId1);
 
 
-    ClientAccount account1 = clientTestDao.get().getAccounts("AccountNumber1");
+    ClientAccount account1 = clientTestDao.get().getAccounts(accountNum);
     assertThat(account1.registered_at.toString()).isEqualTo("Mon Jan 23 23:22:11 ALMT 2012");
     assertThat(account1.client).isEqualTo(det.id);
 
   }
+
+  @Test
+  public void mainMigrationFRS_CheckForCountingMoney() throws SQLException {
+
+    deleteAll();
+
+    String ciaId1 = RND.str(10);
+    String accountNum = RND.str(10);
+    String accountNum2 = RND.str(10);
+
+    insertClientWithCiaId(ciaId1);
+
+    insertAccount(migration.accountTable, ciaId1, accountNum, "2012-01-23T23:22:11.456");
+    insertAccount(migration.accountTable, ciaId1, accountNum2, "2012-01-23T23:22:11.456");
+
+
+    insertTransactions(
+      migration.transactionTable,
+      "+123",
+      "2009-01-23T11:56:11.987",
+      "Перечисление с госбюджета",
+      accountNum);
+
+
+    insertTransactions(
+      migration.transactionTable,
+      "+123",
+      "2010-01-23T11:56:11.987",
+      "Перечисление с госбюджета",
+      accountNum);
+
+    insertTransactions(
+      migration.transactionTable,
+      "-123",
+      "2010-01-23T11:56:11.987",
+      "Перечисление с госбюджета",
+      accountNum2);
+
+    //
+    //
+    migration.mainMigrationOperation();
+    //
+    //
+
+    ClientAccount account1 = clientTestDao.get().getAccounts(accountNum);
+    ClientAccount account2 = clientTestDao.get().getAccounts(accountNum2);
+
+    assertThat(account1.money).isEqualTo(246);
+    assertThat(account2.money).isEqualTo(-123);
+
+
+  }
+
+
+
+
+
+
+
+
+
 
   private void insertAccount(String tableName,
                              String ciaId,

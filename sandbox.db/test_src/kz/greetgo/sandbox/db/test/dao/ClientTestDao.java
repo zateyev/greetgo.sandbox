@@ -149,7 +149,7 @@ public interface ClientTestDao {
     @Param("clientId") String clientId,
     @Param("ciaId") String ciaId);
 
-  @Select("select * from client_account_transaction where actual = 1 and account_number = #{accountNumber}")
+  @Select("select * from client_account_transaction where actual = 0 and account_number = #{accountNumber}")
   List<AccountTransaction> getTransactions(@Param("accountNumber") String accountNumber);
 
   @Select("select * from client_account where actual = 1 and number = #{number}")

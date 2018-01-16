@@ -170,6 +170,23 @@ public class MigrationFrs {
         " where status = 'JUST_INSERTED' and error is null"
     );
 
+    exec(
+      "with a as (select tr.account, sum(tr.\"money\")\n" +
+        "from client_account_transaction as tr join client_account\n" +
+        "on tr.account = client_account.id\n" +
+        "where tr.actual = 1 group by account)\n" +
+        "update client_account set \"money\" = \"money\" + a.sum\n" +
+        "from a\n" +
+        "where a.account = id"
+    );
+
+    exec(
+      "update client_account_transaction set actual = 0\n" +
+        "where actual = 1"
+    );
+
+
+
 
   }
 
