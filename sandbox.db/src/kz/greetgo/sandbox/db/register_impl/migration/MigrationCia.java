@@ -119,10 +119,15 @@ public class MigrationCia {
     }
   }
 
-  void downloadErrors() throws IOException {
+  void downloadErrors() throws Exception {
 
     try(FileWriter out = new FileWriter(errorsFile)){
+
       out.write(errorLog.toString());
+
+      ClientErrorWriter cew = new ClientErrorWriter(
+        out, connection, clientTable
+      );
     }
 
   }

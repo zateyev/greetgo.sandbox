@@ -1,6 +1,10 @@
 package kz.greetgo.sandbox.db.test.dao;
 
-import kz.greetgo.sandbox.controller.model.*;
+import kz.greetgo.sandbox.controller.model.ClientAddress;
+import kz.greetgo.sandbox.controller.model.ClientDetails;
+import kz.greetgo.sandbox.controller.model.ClientRecord;
+import kz.greetgo.sandbox.db.register_impl.migration.models.AccountTransaction;
+import kz.greetgo.sandbox.db.register_impl.migration.models.ClientAccount;
 import org.apache.ibatis.annotations.Insert;
 import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
@@ -8,7 +12,6 @@ import org.apache.ibatis.annotations.Update;
 
 import java.util.Date;
 import java.util.List;
-import java.util.Map;
 
 public interface ClientTestDao {
 
@@ -91,7 +94,7 @@ public interface ClientTestDao {
   @Update("update client_addr set actual = 0")
   void deleteAllAddr();
 
-  @Insert("insert into client_phone(client, type, number, actual) values (#{id}, #{transaction_type}, #{account_number}, 1)")
+  @Insert("insert into client_phone(client, type, number, actual) values (#{id}, #{type}, #{number}, 1)")
   void insertPhones(@Param("id") String clientId,
                     @Param("type") String type,
                     @Param("number") String number);
@@ -139,4 +142,22 @@ public interface ClientTestDao {
 
   @Select("Select number from client_phone where client = #{id} and type = 'work' and actual = 1")
   List<String> getWorkPhones(String id);
+
+  @Insert("insert into client(id, cia_id)" +
+    " values (#{clientId}, #{ciaId})")
+  void insertClientWithCia(
+    @Param("clientId") String clientId,
+    @Param("ciaId") String ciaId);
+
+  @Select("select * from client_account_transaction where actual = 1 and account_number = #{accountNumber}")
+  List<AccountTransaction> getTransactions(@Param("accountNumber") String accountNumber);
+
+  @Select("select * from client_account where actual = 1 and number = #{number}")
+  ClientAccount getAccounts(@Param("number") String accountNumber);
+
+  @Select("select name from transaction_type where actual = 1")
+  List<String> getTransactionType();
+
+  @Select("select id from client_account_transaction where actual = 1")
+  List<String> getAllTransactions();
 }

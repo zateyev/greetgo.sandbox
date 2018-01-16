@@ -5,7 +5,6 @@
 
   <changeSet author="jgolibzhan" id="create-table-Charm">
     <sql endDelimiter=";;"><![CDATA[
-    CREATE SEQUENCE serial START 101;
       create table Charm (
         id varchar(32) not null primary key,
         name varchar(300),
@@ -63,10 +62,11 @@
         id varchar(32) NOT NULL,
         client varchar(32) NOT NULL,
         "money" float8 NULL,
-        "number" varchar(15) NULL,
+        "number" varchar(50) NULL,
         registered_at timestamp NULL,
         actual int2 NOT NULL DEFAULT 0,
         UNIQUE (id),
+        UNIQUE ("number"),
         PRIMARY KEY (id, client),
         FOREIGN KEY (client) REFERENCES client(id)
       )
@@ -88,13 +88,15 @@
   <changeSet author="jgolibzhan" id="create-table-client_account_transaction">
     <sql endDelimiter=";;"><![CDATA[
       CREATE TABLE client_account_transaction (
-        id varchar(32) NOT NULL,
-        account varchar(32) NULL,
+        id varchar(50) NOT NULL,
+        account varchar(50) NULL,
         "money" float8 NULL,
         finished_at timestamp NULL,
-        "type" varchar(32) NULL,
+        "type" varchar(300) NULL,
+        account_number varchar(50),
         actual int2 NOT NULL DEFAULT 0,
         PRIMARY KEY (id),
+        UNIQUE(money, finished_at, account_number),
         FOREIGN KEY (account) REFERENCES client_account(id),
         FOREIGN KEY (type) REFERENCES transaction_type(id)
       )

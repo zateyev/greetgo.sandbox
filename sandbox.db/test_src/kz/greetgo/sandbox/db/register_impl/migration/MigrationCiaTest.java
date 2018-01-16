@@ -50,11 +50,9 @@ public class MigrationCiaTest extends ParentTestNg {
 
     migration.createTempTables();
 
-    migrationTestDao.get().dropTables(
-      migration.clientTable,
-      migration.phoneTable,
-      migration.addressTable
-    );
+    migrationTestDao.get().dropTables(migration.clientTable);
+    migrationTestDao.get().dropTables(migration.phoneTable);
+    migrationTestDao.get().dropTables(migration.addressTable);
 
   }
 
@@ -77,11 +75,9 @@ public class MigrationCiaTest extends ParentTestNg {
     Map<String, Address> address = getAddressById(migration.addressTable, "4-DU8-32-H7");
     Phone phones = getPhoneById(migration.phoneTable, "4-DU8-32-H7");
 
-    migrationTestDao.get().dropTables(
-      migration.clientTable,
-      migration.phoneTable,
-      migration.addressTable
-    );
+    migrationTestDao.get().dropTables(migration.clientTable);
+    migrationTestDao.get().dropTables(migration.addressTable);
+    migrationTestDao.get().dropTables(migration.phoneTable);
 
     assertThat(client).hasSize(2);
 

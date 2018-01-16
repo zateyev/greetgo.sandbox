@@ -60,7 +60,7 @@ public interface ClientDao {
     " house = #{house}," +
     " flat = #{flat}" +
     " where client = #{clientId} and" +
-    " type = #{transaction_type}")
+    " type = #{type}")
   void updateAddress(
     @Param("clientId") String id,
     @Param("type") String type,
@@ -108,7 +108,7 @@ public interface ClientDao {
   @Insert("insert into client_phone(client, number, type, actual)" +
     " values (#{id}, #{number}, #{type}, 1)" +
     " on conflict(client, number) do update" +
-    " set actual = 1, type = #{transaction_type}")
+    " set actual = 1, type = #{type}")
   void insertClientPhone(@Param("id") String id,
                          @Param("number") String number,
                          @Param("type") String type);

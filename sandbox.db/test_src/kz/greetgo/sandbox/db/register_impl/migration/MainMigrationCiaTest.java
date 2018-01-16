@@ -1,5 +1,6 @@
 package kz.greetgo.sandbox.db.register_impl.migration;
 
+import com.google.common.io.Files;
 import kz.greetgo.depinject.core.BeanGetter;
 import kz.greetgo.sandbox.controller.model.ClientAddress;
 import kz.greetgo.sandbox.controller.model.ClientDetails;
@@ -11,6 +12,9 @@ import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
+import java.io.File;
+import java.io.IOException;
+import java.nio.charset.Charset;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.List;
@@ -35,11 +39,9 @@ public class MainMigrationCiaTest extends ParentTestNg {
 
   @AfterMethod
   public void closeConnection() throws Exception {
-//    migrationTestDao.get().dropTables(
-//      migration.clientTable,
-//      migration.phoneTable,
-//      migration.addressTable
-//    );
+    migrationTestDao.get().dropTables(migration.clientTable);
+    migrationTestDao.get().dropTables(migration.addressTable);
+    migrationTestDao.get().dropTables(migration.phoneTable);
     connection.close();
     connection = null;
   }
@@ -271,7 +273,7 @@ public class MainMigrationCiaTest extends ParentTestNg {
   }
 
   @Test
-  public void mainMigration_CheckForNullClientFields() throws SQLException {
+  public void mainMigration_CheckForNullClientFields() throws Exception {
 
     deleteAll();
 
@@ -318,17 +320,21 @@ public class MainMigrationCiaTest extends ParentTestNg {
     insertTmpAdress(26, "45", "fact");
     insertTmpPhone(26, "45", "home", "555");
 
+    migration.errorsFile = new File("build/errorCia.log");
 
     //
     //
     migration.mainMigrationOperation();
+    migration.downloadErrors();
     //
     //
+
 
     int clientListSize = clientTestDao.get().getClientListSize();
+    String firstLine = getFirstLine(migration.errorsFile);
 
     assertThat(clientListSize).isEqualTo(3);
-
+    assertThat(firstLine).isEqualTo("CIA_ID for client is [ 41 ] \t Error is [[Name is null] Client fields cannot be null] ");
   }
 
   @Test
@@ -399,10 +405,14 @@ public class MainMigrationCiaTest extends ParentTestNg {
 
   }
 
-
-
   private void insertCharm(String charmId, String charmName) {
     clientTestDao.get().insertCharm(charmId, charmName);
+  }
+
+
+
+  private String getFirstLine(File errorsFile) throws IOException {
+    return Files.asCharSource(errorsFile, Charset.defaultCharset()).readFirstLine();
   }
 
 
