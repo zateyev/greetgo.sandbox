@@ -1172,7 +1172,7 @@ public class ClientRegisterImplTest extends ParentTestNg {
 
     //
     //
-    jdbc.get().execute(new FillClientReportView(testView, req, "personId"));
+    jdbc.get().execute(new FillClientReportView(testView, req, "p1"));
     //
     //
 

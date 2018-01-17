@@ -1,12 +1,9 @@
 package kz.greetgo.sandbox.db.test.dao;
 
-import kz.greetgo.sandbox.db.register_impl.IdGenerator;
 import kz.greetgo.sandbox.db.register_impl.migration.models.Account;
 import kz.greetgo.sandbox.db.register_impl.migration.models.Transaction;
-import org.apache.ibatis.annotations.Delete;
-import org.apache.ibatis.annotations.Insert;
-import org.apache.ibatis.annotations.Param;
-import org.apache.ibatis.annotations.Select;
+import org.apache.ibatis.annotations.*;
+import org.testng.annotations.Test;
 
 import java.util.List;
 
@@ -48,13 +45,10 @@ public interface MigrationTestDao {
     @Param("number") String number);
 
 
-  @Delete("drop table ${clientTable};" +
-    " drop table ${phoneTable};" +
-    " drop table ${addressTable}")
+  @Delete("drop table ${tableName};")
   void dropTables(
-    @Param("clientTable") String clientTable,
-    @Param("phoneTable") String phoneTable,
-    @Param("addressTable") String addressTable);
+    @Param("tableName") String clientTable
+  );
 
   @Select("select cia_id as client_id, account_number, registered_at " +
     " from ${tableName} where cia_id = #{ciaId}")
@@ -65,4 +59,34 @@ public interface MigrationTestDao {
     " from ${tableName} where account_number = #{accNum}")
   List<Transaction> getTransactions(@Param("tableName") String tableName,
                                     @Param("accNum") String accNum);
+
+  @Insert("insert into ${tableName}( cia_id, account_number, registered_at, generatedId, no )" +
+                        " values (#{ciaId}, #{accountNumber}, #{registeredAt}, #{generatedId}, #{no})")
+  void insertAccount(
+    @Param("tableName") String tableName,
+    @Param("ciaId") String ciaId,
+    @Param("accountNumber") String accountNumber,
+    @Param("registeredAt") String registeredAt,
+    @Param("generatedId") String generatedId,
+    @Param("no") long no
+  );
+
+
+  @Insert("insert into ${tableName}(money, finished_at, transaction_type, account_number, generatedId)" +
+    " values (#{money}, #{finishedAt}, #{transactionType}, #{accountNumber}, #{generatedId})")
+  void insertTransaction(
+    @Param("tableName") String tableName,
+    @Param("money") String money,
+    @Param("finishedAt") String finishedAt,
+    @Param("transactionType") String transactionType,
+    @Param("accountNumber") String accountNumber,
+    @Param("generatedId") String generatedId
+  );
+
+  @Update("update client_account_transaction set actual = 0")
+  void deleteAllTransactions();
+
+  @Update("update transaction_type set actual = 0")
+  void deleteAllTransactionType();
+
 }
