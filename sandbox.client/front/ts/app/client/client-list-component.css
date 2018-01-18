@@ -2,31 +2,19 @@ body {
   padding-top: 90px;
 }
 
-.btn-control:disabled {
-  background: #666666;
-}
-
 .center-all {
   vertical-align: middle;
   text-align: center;
 }
 
-.sort-button-active {
-  color: black;
-  background: #1CA347;
-  font-weight: bold;
-}
-
 table {
   border-collapse: separate;
-  background: #fff;
   -moz-border-radius: 5px;
   -webkit-border-radius: 5px;
   border-radius: 5px;
-  border-color: darkgray;
-  -moz-box-shadow: 0px 0px 5px rgba(0, 0, 0, 0.3);
-  -webkit-box-shadow: 0px 0px 5px rgba(0, 0, 0, 0.3);
-  box-shadow: 0px 0px 5px rgba(0, 0, 0, 0.3);
+  -moz-box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.3);
+  -webkit-box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.3);
+  box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.3);
 }
 
 thead {
@@ -36,27 +24,28 @@ thead {
 }
 
 thead th {
-  color: black;
   font-size: 16px;
-  background-size: 100%;
-  background: lightgray;
+  background: whitesmoke;
 }
 
 tbody tr td {
-  border-color: darkgray;
   padding: 10px;
   font-size: 14px;
   font-weight: 400;
-  color: black;
 }
 
 tbody:hover > tr:hover td {
   text-shadow: none;
-  color: #888888;
+  background-color: seashell;
   opacity: 1;
-  transition: 0.2s all;
+  transition: 0.1s all;
 }
 
-.client-record {
+.btn-operation {
+  font-size: 20px;
+  font-weight: bold;
+}
+
+.client-record-keep-selection {
 
 }

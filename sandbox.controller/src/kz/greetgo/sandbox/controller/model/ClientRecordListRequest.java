@@ -7,4 +7,5 @@ public class ClientRecordListRequest {
   public long clientRecordCount;
   public ColumnSortType columnSortType;
   public boolean sortAscend;
+  public String nameFilter;
 }

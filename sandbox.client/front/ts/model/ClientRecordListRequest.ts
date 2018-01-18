@@ -5,4 +5,5 @@ export class ClientRecordListRequest {
   public clientRecordCount: number/*long*/;
   public columnSortType: ColumnSortType;
   public sortAscend: boolean;
+  public nameFilter: string;
 }

@@ -1,13 +1,18 @@
 <div class="panel container-fluid">
   <div class="panel-heading row">
-    <div class="col-lg-11 text-center">
-      <h2>Main Form Component</h2>
+    <div class="col-lg-11">
+      <h2 class="center-all">
+        <span class="label label-default">
+          Список клиентских записей
+        </span>
+      </h2>
     </div>
-    <div class="col-lg-1 text-center">
-      <button class="btn btn-primary btn-default"
-              (click)="exit.emit()">
-        Выход
-      </button>
+    <div class="col-lg-1">
+      <div class="center-all">
+        <button class="btn btn-default btn-primary" (click)="exit.emit()">
+          Выход
+        </button>
+      </div>
     </div>
   </div>
   <div class="panel-body">

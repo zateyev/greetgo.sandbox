@@ -3,6 +3,8 @@ package kz.greetgo.sandbox.controller.controller;
 import kz.greetgo.depinject.core.Bean;
 import kz.greetgo.depinject.core.BeanGetter;
 import kz.greetgo.mvc.annotations.*;
+import kz.greetgo.sandbox.controller.model.ClientDetails;
+import kz.greetgo.sandbox.controller.model.ClientDetailsToSave;
 import kz.greetgo.sandbox.controller.model.ClientRecord;
 import kz.greetgo.sandbox.controller.model.ClientRecordListRequest;
 import kz.greetgo.sandbox.controller.register.ClientRegister;
@@ -19,8 +21,8 @@ public class ClientController implements Controller {
 
   @ToJson
   @Mapping("/pageCount")
-  public long pageCount(@Par("clientRecordCount") long clientRecordCount) {
-    return clientRegister.get().getPageCount(clientRecordCount);
+  public long pageCount(@Par("clientRecordCount") long clientRecordCount, @Par("clientRecordNameFilter") String clientRecordNameFilter) {
+    return clientRegister.get().getPageCount(clientRecordCount, clientRecordNameFilter);
   }
 
   @ToJson
@@ -29,9 +31,19 @@ public class ClientController implements Controller {
     return clientRegister.get().getClientRecordList(clientRecordListRequest);
   }
 
-  @ToJson
   @Mapping("/remove")
-  public boolean removeClientRecord(@Par("clientRecordId") long clientRecordId) {
-    return clientRegister.get().removeClientRecord(clientRecordId);
+  public void removeClientDetails(@Par("clientRecordId") long clientRecordId) {
+    clientRegister.get().removeClientDetails(clientRecordId);
+  }
+
+  @ToJson
+  @Mapping("/details")
+  public ClientDetails getClientDetails(@Par("clientRecordId") Long clientRecordId) {
+    return clientRegister.get().getClientDetails(clientRecordId);
+  }
+
+  @Mapping("/save")
+  public void saveClientDetails(@Par("clientDetailsToSave") @Json ClientDetailsToSave clientDetailsToSave) {
+    clientRegister.get().saveClientDetails(clientDetailsToSave);
   }
 }

@@ -7,14 +7,14 @@ import {LoginComponent} from "./input/login.component";
 import {MainFormComponent} from "./main_form/main_form.component";
 import {HttpService} from "./HttpService";
 import {ClientListComponent} from "./client/client-list.component";
-import {ClientRecordComponent} from "./client/client-record.component";
+import {ClientDetailsComponent} from "./client/client-details.component";
 
 @NgModule({
   imports: [
     BrowserModule, HttpModule, JsonpModule, FormsModule
   ],
   declarations: [
-    RootComponent, LoginComponent, MainFormComponent, ClientListComponent, ClientRecordComponent
+    RootComponent, LoginComponent, MainFormComponent, ClientListComponent, ClientDetailsComponent
   ],
   bootstrap: [RootComponent],
   providers: [HttpService],

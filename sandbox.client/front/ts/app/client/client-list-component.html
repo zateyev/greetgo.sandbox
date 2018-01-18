@@ -1,4 +1,30 @@
-<client-record-component #client_record_modal></client-record-component>
+<client-details-component #client_details_component (onModalCloseOutput)="onModalClose($event)"></client-details-component>
+
+<form class="form-group form-inline"
+      [attr.disabled]="isModalFormActive"
+      #filter_form="ngForm"
+      (ngSubmit)="onFilterButtonClick(filter_form.value)">
+  <label for="input-filter" class="sr-only">
+    Фильтрация ФИО
+  </label>
+  <div class="input-group input-group-lg col-lg-3">
+    <input id="input-filter"
+           type="text"
+           name="filter"
+           class="form-control client-record-keep-selection"
+           (ngModelChange)="onFilterTextChange($event)"
+           ngModel>
+    <span class="input-group-btn">
+          <button class="btn"
+                  [ngClass]="{'btn-default': filterSuccessState == null,
+                    'btn-success': filterSuccessState == true,
+                    'btn-danger': filterSuccessState == false}"
+                  type="submit">
+            <span class="glyphicon glyphicon-filter"></span>
+          </button>
+      </span>
+  </div>
+</form>
 
 <div class="row">
   <div class="col-lg-11">
@@ -14,114 +40,103 @@
         <th class="col-xs-1 center-all">
           <span class="center-block">Возраст</span>
           <div class="btn-group btn-group-sm">
-            <button id="sort-age-ascend"
-                    class="btn btn-default glyphicon glyphicon-arrow-up"
-                    [ngClass]="{'sort-button-active':activeSortButtonId=='sort-age-ascend'}"
-                    (click)="onSortingButtonClick('sort-age-ascend', 'AGE', true)">
+            <button class="btn btn-default glyphicon glyphicon-arrow-up"
+                    [ngClass]="{'btn-success':isSortingButtonActive('AGE', true)}"
+                    (click)="onSortingButtonClick('AGE', true)">
             </button>
-            <button id="sort-age-none"
-                    class="btn btn-default glyphicon glyphicon-list"
-                    [ngClass]="{'sort-button-active':activeSortButtonId=='sort-age-none'}"
-                    (click)="onSortingButtonClick('sort-age-none', 'NONE', false)">
+            <button class="btn btn-default glyphicon glyphicon-list"
+                    [ngClass]="{'btn-success':isSortingButtonActive('NONE', false)}"
+                    (click)="onSortingButtonClick('NONE', false)">
             </button>
-            <button id="sort-age-descend"
-                    class="btn btn-default glyphicon glyphicon-arrow-down"
-                    [ngClass]="{'sort-button-active':activeSortButtonId=='sort-age-descend'}"
-                    (click)="onSortingButtonClick('sort-age-descend', 'AGE', false)">
+            <button class="btn btn-default glyphicon glyphicon-arrow-down"
+                    [ngClass]="{'btn-success':isSortingButtonActive('AGE', false)}"
+                    (click)="onSortingButtonClick('AGE', false)">
             </button>
           </div>
         </th>
         <th class="col-xs-2 center-all">
           <span class="center-block">Общий остаток счетов</span>
           <div class="btn-group btn-group-sm">
-            <button id="sort-total-ascend"
-                    class="btn btn-default glyphicon glyphicon-arrow-up"
-                    [ngClass]="{'sort-button-active':activeSortButtonId=='sort-total-ascend'}"
-                    (click)="onSortingButtonClick('sort-total-ascend', 'TOTALACCOUNTBALANCE', true)">
+            <button class="btn btn-default glyphicon glyphicon-arrow-up"
+                    [ngClass]="{'btn-success':isSortingButtonActive('TOTALACCOUNTBALANCE', true)}"
+                    (click)="onSortingButtonClick('TOTALACCOUNTBALANCE', true)">
             </button>
             <button id="sort-total-none"
                     class="btn btn-default glyphicon glyphicon-list"
-                    [ngClass]="{'sort-button-active':activeSortButtonId=='sort-total-none'}"
-                    (click)="onSortingButtonClick('sort-total-none', 'NONE', false)">
+                    [ngClass]="{'btn-success':isSortingButtonActive('NONE', false)}"
+                    (click)="onSortingButtonClick('NONE', false)">
             </button>
-            <button id="sort-total-descend"
-                    class="btn btn-default glyphicon glyphicon-arrow-down"
-                    [ngClass]="{'sort-button-active':activeSortButtonId=='sort-total-descend'}"
-                    (click)="onSortingButtonClick('sort-total-descend', 'TOTALACCOUNTBALANCE', false)">
+            <button class="btn btn-default glyphicon glyphicon-arrow-down"
+                    [ngClass]="{'btn-success':isSortingButtonActive('TOTALACCOUNTBALANCE', false)}"
+                    (click)="onSortingButtonClick('TOTALACCOUNTBALANCE', false)">
             </button>
           </div>
         </th>
         <th class="col-xs-2 center-all">
           <span class="center-block">Максимальный остаток</span>
           <div class="btn-group btn-group-sm">
-            <button id="sort-max-ascend"
-                    class="btn btn-default glyphicon glyphicon-arrow-up"
-                    [ngClass]="{'sort-button-active':activeSortButtonId=='sort-max-ascend'}"
-                    (click)="onSortingButtonClick('sort-max-ascend', 'MAXACCOUNTBALANCE', true)">
+            <button class="btn btn-default glyphicon glyphicon-arrow-up"
+                    [ngClass]="{'btn-success':isSortingButtonActive('MAXACCOUNTBALANCE', true)}"
+                    (click)="onSortingButtonClick('MAXACCOUNTBALANCE', true)">
             </button>
-            <button id="sort-max-none"
-                    class="btn btn-default glyphicon glyphicon-list"
-                    [ngClass]="{'sort-button-active':activeSortButtonId=='sort-max-none'}"
-                    (click)="onSortingButtonClick('sort-max-none', 'NONE', true)">
+            <button class="btn btn-default glyphicon glyphicon-list"
+                    [ngClass]="{'btn-success':isSortingButtonActive('NONE', true)}"
+                    (click)="onSortingButtonClick('NONE', true)">
             </button>
-            <button id="sort-max-descend"
-                    class="btn btn-default glyphicon glyphicon-arrow-down"
-                    [ngClass]="{'sort-button-active':activeSortButtonId=='sort-maxтзь-descend'}"
-                    (click)="onSortingButtonClick('sort-max-descend', 'MAXACCOUNTBALANCE', false)">
+            <button class="btn btn-default glyphicon glyphicon-arrow-down"
+                    [ngClass]="{'btn-success':isSortingButtonActive('MAXACCOUNTBALANCE', false)}"
+                    (click)="onSortingButtonClick('MAXACCOUNTBALANCE', false)">
             </button>
           </div>
         </th>
         <th class="col-xs-2 center-all">
           <span class="center-block">Минимальный остаток</span>
           <div class="btn-group btn-group-sm">
-            <button id="sort-min-ascend"
-                    class="btn btn-default glyphicon glyphicon-arrow-up"
-                    [ngClass]="{'sort-button-active':activeSortButtonId=='sort-min-ascend'}"
-                    (click)="onSortingButtonClick('sort-min-ascend', 'MINACCOUNTBALANCE', true)">
+            <button class="btn btn-default glyphicon glyphicon-arrow-up"
+                    [ngClass]="{'btn-success':isSortingButtonActive('MINACCOUNTBALANCE', true)}"
+                    (click)="onSortingButtonClick('MINACCOUNTBALANCE', true)">
             </button>
-            <button id="sort-min-none"
-                    class="btn btn-default glyphicon glyphicon-list"
-                    [ngClass]="{'sort-button-active':activeSortButtonId=='sort-min-none'}"
-                    (click)="onSortingButtonClick('sort-min-none', 'NONE', false)"></button>
-            <button id="sort-min-descend"
-                    class="btn btn-default glyphicon glyphicon-arrow-down"
-                    [ngClass]="{'sort-button-active':activeSortButtonId=='sort-min-descend'}"
-                    (click)="onSortingButtonClick('sort-min-descend', 'MINACCOUNTBALANCE', false)">
+            <button class="btn btn-default glyphicon glyphicon-list"
+                    [ngClass]="{'btn-success':isSortingButtonActive('NONE', false)}"
+                    (click)="onSortingButtonClick('NONE', false)">
+            </button>
+            <button class="btn btn-default glyphicon glyphicon-arrow-down"
+                    [ngClass]="{'btn-success':isSortingButtonActive('MINACCOUNTBALANCE', false)}"
+                    (click)="onSortingButtonClick('MINACCOUNTBALANCE', false)">
             </button>
           </div>
         </th>
       </tr>
       </thead>
       <tbody *ngFor="let record of records">
-      <tr (click)="onClientRecordButtonClick(record.id);"
-          [ngClass]="{'bg-success': record.id == selectedRecordId}">
-        <td class="client-record">{{record.fullName}}</td>
-        <td class="client-record">{{record.charmName}}</td>
-        <td class="client-record">{{record.age}}</td>
-        <td class="client-record">{{record.totalAccountBalance}}</td>
-        <td class="client-record">{{record.maxAccountBalance}}</td>
-        <td class="client-record">{{record.minAccountBalance}}</td>
+      <tr (click)="onClientRecordClick(record.id);"
+          [ngClass]="{'success': record.id == selectedRecordId}">
+        <td class="client-record-keep-selection">{{record.fullName}}</td>
+        <td class="client-record-keep-selection">{{record.charmName}}</td>
+        <td class="client-record-keep-selection">{{record.age}}</td>
+        <td class="client-record-keep-selection">{{record.totalAccountBalance}}</td>
+        <td class="client-record-keep-selection">{{record.maxAccountBalance}}</td>
+        <td class="client-record-keep-selection">{{record.minAccountBalance}}</td>
       </tr>
       </tbody>
     </table>
   </div>
   <div class="col-sm-1 text-center">
     <div class="btn-group-vertical btn-group-lg">
-      <button class="btn btn-success btn-control"
-              id="client-list-form-add"
-              (click)="client_record_modal.show(); onClientRecordEditButtonClick(false);">
+      <button class="btn btn-success btn-operation"
+              (click)="onClientRecordEditButtonClick(client_details_component, false);">
         +
       </button>
-      <button class="btn btn-primary btn-control"
-              [disabled]="selectedRecordId == null"
-              id="client-list-form-inspect"
-              (click)="client_record_modal.show(); onClientRecordEditButtonClick(true)">
+      <button class="btn btn-operation client-record-keep-selection"
+              [ngClass]="{'btn-primary': selectedRecordId != null}"
+              (click)="onClientRecordEditButtonClick(client_details_component, true)"
+              [disabled]="selectedRecordId == null">
         ...
       </button>
-      <button class="btn btn-danger btn-control"
-              [disabled]="selectedRecordId == null"
-              id="client-list-form-remove"
-              (click)="onClientRecordRemoveButtonClick()">
+      <button class="btn btn-operation"
+              [ngClass]="{'btn-danger': selectedRecordId != null}"
+              (click)="onClientRecordRemoveButtonClick()"
+              [disabled]="selectedRecordId == null">
         -
       </button>
     </div>

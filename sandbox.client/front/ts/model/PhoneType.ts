@@ -3,4 +3,5 @@ export enum PhoneType {
   WORK = "WORK",
   MOBILE = "MOBILE",
   EMBEDDED = "EMBEDDED",
+  OTHER = "OTHER",
 }
