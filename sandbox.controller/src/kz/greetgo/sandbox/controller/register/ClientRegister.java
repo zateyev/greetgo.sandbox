@@ -12,39 +12,38 @@ public interface ClientRegister {
   /**
    * Предоставляет количество страниц клиентских записей
    *
-   * @param clientRecordCount количество клиентских записей в одной странице
-   * @param nameFilter        текущая применяемая фильтрация
+   * @param nameFilter текущая применяемая фильтрация
    * @return количество страниц
    */
-  long getPageCount(long clientRecordCount, String nameFilter);
+  long getCount(String nameFilter);
 
   /**
    * Предоставляет список клиентских записей
    *
-   * @param clientRecordListRequest принимаемые параметры страницы, сортировки и фильтрации в виде модели
+   * @param listRequest принимаемые параметры страницы, сортировки и фильтрации в виде модели
    * @return список клиентских записей
    */
-  List<ClientRecord> getClientRecordList(ClientRecordListRequest clientRecordListRequest);
+  List<ClientRecord> getRecordList(ClientRecordListRequest listRequest);
 
   /**
    * Удаление клиентской записи
    *
-   * @param clientRecordId идентификатор клиентской записи
+   * @param id идентификатор клиентской записи
    */
-  void removeClientDetails(long clientRecordId);
+  void removeRecord(long id);
 
   /**
    * Возвращает клиентские детали
    *
-   * @param clientRecordId идентификатор клиентской записи
+   * @param id идентификатор клиентской записи
    * @return клиентский детали одного клиента
    */
-  ClientDetails getClientDetails(Long clientRecordId);
+  ClientDetails getDetails(Long id);
 
   /**
    * Сохранение новых или изменение существующих клиентских деталей
    *
-   * @param clientDetailsToSave клиентские детали
+   * @param detailsToSave клиентские детали
    */
-  void saveClientDetails(ClientDetailsToSave clientDetailsToSave);
+  void saveDetails(ClientDetailsToSave detailsToSave);
 }

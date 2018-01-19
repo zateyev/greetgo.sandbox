@@ -21,44 +21,40 @@ public class ClientRegisterStand implements ClientRegister {
   public BeanGetter<StandDb> db;
 
   @Override
-  public long getPageCount(long clientRecordCount, String clientRecordNameFilter) {
+  public long getCount(String namefilter) {
     List<ClientDot> clientDots = new ArrayList<>(db.get().clientStorage.values());
-    clientDots = this.getFilteredList(clientDots, clientRecordNameFilter);
+    clientDots = this.getFilteredList(clientDots, namefilter);
 
-    long ret = clientDots.size() / clientRecordCount;
-    if (clientDots.size() % clientRecordCount > 0)
-      ret++;
-
-    return ret;
+    return clientDots.size() ;
   }
 
   @Override
-  public List<ClientRecord> getClientRecordList(ClientRecordListRequest clientRecordListRequest) {
+  public List<ClientRecord> getRecordList(ClientRecordListRequest listRequest) {
     List<ClientDot> clientDots = new ArrayList<>(db.get().clientStorage.values());
     List<ClientRecord> clientRecords = new ArrayList<>();
 
-    clientDots = this.getFilteredList(clientDots, clientRecordListRequest.nameFilter);
+    clientDots = this.getFilteredList(clientDots, listRequest.nameFilter);
 
-    switch (clientRecordListRequest.columnSortType) {
+    switch (listRequest.columnSortType) {
       case AGE:
-        clientDots = this.getListByAge(clientDots, clientRecordListRequest.sortAscend);
+        clientDots = this.getListByAge(clientDots, listRequest.sortAscend);
         break;
       case TOTALACCOUNTBALANCE:
-        clientDots = this.getListByTotalAccountBalance(clientDots, clientRecordListRequest.sortAscend);
+        clientDots = this.getListByTotalAccountBalance(clientDots, listRequest.sortAscend);
         break;
       case MAXACCOUNTBALANCE:
-        clientDots = this.getListByMaxAccountBalance(clientDots, clientRecordListRequest.sortAscend);
+        clientDots = this.getListByMaxAccountBalance(clientDots, listRequest.sortAscend);
         break;
       case MINACCOUNTBALANCE:
-        clientDots = this.getListByMinAccountBalance(clientDots, clientRecordListRequest.sortAscend);
+        clientDots = this.getListByMinAccountBalance(clientDots, listRequest.sortAscend);
         break;
       default:
         clientDots = this.getDefaultList(clientDots);
     }
 
     PageUtils.cutPage(clientDots,
-      clientRecordListRequest.clientRecordCountToSkip,
-      clientRecordListRequest.clientRecordCount);
+      listRequest.clientRecordCountToSkip,
+      listRequest.clientRecordCount);
 
     for (ClientDot clientDot : clientDots)
       clientRecords.add(clientDot.toClientRecord());
@@ -170,19 +166,19 @@ public class ClientRegisterStand implements ClientRegister {
   }
 
   @Override
-  public void removeClientDetails(long clientRecordId) {
+  public void removeRecord(long id) {
     Map<Long, ClientDot> clientDotMap = db.get().clientStorage;
 
-    if (clientDotMap.remove(clientRecordId) == null)
+    if (clientDotMap.remove(id) == null)
       throw new NotFound();
   }
 
   @Override
-  public ClientDetails getClientDetails(Long clientRecordId) {
+  public ClientDetails getDetails(Long id) {
     List<CharmDot> charmDots = new ArrayList<>(db.get().charmStorage.values());
     ClientDetails clientDetails;
 
-    if (clientRecordId == null) {
+    if (id == null) {
       clientDetails = new ClientDetails();
 
       clientDetails.id = null;
@@ -205,7 +201,7 @@ public class ClientRegisterStand implements ClientRegister {
 
       clientDetails.phones = new ArrayList<>();
     } else {
-      ClientDot clientDot = db.get().clientStorage.get(clientRecordId);
+      ClientDot clientDot = db.get().clientStorage.get(id);
       clientDetails = clientDot.toClientDetails();
     }
 
@@ -216,17 +212,17 @@ public class ClientRegisterStand implements ClientRegister {
   }
 
   @Override
-  public void saveClientDetails(ClientDetailsToSave clientDetailsToSave) {
+  public void saveDetails(ClientDetailsToSave detailstoSave) {
     Map<Long, ClientDot> clientDotMap = db.get().clientStorage;
     ClientDot clientDot;
 
-    if (clientDetailsToSave.id == null) {
+    if (detailstoSave.id == null) {
       clientDot = new ClientDot();
-      clientDot.toClientDot(clientDetailsToSave, (long) clientDotMap.size() + 1, db.get().charmStorage);
+      clientDot.toClientDot(detailstoSave, (long) clientDotMap.size() + 1, db.get().charmStorage);
       clientDotMap.put((long) clientDotMap.size() + 1, clientDot);
     } else {
-      clientDot = clientDotMap.get(clientDetailsToSave.id);
-      clientDot.toClientDot(clientDetailsToSave, null, db.get().charmStorage);
+      clientDot = clientDotMap.get(detailstoSave.id);
+      clientDot.toClientDot(detailstoSave, null, db.get().charmStorage);
     }
   }
 }

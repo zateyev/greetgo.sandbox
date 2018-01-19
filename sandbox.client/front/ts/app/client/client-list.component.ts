@@ -37,11 +37,13 @@ export class ClientListComponent {
   }
 
   private updatePageNumeration() {
-    this.httpService.get("/client/pageCount", {
-      'clientRecordCount': this.httpService.pageSize,
+    this.httpService.get("/client/count", {
       'clientRecordNameFilter': this.listRequest.nameFilter
     }).toPromise().then(result => {
-      this.pageCount = result.json() as number;
+      this.pageCount = Math.floor(result.json() as number / this.httpService.pageSize);
+      if ( result.json() as number % this.httpService.pageSize > 0 )
+        this.pageCount++;
+
       this.pageNums = [];
 
       if (this.pageCount > 0) {
