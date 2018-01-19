@@ -1,5 +1,7 @@
 package kz.greetgo.sandbox.db.register_impl.migration;
 
+import kz.greetgo.sandbox.db.report.SqlExecutionTime.SqlExecutionTimeView;
+import kz.greetgo.util.RND;
 import org.apache.log4j.Logger;
 
 import java.io.*;
@@ -13,8 +15,11 @@ public class MigrationFrs {
   public File inFile, errorsFile;
   public Connection connection;
   public int maxBatchSize = 5000;
+  public SqlExecutionTimeView view = new SqlExecutionTimeView(new FileOutputStream("build/SqlExecutionTimeCIA.xlsx"));
 
   private final Logger logger = Logger.getLogger(getClass());
+
+  public MigrationFrs() throws FileNotFoundException {}
 
   private void exec(String sql) throws SQLException {
 
@@ -24,6 +29,11 @@ public class MigrationFrs {
     try (Statement statement = connection.createStatement()) {
       long startedAt = System.nanoTime();
       statement.execute(sql);
+
+      long elapsed = System.nanoTime() - startedAt;
+      double seconds = (double) elapsed / 1000000000.0;
+
+      view.append(seconds, sql);
       logger.trace("SQL [" + (System.nanoTime() - startedAt) + "] " + sql);
     }
 
@@ -38,11 +48,15 @@ public class MigrationFrs {
     downloadErrors();
   }
 
+  public void getExecutedTime() {
+    view.finish();
+  }
+
   void createTempTables() throws SQLException {
 
     String date = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new java.util.Date());
-    accountTable = "tmp_accounts_" + date;
-    transactionTable = "tmp_transactions_" + date;
+    accountTable = "tmp_accounts_" + date + "_" + RND.intStr(3);
+    transactionTable = "tmp_transactions_" + date + "_" + RND.intStr(3);
 
     exec(
       "create table " + accountTable + "(" +
@@ -137,12 +151,12 @@ public class MigrationFrs {
 
     exec(
       "insert into transaction_type(id, name, actual)\n" +
-        " select tmp.generatedId as id, \n" +
+        " select distinct on(transaction_type) tmp.generatedId as id, \n" +
         " transaction_type as name, 1 as actual \n" +
         " from TMP_TRANSACTIONS as tmp\n" +
         " where tmp.transaction_type not in (select name from transaction_type where actual = 1)\n" +
-        " and tmp.error is null" +
-        " group by transaction_type, generatedId limit 1"
+        " and tmp.error is null\n" +
+        " group by transaction_type, generatedId"
     );
 
     exec(

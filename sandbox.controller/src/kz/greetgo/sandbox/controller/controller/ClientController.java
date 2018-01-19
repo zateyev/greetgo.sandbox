@@ -55,4 +55,5 @@ public class ClientController implements Controller {
     @Par("id") String id) {
     clientRegister.get().deleteClient(id);
   }
+
 }

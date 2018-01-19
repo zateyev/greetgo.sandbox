@@ -30,18 +30,20 @@ public class MainMigrationCiaTest extends ParentTestNg {
   Connection connection;
   MigrationCia migration = new MigrationCia();
 
+  public MainMigrationCiaTest() throws Exception {}
+
   @BeforeMethod
   public void createConnection() throws Exception {
     connection = migrationManager.get().createConnection();
-    migration.connection = connection;
-    migration.createTempTables();
+//    migration.connection = connection;
+//    migration.createTempTables();
   }
 
   @AfterMethod
   public void closeConnection() throws Exception {
-    migrationTestDao.get().dropTables(migration.clientTable);
-    migrationTestDao.get().dropTables(migration.addressTable);
-    migrationTestDao.get().dropTables(migration.phoneTable);
+//    migrationTestDao.get().dropTables(migration.clientTable);
+//    migrationTestDao.get().dropTables(migration.addressTable);
+//    migrationTestDao.get().dropTables(migration.phoneTable);
     connection.close();
     connection = null;
   }
@@ -91,6 +93,7 @@ public class MainMigrationCiaTest extends ParentTestNg {
     //
     //
     migration.mainMigrationOperation();
+    //migration.getExecutedTime();
     //
     //
 

@@ -3,6 +3,7 @@ package kz.greetgo.sandbox.db.register_impl.migration;
 import kz.greetgo.depinject.core.Bean;
 import kz.greetgo.depinject.core.BeanGetter;
 import kz.greetgo.sandbox.db.configs.DbConfig;
+import kz.greetgo.sandbox.db.register_impl.migration.SshConnector.SSHManager;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -21,7 +22,12 @@ public class MigrationManager {
       dbConfig.get().password());
   }
 
-  public void migrate() {
+
+  public void migrate() throws Exception {
+
+    SSHManager sshManager = new SSHManager();
+    sshManager.connectAndMigrateCia(createConnection());
+    sshManager.connectAndMigrateFrs(createConnection());
 
   }
 

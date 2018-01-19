@@ -58,9 +58,9 @@ public class ClientReportViewXslx implements ClientReportView {
     sheet.cellStr(1, row.fio);
     sheet.cellStr(2, row.charm);
     sheet.cellInt(3, row.age);
-    sheet.cellStr(4, String.valueOf(row.totalAccountBalance));
-    sheet.cellStr(5, String.valueOf(row.maxAccountBalance));
-    sheet.cellStr(6, String.valueOf(row.minAccountBalance));
+    sheet.cellDouble(4, row.totalAccountBalance);
+    sheet.cellDouble(5, row.maxAccountBalance);
+    sheet.cellDouble(6, row.minAccountBalance);
     sheet.row().finish();
   }
 
@@ -71,6 +71,7 @@ public class ClientReportViewXslx implements ClientReportView {
     sheet.row().start();
     sheet.cellStr(1, "Отчет сформирован для: " + fio);
     xlsx.complete(out);
+
   }
 
   public static void main(String[] args) throws Exception {
