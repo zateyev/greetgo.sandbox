@@ -10,7 +10,10 @@ import kz.greetgo.sandbox.db.register_impl.migration.MigrationFrs;
 import kz.greetgo.util.RND;
 import kz.greetgo.util.ServerUtil;
 
-import java.io.*;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.InputStream;
 import java.sql.Connection;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -31,41 +34,49 @@ public class SSHManager {
   private static String SERVER_DIRECTORY;
   private static String LOCAL_DIRECTORY;
 
+  private Session session;
+  private Channel channel;
+  private ChannelSftp channelSftp;
+
   MigrationCia cia = new MigrationCia();
   MigrationFrs frc = new MigrationFrs();
 
-  public SSHManager() throws FileNotFoundException {}
+  public SSHManager() throws Exception {}
 
-  private Session initSession() throws Exception {
-
+  private void initSession() throws Exception {
     JSch jsch = new JSch();
 
     readConfig();
 
-    Session session = jsch.getSession(USERNAME, HOSTNAME, SSH_PORT);
+    session = jsch.getSession(USERNAME, HOSTNAME, SSH_PORT);
     session.setPassword(PASSWORD);
     UserInfo userInfo = new SshUserInfo();
 
     session.setUserInfo(userInfo);
     session.setConfig("StrictHostKeyChecking", "no");
     session.connect(CONNECTION_TIMEOUT);
-    return session;
+  }
 
+  private void openSSH() throws Exception {
+    initSession();
+    channel = session.openChannel("sftp");
+    channel.connect();
+
+    channelSftp = (ChannelSftp) channel;
+    channelSftp.cd(SERVER_DIRECTORY);
+  }
+
+  private void closeSSH() {
+    channel.disconnect();
+    session.disconnect();
   }
 
   public void connectAndMigrateCia(Connection connection) throws Exception {
+    openSSH();
 
     List<String> filesForMigrate = new ArrayList<>();
 
-    Session session = initSession();
-
-    Channel channel = session.openChannel("sftp");
-    channel.connect();
-
-    ChannelSftp channelSftp = (ChannelSftp) channel;
-    channelSftp.cd(SERVER_DIRECTORY);
-
-    Pattern pattern = Pattern.compile("from_cia_[0-9]{8}.xml");
+    Pattern pattern = Pattern.compile("from_cia_[0-9]{4}-[0-9]{2}-[0-9]{2}-[0-9]{6}.xml");
     Vector<ChannelSftp.LsEntry> xmlList = channelSftp.ls("*.xml");
     for (ChannelSftp.LsEntry entry : xmlList) {
 
@@ -79,9 +90,7 @@ public class SSHManager {
 
     }
 
-    channel.disconnect();
-    session.disconnect();
-
+    closeSSH();
     migrateCia(filesForMigrate, connection);
 
   }
@@ -91,13 +100,7 @@ public class SSHManager {
     Collections.sort(filesForMigrate);
     for (String fileName : filesForMigrate) {
 
-      Session session = initSession();
-      Channel channel = session.openChannel("sftp");
-      channel.connect();
-
-      ChannelSftp channelSftp = (ChannelSftp) channel;
-      channelSftp.cd(SERVER_DIRECTORY);
-
+      openSSH();
 
       String errorFileName = fileName + RND.intStr(3) + "_Error.log";
 
@@ -112,8 +115,7 @@ public class SSHManager {
 
       }
 
-      channel.disconnect();
-      session.disconnect();
+      closeSSH();
 
       cia.connection = connection;
       cia.inFile = toMigrate;
@@ -122,11 +124,14 @@ public class SSHManager {
       //
       cia.migrate();
       //
-      channelSftp.put(new FileInputStream(cia.errorsFile), cia.errorsFile.getName());
 
+      openSSH();
+
+      channelSftp.put(new FileInputStream(cia.errorsFile), cia.errorsFile.getName());
       channelSftp.rename(fileName,
         fileName.replaceAll(".XmlToMigrate", ".XmlMigrated"));
 
+      closeSSH();
 
     }
 
@@ -134,29 +139,36 @@ public class SSHManager {
 
   public void connectAndMigrateFrs(Connection connection) throws Exception {
 
-    Session session = initSession();
+    List<String> filesForMigrate = new ArrayList<>();
 
-    Channel channel = session.openChannel("sftp");
-    channel.connect();
+    openSSH();
 
-    ChannelSftp channelSftp = (ChannelSftp) channel;
-    channelSftp.cd(SERVER_DIRECTORY);
-
+    Pattern pattern = Pattern.compile("from_frs_[0-9]{4}-[0-9]{2}-[0-9]{2}-[0-9]{6}.json_row");
     Vector<ChannelSftp.LsEntry> xmlList = channelSftp.ls("*.json_row");
     for (ChannelSftp.LsEntry entry : xmlList) {
 
       String fileName = entry.getFilename();
-      String tempFileName = fileName.replaceAll(".json_row", ".JsonToMigrate");
-      channelSftp.rename(fileName, tempFileName);
+      Matcher m = pattern.matcher(fileName);
+      if (m.matches()) {
+        String tempFileName = fileName.replaceAll(".json_row", ".JsonToMigrate");
+        channelSftp.rename(fileName, tempFileName);
+        filesForMigrate.add(tempFileName);
+      }
 
     }
+    closeSSH();
 
+    migrateFrs(filesForMigrate, connection);
 
-    Vector<ChannelSftp.LsEntry> toMigrateList = channelSftp.ls("*.JsonToMigrate");
-    Collections.sort(toMigrateList);
-    for (ChannelSftp.LsEntry entry : toMigrateList) {
+  }
 
-      String fileName = entry.getFilename();
+  private void migrateFrs(List<String> filesForMigrate, Connection connection) throws Exception {
+
+    Collections.sort(filesForMigrate);
+    for (String fileName : filesForMigrate) {
+
+      openSSH();
+
       String errorFileName = fileName + RND.intStr(3) + "_Error.log";
 
       File toMigrate = new File(LOCAL_DIRECTORY + "inFile_" + RND.intStr(10) + "_" + fileName);
@@ -170,21 +182,25 @@ public class SSHManager {
 
       }
 
+      closeSSH();
+
       frc.connection = connection;
       frc.inFile = toMigrate;
       frc.errorsFile = new File("build/migration/" + errorFileName);
       //
       frc.migrate();
       //
-      channelSftp.put(new FileInputStream(frc.errorsFile), frc.errorsFile.getName());
 
+      openSSH();
+
+      channelSftp.put(new FileInputStream(frc.errorsFile), frc.errorsFile.getName());
       channelSftp.rename(fileName,
         fileName.replaceAll(".JsonToMigrate", ".JsonMigrated"));
 
+      closeSSH();
+
     }
 
-    channel.disconnect();
-    session.disconnect();
   }
 
   public BeanGetter<SshConfig> sshConfig;
@@ -206,14 +222,7 @@ public class SSHManager {
 
   public void renameToDefault() throws Exception {
 
-    Session session = initSession();
-
-    Channel channel = session.openChannel("sftp");
-    channel.connect();
-
-    ChannelSftp channelSftp = (ChannelSftp) channel;
-    channelSftp.cd(SERVER_DIRECTORY);
-
+    openSSH();
 
     Vector<ChannelSftp.LsEntry> list = channelSftp.ls("*.XmlMigrated");
 
@@ -239,8 +248,7 @@ public class SSHManager {
 
     }
 
-    channel.disconnect();
-    session.disconnect();
+    closeSSH();
 
   }
 
