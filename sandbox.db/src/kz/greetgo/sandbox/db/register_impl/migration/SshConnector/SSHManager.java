@@ -2,6 +2,9 @@ package kz.greetgo.sandbox.db.register_impl.migration.SshConnector;
 
 
 import com.jcraft.jsch.*;
+import kz.greetgo.depinject.core.Bean;
+import kz.greetgo.depinject.core.BeanGetter;
+import kz.greetgo.sandbox.db.configs.SshConfig;
 import kz.greetgo.sandbox.db.register_impl.migration.MigrationCia;
 import kz.greetgo.sandbox.db.register_impl.migration.MigrationFrs;
 import kz.greetgo.util.RND;
@@ -9,10 +12,14 @@ import kz.greetgo.util.ServerUtil;
 
 import java.io.*;
 import java.sql.Connection;
+import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Properties;
+import java.util.List;
 import java.util.Vector;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
+@Bean
 public class SSHManager {
 
   private static int SSH_PORT;
@@ -24,7 +31,6 @@ public class SSHManager {
   private static String SERVER_DIRECTORY;
   private static String LOCAL_DIRECTORY;
 
-
   MigrationCia cia = new MigrationCia();
   MigrationFrs frc = new MigrationFrs();
 
@@ -34,11 +40,12 @@ public class SSHManager {
 
     JSch jsch = new JSch();
 
-    readConfig("SSH.config");
+    readConfig();
 
     Session session = jsch.getSession(USERNAME, HOSTNAME, SSH_PORT);
     session.setPassword(PASSWORD);
     UserInfo userInfo = new SshUserInfo();
+
     session.setUserInfo(userInfo);
     session.setConfig("StrictHostKeyChecking", "no");
     session.connect(CONNECTION_TIMEOUT);
@@ -48,6 +55,8 @@ public class SSHManager {
 
   public void connectAndMigrateCia(Connection connection) throws Exception {
 
+    List<String> filesForMigrate = new ArrayList<>();
+
     Session session = initSession();
 
     Channel channel = session.openChannel("sftp");
@@ -56,20 +65,40 @@ public class SSHManager {
     ChannelSftp channelSftp = (ChannelSftp) channel;
     channelSftp.cd(SERVER_DIRECTORY);
 
+    Pattern pattern = Pattern.compile("from_cia_[0-9]{8}.xml");
     Vector<ChannelSftp.LsEntry> xmlList = channelSftp.ls("*.xml");
     for (ChannelSftp.LsEntry entry : xmlList) {
 
       String fileName = entry.getFilename();
-      String tempFileName = fileName.replaceAll(".xml", ".XmlToMigrate");
-      channelSftp.rename(fileName, tempFileName);
+      Matcher m = pattern.matcher(fileName);
+      if (m.matches()) {
+        String tempFileName = fileName.replaceAll(".xml", ".XmlToMigrate");
+        channelSftp.rename(fileName, tempFileName);
+        filesForMigrate.add(tempFileName);
+      }
 
     }
 
-    Vector<ChannelSftp.LsEntry> toMigrateList = channelSftp.ls("*.XmlToMigrate");
-    Collections.sort(toMigrateList);
-    for (ChannelSftp.LsEntry entry : toMigrateList) {
+    channel.disconnect();
+    session.disconnect();
 
-      String fileName = entry.getFilename();
+    migrateCia(filesForMigrate, connection);
+
+  }
+
+  private void migrateCia(List<String> filesForMigrate, Connection connection) throws Exception {
+
+    Collections.sort(filesForMigrate);
+    for (String fileName : filesForMigrate) {
+
+      Session session = initSession();
+      Channel channel = session.openChannel("sftp");
+      channel.connect();
+
+      ChannelSftp channelSftp = (ChannelSftp) channel;
+      channelSftp.cd(SERVER_DIRECTORY);
+
+
       String errorFileName = fileName + RND.intStr(3) + "_Error.log";
 
       File toMigrate = new File(LOCAL_DIRECTORY + "inFile_" + RND.intStr(10) + "_" + fileName);
@@ -95,10 +124,10 @@ public class SSHManager {
       channelSftp.rename(fileName,
         fileName.replaceAll(".XmlToMigrate", ".XmlMigrated"));
 
-    }
+      channel.disconnect();
+      session.disconnect();
 
-    channel.disconnect();
-    session.disconnect();
+    }
 
   }
 
@@ -157,19 +186,19 @@ public class SSHManager {
     session.disconnect();
   }
 
-  private void readConfig(String resource) throws Exception {
+  public BeanGetter<SshConfig> sshConfig;
 
-    Properties props = new Properties();
-    props.load(getClass().getResourceAsStream(resource));
 
-    SSH_PORT = Integer.valueOf(props.getProperty("SSH_PORT"));
-    CONNECTION_TIMEOUT = Integer.valueOf(props.getProperty("CONNECTION_TIMEOUT"));
+  private void readConfig() {
 
-    HOSTNAME = props.getProperty("HOSTNAME");
-    USERNAME = props.getProperty("USERNAME");
-    PASSWORD = props.getProperty("PASSWORD");
-    SERVER_DIRECTORY = props.getProperty("SERVER_DIRECTORY");
-    LOCAL_DIRECTORY = props.getProperty("LOCAL_DIRECTORY");
+    SSH_PORT = sshConfig.get().port();
+    CONNECTION_TIMEOUT = sshConfig.get().timeout();
+
+    HOSTNAME = sshConfig.get().hostName();
+    USERNAME = sshConfig.get().username();
+    PASSWORD = sshConfig.get().pass();
+    SERVER_DIRECTORY = sshConfig.get().serverDir();
+    LOCAL_DIRECTORY = sshConfig.get().localDir();
 
   }
 
