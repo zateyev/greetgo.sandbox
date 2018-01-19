@@ -7,15 +7,16 @@ import kz.greetgo.sandbox.db.register_impl.migration.SshConnector.SSHManager;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
-import java.sql.SQLException;
 
 @Bean
 public class MigrationManager {
 
   public BeanGetter<DbConfig> dbConfig;
+  public BeanGetter<SSHManager> sshManager;
 
 
-  public Connection createConnection() throws SQLException {
+  public Connection createConnection() throws Exception {
+    Class.forName("org.postgresql.Driver");
     return DriverManager.getConnection(
       dbConfig.get().url(),
       dbConfig.get().username(),
@@ -25,7 +26,7 @@ public class MigrationManager {
 
   public void migrate() throws Exception {
 
-    SSHManager sshManager = new SSHManager();
+    SSHManager sshManager = this.sshManager.get();
     try (Connection connection = createConnection()) {
       sshManager.connectAndMigrateCia(connection);
     }

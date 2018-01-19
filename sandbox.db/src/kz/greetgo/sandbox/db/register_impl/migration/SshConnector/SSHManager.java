@@ -112,6 +112,9 @@ public class SSHManager {
 
       }
 
+      channel.disconnect();
+      session.disconnect();
+
       cia.connection = connection;
       cia.inFile = toMigrate;
       cia.errorsFile = new File(LOCAL_DIRECTORY + errorFileName);
@@ -124,8 +127,6 @@ public class SSHManager {
       channelSftp.rename(fileName,
         fileName.replaceAll(".XmlToMigrate", ".XmlMigrated"));
 
-      channel.disconnect();
-      session.disconnect();
 
     }
 

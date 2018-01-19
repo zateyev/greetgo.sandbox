@@ -44,14 +44,14 @@ public class MainMigrationFrsTest extends ParentTestNg {
   public void createConnection() throws Exception {
     connection = migrationManager.get().createConnection();
     migration.connection = connection;
-    //migration.createTempTables();
+    migration.createTempTables();
   }
 
 
   @AfterMethod
   public void closeConnection() throws Exception {
-//    migrationTestDao.get().dropTables(migration.accountTable);
-//    migrationTestDao.get().dropTables(migration.transactionTable);
+    migrationTestDao.get().dropTables(migration.accountTable);
+    migrationTestDao.get().dropTables(migration.transactionTable);
     connection.close();
     connection = null;
   }

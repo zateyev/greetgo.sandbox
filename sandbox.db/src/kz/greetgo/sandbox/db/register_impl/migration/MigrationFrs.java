@@ -33,7 +33,6 @@ public class MigrationFrs {
       long elapsed = System.nanoTime() - startedAt;
       double seconds = (double) elapsed / 1000000000.0;
 
-      view.append(seconds, sql);
       logger.trace("SQL [" + (System.nanoTime() - startedAt) + "] " + sql);
     }
 

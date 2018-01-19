@@ -42,7 +42,6 @@ public class MigrationCia {
       long elapsed = System.nanoTime() - startedAt;
       double seconds = (double) elapsed / 1000000000.0;
 
-      view.append(seconds, sql);
       logger.trace("SQL [" + seconds + "] " + sql);
     }
   }
