@@ -2,7 +2,10 @@ package kz.greetgo.sandbox.db.register_impl;
 
 import kz.greetgo.depinject.core.Bean;
 import kz.greetgo.depinject.core.BeanGetter;
-import kz.greetgo.sandbox.controller.model.*;
+import kz.greetgo.sandbox.controller.model.ClientDetails;
+import kz.greetgo.sandbox.controller.model.ClientListRequest;
+import kz.greetgo.sandbox.controller.model.ClientRecord;
+import kz.greetgo.sandbox.controller.model.ClientToSave;
 import kz.greetgo.sandbox.controller.register.ClientRegister;
 import kz.greetgo.sandbox.db.dao.postgres.ClientDaoPostgres;
 import kz.greetgo.sandbox.db.register_impl.jdbc.FillClientReportView;
@@ -21,6 +24,7 @@ import java.util.List;
 
 @Bean
 public class ClientRegisterImpl implements ClientRegister {
+
   public BeanGetter<ClientDaoPostgres> clientDao;
 
   public BeanGetter<JdbcSandbox> jdbc;
@@ -41,11 +45,12 @@ public class ClientRegisterImpl implements ClientRegister {
     ClientDetails ret = new ClientDetails();
 
     if (id != null && !"".equals(id)) {
+
       ret = clientDao.get().loadDetails(id);
       ret.factAddress = clientDao.get().getFactAddress(id);
       ret.regAddress = clientDao.get().getRegAddress(id);
-
       ret.phones = jdbc.get().execute(new GetClientPhones(id));
+
     }
     ret.charms = clientDao.get().loadCharmList();
 

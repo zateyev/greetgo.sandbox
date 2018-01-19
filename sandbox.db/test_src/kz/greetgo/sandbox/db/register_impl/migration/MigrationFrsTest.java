@@ -12,10 +12,7 @@ import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 import java.nio.charset.Charset;
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -44,7 +41,7 @@ public class MigrationFrsTest extends ParentTestNg{
   }
 
   @Test
-  public void createTempTables() throws SQLException {
+  public void createTempTables() throws Exception {
 
     MigrationFrs migration = new MigrationFrs();
     migration.connection = connection;

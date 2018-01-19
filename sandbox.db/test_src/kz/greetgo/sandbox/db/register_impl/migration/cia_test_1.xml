@@ -19,6 +19,27 @@
     <workPhone>+7-123-111-00-33 вн. 3343</workPhone>
   </client>
 
+
+  <client id="N8X4-5-R9C">
+    <surname value="Бабанина"/>
+    <name value="Людмила"/>
+    <patronymic value="Кондратьевна"/>
+    <gender value="FEMALE"/>
+    <charm value="Тревожный"/>
+    <birth value="1971-04-28"/>
+    <address>
+      <fact street="Барнаульская" house="43" flat="1"/>
+      <register street="Минина" house="41" flat="68"/>
+    </address>
+    <homePhone>+7 718 969 02 32</homePhone>
+    <workPhone>+7 744 969 02 33</workPhone>
+    <workPhone>+7 744 969 02 33</workPhone>
+    <workPhone>+7 727 969 02 33</workPhone>
+    <mobilePhone>+7 705 969 02 33</mobilePhone>
+    <mobilePhone>+7 775 969 02 33</mobilePhone>
+    <mobilePhone>+7 747 969 02 33</mobilePhone>
+  </client>
+
   <client id="4-DU8-32-ss">
     <surname value="Петров"/>
     <name value="Пётр"/>

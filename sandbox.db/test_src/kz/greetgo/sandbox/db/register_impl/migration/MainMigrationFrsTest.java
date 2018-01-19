@@ -14,6 +14,7 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.charset.Charset;
 import java.sql.Connection;
@@ -37,18 +38,20 @@ public class MainMigrationFrsTest extends ParentTestNg {
   MigrationFrs migration = new MigrationFrs();
   long no = 0; //Порядковый номер для аккаунта клиента
 
+  public MainMigrationFrsTest() throws FileNotFoundException {}
+
   @BeforeMethod
   public void createConnection() throws Exception {
     connection = migrationManager.get().createConnection();
     migration.connection = connection;
-    migration.createTempTables();
+    //migration.createTempTables();
   }
 
 
   @AfterMethod
   public void closeConnection() throws Exception {
-    migrationTestDao.get().dropTables(migration.accountTable);
-    migrationTestDao.get().dropTables(migration.transactionTable);
+//    migrationTestDao.get().dropTables(migration.accountTable);
+//    migrationTestDao.get().dropTables(migration.transactionTable);
     connection.close();
     connection = null;
   }
@@ -255,14 +258,6 @@ public class MainMigrationFrsTest extends ParentTestNg {
 
 
   }
-
-
-
-
-
-
-
-
 
 
   private void insertAccount(String tableName,

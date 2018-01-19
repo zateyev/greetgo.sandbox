@@ -1,15 +1,14 @@
 package kz.greetgo.sandbox.db.register_impl.migration;
 
+import kz.greetgo.sandbox.db.report.SqlExecutionTime.SqlExecutionTimeView;
+import kz.greetgo.util.RND;
 import org.apache.log4j.Logger;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXParseException;
 import org.xml.sax.XMLReader;
 import org.xml.sax.helpers.XMLReaderFactory;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileWriter;
-import java.io.IOException;
+import java.io.*;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -20,8 +19,11 @@ public class MigrationCia {
   public File inFile, errorsFile;
   public Connection connection;
   public int maxBatchSize = 5000;
+  public SqlExecutionTimeView view = new SqlExecutionTimeView(new FileOutputStream("build/SqlExecutionTimeCIA.xlsx"));
 
   private final Logger logger = Logger.getLogger(getClass());
+
+  public MigrationCia() throws FileNotFoundException {}
 
   private void exec(String sql) throws SQLException {
 
@@ -31,8 +33,14 @@ public class MigrationCia {
 
     try (Statement statement = connection.createStatement()) {
       long startedAt = System.nanoTime();
+
       statement.execute(sql);
-      logger.trace("SQL [" + (System.nanoTime() - startedAt) + "] " + sql);
+
+      long elapsed = System.nanoTime() - startedAt;
+      double seconds = (double) elapsed / 1000000000.0;
+
+      view.append(seconds, sql);
+      logger.trace("SQL [" + seconds + "] " + sql);
     }
   }
 
@@ -47,12 +55,17 @@ public class MigrationCia {
     downloadErrors();
   }
 
+  public void getExecutedTime() throws SQLException {
+    view.finish();
+  }
+
   void createTempTables() throws Exception {
+
     String date = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new java.util.Date());
 
-    clientTable = "tmp_client_" + date;
-    addressTable = "tmp_client_address_" + date;
-    phoneTable = "tmp_client_phone_" + date;
+    clientTable = "tmp_client_" + date + "_" + RND.intStr(3);
+    addressTable = "tmp_client_address_" + date + "_" + RND.intStr(3);
+    phoneTable = "tmp_client_phone_" + date + "_" + RND.intStr(3);
 
     exec("create table " + clientTable + "(" +
       "  no bigint not null," +
@@ -89,9 +102,8 @@ public class MigrationCia {
         " no bigint not null," +
         " client varchar(50)," +
         " type varchar(10)," +
-        " number varchar(50), " +
+        " number varchar(50) " +
 
-        " primary key(no, number)" +
         ")"
     );
 
@@ -124,15 +136,14 @@ public class MigrationCia {
 
   void downloadErrors() throws Exception {
 
-    try(FileWriter out = new FileWriter(errorsFile)){
+    try (FileWriter out = new FileWriter(errorsFile, true)) {
 
       out.write(errorLog.toString());
+      ClientErrorWriter ew = new ClientErrorWriter(
+        out, connection, clientTable
+      );
 
-
-    try (FileWriter out = new FileWriter(errorsFile)) {
-      out.write(errorLog.toString());
     }
-
   }
 
   void mainMigrationOperation() throws SQLException {
@@ -208,7 +219,7 @@ public class MigrationCia {
 
     exec(
       "insert into charm (name, id, actual) \n" +
-        " select  charm, tmp.generatedId as id, 1 as actual \n" +
+        " select  distinct on(charm) charm, tmp.generatedId as id, 1 as actual \n" +
         " from TMP_CLIENT as tmp where tmp.charm not in(select name from charm where actual = 1) " +
         "and error is null group by charm, generatedId"
     );
@@ -262,17 +273,17 @@ public class MigrationCia {
     );
 
     exec(
-      "insert into client_phone(client, type, number, actual)\n" +
-        " select c.id, ph.type, ph.number, 1 as actual from client c join TMP_CLIENT as tmp on c.cia_id = tmp.cia_id \n" +
+      " insert into client_phone(client, type, number, actual)\n" +
+        " select distinct on(c.id, ph.number)\n" +
+        " c.id, ph.type, ph.number, 1 as actual from client c join TMP_CLIENT as tmp on c.cia_id = tmp.cia_id \n" +
         " join TMP_PHONE as ph on tmp.cia_id = ph.client\n" +
         " where tmp.no = ph.no\n" +
-        " and c.actual = 1" +
-        " and tmp.error is null" +
-        " and tmp.status = 'READY_TO_MERGE'" +
+        " and c.actual = 1\n" +
+        " and tmp.error is null\n" +
+        " and tmp.status = 'READY_TO_MERGE'\n" +
         " on conflict(client, number) do\n" +
-        " update set \"number\" = excluded.number," +
-        " actual  = 1," +
-        " type = excluded.type\n"
+        " update set\n" +
+        " actual  = 1"
     );
 
     exec(

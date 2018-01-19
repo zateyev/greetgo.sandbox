@@ -7,7 +7,6 @@ import com.itextpdf.text.pdf.PdfPCell;
 import com.itextpdf.text.pdf.PdfPTable;
 import com.itextpdf.text.pdf.PdfWriter;
 import kz.greetgo.sandbox.controller.model.ClientRecord;
-import kz.greetgo.sandbox.db.report.*;
 import kz.greetgo.sandbox.db.report.FontFactory;
 
 import java.io.IOException;
@@ -139,7 +138,7 @@ public class ClientReportViewPdf implements ClientReportView {
 
   private static String readFloat(float balance) {
     Float fFloat = new Float(balance);
-    return fFloat.toString();
+    return String.format("%.2f", fFloat);
   }
 
   private static String readInt(int age) {
