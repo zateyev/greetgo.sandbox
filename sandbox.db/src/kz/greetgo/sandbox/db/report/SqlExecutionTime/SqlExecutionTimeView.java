@@ -15,6 +15,7 @@ public class SqlExecutionTimeView {
 
   private final Xlsx xlsx = new Xlsx();
   private Sheet sheet = xlsx.newSheet(true);
+  ;
 
   public void append(double sec, String sql) {
 

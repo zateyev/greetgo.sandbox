@@ -8,7 +8,10 @@ import org.xml.sax.SAXParseException;
 import org.xml.sax.XMLReader;
 import org.xml.sax.helpers.XMLReaderFactory;
 
-import java.io.*;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileWriter;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -19,7 +22,7 @@ public class MigrationCia {
   public File inFile, errorsFile;
   public Connection connection;
   public int maxBatchSize = 5000;
-  public SqlExecutionTimeView view = new SqlExecutionTimeView(new FileOutputStream("build/SqlExecutionTimeCIA.xlsx"));
+  public SqlExecutionTimeView view;
 
   private final Logger logger = Logger.getLogger(getClass());
 

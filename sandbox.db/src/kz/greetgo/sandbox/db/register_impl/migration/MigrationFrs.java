@@ -15,7 +15,7 @@ public class MigrationFrs {
   public File inFile, errorsFile;
   public Connection connection;
   public int maxBatchSize = 5000;
-  public SqlExecutionTimeView view = new SqlExecutionTimeView(new FileOutputStream("build/SqlExecutionTimeCIA.xlsx"));
+  public SqlExecutionTimeView view;
 
   private final Logger logger = Logger.getLogger(getClass());
 

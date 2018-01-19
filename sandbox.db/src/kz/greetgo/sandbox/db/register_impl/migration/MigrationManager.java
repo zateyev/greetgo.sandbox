@@ -26,8 +26,13 @@ public class MigrationManager {
   public void migrate() throws Exception {
 
     SSHManager sshManager = new SSHManager();
-    sshManager.connectAndMigrateCia(createConnection());
-    sshManager.connectAndMigrateFrs(createConnection());
+    try (Connection connection = createConnection()) {
+      sshManager.connectAndMigrateCia(connection);
+    }
+
+    try (Connection connection = createConnection()) {
+      sshManager.connectAndMigrateFrs(connection);
+    }
 
   }
 
