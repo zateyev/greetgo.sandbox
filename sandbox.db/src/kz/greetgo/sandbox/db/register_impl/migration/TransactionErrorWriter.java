@@ -18,15 +18,16 @@ public class TransactionErrorWriter {
 
       try (ResultSet rs = statement.executeQuery()) {
 
-        BufferedWriter bf = new BufferedWriter(fileWriter);
+        try(BufferedWriter bf = new BufferedWriter(fileWriter)) {
 
-        while (rs.next()) {
+          while (rs.next()) {
 
-          bf.write(createLine(rs.getString(1), rs.getString(2)));
-          bf.newLine();
+            bf.write(createLine(rs.getString(1), rs.getString(2)));
+            bf.newLine();
+
+          }
 
         }
-        bf.close();
 
       }
 
