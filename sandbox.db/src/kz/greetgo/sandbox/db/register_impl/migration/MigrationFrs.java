@@ -90,7 +90,6 @@ public class MigrationFrs {
       accountTable,
       transactionTable
     )) {
-
       handler.errorLog = errorsFile;
 
       try (BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(inFile), "UTF-8"))) {
@@ -212,7 +211,6 @@ public class MigrationFrs {
       );
 
     }
-
 
   }
 
