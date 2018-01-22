@@ -79,7 +79,7 @@ public class MigrationCiaTest extends ParentTestNg {
     migrationTestDao.get().dropTables(migration.addressTable);
     migrationTestDao.get().dropTables(migration.phoneTable);
 
-    assertThat(client).hasSize(2);
+    assertThat(client).hasSize(3);
 
     assertThat(client.get(1L).get("cia_id")).isEqualTo("4-DU8-32-H7");
     assertThat(client.get(1L).get("surname")).isEqualTo("Иванов");

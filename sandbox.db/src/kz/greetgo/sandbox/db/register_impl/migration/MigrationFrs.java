@@ -33,7 +33,6 @@ public class MigrationFrs {
       long elapsed = System.nanoTime() - startedAt;
       double seconds = (double) elapsed / 1000000000.0;
 
-      view.append(seconds, sql);
       logger.trace("SQL [" + (System.nanoTime() - startedAt) + "] " + sql);
     }
 
@@ -91,7 +90,6 @@ public class MigrationFrs {
       accountTable,
       transactionTable
     )) {
-
       handler.errorLog = errorsFile;
 
       try (BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(inFile), "UTF-8"))) {
@@ -213,7 +211,6 @@ public class MigrationFrs {
       );
 
     }
-
 
   }
 
