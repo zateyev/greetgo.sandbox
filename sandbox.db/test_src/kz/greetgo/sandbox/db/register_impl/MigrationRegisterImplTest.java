@@ -27,7 +27,7 @@ public class MigrationRegisterImplTest extends ParentTestNg {
 
     //
     //
-    migrationRegister.get().doMigrate();
+    //migrationRegister.get().doMigrate();
     //
     //
 
