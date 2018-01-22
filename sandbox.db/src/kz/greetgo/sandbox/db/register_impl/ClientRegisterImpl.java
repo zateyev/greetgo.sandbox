@@ -15,15 +15,11 @@ import java.util.List;
 @Bean
 public class ClientRegisterImpl implements ClientRegister {
 
-  BeanGetter<ClientDao> clientDao;
+  public BeanGetter<ClientDao> clientDao;
 
   @Override
   public long getCount(String nameFilter) {
-    if (nameFilter == null) throw new InvalidParameter();
-
-    long recordCount = clientDao.get().selectEnabledWithFilterCountTableClient(nameFilter);
-
-    return recordCount;
+    return 0;
   }
 
   @Override
