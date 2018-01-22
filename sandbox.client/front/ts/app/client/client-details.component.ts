@@ -89,7 +89,7 @@ export class ClientDetailsComponent {
       }
     }
 
-    this.httpService.get("/client/save", {
+    this.httpService.post("/client/save", {
       "clientDetailsToSave": JSON.stringify(clientDetailsToSave)
     }).toPromise().then(result => {
       this.hide();

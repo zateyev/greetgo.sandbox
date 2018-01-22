@@ -1,0 +1,112 @@
+1. able to insert into table Charm - ok ? insertTableCharm_ok
+2. able to insert into table Client - ok insertTableClient_ok
+KEY CONSTRAINTS BEGIN
+1. pk Charm.id to fk Client.charm existence - ok pkCharmIdFkClientCharm_exist
+2. pk (client, type) of Client_Addr existence - test
+3. pk (client, number) of Client_Phone existence - test
+4. pk Client.id to fk Client_Addr.client existence - test
+5. pk Client.id to fk Client_Phone.client existence - test
+6. pk Client.id to fk Client_Account.client existence - test
+7. pk Client_Account.id to fk Client_Account_Transaction.account existence - test
+8. pk Transaction_Type.id to fk Client_Account_Transaction.type existence - test
+KEY CONSTRAINTS END
+ClientRegister BEGIN
+1. getCount(null) exception - ok
+2. getCount("") default record count - test
+3. getCount("Нур") filtered record count - test
+4. getCount("нУР") record count doesn't depend on letter case - test
+OTHER METHOD
+1. getRecordList(ClientRecordListRequest.clientRecordCountToSkip = 0) exception - test
+2. getRecordList(ClientRecordListRequest.clientRecordCountToSkip = -10) exception - test
+3. getRecordList(ClientRecordListRequest.clientRecordCount = 0) exception - test
+4. getRecordList(ClientRecordListRequest.clientRecordCount = -10) exception - test
+5. getRecordList(ClientRecordListRequest) record count of default request - test
+  clientRecordCountToSkip >= 0
+  clientRecordCount > 0
+  columnSortType = NONE
+  sortAscend = false || true
+  nameFilter = ""
+6. getRecordList(ClientRecordListRequest) record count and values sequence of sorting only - test
+  clientRecordCountToSkip >= 0
+  clientRecordCount > 0
+  columnSortType = AGE
+  sortAscend = false
+  nameFilter = ""
+7. getRecordList(ClientRecordListRequest) record count and values sequence of sorting only - test
+  clientRecordCountToSkip >= 0
+  clientRecordCount > 0
+  columnSortType = AGE
+  sortAscend = true
+  nameFilter = ""
+8. getRecordList(ClientRecordListRequest) record count and values sequence of sorting only - test
+  clientRecordCountToSkip >= 0
+  clientRecordCount > 0
+  columnSortType = TOTALACCOUNTBALANCE
+  sortAscend = false
+  nameFilter = ""
+9. getRecordList(ClientRecordListRequest) record count and values sequence of sorting only - test
+  clientRecordCountToSkip >= 0
+  clientRecordCount > 0
+  columnSortType = TOTALACCOUNTBALANCE
+  sortAscend = true
+  nameFilter = ""
+10. getRecordList(ClientRecordListRequest) record count and values sequence of sorting only - test
+  clientRecordCountToSkip >= 0
+  clientRecordCount > 0
+  columnSortType = MAXACCOUNTBALANCE
+  sortAscend = false
+  nameFilter = ""
+11. getRecordList(ClientRecordListRequest) record count and values sequence of sorting only - test
+  clientRecordCountToSkip >= 0
+  clientRecordCount > 0
+  columnSortType = MAXACCOUNTBALANCE
+  sortAscend = true
+  nameFilter = ""
+12. getRecordList(ClientRecordListRequest) record count and values sequence of sorting only - test
+  clientRecordCountToSkip >= 0
+  clientRecordCount > 0
+  columnSortType = MINACCOUNTBALANCE
+  sortAscend = false
+  nameFilter = ""
+13. getRecordList(ClientRecordListRequest) record count and values sequence of sorting only - test
+  clientRecordCountToSkip >= 0
+  clientRecordCount > 0
+  columnSortType = MINACCOUNTBALANCE
+  sortAscend = true
+  nameFilter = ""
+14. getRecordList(ClientRecordListRequest) record count and values of default filter only - test
+  clientRecordCountToSkip >= 0
+  clientRecordCount > 0
+  columnSortType = NONE
+  sortAscend = false || true
+  nameFilter = ""
+15. getRecordList(ClientRecordListRequest) record count and values of filter only - test
+  clientRecordCountToSkip >= 0
+  clientRecordCount > 0
+  columnSortType = NONE
+  sortAscend = false || true
+  nameFilter = "ва"
+16. getRecordList(ClientRecordListRequest) record count and values of filter only - test
+  clientRecordCountToSkip >= 0
+  clientRecordCount > 0
+  columnSortType = NONE
+  sortAscend = false || true
+  nameFilter = "иГоР"
+17. getRecordList(ClientRecordListRequest) record count and values sequence of sort and filter - test
+  clientRecordCountToSkip >= 0
+  clientRecordCount > 0
+  columnSortType = AGE
+  sortAscend = true
+  nameFilter = "ка"
+OTHER METHOD
+1. removeRecord(-10) exception - test ?
+2. removeRecord(long) x1 record count - test
+3. removeRecord(long) x5 record count - test
+OTHER METHOD
+1. getDetails(-10) exception - test ?
+2. getDetails(null) value - test
+3. getDetails(3) value - test
+4. getDetails(12) value - test
+OTHER METHOD
+1. saveDetails(ClientDetailsToSave)
+need more for saveDetails

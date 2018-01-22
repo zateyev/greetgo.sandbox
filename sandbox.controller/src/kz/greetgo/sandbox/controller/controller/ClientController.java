@@ -11,10 +11,10 @@ import kz.greetgo.sandbox.controller.register.ClientRegister;
 import kz.greetgo.sandbox.controller.util.Controller;
 
 import java.util.List;
-import java.util.Map;
 
 import static kz.greetgo.mvc.core.RequestMethod.DELETE;
 import static kz.greetgo.mvc.core.RequestMethod.GET;
+import static kz.greetgo.mvc.core.RequestMethod.POST;
 
 @Bean
 @Mapping("/client")
@@ -25,8 +25,8 @@ public class ClientController implements Controller {
   @ToJson
   @MethodFilter(GET)
   @Mapping("/count")
-  public long getCount(@Par("clientRecordNameFilter") String namefilter) {
-    return clientRegister.get().getCount(namefilter);
+  public long getCount(@Par("clientRecordNameFilter") String nameFilter) {
+    return clientRegister.get().getCount(nameFilter);
   }
 
   @ToJson
@@ -38,18 +38,20 @@ public class ClientController implements Controller {
 
   @MethodFilter(DELETE)
   @Mapping("/remove")
-  public void removeClientDetails(@Par("clientRecordId") long id) {
+  public void removeDetails(@Par("clientRecordId") long id) {
     clientRegister.get().removeRecord(id);
   }
 
+  @MethodFilter(GET)
   @ToJson
   @Mapping("/details")
   public ClientDetails getDetails(@Par("clientRecordId") Long id) {
     return clientRegister.get().getDetails(id);
   }
 
+  @MethodFilter(POST)
   @Mapping("/save")
-  public void saveClientDetails(@Par("clientDetailsToSave") @Json ClientDetailsToSave detailsToSave) {
+  public void saveDetails(@Par("clientDetailsToSave") @Json ClientDetailsToSave detailsToSave) {
     clientRegister.get().saveDetails(detailsToSave);
   }
 }

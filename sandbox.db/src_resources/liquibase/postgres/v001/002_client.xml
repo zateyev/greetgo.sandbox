@@ -18,7 +18,8 @@
         patronymic  varchar(255) NOT NULL,
         gender      varchar(255) NOT NULL,
         birth_date  date NOT NULL,
-        charm       integer NOT NULL
+        charm       integer NOT NULL,
+        disabled    boolean NOT NULL DEFAULT false
       )
     ]]></sql>
   </changeSet>
@@ -32,10 +33,10 @@
   <changeSet author="nsmagulov" id="create-table-Charm">
     <sql endDelimiter=";;"><![CDATA[
       CREATE TABLE Charm (
-        id integer DEFAULT nextval('charm_id_seq') NOT NULL PRIMARY KEY,
-        name varchar(255) NOT NULL,
+        id          integer DEFAULT nextval('charm_id_seq') NOT NULL PRIMARY KEY,
+        name        varchar(255) NOT NULL,
         description varchar(255) NOT NULL,
-        energy real NOT NULL
+        energy      real NOT NULL
       )
     ]]></sql>
   </changeSet>
@@ -52,11 +53,11 @@
   <changeSet author="nsmagulov" id="create-table-Client_Addr">
     <sql endDelimiter=";;"><![CDATA[
       CREATE TABLE Client_Addr (
-        client bigint NOT NULL REFERENCES Client(id),
-        type varchar(255) NOT NULL,
-        street varchar(255) NOT NULL,
-        house varchar(255) NOT NULL,
-        flat varchar(255) NOT NULL,
+        client  bigint NOT NULL REFERENCES Client(id),
+        type    varchar(255) NOT NULL,
+        street  varchar(255) NOT NULL,
+        house   varchar(255) NOT NULL,
+        flat    varchar(255) NOT NULL,
         PRIMARY KEY (client, type)
       )
     ]]></sql>
@@ -65,9 +66,9 @@
   <changeSet author="nsmagulov" id="create-table-Client_Phone">
     <sql endDelimiter=";;"><![CDATA[
       CREATE TABLE Client_Phone (
-        client bigint NOT NULL REFERENCES Client(id),
-        number varchar(255) NOT NULL,
-        type varchar(255) NOT NULL,
+        client  bigint NOT NULL REFERENCES Client(id),
+        number  varchar(255) NOT NULL,
+        type    varchar(255) NOT NULL,
         PRIMARY KEY (client, number)
       )
     ]]></sql>
@@ -82,10 +83,10 @@
   <changeSet author="nsmagulov" id="create-table-Client_Account">
     <sql endDelimiter=";;"><![CDATA[
       CREATE TABLE Client_Account (
-        id bigint DEFAULT nextval('client_account_id_seq') NOT NULL PRIMARY KEY,
-        client bigint NOT NULL REFERENCES Client(id),
-        money real NOT NULL,
-        number varchar(255) NOT NULL,
+        id            bigint DEFAULT nextval('client_account_id_seq') NOT NULL PRIMARY KEY,
+        client        bigint NOT NULL REFERENCES Client(id),
+        money         real NOT NULL,
+        number        varchar(255) NOT NULL,
         registered_at timestamp NOT NULL
       )
     ]]></sql>
@@ -100,11 +101,11 @@
   <changeSet author="nsmagulov" id="create-table-Client_Account_Transaction">
     <sql endDelimiter=";;"><![CDATA[
       CREATE TABLE Client_Account_Transaction (
-        id bigint DEFAULT nextval('client_account_transaction_id_seq') NOT NULL PRIMARY KEY,
-        account bigint NOT NULL REFERENCES Client_Account(id),
-        money real NOT NULL,
-        finished_at timestamp NOT NULL,
-        type integer NOT NULL
+        id            bigint DEFAULT nextval('client_account_transaction_id_seq') NOT NULL PRIMARY KEY,
+        account       bigint NOT NULL REFERENCES Client_Account(id),
+        money         real NOT NULL,
+        finished_at   timestamp NOT NULL,
+        type integer  NOT NULL
       )
     ]]></sql>
   </changeSet>
@@ -118,9 +119,9 @@
   <changeSet author="nsmagulov" id="create-table-Transaction_Type">
     <sql endDelimiter=";;"><![CDATA[
       CREATE TABLE Transaction_Type (
-        id integer DEFAULT nextval('transaction_type_id_seq') NOT NULL PRIMARY KEY,
-        code varchar(255) NOT NULL,
-        name varchar(255) NOT NULL
+        id    integer DEFAULT nextval('transaction_type_id_seq') NOT NULL PRIMARY KEY,
+        code  varchar(255) NOT NULL,
+        name  varchar(255) NOT NULL
       )
     ]]></sql>
   </changeSet>
