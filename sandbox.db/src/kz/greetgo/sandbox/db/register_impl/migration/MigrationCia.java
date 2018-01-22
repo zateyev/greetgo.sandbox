@@ -127,7 +127,7 @@ public class MigrationCia {
       try (FileInputStream in = new FileInputStream(inFile)) {
         reader.parse(new InputSource(in));
       } catch (SAXParseException e) {
-        logger.trace("SAX parse exception", e);
+        logger.trace("SAX Parse Error: ", e);
         errorLog.append("SAX Parse Error: ").append(e.getMessage()).append("\n");
         errorLog.append("At line [").append(e.getLineNumber()).append("] ")
           .append("Column number: [").append(e.getColumnNumber()).append("]\n");

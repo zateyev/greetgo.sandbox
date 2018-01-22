@@ -121,6 +121,7 @@ public class SSHManager {
       cia.inFile = toMigrate;
       cia.errorsFile = new File(LOCAL_DIRECTORY + errorFileName);
       cia.errorsFile.getParentFile().mkdirs();
+
       //
       cia.migrate();
       //
