@@ -1,5 +1,5 @@
-#CHARM; EMPTY; Не указан
-#CHARM; CALM; Спокойный
+CHARM; EMPTY; Не указан
+CHARM; CALM; Спокойный
 CHARM; WILD; Буйный
 CHARM; MYSTERIOUS; Загадочный
 CHARM; OPEN; Открытый

@@ -1,5 +1,7 @@
 package kz.greetgo.sandbox.controller.register;
 
+import kz.greetgo.sandbox.controller.model.ClientDetails;
+import kz.greetgo.sandbox.controller.model.ClientDetailsToSave;
 import kz.greetgo.sandbox.controller.model.ClientRecord;
 import kz.greetgo.sandbox.controller.model.ClientRecordListRequest;
 
@@ -10,23 +12,38 @@ public interface ClientRegister {
   /**
    * Предоставляет количество страниц клиентских записей
    *
-   * @param clientRecordCount количество клиентских записей в одной странице
+   * @param nameFilter текущая применяемая фильтрация
    * @return количество страниц
    */
-  long getPageCount(long clientRecordCount);
+  long getCount(String nameFilter);
 
   /**
    * Предоставляет список клиентских записей
-   *TODO: доделать java-help
+   *
+   * @param listRequest принимаемые параметры страницы, сортировки и фильтрации в виде модели
    * @return список клиентских записей
    */
-  List<ClientRecord> getClientRecordList(ClientRecordListRequest clientRecordListRequest);
+  List<ClientRecord> getRecordList(ClientRecordListRequest listRequest);
 
   /**
-   * Возвращает успешное удаление клиентской записи
+   * Удаление клиентской записи
    *
-   * @param clientRecordId идентификатор клиентской записи
-   * @return успешное удаление
+   * @param id идентификатор клиентской записи
    */
-  boolean removeClientRecord(long clientRecordId);
+  void removeRecord(long id);
+
+  /**
+   * Возвращает клиентские детали
+   *
+   * @param id идентификатор клиентской записи
+   * @return клиентский детали одного клиента
+   */
+  ClientDetails getDetails(Long id);
+
+  /**
+   * Сохранение новых или изменение существующих клиентских деталей
+   *
+   * @param detailsToSave клиентские детали
+   */
+  void saveDetails(ClientDetailsToSave detailsToSave);
 }

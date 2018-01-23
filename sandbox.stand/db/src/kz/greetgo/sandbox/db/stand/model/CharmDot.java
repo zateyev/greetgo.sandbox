@@ -14,7 +14,6 @@ public class CharmDot {
 
     ret.id = id;
     ret.name = name;
-    ret.isDisabled = isDisabled;
 
     return ret;
   }

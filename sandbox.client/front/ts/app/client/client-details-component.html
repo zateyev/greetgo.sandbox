@@ -1,0 +1,273 @@
+<form #client_details_form="ngForm"
+      class="modal fade"
+      role="form"
+      (click)="onContainerClicked($event)"
+      *ngIf="clientDetails"
+      [ngClass]="{'in': isAnimating}"
+      [ngStyle]="{'display': isVisible ? 'block' : 'none', 'opacity': isAnimating ? 1 : 0}"
+      (ngSubmit)="onClientRecordFormSubmit(client_details_form.value)">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header" [ngClass]="clientDetails.id == null ? 'label-success' : 'label-primary'">
+        <button type="button"
+                class="close glyphicon glyphicon-remove"
+                (click)="cancelClientRecordEdit()">
+        </button>
+        <h4>
+          <span class="glyphicon"
+                [ngClass]="clientDetails.id == null ? 'glyphicon-plus-sign' : 'glyphicon-pencil'"></span>
+          {{clientDetails.id == null ? "Добавление " : "Изменение "}}клиента
+        </h4>
+      </div>
+      <div class="modal-body">
+        <div class="row">
+          <div class="form-group col-xs-4"
+               [ngClass]="{'has-error': clientDetails.surname.length == 0 == true}">
+            <label for="surname" class="control-label"> Фамилия</label>
+            <input type="text"
+                   class="form-control"
+                   id="surname"
+                   name="surname"
+                   placeholder="Фамилия"
+                   [(ngModel)]="clientDetails.surname">
+          </div>
+          <div class="form-group has-error col-xs-4"
+               [ngClass]="{'has-error': clientDetails.lastname.length == 0 == true}">
+            <label for="lastname" class="control-label"> Имя</label>
+            <input type="text"
+                   class="form-control"
+                   id="lastname"
+                   name="lastname"
+                   placeholder="Имя"
+                   [(ngModel)]="clientDetails.lastname">
+          </div>
+          <div class="form-group col-xs-4"
+               [ngClass]="{'has-error': clientDetails.patronymic.length == 0 == true}">
+            <label for="patronymic" class="control-label"> Отчество</label>
+            <input type="text"
+                   class="form-control"
+                   id="patronymic"
+                   name="patronymic"
+                   placeholder="Отчество"
+                   [(ngModel)]="clientDetails.patronymic">
+          </div>
+        </div>
+        <div class="row">
+          <div class="form-group col-xs-4">
+            <label for="gender" class="control-label"> Пол</label>
+            <select class="form-control"
+                    id="gender"
+                    name="gender"
+                    [(ngModel)]="clientDetails.gender">
+              <option [value]="genderEnum.EMPTY"
+                      [selected]="clientDetails.gender == genderEnum.EMPTY">
+                {{genderList[genderEnum.EMPTY]}}
+              </option>
+              <option [value]="genderEnum.MALE"
+                      [selected]="clientDetails.gender == genderEnum.MALE">
+                {{genderList[genderEnum.MALE]}}
+              </option>
+              <option [value]="genderEnum.FEMALE"
+                      [selected]="clientDetails.gender == genderEnum.FEMALE">
+                {{genderList[genderEnum.FEMALE]}}
+              </option>
+            </select>
+          </div>
+          <div class="form-group col-xs-4"
+               [ngClass]="{'has-error': clientDetails.birthdate.length == 0 == true}">
+            <label for="birthdate" class="control-label"> Дата рождения</label>
+            <input type="text"
+                   class="form-control"
+                   id="birthdate"
+                   placeholder="Дата рождения"
+                   name="birthdate"
+                   [(ngModel)]="clientDetails.birthdate">
+          </div>
+          <div class="form-group col-xs-4">
+            <label for="charm" class="control-label"> Характер</label>
+            <select class="form-control"
+                    id="charm"
+                    name="charm"
+                    [(ngModel)]="clientDetails.charmId">
+              <option *ngFor="let charm of clientDetails.charmList"
+                      [value]="charm.id"
+                      [selected]="charm.id == clientDetails.charmId">
+                {{charm.name}}
+              </option>
+            </select>
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="residential-address" class="control-label"> Адрес проживания</label>
+          <div class="row" id="residential-address">
+            <div class="col-xs-4"
+                 [ngClass]="{'has-error': clientDetails.residentialAddressInfo.street.length == 0 == true}">
+              <input type="text"
+                     class="form-control"
+                     id="residential-street"
+                     placeholder="Улица"
+                     name="residential-street"
+                     [(ngModel)]="clientDetails.residentialAddressInfo.street">
+            </div>
+            <div class="col-xs-4"
+                 [ngClass]="{'has-error': clientDetails.residentialAddressInfo.home.length == 0 == true}">
+              <input type="text"
+                     class="form-control"
+                     id="residential-home"
+                     placeholder="Дом"
+                     name="residential-home"
+                     [(ngModel)]="clientDetails.residentialAddressInfo.home">
+            </div>
+            <div class="col-xs-4"
+                 [ngClass]="{'has-error': clientDetails.residentialAddressInfo.flat.length == 0 == true}">
+              <input type="text"
+                     class="form-control"
+                     id="residential-flat"
+                     placeholder="Квартира"
+                     name="residential-flat"
+                     [(ngModel)]="clientDetails.residentialAddressInfo.flat">
+            </div>
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="registration-address" class="control-label"> Адрес регистрации</label>
+          <div class="row" id="registration-address">
+            <div class="col-xs-4"
+                 [ngClass]="{'has-error': clientDetails.registrationAddressInfo.street.length == 0 == true}">
+              <input type="text"
+                     class="form-control"
+                     id="registration-street"
+                     placeholder="Улица"
+                     name="registration-street"
+                     [(ngModel)]="clientDetails.registrationAddressInfo.street">
+            </div>
+            <div class="col-xs-4"
+                 [ngClass]="{'has-error': clientDetails.registrationAddressInfo.home.length == 0 == true}">
+              <input type="text"
+                     class="form-control"
+                     id="registration-home"
+                     placeholder="Дом"
+                     name="registration-home"
+                     [(ngModel)]="clientDetails.registrationAddressInfo.home">
+            </div>
+            <div class="col-xs-4"
+                 [ngClass]="{'has-error': clientDetails.registrationAddressInfo.flat.length == 0 == true}">
+              <input type="text"
+                     class="form-control"
+                     id="registration-flat"
+                     placeholder="Квартира"
+                     name="registration-flat"
+                     [(ngModel)]="clientDetails.registrationAddressInfo.flat">
+            </div>
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="phone-list" class="control-label"> Контактные телефоны</label>
+          <div id="phone-list">
+            <div class="phone-row row" *ngFor="let phone of clientDetails.phones; let idx = index">
+              <div class="col-xs-4">
+                <input type="text"
+                       class="form-control"
+                       id="phone-number{{idx}}"
+                       name="phone-number{{idx}}"
+                       placeholder="Номер"
+                       [(ngModel)]="phone.number">
+              </div>
+              <div class="col-xs-4">
+                <select class="form-control"
+                        id="phone-type{{idx}}"
+                        name="phone-type{{idx}}"
+                        [(ngModel)]="phone.type">
+                  <option [value]="phoneTypeEnum.MOBILE"
+                          [selected]="phone.type == phoneTypeEnum.MOBILE">
+                    {{phoneTypeList[phoneTypeEnum.MOBILE]}}
+                  </option>
+                  <option [value]="phoneTypeEnum.HOME"
+                          [selected]="phone.type == phoneTypeEnum.HOME">
+                    {{phoneTypeList[phoneTypeEnum.HOME]}}
+                  </option>
+                  <option [value]="phoneTypeEnum.WORK"
+                          [selected]="phone.type == phoneTypeEnum.WORK">
+                    {{phoneTypeList[phoneTypeEnum.WORK]}}
+                  </option>
+                  <option [value]="phoneTypeEnum.EMBEDDED"
+                          [selected]="phone.type == phoneTypeEnum.EMBEDDED">
+                    {{phoneTypeList[phoneTypeEnum.EMBEDDED]}}
+                  <option [value]="phoneTypeEnum.OTHER"
+                          [selected]="phone.type == phoneTypeEnum.OTHER">
+                    {{phoneTypeList[phoneTypeEnum.OTHER]}}
+                  </option>
+                </select>
+              </div>
+              <div class="col-xs-4">
+                <button type="button"
+                        class="btn btn-danger btn-default pull-left"
+                        (click)="onPhoneRemoveButtonClick(idx)">
+                  <span class="glyphicon glyphicon glyphicon-erase"></span>
+                  Удалить
+                </button>
+              </div>
+            </div>
+            <div class="phone-row row">
+              <div class="col-xs-4">
+                <input type="text"
+                       class="form-control"
+                       id="phone-number-add"
+                       name="phone-number-add"
+                       placeholder="Номер"
+                       [(ngModel)]="phoneToAdd.number">
+              </div>
+              <div class="col-xs-4">
+                <select class="form-control"
+                        id="phone-type-add"
+                        name="phone-type-add"
+                        [(ngModel)]="phoneToAdd.type">
+                  <option [value]="phoneTypeEnum.MOBILE"
+                          [selected]="phoneToAdd.type == phoneTypeEnum.MOBILE">
+                    {{phoneTypeList[phoneTypeEnum.MOBILE]}}
+                  </option>
+                  <option [value]="phoneTypeEnum.HOME"
+                          [selected]="phoneToAdd.type == phoneTypeEnum.HOME">
+                    {{phoneTypeList[phoneTypeEnum.HOME]}}
+                  </option>
+                  <option [value]="phoneTypeEnum.WORK"
+                          [selected]="phoneToAdd.type == phoneTypeEnum.WORK">
+                    {{phoneTypeList[phoneTypeEnum.WORK]}}
+                  </option>
+                  <option [value]="phoneTypeEnum.EMBEDDED"
+                          [selected]="phoneToAdd.type == phoneTypeEnum.EMBEDDED">
+                    {{phoneTypeList[phoneTypeEnum.EMBEDDED]}}
+                  <option [value]="phoneTypeEnum.OTHER"
+                          [selected]="phoneToAdd.type == phoneTypeEnum.OTHER">
+                    {{phoneTypeList[phoneTypeEnum.OTHER]}}
+                  </option>
+                </select>
+              </div>
+              <div class="col-xs-4">
+                <button type="button"
+                        class="btn btn-success btn-default"
+                        (click)="onPhoneAppendButtonClick()">
+                  <span class="glyphicon glyphicon-plus-sign"></span>
+                  Добавить
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button"
+                class="btn btn-danger btn-default pull-left"
+                (click)="cancelClientRecordEdit()">
+          <span class="glyphicon glyphicon-remove"></span>
+          Отменить
+        </button>
+        <button type="submit"
+                class="btn btn-success btn-default pull-right">
+          <span class="glyphicon glyphicon-ok"></span>
+          {{clientDetails.id == null ? "Добавить" : "Изменить"}}
+        </button>
+      </div>
+    </div>
+  </div>
+</form>
