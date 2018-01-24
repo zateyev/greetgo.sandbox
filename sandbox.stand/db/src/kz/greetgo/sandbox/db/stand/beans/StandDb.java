@@ -10,27 +10,21 @@ import kz.greetgo.sandbox.db.stand.model.PersonDot;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicLong;
 
 @Bean
 public class StandDb implements HasAfterInject {
-  //public final Map<String, String> genderStorage = new HashMap<>();
-  public final Map<String, CharmDot> charmStorage = new HashMap<>();
+  public final Map<Integer, CharmDot> charmStorage = new HashMap<>();
   public final Map<String, PersonDot> personStorage = new HashMap<>();
   public final Map<Long, ClientDot> clientStorage = new HashMap<>();
+  public AtomicLong curClientId = new AtomicLong(0);
 
   @Override
   public void afterInject() throws Exception {
     //TODO parse only once, not in separate files
-    this.initGenders();
     this.parseCharms();
     this.parsePersons();
     this.parseClients();
-  }
-
-  private void initGenders() {
-    /*genderStorage.put(Gender.a.name(), "Неизвестно");
-    genderStorage.put(Gender.MALE.name(), "Мужской");
-    genderStorage.put(Gender.FEMALE.name(), "Женский");*/
   }
 
   private void parseCharms() throws Exception {
@@ -65,7 +59,7 @@ public class StandDb implements HasAfterInject {
   private void appendCharm(String[] splitLine, String line, int lineNo) {
     CharmDot charmDot = new CharmDot();
 
-    charmDot.id = splitLine[1].trim();
+    charmDot.id = Integer.parseInt(splitLine[1].trim());
     charmDot.name = splitLine[2].trim();
     charmDot.isDisabled = false;
 
@@ -141,6 +135,8 @@ public class StandDb implements HasAfterInject {
             throw new RuntimeException("Unknown command " + command);
         }
       }
+
+      curClientId.set(lineNo);
     }
   }
 

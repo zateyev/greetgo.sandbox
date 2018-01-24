@@ -38,7 +38,7 @@ public class ClientController implements Controller {
 
   @MethodFilter(DELETE)
   @Mapping("/remove")
-  public void removeDetails(@Par("clientRecordId") long id) {
+  public void removeRecord(@Par("clientRecordId") long id) {
     clientRegister.get().removeRecord(id);
   }
 

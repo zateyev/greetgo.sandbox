@@ -11,7 +11,7 @@ export class ClientDetails {
   public patronymic: string;
   public gender: Gender;
   public birthdate: string;
-  public charmId: string;
+  public charmId: number/*int*/;
   public charmList: Charm[];
   public registrationAddressInfo: RegistrationAddressInfo;
   public residentialAddressInfo: ResidentialAddressInfo;

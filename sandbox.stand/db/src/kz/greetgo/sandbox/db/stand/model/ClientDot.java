@@ -20,9 +20,9 @@ public class ClientDot {
   public List<Phone> phones;
 
   public int age;
-  public long totalAccountBalance;
-  public long maxAccountBalance;
-  public long minAccountBalance;
+  public String totalAccountBalance;
+  public String maxAccountBalance;
+  public String minAccountBalance;
 
   public ClientDetails toClientDetails() {
     ClientDetails ret = new ClientDetails();
@@ -64,7 +64,7 @@ public class ClientDot {
     return ret;
   }
 
-  public void toClientDot(ClientDetailsToSave clientDetailsToSave, Long id, Map<String, CharmDot> charmStorage) {
+  public void toClientDot(ClientDetailsToSave clientDetailsToSave, Long id, Map<Integer, CharmDot> charmStorage) {
     surname = clientDetailsToSave.surname;
     lastname = clientDetailsToSave.lastname;
     patronymic = clientDetailsToSave.patronymic;
@@ -95,9 +95,9 @@ public class ClientDot {
     Random random = new Random();
 
     clientDot.age = random.nextInt(40) + 18;
-    clientDot.totalAccountBalance = random.nextInt();
-    clientDot.maxAccountBalance = random.nextInt();
-    clientDot.minAccountBalance = random.nextInt();
+    clientDot.totalAccountBalance = "" + random.nextInt();
+    clientDot.maxAccountBalance = "" + random.nextInt();
+    clientDot.minAccountBalance = "" + random.nextInt();
   }
 
   @Override

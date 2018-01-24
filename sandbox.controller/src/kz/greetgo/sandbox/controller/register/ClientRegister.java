@@ -36,7 +36,7 @@ public interface ClientRegister {
    * Возвращает клиентские детали
    *
    * @param id идентификатор клиентской записи
-   * @return клиентский детали одного клиента
+   * @return клиентские детали одного клиента
    */
   ClientDetails getDetails(Long id);
 

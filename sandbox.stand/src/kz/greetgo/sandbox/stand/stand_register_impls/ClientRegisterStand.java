@@ -5,6 +5,7 @@ import kz.greetgo.depinject.core.BeanGetter;
 import kz.greetgo.sandbox.controller.errors.NotFound;
 import kz.greetgo.sandbox.controller.model.*;
 import kz.greetgo.sandbox.controller.register.ClientRegister;
+import kz.greetgo.sandbox.controller.util.Util;
 import kz.greetgo.sandbox.db.stand.beans.StandDb;
 import kz.greetgo.sandbox.db.stand.model.CharmDot;
 import kz.greetgo.sandbox.db.stand.model.ClientDot;
@@ -21,11 +22,11 @@ public class ClientRegisterStand implements ClientRegister {
   public BeanGetter<StandDb> db;
 
   @Override
-  public long getCount(String namefilter) {
+  public long getCount(String nameFilter) {
     List<ClientDot> clientDots = new ArrayList<>(db.get().clientStorage.values());
-    clientDots = this.getFilteredList(clientDots, namefilter);
+    clientDots = this.getFilteredList(clientDots, nameFilter);
 
-    return clientDots.size() ;
+    return clientDots.size();
   }
 
   @Override
@@ -113,13 +114,13 @@ public class ClientRegisterStand implements ClientRegister {
     if (ascend) {
       clientDots.sort(new Comparator<ClientDot>() {
         public int compare(ClientDot o1, ClientDot o2) {
-          return Long.valueOf(o1.totalAccountBalance).compareTo(o2.totalAccountBalance);
+          return Float.compare(Util.stringToFloat(o1.totalAccountBalance), Util.stringToFloat(o2.totalAccountBalance));
         }
       });
     } else {
       clientDots.sort(new Comparator<ClientDot>() {
         public int compare(ClientDot o1, ClientDot o2) {
-          return Long.valueOf(o2.totalAccountBalance).compareTo(o1.totalAccountBalance);
+          return Float.compare(Util.stringToFloat(o2.totalAccountBalance), Util.stringToFloat(o1.totalAccountBalance));
         }
       });
     }
@@ -132,13 +133,13 @@ public class ClientRegisterStand implements ClientRegister {
     if (ascend) {
       clientDots.sort(new Comparator<ClientDot>() {
         public int compare(ClientDot o1, ClientDot o2) {
-          return Long.valueOf(o1.maxAccountBalance).compareTo(o2.maxAccountBalance);
+          return Float.compare(Util.stringToFloat(o1.maxAccountBalance), Util.stringToFloat(o2.maxAccountBalance));
         }
       });
     } else {
       clientDots.sort(new Comparator<ClientDot>() {
         public int compare(ClientDot o1, ClientDot o2) {
-          return Long.valueOf(o2.maxAccountBalance).compareTo(o1.maxAccountBalance);
+          return Float.compare(Util.stringToFloat(o2.maxAccountBalance), Util.stringToFloat(o1.maxAccountBalance));
         }
       });
     }
@@ -151,13 +152,13 @@ public class ClientRegisterStand implements ClientRegister {
     if (ascend) {
       clientDots.sort(new Comparator<ClientDot>() {
         public int compare(ClientDot o1, ClientDot o2) {
-          return Long.valueOf(o1.minAccountBalance).compareTo(o2.minAccountBalance);
+          return Float.compare(Util.stringToFloat(o1.minAccountBalance), Util.stringToFloat(o2.minAccountBalance));
         }
       });
     } else {
       clientDots.sort(new Comparator<ClientDot>() {
         public int compare(ClientDot o1, ClientDot o2) {
-          return Long.valueOf(o2.minAccountBalance).compareTo(o1.minAccountBalance);
+          return Float.compare(Util.stringToFloat(o2.minAccountBalance), Util.stringToFloat(o1.minAccountBalance));
         }
       });
     }
@@ -215,11 +216,13 @@ public class ClientRegisterStand implements ClientRegister {
   public void saveDetails(ClientDetailsToSave detailstoSave) {
     Map<Long, ClientDot> clientDotMap = db.get().clientStorage;
     ClientDot clientDot;
+    long id = db.get().curClientId.getAndIncrement();
+    db.get().curClientId.set(id + 1);
 
     if (detailstoSave.id == null) {
       clientDot = new ClientDot();
-      clientDot.toClientDot(detailstoSave, (long) clientDotMap.size() + 1, db.get().charmStorage);
-      clientDotMap.put((long) clientDotMap.size() + 1, clientDot);
+      clientDot.toClientDot(detailstoSave, id, db.get().charmStorage);
+      clientDotMap.put(id, clientDot);
     } else {
       clientDot = clientDotMap.get(detailstoSave.id);
       clientDot.toClientDot(detailstoSave, null, db.get().charmStorage);

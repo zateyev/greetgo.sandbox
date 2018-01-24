@@ -15,7 +15,7 @@ public class ClientDetails {
   public String patronymic;
   public Gender gender;
   public String birthdate;
-  public String charmId;
+  public int charmId;
   public List<Charm> charmList = new ArrayList<>();
   public RegistrationAddressInfo registrationAddressInfo;
   public ResidentialAddressInfo residentialAddressInfo;

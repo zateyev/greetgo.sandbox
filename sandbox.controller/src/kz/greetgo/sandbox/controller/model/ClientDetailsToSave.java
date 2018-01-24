@@ -14,7 +14,7 @@ public class ClientDetailsToSave {
   public String patronymic;
   public Gender gender;
   public String birthdate;
-  public String charmId;
+  public int charmId;
   public RegistrationAddressInfo registrationAddressInfo;
   public ResidentialAddressInfo residentialAddressInfo;
   public List<Phone> phones = new ArrayList<>();

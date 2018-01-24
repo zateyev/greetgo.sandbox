@@ -2,28 +2,35 @@ package kz.greetgo.sandbox.db.test.util;
 
 import kz.greetgo.sandbox.controller.model.*;
 
+import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.Period;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Random;
+import java.util.concurrent.ThreadLocalRandom;
 
 public class Util {
 
-  // https://stackoverflow.com/a/3985467
-  public static String generateDateString() {
-    long time = -946771200000L + (Math.abs(new Random().nextLong()) % (70L * 365 * 24 * 60 * 60 * 1000));
-    Date date = new Date(time);
+  public static LocalDate generateLocalDate() {
+    long minDay = LocalDate.of(1970, 1, 1).toEpochDay();
+    long maxDay = LocalDate.of(2015, 12, 31).toEpochDay();
+    long randomDay = ThreadLocalRandom.current().nextLong(minDay, maxDay);
 
-    return new SimpleDateFormat("yyyy-MM-dd").format(date);
+    return LocalDate.ofEpochDay(randomDay);
   }
-/*
-  private static Charm generateCharm() {
-    Object[] values = charmStorage.values().toArray();
-    CharmDot charmDot = (CharmDot) values[new Random().nextInt(values.length)];
 
-    return charmDot.toCharm();
-  }*/
+  public static int calculateAge(LocalDate birthDate, LocalDate currentDate) {
+    return Period.between(birthDate, currentDate).getYears();
+  }
+
+  public static Timestamp generateTimestamp() {
+    LocalDate localDate = Util.generateLocalDate();
+
+    return new Timestamp(localDate.toEpochDay());
+  }
 
   private static ResidentialAddressInfo generateResidentialAddress() {
     Random random = new Random();
@@ -52,7 +59,7 @@ public class Util {
     List<Phone> ret = new ArrayList<>();
     int n = random.nextInt(3) + 1;
 
-    for(int i = 0; i < n; i++) {
+    for (int i = 0; i < n; i++) {
       Phone phone = new Phone();
       phone.number = "+" + generateString(11, true);
       phone.type = toPhoneType(random.nextInt(PhoneType.values().length));

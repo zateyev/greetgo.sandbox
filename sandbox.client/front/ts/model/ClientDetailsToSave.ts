@@ -10,7 +10,7 @@ export class ClientDetailsToSave {
   public patronymic: string;
   public gender: Gender;
   public birthdate: string;
-  public charmId: string;
+  public charmId: number/*int*/;
   public registrationAddressInfo: RegistrationAddressInfo;
   public residentialAddressInfo: ResidentialAddressInfo;
   public phones: Phone[];

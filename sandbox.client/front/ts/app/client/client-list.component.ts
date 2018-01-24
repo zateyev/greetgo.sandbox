@@ -64,8 +64,6 @@ export class ClientListComponent {
     this.listRequest.clientRecordCountToSkip = this.curPageNum * this.httpService.pageSize;
     this.listRequest.clientRecordCount = this.httpService.pageSize;
 
-    console.log(JSON.stringify(this.listRequest));
-
     this.httpService.get("/client/list", {
       'clientRecordListRequest': JSON.stringify(this.listRequest)
     }).toPromise().then(result => {
@@ -84,14 +82,6 @@ export class ClientListComponent {
   }
 
   private onClick(event: any) {
-    /*console.log("active " + this.isModalFormActive);
-
-     if (!(<HTMLElement>event.target).classList.contains('modal')) {
-     event.stopPropagation();
-     }
-
-     if (!this.isModalFormActive && !(<HTMLElement>event.target).classList.contains('client-record-keep-selection'))
-     this.selectedRecordId = null;*/
   }
 
   protected onFilterTextChange(event) {
@@ -135,10 +125,6 @@ export class ClientListComponent {
   }
 
   onPageNumberButtonClick(pageNum: number) {
-    // TODO: может ли клиент кликать по текущей странице?
-    //if (this.curPageNum == pageNum)
-    //  return;
-
     this.curPageNum = pageNum;
     this.refreshClientRecordList();
   }
