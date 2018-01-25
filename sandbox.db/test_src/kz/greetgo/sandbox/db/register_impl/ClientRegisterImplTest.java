@@ -976,6 +976,7 @@ public class ClientRegisterImplTest extends ParentTestNg {
       clientTestDao.get().selectRowByClientAndTypeTableClientAddr(expectedId, AddressType.REGISTRATION.name());
     realClientDetails.phones =
       clientTestDao.get().selectRowsByClientTableClientPhone(expectedId);
+      clientTestDao.get().selectRowsByClientTableClientPhone(expectedId);
 
     assertThat(clientTestDao.get().selectExistSingleTableClient(expectedId)).isEqualTo(true);
     assertThat(realClientDetails.id).isEqualTo(expectedId);
@@ -1042,11 +1043,6 @@ public class ClientRegisterImplTest extends ParentTestNg {
   @Test(expectedExceptions = InvalidParameter.class)
   public void method_removeRecord_idNegative() {
     clientRegister.get().removeRecord(-100);
-  }
-
-  @Test(expectedExceptions = InvalidParameter.class)
-  public void method_getDetails_idNull() {
-    clientRegister.get().getDetails(null);
   }
 
   @Test(expectedExceptions = InvalidParameter.class)

@@ -12,10 +12,7 @@ public interface ClientPhoneDao {
   @Select("SELECT number, type FROM client_phone WHERE client=#{client} AND record_state=0")
   List<Phone> selectRowsByClient(@Param("client") long client);
 
-  @Insert("INSERT INTO client_phone (client, number, type) VALUES(#{client}, #{number}, #{type})")
-  void insert(@Param("client") long client,
-              @Param("number") String number,
-              @Param("type") String type);
+  void insert(long client, String number, String type);
 
   @Update("UPDATE client_phone " +
     "SET number=#{number}, type=#{type} " +

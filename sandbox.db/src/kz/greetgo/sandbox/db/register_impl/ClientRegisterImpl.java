@@ -113,7 +113,7 @@ public class ClientRegisterImpl implements ClientRegister {
         clientPhoneDao.get().updateSetDisabled(detailsToSave.id, phone.number);
 
       for (Phone phone : detailsToSave.phones)
-        clientPhoneDao.get().update(detailsToSave.id, phone.number, phone.type.name());
+        clientPhoneDao.get().insert(detailsToSave.id, phone.number, phone.type.name());
     }
   }
 }
