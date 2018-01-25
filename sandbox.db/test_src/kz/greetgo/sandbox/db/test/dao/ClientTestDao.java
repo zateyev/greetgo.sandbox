@@ -1,20 +1,33 @@
 package kz.greetgo.sandbox.db.test.dao;
 
+import kz.greetgo.sandbox.controller.model.AddressInfo;
+import kz.greetgo.sandbox.controller.model.ClientDetails;
+import kz.greetgo.sandbox.controller.model.Phone;
 import org.apache.ibatis.annotations.*;
 
 import java.sql.Date;
 import java.sql.Timestamp;
+import java.util.List;
 
 public interface ClientTestDao {
   //Client table part
   @Delete("DELETE FROM client")
   void deleteAllTableClient();
 
-  @Select("SELECT COUNT(*) FROM client WHERE disabled=false")
+  @Select("SELECT COUNT(*) FROM client WHERE record_state=0")
   long selectCountTableClient();
 
-  @Select("SELECT EXISTS (SELECT true FROM client WHERE id=#{id})")
+  @Select("SELECT EXISTS (SELECT true FROM client WHERE id=#{id} AND record_state=0)")
   boolean selectExistSingleTableClient(@Param("id") long id);
+
+  @Select("SELECT nextval('client_id_seq')")
+  long selectSeqIdNextValueTableClient();
+
+  @Select("SELECT id, surname, name, patronymic, gender, " +
+    "to_char(birth_date, 'YYYY-MM-DD') as birthdate, charm as charmId " +
+    "FROM client " +
+    "WHERE id=#{id} AND record_state=0")
+  ClientDetails selectRowById(@Param("id") long id);
 
   @Insert("INSERT INTO client (id, surname, name, patronymic, gender, birth_date, charm) " +
     "VALUES (#{id}, #{surname}, #{name}, #{patronymic}, #{gender}, #{birth_date}, #{charm})")
@@ -45,7 +58,7 @@ public interface ClientTestDao {
   @Select("SELECT nextval('charm_id_seq')")
   int selectSeqIdNextValueTableCharm();
 
-  @Update("UPDATE charm SET disabled=true WHERE id=#{id}")
+  @Update("UPDATE charm SET record_state=1 WHERE id=#{id}")
   void updateDisableSingleTableCharm(@Param("id") int id);
 
   @Insert("INSERT INTO charm (id, name, description, energy) " +
@@ -74,6 +87,11 @@ public interface ClientTestDao {
   @Delete("DELETE FROM client_addr")
   void deleteAllTableClientAddr();
 
+  @Select("SELECT street, house, flat, type " +
+    "FROM client_addr " +
+    "WHERE client=#{client} AND type=#{type} AND record_state=0")
+  AddressInfo selectRowByClientAndTypeTableClientAddr(@Param("client") long client, @Param("type") String type);
+
   @Insert("INSERT INTO client_addr (client, type, street, house, flat) " +
     "VALUES (#{client}, #{type}, #{street}, #{house}, #{flat})")
   void insertClientAddr(@Param("client") long client,
@@ -85,6 +103,9 @@ public interface ClientTestDao {
   //Client_Phone table part
   @Delete("DELETE FROM client_phone")
   void deleteAllTableClientPhone();
+
+  @Select("SELECT number, type FROM client_phone WHERE client=#{client}")
+  List<Phone> selectRowsByClientTableClientPhone(@Param("client") long client);
 
   @Insert("INSERT INTO client_phone (client, number, type) " +
     "VALUES (#{client}, #{number}, #{type})")

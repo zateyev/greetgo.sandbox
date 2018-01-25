@@ -41,7 +41,7 @@ export class ClientListComponent {
       'clientRecordNameFilter': this.listRequest.nameFilter
     }).toPromise().then(result => {
       this.pageCount = Math.floor(result.json() as number / this.httpService.pageSize);
-      if ( result.json() as number % this.httpService.pageSize > 0 )
+      if (result.json() as number % this.httpService.pageSize > 0)
         this.pageCount++;
 
       this.pageNums = [];
@@ -49,12 +49,10 @@ export class ClientListComponent {
       if (this.pageCount > 0) {
         this.filterSuccessState = true;
 
-        for (let i = 0; i < this.pageCount; i++) {
+        for (let i = 0; i < this.pageCount; i++)
           this.pageNums[i] = i + 1;
-        }
-      } else {
+      } else
         this.filterSuccessState = false;
-      }
     }, error => {
       console.log(error);
     });

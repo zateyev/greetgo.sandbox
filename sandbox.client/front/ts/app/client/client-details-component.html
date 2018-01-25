@@ -15,7 +15,8 @@
         </button>
         <h4>
           <span class="glyphicon"
-                [ngClass]="clientDetails.id == null ? 'glyphicon-plus-sign' : 'glyphicon-pencil'"></span>
+                [ngClass]="clientDetails.id == null ? 'glyphicon-plus-sign' : 'glyphicon-pencil'">
+          </span>
           {{clientDetails.id == null ? "Добавление " : "Изменение "}}клиента
         </h4>
       </div>
@@ -32,14 +33,14 @@
                    [(ngModel)]="clientDetails.surname">
           </div>
           <div class="form-group has-error col-xs-4"
-               [ngClass]="{'has-error': clientDetails.lastname.length == 0 == true}">
-            <label for="lastname" class="control-label"> Имя</label>
+               [ngClass]="{'has-error': clientDetails.name.length == 0 == true}">
+            <label for="name" class="control-label"> Имя</label>
             <input type="text"
                    class="form-control"
-                   id="lastname"
-                   name="lastname"
+                   id="name"
+                   name="name"
                    placeholder="Имя"
-                   [(ngModel)]="clientDetails.lastname">
+                   [(ngModel)]="clientDetails.name">
           </div>
           <div class="form-group col-xs-4"
                [ngClass]="{'has-error': clientDetails.patronymic.length == 0 == true}">
@@ -101,31 +102,31 @@
           <label for="residential-address" class="control-label"> Адрес проживания</label>
           <div class="row" id="residential-address">
             <div class="col-xs-4"
-                 [ngClass]="{'has-error': clientDetails.residentialAddressInfo.street.length == 0 == true}">
+                 [ngClass]="{'has-error': clientDetails.factualAddressInfo.street.length == 0 == true}">
               <input type="text"
                      class="form-control"
                      id="residential-street"
                      placeholder="Улица"
                      name="residential-street"
-                     [(ngModel)]="clientDetails.residentialAddressInfo.street">
+                     [(ngModel)]="clientDetails.factualAddressInfo.street">
             </div>
             <div class="col-xs-4"
-                 [ngClass]="{'has-error': clientDetails.residentialAddressInfo.home.length == 0 == true}">
+                 [ngClass]="{'has-error': clientDetails.factualAddressInfo.house.length == 0 == true}">
               <input type="text"
                      class="form-control"
                      id="residential-home"
                      placeholder="Дом"
                      name="residential-home"
-                     [(ngModel)]="clientDetails.residentialAddressInfo.home">
+                     [(ngModel)]="clientDetails.factualAddressInfo.house">
             </div>
             <div class="col-xs-4"
-                 [ngClass]="{'has-error': clientDetails.residentialAddressInfo.flat.length == 0 == true}">
+                 [ngClass]="{'has-error': clientDetails.factualAddressInfo.flat.length == 0 == true}">
               <input type="text"
                      class="form-control"
                      id="residential-flat"
                      placeholder="Квартира"
                      name="residential-flat"
-                     [(ngModel)]="clientDetails.residentialAddressInfo.flat">
+                     [(ngModel)]="clientDetails.factualAddressInfo.flat">
             </div>
           </div>
         </div>
@@ -142,13 +143,13 @@
                      [(ngModel)]="clientDetails.registrationAddressInfo.street">
             </div>
             <div class="col-xs-4"
-                 [ngClass]="{'has-error': clientDetails.registrationAddressInfo.home.length == 0 == true}">
+                 [ngClass]="{'has-error': clientDetails.registrationAddressInfo.house.length == 0 == true}">
               <input type="text"
                      class="form-control"
                      id="registration-home"
                      placeholder="Дом"
                      name="registration-home"
-                     [(ngModel)]="clientDetails.registrationAddressInfo.home">
+                     [(ngModel)]="clientDetails.registrationAddressInfo.house">
             </div>
             <div class="col-xs-4"
                  [ngClass]="{'has-error': clientDetails.registrationAddressInfo.flat.length == 0 == true}">
@@ -164,45 +165,48 @@
         <div class="form-group">
           <label for="phone-list" class="control-label"> Контактные телефоны</label>
           <div id="phone-list">
-            <div class="phone-row row" *ngFor="let phone of clientDetails.phones; let idx = index">
+            <div class="phone-row row" *ngFor="let phone of curPhoneList; let idx = index">
               <div class="col-xs-4">
                 <input type="text"
                        class="form-control"
                        id="phone-number{{idx}}"
                        name="phone-number{{idx}}"
                        placeholder="Номер"
-                       [(ngModel)]="phone.number">
+                       [(ngModel)]="phone.number"
+                       readonly>
               </div>
               <div class="col-xs-4">
-                <select class="form-control"
-                        id="phone-type{{idx}}"
-                        name="phone-type{{idx}}"
-                        [(ngModel)]="phone.type">
-                  <option [value]="phoneTypeEnum.MOBILE"
-                          [selected]="phone.type == phoneTypeEnum.MOBILE">
-                    {{phoneTypeList[phoneTypeEnum.MOBILE]}}
-                  </option>
-                  <option [value]="phoneTypeEnum.HOME"
-                          [selected]="phone.type == phoneTypeEnum.HOME">
-                    {{phoneTypeList[phoneTypeEnum.HOME]}}
-                  </option>
-                  <option [value]="phoneTypeEnum.WORK"
-                          [selected]="phone.type == phoneTypeEnum.WORK">
-                    {{phoneTypeList[phoneTypeEnum.WORK]}}
-                  </option>
-                  <option [value]="phoneTypeEnum.EMBEDDED"
-                          [selected]="phone.type == phoneTypeEnum.EMBEDDED">
-                    {{phoneTypeList[phoneTypeEnum.EMBEDDED]}}
-                  <option [value]="phoneTypeEnum.OTHER"
-                          [selected]="phone.type == phoneTypeEnum.OTHER">
-                    {{phoneTypeList[phoneTypeEnum.OTHER]}}
-                  </option>
-                </select>
+                <fieldset disabled>
+                  <select class="form-control"
+                          id="phone-type{{idx}}"
+                          name="phone-type{{idx}}"
+                          [(ngModel)]="phone.type" readonly>
+                    <option [value]="phoneTypeEnum.MOBILE"
+                            [selected]="phone.type == phoneTypeEnum.MOBILE">
+                      {{phoneTypeList[phoneTypeEnum.MOBILE]}}
+                    </option>
+                    <option [value]="phoneTypeEnum.HOME"
+                            [selected]="phone.type == phoneTypeEnum.HOME">
+                      {{phoneTypeList[phoneTypeEnum.HOME]}}
+                    </option>
+                    <option [value]="phoneTypeEnum.WORK"
+                            [selected]="phone.type == phoneTypeEnum.WORK">
+                      {{phoneTypeList[phoneTypeEnum.WORK]}}
+                    </option>
+                    <option [value]="phoneTypeEnum.EMBEDDED"
+                            [selected]="phone.type == phoneTypeEnum.EMBEDDED">
+                      {{phoneTypeList[phoneTypeEnum.EMBEDDED]}}
+                    <option [value]="phoneTypeEnum.OTHER"
+                            [selected]="phone.type == phoneTypeEnum.OTHER">
+                      {{phoneTypeList[phoneTypeEnum.OTHER]}}
+                    </option>
+                  </select>
+                </fieldset>
               </div>
               <div class="col-xs-4">
                 <button type="button"
                         class="btn btn-danger btn-default pull-left"
-                        (click)="onPhoneRemoveButtonClick(idx)">
+                        (click)="onPhoneRemoveButtonClick(phone, idx)">
                   <span class="glyphicon glyphicon glyphicon-erase"></span>
                   Удалить
                 </button>

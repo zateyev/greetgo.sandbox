@@ -25,6 +25,8 @@ export class ClientDetailsComponent {
   phoneTypeEnum = PhoneType;
   phoneTypeList: { [key: string]: string } = {};
   phoneToAdd: Phone = new Phone();
+  deletedPhoneList: Phone[] = [];
+  curPhoneList: Phone[] = [];
 
   constructor(private httpService: HttpService) {
     this.genderList[Gender.EMPTY] = "Неизвестно";
@@ -39,11 +41,16 @@ export class ClientDetailsComponent {
   }
 
   show(clientRecordId: number) {
+    this.deletedPhoneList = [];
+    this.curPhoneList = [];
+    this.setDefaultPhone();
+
     this.httpService.get("/client/details", {
       "clientRecordId": clientRecordId
     }).toPromise().then(result => {
       this.clientDetails = result.json() as ClientDetails;
-      this.setDefaultPhone();
+      for (let phone of this.clientDetails.phones)
+        this.curPhoneList.push(Phone.copy(phone));
 
       this.isVisible = true;
       setTimeout(() => this.isAnimating = true, 100);
@@ -59,13 +66,35 @@ export class ClientDetailsComponent {
   }
 
   onPhoneAppendButtonClick() {
-    //fixme: ngModel конфликтует с array.unshift?
-    this.clientDetails.phones.push(Phone.copy(this.phoneToAdd));
+    if (this.containsPhone(this.curPhoneList, this.phoneToAdd))
+      return;
+
+    let meetIdx: number = -1;
+    this.deletedPhoneList.forEach((deletedPhone, index) => {
+      if (Phone.compare(deletedPhone, this.phoneToAdd)) {
+        meetIdx = index;
+        return;
+      }
+    });
+
+    if (meetIdx >= 0)
+      this.deletedPhoneList.splice(meetIdx, 1);
+
+    this.curPhoneList.push(Phone.copy(this.phoneToAdd));
     this.setDefaultPhone();
+
+    console.log(this.curPhoneList);
+    console.log(this.deletedPhoneList);
   }
 
-  onPhoneRemoveButtonClick(idx: number) {
-    this.clientDetails.phones.splice(idx, 1);
+  onPhoneRemoveButtonClick(phone: Phone, idx: number) {
+    if (this.containsPhone(this.clientDetails.phones, phone))
+      this.deletedPhoneList.push(phone);
+
+    this.curPhoneList.splice(idx, 1);
+
+    console.log(this.curPhoneList);
+    console.log(this.deletedPhoneList);
   }
 
   //TODO: rawClientDetails скорее всего не нежно, т. к. используется ngModel связка с this.clientDetails
@@ -74,20 +103,22 @@ export class ClientDetailsComponent {
 
     clientDetailsToSave.id = this.clientDetails.id;
     clientDetailsToSave.surname = this.clientDetails.surname;
-    clientDetailsToSave.lastname = this.clientDetails.lastname;
+    clientDetailsToSave.name = this.clientDetails.name;
     clientDetailsToSave.patronymic = this.clientDetails.patronymic;
     clientDetailsToSave.gender = this.clientDetails.gender;
     clientDetailsToSave.birthdate = this.clientDetails.birthdate;
     clientDetailsToSave.charmId = this.clientDetails.charmId;
     clientDetailsToSave.registrationAddressInfo = this.clientDetails.registrationAddressInfo;
-    clientDetailsToSave.residentialAddressInfo = this.clientDetails.residentialAddressInfo;
-
+    clientDetailsToSave.factualAddressInfo = this.clientDetails.factualAddressInfo;
     clientDetailsToSave.phones = [];
-    if (this.clientDetails.phones.length > 0) {
-      for (let phone of this.clientDetails.phones) {
-        clientDetailsToSave.phones.push(Phone.copy(phone))
-      }
-    }
+    clientDetailsToSave.deletedPhones = [];
+
+    for (let curPhone of this.curPhoneList)
+      if (!this.containsPhone(this.clientDetails.phones, curPhone))
+        clientDetailsToSave.phones.push(Phone.copy(curPhone));
+
+    for (let deletedPhone of this.deletedPhoneList)
+      clientDetailsToSave.deletedPhones.push(Phone.copy(deletedPhone));
 
     this.httpService.post("/client/save", {
       "clientDetailsToSave": JSON.stringify(clientDetailsToSave)
@@ -104,10 +135,17 @@ export class ClientDetailsComponent {
 
   //TODO: если нужно будет закрывать форму при нажатии вне нее, то раскомментить
   onContainerClicked(event: MouseEvent) {
-    //TODO: что-то нужно с этим сделать
     if ((<HTMLElement>event.target).classList.contains('modal')) {
       //this.hide();
     }
+  }
+
+  private containsPhone(phones: Phone[], phoneToSearch: Phone): boolean {
+    for (let phone of phones)
+      if (Phone.compare(phone, phoneToSearch))
+        return true;
+
+    return false;
   }
 
   private setDefaultPhone() {

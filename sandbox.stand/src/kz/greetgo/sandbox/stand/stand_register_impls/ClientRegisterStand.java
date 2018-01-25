@@ -73,7 +73,7 @@ public class ClientRegisterStand implements ClientRegister {
       @Override
       public boolean test(ClientDot clientDot) {
         if (clientDot.surname.toLowerCase().contains(loweredNameFilter) ||
-          clientDot.lastname.toLowerCase().contains(loweredNameFilter) ||
+          clientDot.name.toLowerCase().contains(loweredNameFilter) ||
           clientDot.patronymic.toLowerCase().contains(loweredNameFilter))
           return true;
 
@@ -184,21 +184,23 @@ public class ClientRegisterStand implements ClientRegister {
 
       clientDetails.id = null;
       clientDetails.surname = "";
-      clientDetails.lastname = "";
+      clientDetails.name = "";
       clientDetails.patronymic = "";
       clientDetails.gender = Gender.EMPTY;
       clientDetails.birthdate = "";
       clientDetails.charmId = charmDots.get(0).toCharm().id;
 
-      clientDetails.registrationAddressInfo = new RegistrationAddressInfo();
+      clientDetails.registrationAddressInfo = new AddressInfo();
+      clientDetails.registrationAddressInfo.type = AddressType.REGISTRATION;
       clientDetails.registrationAddressInfo.street = "";
-      clientDetails.registrationAddressInfo.home = "";
+      clientDetails.registrationAddressInfo.house = "";
       clientDetails.registrationAddressInfo.flat = "";
-
-      clientDetails.residentialAddressInfo = new ResidentialAddressInfo();
-      clientDetails.residentialAddressInfo.street = "";
-      clientDetails.residentialAddressInfo.home = "";
-      clientDetails.residentialAddressInfo.flat = "";
+      
+      clientDetails.factualAddressInfo = new AddressInfo();
+      clientDetails.factualAddressInfo.type = AddressType.REGISTRATION;
+      clientDetails.factualAddressInfo.street = "";
+      clientDetails.factualAddressInfo.house = "";
+      clientDetails.factualAddressInfo.flat = "";
 
       clientDetails.phones = new ArrayList<>();
     } else {
@@ -213,19 +215,19 @@ public class ClientRegisterStand implements ClientRegister {
   }
 
   @Override
-  public void saveDetails(ClientDetailsToSave detailstoSave) {
+  public void saveDetails(ClientDetailsToSave detailsToSave) {
     Map<Long, ClientDot> clientDotMap = db.get().clientStorage;
     ClientDot clientDot;
     long id = db.get().curClientId.getAndIncrement();
     db.get().curClientId.set(id + 1);
 
-    if (detailstoSave.id == null) {
+    if (detailsToSave.id == null) {
       clientDot = new ClientDot();
-      clientDot.toClientDot(detailstoSave, id, db.get().charmStorage);
+      clientDot.toClientDot(detailsToSave, id, db.get().charmStorage);
       clientDotMap.put(id, clientDot);
     } else {
-      clientDot = clientDotMap.get(detailstoSave.id);
-      clientDot.toClientDot(detailstoSave, null, db.get().charmStorage);
+      clientDot = clientDotMap.get(detailsToSave.id);
+      clientDot.toClientDot(detailsToSave, null, db.get().charmStorage);
     }
   }
 }

@@ -14,6 +14,7 @@ import java.sql.Date;
 import java.sql.Timestamp;
 import java.time.LocalDate;
 import java.util.*;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import static org.fest.assertions.api.Assertions.assertThat;
@@ -745,8 +746,10 @@ public class ClientRegisterImplTest extends ParentTestNg {
     this.resetTablesAll();
     List<CharmHelper> charmHelperList = this.declareAndInsertCharms();
 
-    clientTestDao.get().updateDisableSingleTableCharm(2);
-    Set<Integer> expectedCharmIdSet = charmHelperList.stream().map(ch -> ch.id).skip(2).collect(Collectors.toSet());
+    int charmIdToSkip = charmHelperList.get(2).id;
+    clientTestDao.get().updateDisableSingleTableCharm(charmIdToSkip);
+    Set<Integer> expectedCharmIdSet =
+      charmHelperList.stream().map(ch -> ch.id).filter(id -> id != charmIdToSkip).collect(Collectors.toSet());
 
     ClientDetails realClientDetails = clientRegister.get().getDetails(null);
     Set<Integer> realCharmIdSet =
@@ -754,7 +757,7 @@ public class ClientRegisterImplTest extends ParentTestNg {
 
     assertThat(realClientDetails.id).isNull();
     assertThat(realClientDetails.surname).isEmpty();
-    assertThat(realClientDetails.lastname).isEmpty();
+    assertThat(realClientDetails.name).isEmpty();
     assertThat(realClientDetails.patronymic).isEmpty();
     assertThat(realClientDetails.gender.name()).isEqualTo(Gender.EMPTY.name());
     assertThat(realClientDetails.birthdate).isEmpty();
@@ -762,12 +765,14 @@ public class ClientRegisterImplTest extends ParentTestNg {
     assertThat(realCharmIdSet.size()).isEqualTo(expectedCharmIdSet.size());
     for (Integer realCharmId : realCharmIdSet)
       assertThat(realCharmId).isIn(expectedCharmIdSet);
+    assertThat(realClientDetails.registrationAddressInfo.type).isEqualTo(AddressType.REGISTRATION);
     assertThat(realClientDetails.registrationAddressInfo.street).isEmpty();
-    assertThat(realClientDetails.registrationAddressInfo.home).isEmpty();
+    assertThat(realClientDetails.registrationAddressInfo.house).isEmpty();
     assertThat(realClientDetails.registrationAddressInfo.flat).isEmpty();
-    assertThat(realClientDetails.residentialAddressInfo.street).isEmpty();
-    assertThat(realClientDetails.residentialAddressInfo.home).isEmpty();
-    assertThat(realClientDetails.residentialAddressInfo.flat).isEmpty();
+    assertThat(realClientDetails.factualAddressInfo.type).isEqualTo(AddressType.FACTUAL);
+    assertThat(realClientDetails.factualAddressInfo.street).isEmpty();
+    assertThat(realClientDetails.factualAddressInfo.house).isEmpty();
+    assertThat(realClientDetails.factualAddressInfo.flat).isEmpty();
     assertThat(realClientDetails.phones).isEmpty();
   }
 
@@ -776,8 +781,9 @@ public class ClientRegisterImplTest extends ParentTestNg {
     this.resetTablesAll();
     List<CharmHelper> charmHelperList = this.declareAndInsertCharms();
 
-    clientTestDao.get().updateDisableSingleTableCharm(3);
-    Set<Integer> expectedCharmIdSet = charmHelperList.stream().map(ch -> ch.id).skip(3).collect(Collectors.toSet());
+    clientTestDao.get().updateDisableSingleTableCharm(charmHelperList.get(3).id);
+    Set<Integer> expectedCharmIdSet =
+      charmHelperList.stream().map(ch -> ch.id).filter(id -> id != charmHelperList.get(3).id).collect(Collectors.toSet());
     long expectedId;
     String dummyName = "test";
     for (int i = 0; i < 4; i++)
@@ -787,8 +793,8 @@ public class ClientRegisterImplTest extends ParentTestNg {
     for (int i = 0; i < 4; i++)
       this.insertClient(charmHelperList);
 
-    this.insertClientAddress(expectedId, AddressType.REG, "Шевченко", "45а", "3");
-    this.insertClientAddress(expectedId, AddressType.FACT, "Абай", "21б", "52");
+    this.insertClientAddress(expectedId, AddressType.REGISTRATION, "Шевченко", "45а", "3");
+    this.insertClientAddress(expectedId, AddressType.FACTUAL, "Абай", "21б", "52");
 
     this.insertClientPhone(expectedId, "+72822590121", PhoneType.HOME);
     this.insertClientPhone(expectedId, "+77071112233", PhoneType.MOBILE);
@@ -807,20 +813,22 @@ public class ClientRegisterImplTest extends ParentTestNg {
 
     assertThat(realClientDetails.id).isEqualTo(expectedId);
     assertThat(realClientDetails.surname).isEqualTo("Фамилия");
-    assertThat(realClientDetails.lastname).isEqualTo("Имя");
+    assertThat(realClientDetails.name).isEqualTo("Имя");
     assertThat(realClientDetails.patronymic).isEqualTo("Отчество");
-    assertThat(realClientDetails.gender.name()).isEqualTo(Gender.MALE.name());
+    assertThat(realClientDetails.gender).isEqualTo(Gender.MALE);
     assertThat(realClientDetails.birthdate).isEqualTo(expectedDate.toString());
     assertThat(realClientDetails.charmId).isEqualTo(charmHelperList.get(1).id);
     assertThat(realCharmIdSet.size()).isEqualTo(expectedCharmIdSet.size());
     for (Integer realCharmId : realCharmIdSet)
       assertThat(realCharmId).isIn(expectedCharmIdSet);
+    assertThat(realClientDetails.registrationAddressInfo.type).isEqualTo(AddressType.REGISTRATION);
     assertThat(realClientDetails.registrationAddressInfo.street).isEqualTo("Шевченко");
-    assertThat(realClientDetails.registrationAddressInfo.home).isEqualTo("45а");
+    assertThat(realClientDetails.registrationAddressInfo.house).isEqualTo("45а");
     assertThat(realClientDetails.registrationAddressInfo.flat).isEqualTo("3");
-    assertThat(realClientDetails.residentialAddressInfo.street).isEqualTo("Абай");
-    assertThat(realClientDetails.residentialAddressInfo.home).isEqualTo("21б");
-    assertThat(realClientDetails.residentialAddressInfo.flat).isEqualTo("52");
+    assertThat(realClientDetails.factualAddressInfo.type).isEqualTo(AddressType.FACTUAL);
+    assertThat(realClientDetails.factualAddressInfo.street).isEqualTo("Абай");
+    assertThat(realClientDetails.factualAddressInfo.house).isEqualTo("21б");
+    assertThat(realClientDetails.factualAddressInfo.flat).isEqualTo("52");
     assertThat(realClientDetails.phones).hasSize(4);
     assertThat(realClientDetails.phones.stream().anyMatch(phone ->
       phone.number.equals("+72822590121") && phone.type == PhoneType.HOME)).isEqualTo(true);
@@ -844,24 +852,27 @@ public class ClientRegisterImplTest extends ParentTestNg {
       this.insertClient(charmHelperList);
     for (int i = 0; i < 4; i++)
       this.insertClient(charmHelperList);
-    expectedId = clientTestDao.get().selectSeqIdNextValueTableCharm() + 1;
+    expectedId = this.insertClient(charmHelperList) + 1;
 
     ClientDetailsToSave expectedClientDetailsToSave = new ClientDetailsToSave();
     expectedClientDetailsToSave.id = null;
     expectedClientDetailsToSave.surname = "surname";
-    expectedClientDetailsToSave.lastname = "lastname";
+    expectedClientDetailsToSave.name = "lastname";
     expectedClientDetailsToSave.patronymic = "patronymic";
     expectedClientDetailsToSave.gender = Gender.FEMALE;
     expectedClientDetailsToSave.birthdate = expectedDate.toString();
     expectedClientDetailsToSave.charmId = charmHelperList.get(3).id;
-    expectedClientDetailsToSave.registrationAddressInfo = new RegistrationAddressInfo();
+    expectedClientDetailsToSave.registrationAddressInfo = new AddressInfo();
+    expectedClientDetailsToSave.registrationAddressInfo.type = AddressType.REGISTRATION;
     expectedClientDetailsToSave.registrationAddressInfo.street = "street";
-    expectedClientDetailsToSave.registrationAddressInfo.home = "home";
+    expectedClientDetailsToSave.registrationAddressInfo.house = "home";
     expectedClientDetailsToSave.registrationAddressInfo.flat = "flat";
-    expectedClientDetailsToSave.residentialAddressInfo = new ResidentialAddressInfo();
-    expectedClientDetailsToSave.residentialAddressInfo.street = "street-res";
-    expectedClientDetailsToSave.residentialAddressInfo.home = "home-res";
-    expectedClientDetailsToSave.residentialAddressInfo.flat = "flat-res";
+    expectedClientDetailsToSave.factualAddressInfo = new AddressInfo();
+    expectedClientDetailsToSave.factualAddressInfo.type = AddressType.FACTUAL;
+    expectedClientDetailsToSave.factualAddressInfo.street = "street-res";
+    expectedClientDetailsToSave.factualAddressInfo.house = "home-res";
+    expectedClientDetailsToSave.factualAddressInfo.flat = "flat-res";
+    expectedClientDetailsToSave.phones = new ArrayList<>();
     expectedClientDetailsToSave.phones.add(this.phoneBuilder("+71111", PhoneType.HOME));
     expectedClientDetailsToSave.phones.add(this.phoneBuilder("+77071230011", PhoneType.EMBEDDED));
     expectedClientDetailsToSave.phones.add(this.phoneBuilder("+70000", PhoneType.HOME));
@@ -871,32 +882,41 @@ public class ClientRegisterImplTest extends ParentTestNg {
 
     clientRegister.get().saveDetails(expectedClientDetailsToSave);
 
+    ClientDetails realClientDetails = clientTestDao.get().selectRowById(expectedId);
+    realClientDetails.factualAddressInfo =
+      clientTestDao.get().selectRowByClientAndTypeTableClientAddr(expectedId, AddressType.FACTUAL.name());
+    realClientDetails.registrationAddressInfo =
+      clientTestDao.get().selectRowByClientAndTypeTableClientAddr(expectedId, AddressType.REGISTRATION.name());
+    realClientDetails.phones =
+      clientTestDao.get().selectRowsByClientTableClientPhone(expectedId);
+
     assertThat(clientTestDao.get().selectExistSingleTableClient(expectedId)).isEqualTo(true);
-    assertThat(expectedClientDetailsToSave.id).isEqualTo(expectedId);
-    assertThat(expectedClientDetailsToSave.surname).isEqualTo("surname");
-    assertThat(expectedClientDetailsToSave.lastname).isEqualTo("lastname");
-    assertThat(expectedClientDetailsToSave.patronymic).isEqualTo("patronymic");
-    assertThat(expectedClientDetailsToSave.gender.name()).isEqualTo(Gender.FEMALE.name());
-    assertThat(expectedClientDetailsToSave.birthdate).isEqualTo(expectedDate.toString());
-    assertThat(expectedClientDetailsToSave.charmId).isEqualTo(charmHelperList.get(3).id);
-    assertThat(expectedClientDetailsToSave.registrationAddressInfo.street).isEqualTo("street");
-    assertThat(expectedClientDetailsToSave.registrationAddressInfo.home).isEqualTo("home");
-    assertThat(expectedClientDetailsToSave.registrationAddressInfo.flat).isEqualTo("flat");
-    assertThat(expectedClientDetailsToSave.residentialAddressInfo.street).isEqualTo("street-res");
-    assertThat(expectedClientDetailsToSave.residentialAddressInfo.home).isEqualTo("home-res");
-    assertThat(expectedClientDetailsToSave.residentialAddressInfo.flat).isEqualTo("flat-res");
-    assertThat(expectedClientDetailsToSave.phones).hasSize(6);
-    assertThat(expectedClientDetailsToSave.phones.stream().anyMatch(phone ->
+    assertThat(realClientDetails.surname).isEqualTo("surname");
+    assertThat(realClientDetails.name).isEqualTo("lastname");
+    assertThat(realClientDetails.patronymic).isEqualTo("patronymic");
+    assertThat(realClientDetails.gender).isEqualTo(Gender.FEMALE);
+    assertThat(realClientDetails.birthdate).isEqualTo(expectedDate.toString());
+    assertThat(realClientDetails.charmId).isEqualTo(charmHelperList.get(3).id);
+    assertThat(realClientDetails.registrationAddressInfo.type).isEqualTo(AddressType.REGISTRATION);
+    assertThat(realClientDetails.registrationAddressInfo.street).isEqualTo("street");
+    assertThat(realClientDetails.registrationAddressInfo.house).isEqualTo("home");
+    assertThat(realClientDetails.registrationAddressInfo.flat).isEqualTo("flat");
+    assertThat(realClientDetails.factualAddressInfo.type).isEqualTo(AddressType.FACTUAL);
+    assertThat(realClientDetails.factualAddressInfo.street).isEqualTo("street-res");
+    assertThat(realClientDetails.factualAddressInfo.house).isEqualTo("home-res");
+    assertThat(realClientDetails.factualAddressInfo.flat).isEqualTo("flat-res");
+    assertThat(realClientDetails.phones).hasSize(6);
+    assertThat(realClientDetails.phones.stream().anyMatch(phone ->
       phone.number.equals("+71111") && phone.type == PhoneType.HOME)).isEqualTo(true);
-    assertThat(expectedClientDetailsToSave.phones.stream().anyMatch(phone ->
+    assertThat(realClientDetails.phones.stream().anyMatch(phone ->
       phone.number.equals("+77071230011") && phone.type == PhoneType.EMBEDDED)).isEqualTo(true);
-    assertThat(expectedClientDetailsToSave.phones.stream().anyMatch(phone ->
+    assertThat(realClientDetails.phones.stream().anyMatch(phone ->
       phone.number.equals("+70000") && phone.type == PhoneType.HOME)).isEqualTo(true);
-    assertThat(expectedClientDetailsToSave.phones.stream().anyMatch(phone ->
+    assertThat(realClientDetails.phones.stream().anyMatch(phone ->
       phone.number.equals("+00000") && phone.type == PhoneType.OTHER)).isEqualTo(true);
-    assertThat(expectedClientDetailsToSave.phones.stream().anyMatch(phone ->
+    assertThat(realClientDetails.phones.stream().anyMatch(phone ->
       phone.number.equals("111111") && phone.type == PhoneType.WORK)).isEqualTo(true);
-    assertThat(expectedClientDetailsToSave.phones.stream().anyMatch(phone ->
+    assertThat(realClientDetails.phones.stream().anyMatch(phone ->
       phone.number.equals("222222") && phone.type == PhoneType.OTHER)).isEqualTo(true);
   }
 
@@ -915,64 +935,78 @@ public class ClientRegisterImplTest extends ParentTestNg {
     for (int i = 0; i < 4; i++)
       this.insertClient(charmHelperList);
 
-    this.insertClientAddress(expectedId, AddressType.REG, "Шевченко", "45а", "3");
+    this.insertClientAddress(expectedId, AddressType.REGISTRATION, "Шевченко", "45а", "3");
+    this.insertClientAddress(expectedId, AddressType.FACTUAL, "", "", "");
 
     this.insertClientPhone(expectedId, "+72822590121", PhoneType.HOME);
     this.insertClientPhone(expectedId, "111111", PhoneType.OTHER);
 
     ClientDetailsToSave expectedClientDetailsToSave = new ClientDetailsToSave();
-    expectedClientDetailsToSave.id = null;
+    expectedClientDetailsToSave.id = expectedId;
     expectedClientDetailsToSave.surname = "surname";
-    expectedClientDetailsToSave.lastname = "lastname";
+    expectedClientDetailsToSave.name = "lastname";
     expectedClientDetailsToSave.patronymic = "patronymic";
     expectedClientDetailsToSave.gender = Gender.MALE;
     expectedClientDetailsToSave.birthdate = expectedDate.toString();
     expectedClientDetailsToSave.charmId = charmHelperList.get(1).id;
-    expectedClientDetailsToSave.registrationAddressInfo = new RegistrationAddressInfo();
+    expectedClientDetailsToSave.registrationAddressInfo = new AddressInfo();
+    expectedClientDetailsToSave.registrationAddressInfo.type = AddressType.REGISTRATION;
     expectedClientDetailsToSave.registrationAddressInfo.street = "street";
-    expectedClientDetailsToSave.registrationAddressInfo.home = "home";
+    expectedClientDetailsToSave.registrationAddressInfo.house = "home";
     expectedClientDetailsToSave.registrationAddressInfo.flat = "flat";
-    expectedClientDetailsToSave.residentialAddressInfo = new ResidentialAddressInfo();
-    expectedClientDetailsToSave.residentialAddressInfo.street = "street-res";
-    expectedClientDetailsToSave.residentialAddressInfo.home = "home-res";
-    expectedClientDetailsToSave.residentialAddressInfo.flat = "flat-res";
+    expectedClientDetailsToSave.factualAddressInfo = new AddressInfo();
+    expectedClientDetailsToSave.factualAddressInfo.type = AddressType.FACTUAL;
+    expectedClientDetailsToSave.factualAddressInfo.street = "street-res";
+    expectedClientDetailsToSave.factualAddressInfo.house = "home-res";
+    expectedClientDetailsToSave.factualAddressInfo.flat = "flat-res";
+    expectedClientDetailsToSave.phones = new ArrayList<>();/*
     expectedClientDetailsToSave.phones.add(this.phoneBuilder("+71111", PhoneType.HOME));
     expectedClientDetailsToSave.phones.add(this.phoneBuilder("+77071230011", PhoneType.EMBEDDED));
     expectedClientDetailsToSave.phones.add(this.phoneBuilder("+70000", PhoneType.HOME));
     expectedClientDetailsToSave.phones.add(this.phoneBuilder("+00000", PhoneType.OTHER));
     expectedClientDetailsToSave.phones.add(this.phoneBuilder("111111", PhoneType.WORK));
-    expectedClientDetailsToSave.phones.add(this.phoneBuilder("222222", PhoneType.OTHER));
+    expectedClientDetailsToSave.phones.add(this.phoneBuilder("222222", PhoneType.OTHER));*/
 
     clientRegister.get().saveDetails(expectedClientDetailsToSave);
 
+    ClientDetails realClientDetails = clientTestDao.get().selectRowById(expectedId);
+    realClientDetails.factualAddressInfo =
+      clientTestDao.get().selectRowByClientAndTypeTableClientAddr(expectedId, AddressType.FACTUAL.name());
+    realClientDetails.registrationAddressInfo =
+      clientTestDao.get().selectRowByClientAndTypeTableClientAddr(expectedId, AddressType.REGISTRATION.name());
+    realClientDetails.phones =
+      clientTestDao.get().selectRowsByClientTableClientPhone(expectedId);
+
     assertThat(clientTestDao.get().selectExistSingleTableClient(expectedId)).isEqualTo(true);
-    assertThat(expectedClientDetailsToSave.id).isEqualTo(expectedId);
-    assertThat(expectedClientDetailsToSave.surname).isEqualTo("surname");
-    assertThat(expectedClientDetailsToSave.lastname).isEqualTo("lastname");
-    assertThat(expectedClientDetailsToSave.patronymic).isEqualTo("patronymic");
-    assertThat(expectedClientDetailsToSave.gender.name()).isEqualTo(Gender.MALE.name());
-    assertThat(expectedClientDetailsToSave.birthdate).isEqualTo(expectedDate.toString());
-    assertThat(expectedClientDetailsToSave.charmId).isEqualTo(charmHelperList.get(1).id);
-    assertThat(expectedClientDetailsToSave.registrationAddressInfo.street).isEqualTo("street");
-    assertThat(expectedClientDetailsToSave.registrationAddressInfo.home).isEqualTo("home");
-    assertThat(expectedClientDetailsToSave.registrationAddressInfo.flat).isEqualTo("flat");
-    assertThat(expectedClientDetailsToSave.residentialAddressInfo.street).isEqualTo("street-res");
-    assertThat(expectedClientDetailsToSave.residentialAddressInfo.home).isEqualTo("home-res");
-    assertThat(expectedClientDetailsToSave.residentialAddressInfo.flat).isEqualTo("flat-res");
-    assertThat(expectedClientDetailsToSave.phones).hasSize(7);
-    assertThat(expectedClientDetailsToSave.phones.stream().anyMatch(phone ->
+    assertThat(realClientDetails.id).isEqualTo(expectedId);
+    assertThat(realClientDetails.surname).isEqualTo("surname");
+    assertThat(realClientDetails.name).isEqualTo("lastname");
+    assertThat(realClientDetails.patronymic).isEqualTo("patronymic");
+    assertThat(realClientDetails.gender.name()).isEqualTo(Gender.MALE.name());
+    assertThat(realClientDetails.birthdate).isEqualTo(expectedDate.toString());
+    assertThat(realClientDetails.charmId).isEqualTo(charmHelperList.get(1).id);
+    assertThat(realClientDetails.registrationAddressInfo.type).isEqualTo(AddressType.REGISTRATION);
+    assertThat(realClientDetails.registrationAddressInfo.street).isEqualTo("street");
+    assertThat(realClientDetails.registrationAddressInfo.house).isEqualTo("home");
+    assertThat(realClientDetails.registrationAddressInfo.flat).isEqualTo("flat");
+    assertThat(realClientDetails.factualAddressInfo.type).isEqualTo(AddressType.FACTUAL);
+    assertThat(realClientDetails.factualAddressInfo.street).isEqualTo("street-res");
+    assertThat(realClientDetails.factualAddressInfo.house).isEqualTo("home-res");
+    assertThat(realClientDetails.factualAddressInfo.flat).isEqualTo("flat-res");
+    assertThat(realClientDetails.phones).hasSize(7);
+    assertThat(realClientDetails.phones.stream().anyMatch(phone ->
       phone.number.equals("+71111") && phone.type == PhoneType.HOME)).isEqualTo(true);
-    assertThat(expectedClientDetailsToSave.phones.stream().anyMatch(phone ->
+    assertThat(realClientDetails.phones.stream().anyMatch(phone ->
       phone.number.equals("+77071230011") && phone.type == PhoneType.EMBEDDED)).isEqualTo(true);
-    assertThat(expectedClientDetailsToSave.phones.stream().anyMatch(phone ->
+    assertThat(realClientDetails.phones.stream().anyMatch(phone ->
       phone.number.equals("+70000") && phone.type == PhoneType.HOME)).isEqualTo(true);
-    assertThat(expectedClientDetailsToSave.phones.stream().anyMatch(phone ->
+    assertThat(realClientDetails.phones.stream().anyMatch(phone ->
       phone.number.equals("+00000") && phone.type == PhoneType.OTHER)).isEqualTo(true);
-    assertThat(expectedClientDetailsToSave.phones.stream().anyMatch(phone ->
+    assertThat(realClientDetails.phones.stream().anyMatch(phone ->
       phone.number.equals("111111") && phone.type == PhoneType.WORK)).isEqualTo(true);
-    assertThat(expectedClientDetailsToSave.phones.stream().anyMatch(phone ->
+    assertThat(realClientDetails.phones.stream().anyMatch(phone ->
       phone.number.equals("222222") && phone.type == PhoneType.OTHER)).isEqualTo(true);
-    assertThat(expectedClientDetailsToSave.phones.stream().anyMatch(phone ->
+    assertThat(realClientDetails.phones.stream().anyMatch(phone ->
       phone.number.equals("+72822590121") && phone.type == PhoneType.HOME)).isEqualTo(true);
   }
 
@@ -1021,24 +1055,13 @@ public class ClientRegisterImplTest extends ParentTestNg {
   }
 
   @Test(expectedExceptions = InvalidParameter.class)
-  public void method_saveDetails_detailsNull() {
-    clientRegister.get().saveDetails(null);
+  public void method_getDetails_idExists() {
+    clientRegister.get().getDetails(9999999L);
   }
 
   @Test(expectedExceptions = InvalidParameter.class)
-  public void method_saveDetails_detailsMemberNull() {
-    ClientDetailsToSave clientDetailsToSave = new ClientDetailsToSave();
-    clientDetailsToSave.id = null;
-    clientDetailsToSave.surname = null;
-    clientDetailsToSave.lastname = null;
-    clientDetailsToSave.patronymic = null;
-    clientDetailsToSave.gender = Gender.EMPTY;
-    clientDetailsToSave.birthdate = null;
-    clientDetailsToSave.charmId = -10;
-    clientDetailsToSave.registrationAddressInfo = null;
-    clientDetailsToSave.residentialAddressInfo = null;
-
-    clientRegister.get().saveDetails(clientDetailsToSave);
+  public void method_saveDetails_detailsNull() {
+    clientRegister.get().saveDetails(null);
   }
 
   private static class CharmHelper {
@@ -1046,6 +1069,20 @@ public class ClientRegisterImplTest extends ParentTestNg {
     String name;
     String description;
     float energy;
+  }
+
+  @Test(expectedExceptions = InvalidParameter.class)
+  public void method_saveDetails_idExists() {
+    ClientDetailsToSave clientDetailsToSave = new ClientDetailsToSave();
+    clientDetailsToSave.id = 999999L;
+    clientDetailsToSave.surname = "";
+    clientDetailsToSave.name = "";
+    clientDetailsToSave.patronymic = "";
+    clientDetailsToSave.gender = Gender.EMPTY;
+    clientDetailsToSave.birthdate = "";
+    clientDetailsToSave.charmId = 0;
+
+    clientRegister.get().saveDetails(clientDetailsToSave);
   }
 
   private CharmHelper declareAndInsertCharm(String name, String description, float energy) {
@@ -1090,7 +1127,7 @@ public class ClientRegisterImplTest extends ParentTestNg {
   }
 
   private long insertClient(List<CharmHelper> charmHelperList) {
-    long id = clientTestDao.get().selectSeqIdNextValueTableClientAccount();
+    long id = clientTestDao.get().selectSeqIdNextValueTableClient();
     clientTestDao.get().insertClient(id, RND.str(RND.plusInt(5) + 5), RND.str(RND.plusInt(5) + 5),
       RND.str(RND.plusInt(5) + 5), Gender.values()[RND.plusInt(Gender.values().length)].name(), Util.generateDate(),
       charmHelperList.get(RND.plusInt(charmHelperList.size())).id);
@@ -1098,7 +1135,7 @@ public class ClientRegisterImplTest extends ParentTestNg {
   }
 
   private long insertClient(String dummyName, List<CharmHelper> charmHelperList) {
-    long id = clientTestDao.get().selectSeqIdNextValueTableClientAccount();
+    long id = clientTestDao.get().selectSeqIdNextValueTableClient();
     clientTestDao.get().insertClient(id, dummyName, dummyName, dummyName,
       Gender.values()[RND.plusInt(Gender.values().length)].name(), Util.generateDate(),
       charmHelperList.get(RND.plusInt(charmHelperList.size())).id);
@@ -1106,13 +1143,13 @@ public class ClientRegisterImplTest extends ParentTestNg {
   }
 
   private long insertClient(String surname, String name, String patronymic, String gender, LocalDate date, int charmId) {
-    long id = clientTestDao.get().selectSeqIdNextValueTableClientAccount();
+    long id = clientTestDao.get().selectSeqIdNextValueTableClient();
     clientTestDao.get().insertClient(id, surname, name, patronymic, gender, Date.valueOf(date), charmId);
     return id;
   }
 
   private long insertClient(String surname, String name, String patronymic, String gender, Date date, int charmId) {
-    long id = clientTestDao.get().selectSeqIdNextValueTableClientAccount();
+    long id = clientTestDao.get().selectSeqIdNextValueTableClient();
     clientTestDao.get().insertClient(id, surname, name, patronymic, gender, date, charmId);
     return id;
   }
@@ -1144,8 +1181,8 @@ public class ClientRegisterImplTest extends ParentTestNg {
 
   private void resetTablesAll() {
     clientTestDao.get().deleteAllTableClientAccount();
-    clientTestDao.get().deleteAllTableClientAddr();
     clientTestDao.get().deleteAllTableClientPhone();
+    clientTestDao.get().deleteAllTableClientAddr();
     clientTestDao.get().deleteAllTableClient();
     clientTestDao.get().deleteAllTableCharm();
   }

@@ -10,6 +10,10 @@ export class Phone {
     return this;
   }
 
+  public static compare(a: any, b: any): boolean {
+    return a.number == b.number && a.type == b.type;
+  }
+
   public static copy(a: any): Phone {
     let ret = new Phone();
     ret.assign(a);

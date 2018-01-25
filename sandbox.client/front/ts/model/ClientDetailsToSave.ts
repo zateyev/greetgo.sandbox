@@ -1,17 +1,17 @@
-import {RegistrationAddressInfo} from "./RegistrationAddressInfo";
-import {ResidentialAddressInfo} from "./ResidentialAddressInfo";
 import {Phone} from "./Phone";
 import {Gender} from "./Gender";
+import {AddressInfo} from "./AddressInfo";
 
 export class ClientDetailsToSave {
   public id: number | null/*long*/;
   public surname: string;
-  public lastname: string;
+  public name: string;
   public patronymic: string;
   public gender: Gender;
   public birthdate: string;
   public charmId: number/*int*/;
-  public registrationAddressInfo: RegistrationAddressInfo;
-  public residentialAddressInfo: ResidentialAddressInfo;
+  public registrationAddressInfo: AddressInfo;
+  public factualAddressInfo: AddressInfo;
   public phones: Phone[];
+  public deletedPhones: Phone[];
 }

@@ -145,13 +145,13 @@ public class StandDb implements HasAfterInject {
     ClientDot c = new ClientDot();
     c.id = lineNo - 1;
     c.surname = splitLine[1].trim();
-    c.lastname = splitLine[2].trim();
+    c.name = splitLine[2].trim();
     c.patronymic = splitLine[3].trim();
     c.gender = toGender(Integer.parseInt(splitLine[4].trim()));
     c.birthDate = this.generateDate();
     c.charm = this.generateCharm();
-    c.residentialAddressInfo = this.generateResidentialAddress();
-    c.registrationAddressInfo = this.generateRegistrationAddressInfo();
+    c.factualAddressInfo = this.generateAddressInfo(AddressType.FACTUAL);
+    c.registrationAddressInfo = this.generateAddressInfo(AddressType.REGISTRATION);
     c.phones = this.generatePhones();
 
     ClientDot.generateAgeAndBalance(c);
@@ -174,23 +174,13 @@ public class StandDb implements HasAfterInject {
     return charmDot.toCharm();
   }
 
-  private ResidentialAddressInfo generateResidentialAddress() {
+  private AddressInfo generateAddressInfo(AddressType addressType) {
     Random random = new Random();
-    ResidentialAddressInfo ret = new ResidentialAddressInfo();
+    AddressInfo ret = new AddressInfo();
 
+    ret.type = addressType;
     ret.street = this.generateString(random.nextInt(10) + 5, false);
-    ret.home = this.generateString(random.nextInt(3) + 2, false);
-    ret.flat = this.generateString(random.nextInt(3) + 2, true);
-
-    return ret;
-  }
-
-  private RegistrationAddressInfo generateRegistrationAddressInfo() {
-    Random random = new Random();
-    RegistrationAddressInfo ret = new RegistrationAddressInfo();
-
-    ret.street = this.generateString(random.nextInt(10) + 5, false);
-    ret.home = this.generateString(random.nextInt(3) + 2, false);
+    ret.house = this.generateString(random.nextInt(3) + 2, false);
     ret.flat = this.generateString(random.nextInt(3) + 2, true);
 
     return ret;
@@ -201,7 +191,7 @@ public class StandDb implements HasAfterInject {
     List<Phone> ret = new ArrayList<>();
     int n = random.nextInt(3) + 1;
 
-    for(int i = 0; i < n; i++) {
+    for (int i = 0; i < n; i++) {
       Phone phone = new Phone();
       phone.number = "+" + this.generateString(11, true);
       phone.type = toPhoneType(random.nextInt(PhoneType.values().length));
