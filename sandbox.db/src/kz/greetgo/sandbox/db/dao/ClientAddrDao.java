@@ -21,8 +21,8 @@ public interface ClientAddrDao {
               @Param("flat") String flat);
 
   @Update("UPDATE client_addr " +
-    "SET type=#{type}, street=#{street}, house=#{house}, flat=#{flat} " +
-    "WHERE client=#{client}")
+    "SET street=#{street}, house=#{house}, flat=#{flat} " +
+    "WHERE client=#{client} AND type=#{type}")
   void update(@Param("client") long client,
               @Param("type") String type,
               @Param("street") String street,

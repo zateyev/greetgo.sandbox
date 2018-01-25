@@ -959,13 +959,13 @@ public class ClientRegisterImplTest extends ParentTestNg {
     expectedClientDetailsToSave.factualAddressInfo.street = "street-res";
     expectedClientDetailsToSave.factualAddressInfo.house = "home-res";
     expectedClientDetailsToSave.factualAddressInfo.flat = "flat-res";
-    expectedClientDetailsToSave.phones = new ArrayList<>();/*
+    expectedClientDetailsToSave.phones = new ArrayList<>();
     expectedClientDetailsToSave.phones.add(this.phoneBuilder("+71111", PhoneType.HOME));
     expectedClientDetailsToSave.phones.add(this.phoneBuilder("+77071230011", PhoneType.EMBEDDED));
     expectedClientDetailsToSave.phones.add(this.phoneBuilder("+70000", PhoneType.HOME));
     expectedClientDetailsToSave.phones.add(this.phoneBuilder("+00000", PhoneType.OTHER));
     expectedClientDetailsToSave.phones.add(this.phoneBuilder("111111", PhoneType.WORK));
-    expectedClientDetailsToSave.phones.add(this.phoneBuilder("222222", PhoneType.OTHER));*/
+    expectedClientDetailsToSave.phones.add(this.phoneBuilder("222222", PhoneType.OTHER));
 
     clientRegister.get().saveDetails(expectedClientDetailsToSave);
 
