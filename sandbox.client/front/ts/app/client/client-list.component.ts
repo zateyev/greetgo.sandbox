@@ -1,7 +1,7 @@
 import {Component} from "@angular/core";
 import {HttpService} from "../HttpService";
 import {ClientRecord} from "../../model/ClientRecord";
-import {ClientRecordListRequest} from "../../model/ClientRecordListRequest";
+import {ClientRecordRequest} from "../../model/ClientRecordRequest";
 import {ColumnSortType} from "../../model/ColumnSortType";
 import {ClientDetailsComponent} from "./client-details.component";
 
@@ -18,14 +18,14 @@ export class ClientListComponent {
   pageNums: number[];
   records: ClientRecord[] | null = [];
   selectedRecordId: number | null = null;
-  listRequest: ClientRecordListRequest = new ClientRecordListRequest();
+  request: ClientRecordRequest = new ClientRecordRequest();
   filterSuccessState: boolean | null = null;
   isModalFormActive: boolean = false;
 
   constructor(private httpService: HttpService) {
-    this.listRequest.columnSortType = ColumnSortType.NONE;
-    this.listRequest.sortAscend = false;
-    this.listRequest.nameFilter = "";
+    this.request.columnSortType = ColumnSortType.NONE;
+    this.request.sortAscend = false;
+    this.request.nameFilter = "";
 
     this.refreshClientRecordList();
   }
@@ -38,7 +38,7 @@ export class ClientListComponent {
 
   private updatePageNumeration() {
     this.httpService.get("/client/count", {
-      'clientRecordNameFilter': this.listRequest.nameFilter
+      'clientRecordRequest': JSON.stringify(this.request)
     }).toPromise().then(result => {
       this.pageCount = Math.floor(result.json() as number / this.httpService.pageSize);
       if (result.json() as number % this.httpService.pageSize > 0)
@@ -59,11 +59,11 @@ export class ClientListComponent {
   }
 
   private getClientRecordList() {
-    this.listRequest.clientRecordCountToSkip = this.curPageNum * this.httpService.pageSize;
-    this.listRequest.clientRecordCount = this.httpService.pageSize;
+    this.request.clientRecordCountToSkip = this.curPageNum * this.httpService.pageSize;
+    this.request.clientRecordCount = this.httpService.pageSize;
 
     this.httpService.get("/client/list", {
-      'clientRecordListRequest': JSON.stringify(this.listRequest)
+      'clientRecordRequest': JSON.stringify(this.request)
     }).toPromise().then(result => {
       this.records = (result.json() as ClientRecord[]).map(ClientRecord.copy);
 
@@ -94,7 +94,7 @@ export class ClientListComponent {
     if (filter == null || filter.length == 0)
       filter = "";
 
-    this.listRequest.nameFilter = filter;
+    this.request.nameFilter = filter;
     this.refreshClientRecordList();
   }
 
@@ -103,19 +103,19 @@ export class ClientListComponent {
   }
 
   onSortingButtonClick(columnSortTypeName: string, sortAscend: boolean) {
-    this.listRequest.columnSortType = columnSortTypeName as ColumnSortType;
-    this.listRequest.sortAscend = sortAscend;
+    this.request.columnSortType = columnSortTypeName as ColumnSortType;
+    this.request.sortAscend = sortAscend;
     this.curPageNum = 0;
 
     this.refreshClientRecordList();
   }
 
   isSortingButtonActive(columnSortTypeName: string, sortAscend: boolean): boolean {
-    if (columnSortTypeName == this.listRequest.columnSortType) {
+    if (columnSortTypeName == this.request.columnSortType) {
       if (columnSortTypeName == "NONE")
         return true;
 
-      if (sortAscend == this.listRequest.sortAscend)
+      if (sortAscend == this.request.sortAscend)
         return true;
     }
 

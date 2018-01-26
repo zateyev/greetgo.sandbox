@@ -9,11 +9,11 @@ import org.apache.ibatis.annotations.Update;
 public interface ClientAddrDao {
   @Select("SELECT street, house, flat, type " +
     "FROM client_addr " +
-    "WHERE client=#{client} AND type=#{type} AND record_state=0")
+    "WHERE client=#{client} AND type=#{type}")
   AddressInfo selectRowByClientAndType(@Param("client") long client, @Param("type") String type);
 
   @Insert("INSERT INTO client_addr (client, type, street, house, flat) " +
-    "VALUES (#{client}, #{type}, #{street}, #{house}, #{flat})")
+    "VALUES(#{client}, #{type}, #{street}, #{house}, #{flat})")
   void insert(@Param("client") long client,
               @Param("type") String type,
               @Param("street") String street,

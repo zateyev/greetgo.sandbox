@@ -9,7 +9,7 @@ import org.apache.ibatis.annotations.Param;
 public interface ClientPhoneDaoPostgres extends ClientPhoneDao {
   @Insert("INSERT INTO client_phone (client, number, type) " +
     "VALUES(#{client}, #{number}, #{type}) " +
-    "ON CONFLICT (client, number) DO UPDATE SET type=#{type}")
+    "ON CONFLICT (client, number) DO UPDATE SET type=#{type}, actual=1")
   void insert(@Param("client") long client,
               @Param("number") String number,
               @Param("type") String type);

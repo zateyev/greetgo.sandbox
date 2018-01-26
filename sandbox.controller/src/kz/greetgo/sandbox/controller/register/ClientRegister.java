@@ -3,19 +3,18 @@ package kz.greetgo.sandbox.controller.register;
 import kz.greetgo.sandbox.controller.model.ClientDetails;
 import kz.greetgo.sandbox.controller.model.ClientDetailsToSave;
 import kz.greetgo.sandbox.controller.model.ClientRecord;
-import kz.greetgo.sandbox.controller.model.ClientRecordListRequest;
+import kz.greetgo.sandbox.controller.model.ClientRecordRequest;
 
 import java.util.List;
-import java.util.Map;
 
 public interface ClientRegister {
   /**
    * Предоставляет количество страниц клиентских записей
    *
-   * @param nameFilter текущая применяемая фильтрация
+   * @param request текущая применяемая фильтрация
    * @return количество страниц
    */
-  long getCount(String nameFilter);
+  long getCount(ClientRecordRequest request);
 
   /**
    * Предоставляет список клиентских записей
@@ -23,7 +22,7 @@ public interface ClientRegister {
    * @param listRequest принимаемые параметры страницы, сортировки и фильтрации в виде модели
    * @return список клиентских записей
    */
-  List<ClientRecord> getRecordList(ClientRecordListRequest listRequest);
+  List<ClientRecord> getRecordList(ClientRecordRequest listRequest);
 
   /**
    * Удаление клиентской записи

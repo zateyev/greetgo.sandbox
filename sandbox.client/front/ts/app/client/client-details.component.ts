@@ -102,9 +102,9 @@ export class ClientDetailsComponent {
     let clientDetailsToSave = new ClientDetailsToSave();
 
     clientDetailsToSave.id = this.clientDetails.id;
-    clientDetailsToSave.surname = this.clientDetails.surname;
-    clientDetailsToSave.name = this.clientDetails.name;
-    clientDetailsToSave.patronymic = this.clientDetails.patronymic;
+    clientDetailsToSave.surname = this.clientDetails.surname.trim();
+    clientDetailsToSave.name = this.clientDetails.name.trim();
+    clientDetailsToSave.patronymic = this.clientDetails.patronymic.trim();
     clientDetailsToSave.gender = this.clientDetails.gender;
     clientDetailsToSave.birthdate = this.clientDetails.birthdate;
     clientDetailsToSave.charmId = this.clientDetails.charmId;

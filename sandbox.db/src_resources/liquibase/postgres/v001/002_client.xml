@@ -3,25 +3,94 @@
                    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
                    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-2.0.xsd">
 
-  <changeSet author="nsmagulov" id="create-sequence-client-id">
-    <sql endDelimiter=";;"><![CDATA[
-      CREATE SEQUENCE client_id_seq
-    ]]></sql>
-  </changeSet>
-
+  <!--TODO: убрать nextval, т.к. в оно вызывается в коде?-->
   <changeSet author="nsmagulov" id="create-table-client">
     <sql endDelimiter=";;"><![CDATA[
       CREATE TABLE client (
-        id            bigint DEFAULT nextval('client_id_seq') NOT NULL,
-        surname       varchar(255) NOT NULL,
-        name          varchar(255) NOT NULL,
-        patronymic    varchar(255) NOT NULL,
-        gender        varchar(255) NOT NULL,
-        birth_date    date NOT NULL,
-        charm         integer NOT NULL,
-        record_state  smallint NOT NULL DEFAULT 0,
-        PRIMARY KEY (id)
+        id bigint NOT NULL,
+        surname varchar(255) NOT NULL,
+        name varchar(255) NOT NULL,
+        patronymic varchar(255) NOT NULL,
+        gender varchar(255) NOT NULL,
+        birth_date date NOT NULL,
+        charm integer NOT NULL,
+        actual smallint NOT NULL DEFAULT 1
       )
+    ]]></sql>
+  </changeSet>
+
+  <changeSet author="nsmagulov" id="create-table-charm">
+    <sql endDelimiter=";;"><![CDATA[
+      CREATE TABLE charm (
+        id integer NOT NULL,
+        name varchar(255) NOT NULL,
+        description varchar(255) NOT NULL,
+        energy real NOT NULL,
+        actual smallint NOT NULL DEFAULT 1
+      )
+    ]]></sql>
+  </changeSet>
+
+  <changeSet author="nsmagulov" id="create-table-clientAddr">
+    <sql endDelimiter=";;"><![CDATA[
+      CREATE TABLE client_addr (
+        client bigint NOT NULL,
+        type varchar(255) NOT NULL,
+        street varchar(255) NOT NULL,
+        house varchar(255) NOT NULL,
+        flat varchar(255) NOT NULL
+      )
+    ]]></sql>
+  </changeSet>
+
+  <changeSet author="nsmagulov" id="create-table-clientPhone">
+    <sql endDelimiter=";;"><![CDATA[
+      CREATE TABLE client_phone (
+        client bigint NOT NULL,
+        number varchar(255) NOT NULL,
+        type varchar(255) NOT NULL,
+        actual smallint NOT NULL DEFAULT 1
+      )
+    ]]></sql>
+  </changeSet>
+
+  <changeSet author="nsmagulov" id="create-table-clientAccount">
+    <sql endDelimiter=";;"><![CDATA[
+      CREATE TABLE client_account (
+        id bigint NOT NULL,
+        client bigint NOT NULL,
+        money real NOT NULL,
+        number varchar(255) NOT NULL,
+        registered_at timestamp NOT NULL
+      )
+    ]]></sql>
+  </changeSet>
+
+  <changeSet author="nsmagulov" id="create-table-clientAccountTransaction">
+    <sql endDelimiter=";;"><![CDATA[
+      CREATE TABLE client_account_transaction (
+        id bigint NOT NULL,
+        account bigint NOT NULL ,
+        money real NOT NULL,
+        finished_at timestamp NOT NULL,
+        type integer NOT NULL
+      )
+    ]]></sql>
+  </changeSet>
+
+  <changeSet author="nsmagulov" id="create-table-transactionType">
+    <sql endDelimiter=";;"><![CDATA[
+      CREATE TABLE transaction_type (
+        id integer NOT NULL,
+        code varchar(255) NOT NULL,
+        name varchar(255) NOT NULL
+      )
+    ]]></sql>
+  </changeSet>
+
+  <changeSet author="nsmagulov" id="create-sequence-client-id">
+    <sql endDelimiter=";;"><![CDATA[
+      CREATE SEQUENCE client_id_seq
     ]]></sql>
   </changeSet>
 
@@ -31,118 +100,122 @@
     ]]></sql>
   </changeSet>
 
-  <changeSet author="nsmagulov" id="create-table-charm">
+  <changeSet author="nsmagulov" id="create-sequence-clientAccount-id">
     <sql endDelimiter=";;"><![CDATA[
-      CREATE TABLE charm (
-        id            integer DEFAULT nextval('charm_id_seq') NOT NULL,
-        name          varchar(255) NOT NULL,
-        description   varchar(255) NOT NULL,
-        energy        real NOT NULL,
-        record_state  smallint NOT NULL DEFAULT 0,
-        PRIMARY KEY (id)
-      )
+      CREATE SEQUENCE client_account_id_seq
+    ]]></sql>
+  </changeSet>
+
+  <changeSet author="nsmagulov" id="create-sequence-clientAccountTransaction-id">
+    <sql endDelimiter=";;"><![CDATA[
+      CREATE SEQUENCE client_account_transaction_id_seq
+    ]]></sql>
+  </changeSet>
+
+  <changeSet author="nsmagulov" id="create-sequence-transactionType-id">
+    <sql endDelimiter=";;"><![CDATA[
+      CREATE SEQUENCE transaction_type_id_seq
+    ]]></sql>
+  </changeSet>
+
+  <changeSet author="nsmagulov" id="alter-table-client-add-primary-key">
+    <sql endDelimiter=";;"><![CDATA[
+      ALTER TABLE client
+      ADD CONSTRAINT pk_client
+      PRIMARY KEY(id)
+    ]]></sql>
+  </changeSet>
+
+  <changeSet author="nsmagulov" id="alter-table-charm-add-primary-key">
+    <sql endDelimiter=";;"><![CDATA[
+      ALTER TABLE charm
+      ADD CONSTRAINT pk_charm
+      PRIMARY KEY(id)
+    ]]></sql>
+  </changeSet>
+
+  <changeSet author="nsmagulov" id="alter-table-clientAddr-add-primary-key">
+    <sql endDelimiter=";;"><![CDATA[
+      ALTER TABLE client_addr
+      ADD CONSTRAINT pk_clientAddr
+      PRIMARY KEY(client, type)
+    ]]></sql>
+  </changeSet>
+
+  <changeSet author="nsmagulov" id="alter-table-clientPhone-add-primary-key">
+    <sql endDelimiter=";;"><![CDATA[
+      ALTER TABLE client_phone
+      ADD CONSTRAINT pk_clientPhone
+      PRIMARY KEY(client, number)
+    ]]></sql>
+  </changeSet>
+
+  <changeSet author="nsmagulov" id="alter-table-clientAccount-add-primary-key">
+    <sql endDelimiter=";;"><![CDATA[
+      ALTER TABLE client_account
+      ADD CONSTRAINT pk_clientAccount
+      PRIMARY KEY(id)
+    ]]></sql>
+  </changeSet>
+
+  <changeSet author="nsmagulov" id="alter-table-clientAccountTransaction-add-primary-key">
+    <sql endDelimiter=";;"><![CDATA[
+      ALTER TABLE client_account_transaction
+      ADD CONSTRAINT pk_clientAccountTransaction
+      PRIMARY KEY(id)
+    ]]></sql>
+  </changeSet>
+
+  <changeSet author="nsmagulov" id="alter-table-transactionType-add-primary-key">
+    <sql endDelimiter=";;"><![CDATA[
+      ALTER TABLE transaction_type
+      ADD CONSTRAINT pk_transactionType
+      PRIMARY KEY(id)
     ]]></sql>
   </changeSet>
 
   <changeSet author="nsmagulov" id="alter-table-client-add-foreign-key">
     <sql endDelimiter=";;"><![CDATA[
       ALTER TABLE client
-      ADD CONSTRAINT fk_Client_Charm
-      FOREIGN KEY (charm)
+      ADD CONSTRAINT fk_client_charm
+      FOREIGN KEY(charm)
       REFERENCES charm(id)
     ]]></sql>
   </changeSet>
 
-  <changeSet author="nsmagulov" id="create-table-client_addr">
+  <changeSet author="nsmagulov" id="alter-table-clientAddr-add-foreign-key">
     <sql endDelimiter=";;"><![CDATA[
-      CREATE TABLE client_addr (
-        client        bigint NOT NULL REFERENCES client(id),
-        type          varchar(255) NOT NULL,
-        street        varchar(255) NOT NULL,
-        house         varchar(255) NOT NULL,
-        flat          varchar(255) NOT NULL,
-        record_state  smallint NOT NULL DEFAULT 0,
-        PRIMARY KEY (client, type)
-      )
+      ALTER TABLE client_addr
+      ADD CONSTRAINT fk_clientAddr_client
+      FOREIGN KEY(client)
+      REFERENCES client(id)
     ]]></sql>
   </changeSet>
 
-  <changeSet author="nsmagulov" id="create-table-client_phone">
+  <changeSet author="nsmagulov" id="alter-table-clientPhone-add-foreign-key">
     <sql endDelimiter=";;"><![CDATA[
-      CREATE TABLE client_phone (
-        client        bigint NOT NULL REFERENCES client(id),
-        number        varchar(255) NOT NULL,
-        type          varchar(255) NOT NULL,
-        record_state  smallint NOT NULL DEFAULT 0,
-        PRIMARY KEY (client, number)
-      )
+      ALTER TABLE client_phone
+      ADD CONSTRAINT fk_clientPhone_client
+      FOREIGN KEY(client)
+      REFERENCES client(id)
     ]]></sql>
   </changeSet>
 
-  <changeSet author="nsmagulov" id="create-sequence-client_account-id">
+  <changeSet author="nsmagulov" id="alter-table-clientAccount-add-foreign-key">
     <sql endDelimiter=";;"><![CDATA[
-      CREATE SEQUENCE client_account_id_seq
+      ALTER TABLE client_account
+      ADD CONSTRAINT fk_clientAccount_client
+      FOREIGN KEY(client)
+      REFERENCES client(id)
     ]]></sql>
   </changeSet>
 
-  <changeSet author="nsmagulov" id="create-table-client_account">
-    <sql endDelimiter=";;"><![CDATA[
-      CREATE TABLE client_account (
-        id            bigint DEFAULT nextval('client_account_id_seq') NOT NULL,
-        client        bigint NOT NULL REFERENCES client(id),
-        money         real NOT NULL,
-        number        varchar(255) NOT NULL,
-        registered_at timestamp NOT NULL,
-        record_state  smallint NOT NULL DEFAULT 0,
-        PRIMARY KEY (id)
-      )
-    ]]></sql>
-  </changeSet>
-
-  <changeSet author="nsmagulov" id="create-sequence-client_account_transaction-id">
-    <sql endDelimiter=";;"><![CDATA[
-      CREATE SEQUENCE client_account_transaction_id_seq
-    ]]></sql>
-  </changeSet>
-
-  <changeSet author="nsmagulov" id="create-table-client_account_transaction">
-    <sql endDelimiter=";;"><![CDATA[
-      CREATE TABLE client_account_transaction (
-        id            bigint DEFAULT nextval('client_account_transaction_id_seq') NOT NULL,
-        account       bigint NOT NULL REFERENCES client_account(id),
-        money         real NOT NULL,
-        finished_at   timestamp NOT NULL,
-        type integer  NOT NULL,
-        record_state  smallint NOT NULL DEFAULT 0,
-        PRIMARY KEY (id)
-      )
-    ]]></sql>
-  </changeSet>
-
-  <changeSet author="nsmagulov" id="create-sequence-transaction_type-id">
-    <sql endDelimiter=";;"><![CDATA[
-      CREATE SEQUENCE transaction_type_id_seq
-    ]]></sql>
-  </changeSet>
-
-  <changeSet author="nsmagulov" id="create-table-Transaction_Type">
-    <sql endDelimiter=";;"><![CDATA[
-      CREATE TABLE transaction_type (
-        id            integer DEFAULT nextval('transaction_type_id_seq') NOT NULL,
-        code          varchar(255) NOT NULL,
-        name          varchar(255) NOT NULL,
-        record_state  smallint NOT NULL DEFAULT 0,
-        PRIMARY KEY (id)
-      )
-    ]]></sql>
-  </changeSet>
-
-  <changeSet author="nsmagulov" id="alter-table-client_account_transaction-add-foreign-key">
+  <changeSet author="nsmagulov" id="alter-table-clientAccountTransaction-add-foreign-key">
     <sql endDelimiter=";;"><![CDATA[
       ALTER TABLE client_account_transaction
       ADD CONSTRAINT fk_clientAccountTransaction_transactionType
-      FOREIGN KEY (type)
-      REFERENCES Transaction_Type(id)
+      FOREIGN KEY(type)
+      REFERENCES transaction_type(id)
     ]]></sql>
   </changeSet>
 </databaseChangeLog>

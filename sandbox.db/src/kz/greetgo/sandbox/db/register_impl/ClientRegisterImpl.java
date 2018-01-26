@@ -9,6 +9,9 @@ import kz.greetgo.sandbox.db.dao.CharmDao;
 import kz.greetgo.sandbox.db.dao.ClientAddrDao;
 import kz.greetgo.sandbox.db.dao.ClientDao;
 import kz.greetgo.sandbox.db.dao.ClientPhoneDao;
+import kz.greetgo.sandbox.db.register_impl.jdbc.client_list.GetClientCount;
+import kz.greetgo.sandbox.db.register_impl.jdbc.client_list.GetClientList;
+import kz.greetgo.sandbox.db.util.JdbcSandbox;
 
 import java.sql.Date;
 import java.util.ArrayList;
@@ -21,15 +24,22 @@ public class ClientRegisterImpl implements ClientRegister {
   public BeanGetter<CharmDao> charmDao;
   public BeanGetter<ClientAddrDao> clientAddrDao;
   public BeanGetter<ClientPhoneDao> clientPhoneDao;
+  public BeanGetter<JdbcSandbox> jdbc;
 
   @Override
-  public long getCount(String nameFilter) {
-    return 0;
+  public long getCount(ClientRecordRequest request) {
+    if (request == null || request.nameFilter == null) throw new InvalidParameter();
+
+    return jdbc.get().execute(new GetClientCount(request));
   }
 
   @Override
-  public List<ClientRecord> getRecordList(ClientRecordListRequest listRequest) {
-    return null;
+  public List<ClientRecord> getRecordList(ClientRecordRequest request) {
+    if (request == null || request.nameFilter == null) throw new InvalidParameter();
+    if (request.clientRecordCount < 0 || request.clientRecordCountToSkip < 0 || request.clientRecordCount == 0)
+      throw new InvalidParameter();
+
+    return jdbc.get().execute(new GetClientList(request));
   }
 
   @Override
@@ -53,7 +63,7 @@ public class ClientRegisterImpl implements ClientRegister {
       resClientDetails.gender = Gender.EMPTY;
       resClientDetails.birthdate = "";
       resClientDetails.charmId = charmDao.get().selectFirstRowId();
-      resClientDetails.charmList = charmDao.get().selectDisabledCharms();
+      resClientDetails.charmList = charmDao.get().selectActualCharms();
       resClientDetails.registrationAddressInfo = new AddressInfo();
       resClientDetails.registrationAddressInfo.type = AddressType.REGISTRATION;
       resClientDetails.registrationAddressInfo.street = "";
@@ -69,7 +79,7 @@ public class ClientRegisterImpl implements ClientRegister {
       if (!clientDao.get().selectExistsRowById(id)) throw new InvalidParameter();
 
       resClientDetails = clientDao.get().selectRowById(id);
-      resClientDetails.charmList = charmDao.get().selectDisabledCharms();
+      resClientDetails.charmList = charmDao.get().selectActualCharms();
       resClientDetails.registrationAddressInfo =
         clientAddrDao.get().selectRowByClientAndType(id, AddressType.REGISTRATION.name());
       resClientDetails.factualAddressInfo =

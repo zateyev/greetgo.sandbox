@@ -12,9 +12,12 @@ import org.testng.annotations.Test;
 
 import java.sql.Date;
 import java.sql.Timestamp;
+import java.text.SimpleDateFormat;
 import java.time.LocalDate;
-import java.util.*;
-import java.util.function.Predicate;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import static org.fest.assertions.api.Assertions.assertThat;
@@ -33,7 +36,10 @@ public class ClientRegisterImplTest extends ParentTestNg {
     for (int i = 0; i < expectedClientCount; i++)
       this.insertClient(charmHelperList);
 
-    long realCount = clientRegister.get().getCount("");
+    ClientRecordRequest clientRecordRequest =
+      this.clientRecordRequestBuilder(0, 0, ColumnSortType.NONE, false, "");
+
+    long realCount = clientRegister.get().getCount(clientRecordRequest);
 
     assertThat(realCount).isEqualTo(expectedClientCount);
   }
@@ -60,7 +66,10 @@ public class ClientRegisterImplTest extends ParentTestNg {
     this.insertClient("Игорев", "Айдану", "Игоревич", Gender.EMPTY.name(), LocalDate.now(),
       charmHelperList.get(0).id);
 
-    long realFilteredCount = clientRegister.get().getCount("Нур");
+    ClientRecordRequest clientRecordRequest =
+      this.clientRecordRequestBuilder(0, 0, ColumnSortType.NONE, false, "Нур");
+
+    long realFilteredCount = clientRegister.get().getCount(clientRecordRequest);
 
     assertThat(realFilteredCount).isEqualTo(expectedIdSet.size());
   }
@@ -89,7 +98,10 @@ public class ClientRegisterImplTest extends ParentTestNg {
     expectedIdSet.add(this.insertClient("Яковлева", "Татьяна", "Нурлановна", Gender.EMPTY.name(), LocalDate.now(),
       charmHelperList.get(0).id));
 
-    long realFilteredCount = clientRegister.get().getCount("нУР");
+    ClientRecordRequest clientRecordRequest =
+      this.clientRecordRequestBuilder(0, 0, ColumnSortType.NONE, false, "нУР");
+
+    long realFilteredCount = clientRegister.get().getCount(clientRecordRequest);
 
     assertThat(realFilteredCount).isEqualTo(expectedIdSet.size());
   }
@@ -111,9 +123,9 @@ public class ClientRegisterImplTest extends ParentTestNg {
     expectedIdSet.add(this.insertClient("Нурланов", "Нурлан", "Нурланович", Gender.EMPTY.name(), LocalDate.now(),
       charmHelperList.get(0).id));
 
-    ClientRecordListRequest clientRecordListRequest =
-      this.clientRecordListRequestBuilder(0, expectedIdSet.size() + 5, ColumnSortType.NONE, false, "");
-    List<ClientRecord> realRecordList = clientRegister.get().getRecordList(clientRecordListRequest);
+    ClientRecordRequest clientRecordRequest =
+      this.clientRecordRequestBuilder(0, expectedIdSet.size() + 5, ColumnSortType.NONE, false, "");
+    List<ClientRecord> realRecordList = clientRegister.get().getRecordList(clientRecordRequest);
 
     assertThat(realRecordList.size()).isEqualTo(expectedIdSet.size());
     for (ClientRecord clientRecord : realRecordList)
@@ -135,9 +147,9 @@ public class ClientRegisterImplTest extends ParentTestNg {
     for (int i = 0; i < 10; i++)
       this.insertClient(charmHelperList);
 
-    ClientRecordListRequest clientRecordListRequest =
-      this.clientRecordListRequestBuilder(0, expectedIdSet.size(), ColumnSortType.NONE, false, "");
-    List<ClientRecord> realRecordList = clientRegister.get().getRecordList(clientRecordListRequest);
+    ClientRecordRequest clientRecordRequest =
+      this.clientRecordRequestBuilder(0, expectedIdSet.size(), ColumnSortType.NONE, false, "");
+    List<ClientRecord> realRecordList = clientRegister.get().getRecordList(clientRecordRequest);
 
     assertThat(realRecordList.size()).isEqualTo(expectedIdSet.size());
     for (ClientRecord clientRecord : realRecordList)
@@ -162,9 +174,9 @@ public class ClientRegisterImplTest extends ParentTestNg {
     for (int i = 0; i < 10; i++)
       this.insertClient(charmHelperList);
 
-    ClientRecordListRequest clientRecordListRequest =
-      this.clientRecordListRequestBuilder(skippedIdSet.size(), expectedIdSet.size(), ColumnSortType.NONE, false, "");
-    List<ClientRecord> realRecordList = clientRegister.get().getRecordList(clientRecordListRequest);
+    ClientRecordRequest clientRecordRequest =
+      this.clientRecordRequestBuilder(skippedIdSet.size(), expectedIdSet.size(), ColumnSortType.NONE, false, "");
+    List<ClientRecord> realRecordList = clientRegister.get().getRecordList(clientRecordRequest);
 
     assertThat(realRecordList.size()).isEqualTo(expectedIdSet.size());
     for (ClientRecord clientRecord : realRecordList)
@@ -187,9 +199,9 @@ public class ClientRegisterImplTest extends ParentTestNg {
     expectedIdSet.add(this.insertClient("Нурланов", "Нурлан", "Нурланович", Gender.EMPTY.name(), LocalDate.now(),
       charmHelperList.get(0).id));
 
-    ClientRecordListRequest clientRecordListRequest =
-      this.clientRecordListRequestBuilder(skippedIdSet.size(), expectedIdSet.size(), ColumnSortType.NONE, false, "");
-    List<ClientRecord> realRecordList = clientRegister.get().getRecordList(clientRecordListRequest);
+    ClientRecordRequest clientRecordRequest =
+      this.clientRecordRequestBuilder(skippedIdSet.size(), expectedIdSet.size(), ColumnSortType.NONE, false, "");
+    List<ClientRecord> realRecordList = clientRegister.get().getRecordList(clientRecordRequest);
 
     assertThat(realRecordList.size()).isEqualTo(expectedIdSet.size());
     for (ClientRecord clientRecord : realRecordList)
@@ -212,9 +224,9 @@ public class ClientRegisterImplTest extends ParentTestNg {
     expectedIdSet.add(this.insertClient("Нурланов", "Нурлан", "Нурланович", Gender.EMPTY.name(), LocalDate.now(),
       charmHelperList.get(0).id));
 
-    ClientRecordListRequest clientRecordListRequest = this.clientRecordListRequestBuilder(skippedIdSet.size(),
+    ClientRecordRequest clientRecordRequest = this.clientRecordRequestBuilder(skippedIdSet.size(),
       expectedIdSet.size() + 2, ColumnSortType.NONE, false, "");
-    List<ClientRecord> realRecordList = clientRegister.get().getRecordList(clientRecordListRequest);
+    List<ClientRecord> realRecordList = clientRegister.get().getRecordList(clientRecordRequest);
 
     assertThat(realRecordList.size()).isEqualTo(expectedIdSet.size());
     for (ClientRecord clientRecord : realRecordList)
@@ -236,9 +248,9 @@ public class ClientRegisterImplTest extends ParentTestNg {
     skippedIdSet.add(this.insertClient("Нурланов", "Нурлан", "Нурлы", Gender.EMPTY.name(), LocalDate.now(),
       charmHelperList.get(0).id));
 
-    ClientRecordListRequest clientRecordListRequest =
-      this.clientRecordListRequestBuilder(skippedIdSet.size(), 10, ColumnSortType.NONE, false, "");
-    List<ClientRecord> realRecordList = clientRegister.get().getRecordList(clientRecordListRequest);
+    ClientRecordRequest clientRecordRequest =
+      this.clientRecordRequestBuilder(skippedIdSet.size(), 10, ColumnSortType.NONE, false, "");
+    List<ClientRecord> realRecordList = clientRegister.get().getRecordList(clientRecordRequest);
 
     assertThat(realRecordList).isEmpty();
   }
@@ -256,9 +268,9 @@ public class ClientRegisterImplTest extends ParentTestNg {
     }
     expectedAgeList.sort((o1, o2) -> Integer.compare(o1, o2));
 
-    ClientRecordListRequest clientRecordListRequest =
-      this.clientRecordListRequestBuilder(0, expectedAgeList.size() + 10, ColumnSortType.AGE, true, "");
-    List<ClientRecord> realRecordList = clientRegister.get().getRecordList(clientRecordListRequest);
+    ClientRecordRequest clientRecordRequest =
+      this.clientRecordRequestBuilder(0, expectedAgeList.size() + 10, ColumnSortType.AGE, true, "");
+    List<ClientRecord> realRecordList = clientRegister.get().getRecordList(clientRecordRequest);
 
     assertThat(realRecordList.size()).isEqualTo(expectedAgeList.size());
     for (int i = 0; i < realRecordList.size(); i++)
@@ -278,9 +290,9 @@ public class ClientRegisterImplTest extends ParentTestNg {
     }
     expectedAgeList.sort((o1, o2) -> Integer.compare(o2, o1));
 
-    ClientRecordListRequest clientRecordListRequest =
-      this.clientRecordListRequestBuilder(0, expectedAgeList.size() + 10, ColumnSortType.AGE, false, "");
-    List<ClientRecord> realRecordList = clientRegister.get().getRecordList(clientRecordListRequest);
+    ClientRecordRequest clientRecordRequest =
+      this.clientRecordRequestBuilder(0, expectedAgeList.size() + 10, ColumnSortType.AGE, false, "");
+    List<ClientRecord> realRecordList = clientRegister.get().getRecordList(clientRecordRequest);
 
     assertThat(realRecordList.size()).isEqualTo(expectedAgeList.size());
     for (int i = 0; i < realRecordList.size(); i++)
@@ -306,10 +318,10 @@ public class ClientRegisterImplTest extends ParentTestNg {
     }
     expectedTotalMoneyList.sort((o1, o2) -> Float.compare(o1, o2));
 
-    ClientRecordListRequest clientRecordListRequest =
-      this.clientRecordListRequestBuilder(0, expectedTotalMoneyList.size() + 10,
+    ClientRecordRequest clientRecordRequest =
+      this.clientRecordRequestBuilder(0, expectedTotalMoneyList.size() + 10,
         ColumnSortType.TOTALACCOUNTBALANCE, true, "");
-    List<ClientRecord> realRecordList = clientRegister.get().getRecordList(clientRecordListRequest);
+    List<ClientRecord> realRecordList = clientRegister.get().getRecordList(clientRecordRequest);
 
     assertThat(realRecordList.size()).isEqualTo(expectedTotalMoneyList.size());
     for (int i = 0; i < realRecordList.size(); i++)
@@ -335,9 +347,9 @@ public class ClientRegisterImplTest extends ParentTestNg {
     }
     expectedTotalMoneyList.sort((o1, o2) -> Float.compare(o2, o1));
 
-    ClientRecordListRequest clientRecordListRequest = this.clientRecordListRequestBuilder(0,
+    ClientRecordRequest clientRecordRequest = this.clientRecordRequestBuilder(0,
       expectedTotalMoneyList.size() + 10, ColumnSortType.TOTALACCOUNTBALANCE, false, "");
-    List<ClientRecord> realRecordList = clientRegister.get().getRecordList(clientRecordListRequest);
+    List<ClientRecord> realRecordList = clientRegister.get().getRecordList(clientRecordRequest);
 
     assertThat(realRecordList.size()).isEqualTo(expectedTotalMoneyList.size());
     for (int i = 0; i < realRecordList.size(); i++)
@@ -363,9 +375,9 @@ public class ClientRegisterImplTest extends ParentTestNg {
     }
     expectedMaxMoneyList.sort((o1, o2) -> Float.compare(o1, o2));
 
-    ClientRecordListRequest clientRecordListRequest = this.clientRecordListRequestBuilder(0,
+    ClientRecordRequest clientRecordRequest = this.clientRecordRequestBuilder(0,
       expectedMaxMoneyList.size() + 10, ColumnSortType.MAXACCOUNTBALANCE, true, "");
-    List<ClientRecord> realRecordList = clientRegister.get().getRecordList(clientRecordListRequest);
+    List<ClientRecord> realRecordList = clientRegister.get().getRecordList(clientRecordRequest);
 
     assertThat(realRecordList.size()).isEqualTo(expectedMaxMoneyList.size());
     for (int i = 0; i < realRecordList.size(); i++)
@@ -391,9 +403,9 @@ public class ClientRegisterImplTest extends ParentTestNg {
     }
     expectedMaxMoneyList.sort((o1, o2) -> Float.compare(o2, o1));
 
-    ClientRecordListRequest clientRecordListRequest = this.clientRecordListRequestBuilder(0,
+    ClientRecordRequest clientRecordRequest = this.clientRecordRequestBuilder(0,
       expectedMaxMoneyList.size() + 10, ColumnSortType.MAXACCOUNTBALANCE, false, "");
-    List<ClientRecord> realRecordList = clientRegister.get().getRecordList(clientRecordListRequest);
+    List<ClientRecord> realRecordList = clientRegister.get().getRecordList(clientRecordRequest);
 
     assertThat(realRecordList.size()).isEqualTo(expectedMaxMoneyList.size());
     for (int i = 0; i < realRecordList.size(); i++)
@@ -419,9 +431,9 @@ public class ClientRegisterImplTest extends ParentTestNg {
     }
     expectedMinMoneyList.sort((o1, o2) -> Float.compare(o1, o2));
 
-    ClientRecordListRequest clientRecordListRequest = this.clientRecordListRequestBuilder(0,
+    ClientRecordRequest clientRecordRequest = this.clientRecordRequestBuilder(0,
       expectedMinMoneyList.size() + 10, ColumnSortType.MINACCOUNTBALANCE, true, "");
-    List<ClientRecord> realRecordList = clientRegister.get().getRecordList(clientRecordListRequest);
+    List<ClientRecord> realRecordList = clientRegister.get().getRecordList(clientRecordRequest);
 
     assertThat(realRecordList.size()).isEqualTo(expectedMinMoneyList.size());
     for (int i = 0; i < realRecordList.size(); i++)
@@ -447,9 +459,9 @@ public class ClientRegisterImplTest extends ParentTestNg {
     }
     expectedMinMoneyList.sort((o1, o2) -> Float.compare(o2, o1));
 
-    ClientRecordListRequest clientRecordListRequest = this.clientRecordListRequestBuilder(0,
+    ClientRecordRequest clientRecordRequest = this.clientRecordRequestBuilder(0,
       expectedMinMoneyList.size() + 10, ColumnSortType.MINACCOUNTBALANCE, false, "");
-    List<ClientRecord> realRecordList = clientRegister.get().getRecordList(clientRecordListRequest);
+    List<ClientRecord> realRecordList = clientRegister.get().getRecordList(clientRecordRequest);
 
     assertThat(realRecordList.size()).isEqualTo(expectedMinMoneyList.size());
     for (int i = 0; i < realRecordList.size(); i++)
@@ -477,15 +489,40 @@ public class ClientRegisterImplTest extends ParentTestNg {
     for (int i = 0; i < 3; i++)
       this.insertClient(dummyName, charmHelperList);
 
-    ClientRecordListRequest clientRecordListRequest =
-      this.clientRecordListRequestBuilder(0, expectedIdSet.size(), ColumnSortType.NONE, false, "кв");
-    List<ClientRecord> realRecordList = clientRegister.get().getRecordList(clientRecordListRequest);
+    ClientRecordRequest clientRecordRequest =
+      this.clientRecordRequestBuilder(0, expectedIdSet.size(), ColumnSortType.NONE, false, "кв");
+    List<ClientRecord> realRecordList = clientRegister.get().getRecordList(clientRecordRequest);
 
     assertThat(realRecordList.size()).isEqualTo(expectedIdSet.size());
     for (ClientRecord clientRecord : realRecordList) {
       assertThat(clientRecord.id).isIn(expectedIdSet);
       assertThat(clientRecord.fullName)
         .isIn("Далана квала Смук", "русская буква Игоревич", "Квентин джон Нурланович");
+    }
+  }
+
+  @Test
+  public void method_getRecordList_filterOnEmptyName() {
+    this.resetTablesAll();
+    List<CharmHelper> charmHelperList = this.declareAndInsertCharms();
+
+    Set<Long> expectedIdSet = new HashSet<>();
+    expectedIdSet.add(this.insertClient("", "", "", Gender.EMPTY.name(), LocalDate.now(),
+      charmHelperList.get(0).id));
+    expectedIdSet.add(this.insertClient("asd", "", "dsa", Gender.EMPTY.name(), LocalDate.now(),
+      charmHelperList.get(0).id));
+    expectedIdSet.add(this.insertClient("NULL", "null", "", Gender.EMPTY.name(), LocalDate.now(),
+      charmHelperList.get(0).id));
+
+    ClientRecordRequest clientRecordRequest =
+      this.clientRecordRequestBuilder(0, expectedIdSet.size(), ColumnSortType.NONE, false, "");
+    List<ClientRecord> realRecordList = clientRegister.get().getRecordList(clientRecordRequest);
+
+    assertThat(realRecordList.size()).isEqualTo(expectedIdSet.size());
+    for (ClientRecord clientRecord : realRecordList) {
+      assertThat(clientRecord.id).isIn(expectedIdSet);
+      assertThat(clientRecord.fullName)
+        .isIn("", "asd dsa", "NULL null");
     }
   }
 
@@ -509,9 +546,9 @@ public class ClientRegisterImplTest extends ParentTestNg {
     for (int i = 0; i < 3; i++)
       this.insertClient(dummyName, charmHelperList);
 
-    ClientRecordListRequest clientRecordListRequest =
-      this.clientRecordListRequestBuilder(0, expectedIdSet.size() + 3, ColumnSortType.NONE, false, "иГоР");
-    List<ClientRecord> realRecordList = clientRegister.get().getRecordList(clientRecordListRequest);
+    ClientRecordRequest clientRecordRequest =
+      this.clientRecordRequestBuilder(0, expectedIdSet.size() + 3, ColumnSortType.NONE, false, "иГоР");
+    List<ClientRecord> realRecordList = clientRegister.get().getRecordList(clientRecordRequest);
 
     assertThat(realRecordList.size()).isEqualTo(expectedIdSet.size());
     for (ClientRecord clientRecord : realRecordList) {
@@ -544,9 +581,9 @@ public class ClientRegisterImplTest extends ParentTestNg {
     this.insertClient("Байконур", "Игорь", "Вячеслав", Gender.EMPTY.name(), LocalDate.now(),
       charmHelperList.get(0).id);
 
-    ClientRecordListRequest clientRecordListRequest =
-      this.clientRecordListRequestBuilder(0, expectedIdSet.size(), ColumnSortType.NONE, false, "нур");
-    List<ClientRecord> realRecordList = clientRegister.get().getRecordList(clientRecordListRequest);
+    ClientRecordRequest clientRecordRequest =
+      this.clientRecordRequestBuilder(0, expectedIdSet.size(), ColumnSortType.NONE, false, "нур");
+    List<ClientRecord> realRecordList = clientRegister.get().getRecordList(clientRecordRequest);
 
     assertThat(realRecordList.size()).isEqualTo(expectedIdSet.size());
     for (ClientRecord clientRecord : realRecordList) {
@@ -579,9 +616,9 @@ public class ClientRegisterImplTest extends ParentTestNg {
     this.insertClient("айбек", "нулл", "Нурланович", Gender.EMPTY.name(), LocalDate.now(),
       charmHelperList.get(0).id);
 
-    ClientRecordListRequest clientRecordListRequest = this.clientRecordListRequestBuilder(skippedIdSet.size(),
+    ClientRecordRequest clientRecordRequest = this.clientRecordRequestBuilder(skippedIdSet.size(),
       expectedIdSet.size(), ColumnSortType.NONE, false, "айбек");
-    List<ClientRecord> realRecordList = clientRegister.get().getRecordList(clientRecordListRequest);
+    List<ClientRecord> realRecordList = clientRegister.get().getRecordList(clientRecordRequest);
 
     assertThat(realRecordList.size()).isEqualTo(expectedIdSet.size());
     for (ClientRecord clientRecord : realRecordList) {
@@ -616,9 +653,9 @@ public class ClientRegisterImplTest extends ParentTestNg {
     expectedIdSet.add(this.insertClient("Нурланов", "квауква", "Нурланович", Gender.EMPTY.name(), LocalDate.now(),
       charmHelperList.get(0).id));
 
-    ClientRecordListRequest clientRecordListRequest = this.clientRecordListRequestBuilder(skippedIdSet.size(),
+    ClientRecordRequest clientRecordRequest = this.clientRecordRequestBuilder(skippedIdSet.size(),
       expectedIdSet.size(), ColumnSortType.NONE, false, "квау");
-    List<ClientRecord> realRecordList = clientRegister.get().getRecordList(clientRecordListRequest);
+    List<ClientRecord> realRecordList = clientRegister.get().getRecordList(clientRecordRequest);
 
     assertThat(realRecordList.size()).isEqualTo(expectedIdSet.size());
     for (ClientRecord clientRecord : realRecordList) {
@@ -653,9 +690,9 @@ public class ClientRegisterImplTest extends ParentTestNg {
     for (int i = 0; i < 4; i++)
       this.insertClient(dummyName, charmHelperList);
 
-    ClientRecordListRequest clientRecordListRequest = this.clientRecordListRequestBuilder(skippedIdSet.size(),
+    ClientRecordRequest clientRecordRequest = this.clientRecordRequestBuilder(skippedIdSet.size(),
       expectedIdSet.size() + 10, ColumnSortType.NONE, false, "стоп");
-    List<ClientRecord> realRecordList = clientRegister.get().getRecordList(clientRecordListRequest);
+    List<ClientRecord> realRecordList = clientRegister.get().getRecordList(clientRecordRequest);
 
     assertThat(realRecordList.size()).isEqualTo(expectedIdSet.size());
     for (ClientRecord clientRecord : realRecordList) {
@@ -684,9 +721,9 @@ public class ClientRegisterImplTest extends ParentTestNg {
     skippedIdSet.add(this.insertClient("null", "Нурлан", "Бобово", Gender.EMPTY.name(), LocalDate.now(),
       charmHelperList.get(0).id));
 
-    ClientRecordListRequest clientRecordListRequest =
-      this.clientRecordListRequestBuilder(skippedIdSet.size() + 5, 10, ColumnSortType.NONE, false, "бобо");
-    List<ClientRecord> realRecordList = clientRegister.get().getRecordList(clientRecordListRequest);
+    ClientRecordRequest clientRecordRequest =
+      this.clientRecordRequestBuilder(skippedIdSet.size() + 5, 10, ColumnSortType.NONE, false, "бобо");
+    List<ClientRecord> realRecordList = clientRegister.get().getRecordList(clientRecordRequest);
 
     assertThat(realRecordList).isEmpty();
   }
@@ -816,7 +853,7 @@ public class ClientRegisterImplTest extends ParentTestNg {
     assertThat(realClientDetails.name).isEqualTo("Имя");
     assertThat(realClientDetails.patronymic).isEqualTo("Отчество");
     assertThat(realClientDetails.gender).isEqualTo(Gender.MALE);
-    assertThat(realClientDetails.birthdate).isEqualTo(expectedDate.toString());
+    assertThat(realClientDetails.birthdate).isEqualTo(new SimpleDateFormat(Util.datePattern).format(expectedDate));
     assertThat(realClientDetails.charmId).isEqualTo(charmHelperList.get(1).id);
     assertThat(realCharmIdSet.size()).isEqualTo(expectedCharmIdSet.size());
     for (Integer realCharmId : realCharmIdSet)
@@ -895,7 +932,7 @@ public class ClientRegisterImplTest extends ParentTestNg {
     assertThat(realClientDetails.name).isEqualTo("lastname");
     assertThat(realClientDetails.patronymic).isEqualTo("patronymic");
     assertThat(realClientDetails.gender).isEqualTo(Gender.FEMALE);
-    assertThat(realClientDetails.birthdate).isEqualTo(expectedDate.toString());
+    assertThat(realClientDetails.birthdate).isEqualTo(new SimpleDateFormat(Util.datePattern).format(expectedDate));
     assertThat(realClientDetails.charmId).isEqualTo(charmHelperList.get(3).id);
     assertThat(realClientDetails.registrationAddressInfo.type).isEqualTo(AddressType.REGISTRATION);
     assertThat(realClientDetails.registrationAddressInfo.street).isEqualTo("street");
@@ -976,7 +1013,7 @@ public class ClientRegisterImplTest extends ParentTestNg {
       clientTestDao.get().selectRowByClientAndTypeTableClientAddr(expectedId, AddressType.REGISTRATION.name());
     realClientDetails.phones =
       clientTestDao.get().selectRowsByClientTableClientPhone(expectedId);
-      clientTestDao.get().selectRowsByClientTableClientPhone(expectedId);
+    clientTestDao.get().selectRowsByClientTableClientPhone(expectedId);
 
     assertThat(clientTestDao.get().selectExistSingleTableClient(expectedId)).isEqualTo(true);
     assertThat(realClientDetails.id).isEqualTo(expectedId);
@@ -984,7 +1021,7 @@ public class ClientRegisterImplTest extends ParentTestNg {
     assertThat(realClientDetails.name).isEqualTo("lastname");
     assertThat(realClientDetails.patronymic).isEqualTo("patronymic");
     assertThat(realClientDetails.gender.name()).isEqualTo(Gender.MALE.name());
-    assertThat(realClientDetails.birthdate).isEqualTo(expectedDate.toString());
+    assertThat(realClientDetails.birthdate).isEqualTo(new SimpleDateFormat(Util.datePattern).format(expectedDate));
     assertThat(realClientDetails.charmId).isEqualTo(charmHelperList.get(1).id);
     assertThat(realClientDetails.registrationAddressInfo.type).isEqualTo(AddressType.REGISTRATION);
     assertThat(realClientDetails.registrationAddressInfo.street).isEqualTo("street");
@@ -1012,32 +1049,53 @@ public class ClientRegisterImplTest extends ParentTestNg {
   }
 
   @Test(expectedExceptions = InvalidParameter.class)
-  public void method_getCount_filterNull() {
+  public void method_getCount_requestNull() {
     clientRegister.get().getCount(null);
   }
 
   @Test(expectedExceptions = InvalidParameter.class)
-  public void method_getRecordList_countToSkipNegative() {
-    ClientRecordListRequest clientRecordListRequest =
-      clientRecordListRequestBuilder(-10, 0, ColumnSortType.NONE, false, "");
+  public void method_getCount_filterNameNull() {
+    ClientRecordRequest clientRecordRequest =
+      clientRecordRequestBuilder(-10, 0, ColumnSortType.NONE, false, null);
 
-    clientRegister.get().getRecordList(clientRecordListRequest);
+    clientRegister.get().getCount(clientRecordRequest);
+  }
+
+  @Test(expectedExceptions = InvalidParameter.class)
+  public void method_getRecordList_requestNull() {
+    clientRegister.get().getRecordList(null);
+  }
+
+  @Test(expectedExceptions = InvalidParameter.class)
+  public void method_getRecordList_filterNameNull() {
+    ClientRecordRequest clientRecordRequest =
+      clientRecordRequestBuilder(-10, 0, ColumnSortType.NONE, false, null);
+
+    clientRegister.get().getRecordList(clientRecordRequest);
+  }
+
+  @Test(expectedExceptions = InvalidParameter.class)
+  public void method_getRecordList_countToSkipNegative() {
+    ClientRecordRequest clientRecordRequest =
+      clientRecordRequestBuilder(-10, 0, ColumnSortType.NONE, false, "");
+
+    clientRegister.get().getRecordList(clientRecordRequest);
   }
 
   @Test(expectedExceptions = InvalidParameter.class)
   public void method_getRecordList_countZero() {
-    ClientRecordListRequest clientRecordListRequest =
-      clientRecordListRequestBuilder(0, 0, ColumnSortType.NONE, false, "");
+    ClientRecordRequest clientRecordRequest =
+      clientRecordRequestBuilder(0, 0, ColumnSortType.NONE, false, "");
 
-    clientRegister.get().getRecordList(clientRecordListRequest);
+    clientRegister.get().getRecordList(clientRecordRequest);
   }
 
   @Test(expectedExceptions = InvalidParameter.class)
   public void method_getRecordList_countNegative() {
-    ClientRecordListRequest clientRecordListRequest =
-      clientRecordListRequestBuilder(0, -10, ColumnSortType.NONE, false, "");
+    ClientRecordRequest clientRecordRequest =
+      clientRecordRequestBuilder(0, -10, ColumnSortType.NONE, false, "");
 
-    clientRegister.get().getRecordList(clientRecordListRequest);
+    clientRegister.get().getRecordList(clientRecordRequest);
   }
 
   @Test(expectedExceptions = InvalidParameter.class)
@@ -1162,23 +1220,21 @@ public class ClientRegisterImplTest extends ParentTestNg {
     return phone;
   }
 
-  private ClientRecordListRequest clientRecordListRequestBuilder(long clientRecordCountToSkip, long clientRecordCount,
-                                                                 ColumnSortType columnSortType, boolean sortAscend,
-                                                                 String nameFilter) {
-    ClientRecordListRequest clientRecordListRequest = new ClientRecordListRequest();
-    clientRecordListRequest.clientRecordCountToSkip = clientRecordCountToSkip;
-    clientRecordListRequest.clientRecordCount = clientRecordCount;
-    clientRecordListRequest.columnSortType = columnSortType;
-    clientRecordListRequest.sortAscend = sortAscend;
-    clientRecordListRequest.nameFilter = nameFilter;
+  private ClientRecordRequest clientRecordRequestBuilder(long clientRecordCountToSkip, long clientRecordCount,
+                                                         ColumnSortType columnSortType, boolean sortAscend,
+                                                         String nameFilter) {
+    ClientRecordRequest clientRecordRequest = new ClientRecordRequest();
+    clientRecordRequest.clientRecordCountToSkip = clientRecordCountToSkip;
+    clientRecordRequest.clientRecordCount = clientRecordCount;
+    clientRecordRequest.columnSortType = columnSortType;
+    clientRecordRequest.sortAscend = sortAscend;
+    clientRecordRequest.nameFilter = nameFilter;
 
-    return clientRecordListRequest;
+    return clientRecordRequest;
   }
 
   private void resetTablesAll() {
-    clientTestDao.get().deleteAllTableClientAccount();
     clientTestDao.get().deleteAllTableClientPhone();
-    clientTestDao.get().deleteAllTableClientAddr();
     clientTestDao.get().deleteAllTableClient();
     clientTestDao.get().deleteAllTableCharm();
   }

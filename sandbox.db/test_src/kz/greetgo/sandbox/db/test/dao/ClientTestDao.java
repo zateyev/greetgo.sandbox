@@ -3,7 +3,11 @@ package kz.greetgo.sandbox.db.test.dao;
 import kz.greetgo.sandbox.controller.model.AddressInfo;
 import kz.greetgo.sandbox.controller.model.ClientDetails;
 import kz.greetgo.sandbox.controller.model.Phone;
-import org.apache.ibatis.annotations.*;
+import kz.greetgo.sandbox.controller.util.Util;
+import org.apache.ibatis.annotations.Insert;
+import org.apache.ibatis.annotations.Param;
+import org.apache.ibatis.annotations.Select;
+import org.apache.ibatis.annotations.Update;
 
 import java.sql.Date;
 import java.sql.Timestamp;
@@ -11,22 +15,22 @@ import java.util.List;
 
 public interface ClientTestDao {
   //Client table part
-  @Delete("DELETE FROM client")
+  @Update("UPDATE client SET actual=0")
   void deleteAllTableClient();
 
-  @Select("SELECT COUNT(*) FROM client WHERE record_state=0")
+  @Select("SELECT COUNT(*) FROM client WHERE actual=1")
   long selectCountTableClient();
 
-  @Select("SELECT EXISTS (SELECT true FROM client WHERE id=#{id} AND record_state=0)")
+  @Select("SELECT EXISTS (SELECT true FROM client WHERE id=#{id} AND actual=1)")
   boolean selectExistSingleTableClient(@Param("id") long id);
 
   @Select("SELECT nextval('client_id_seq')")
   long selectSeqIdNextValueTableClient();
 
   @Select("SELECT id, surname, name, patronymic, gender, " +
-    "to_char(birth_date, 'YYYY-MM-DD') as birthdate, charm as charmId " +
+    "to_char(birth_date, '" + Util.datePattern + "') as birthdate, charm as charmId " +
     "FROM client " +
-    "WHERE id=#{id} AND record_state=0")
+    "WHERE id=#{id} AND actual=1")
   ClientDetails selectRowById(@Param("id") long id);
 
   @Insert("INSERT INTO client (id, surname, name, patronymic, gender, birth_date, charm) " +
@@ -52,13 +56,13 @@ public interface ClientTestDao {
                     @Param("charm") int charm);
 
   //Charm table part
-  @Delete("DELETE FROM charm")
+  @Update("UPDATE charm SET actual=0")
   void deleteAllTableCharm();
 
   @Select("SELECT nextval('charm_id_seq')")
   int selectSeqIdNextValueTableCharm();
 
-  @Update("UPDATE charm SET record_state=1 WHERE id=#{id}")
+  @Update("UPDATE charm SET actual=0 WHERE id=#{id}")
   void updateDisableSingleTableCharm(@Param("id") int id);
 
   @Insert("INSERT INTO charm (id, name, description, energy) " +
@@ -67,10 +71,6 @@ public interface ClientTestDao {
                    @Param("name") String name,
                    @Param("description") String description,
                    @Param("energy") float energy);
-
-  //Client_Account table part
-  @Delete("DELETE FROM client_account")
-  void deleteAllTableClientAccount();
 
   @Select("SELECT nextval('client_account_id_seq')")
   long selectSeqIdNextValueTableClientAccount();
@@ -83,13 +83,9 @@ public interface ClientTestDao {
                            @Param("number") String number,
                            @Param("registered_at") Timestamp registered_at);
 
-  //Client_Addr table part
-  @Delete("DELETE FROM client_addr")
-  void deleteAllTableClientAddr();
-
   @Select("SELECT street, house, flat, type " +
     "FROM client_addr " +
-    "WHERE client=#{client} AND type=#{type} AND record_state=0")
+    "WHERE client=#{client} AND type=#{type}")
   AddressInfo selectRowByClientAndTypeTableClientAddr(@Param("client") long client, @Param("type") String type);
 
   @Insert("INSERT INTO client_addr (client, type, street, house, flat) " +
@@ -101,10 +97,10 @@ public interface ClientTestDao {
                         @Param("flat") String flat);
 
   //Client_Phone table part
-  @Delete("DELETE FROM client_phone")
+  @Update("UPDATE client_phone SET actual=0")
   void deleteAllTableClientPhone();
 
-  @Select("SELECT number, type FROM client_phone WHERE client=#{client}")
+  @Select("SELECT number, type FROM client_phone WHERE client=#{client} AND actual=1")
   List<Phone> selectRowsByClientTableClientPhone(@Param("client") long client);
 
   @Insert("INSERT INTO client_phone (client, number, type) " +

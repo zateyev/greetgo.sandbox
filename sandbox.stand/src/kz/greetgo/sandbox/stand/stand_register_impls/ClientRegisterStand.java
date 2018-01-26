@@ -11,7 +11,10 @@ import kz.greetgo.sandbox.db.stand.model.CharmDot;
 import kz.greetgo.sandbox.db.stand.model.ClientDot;
 import kz.greetgo.sandbox.stand.util.PageUtils;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Map;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -22,40 +25,40 @@ public class ClientRegisterStand implements ClientRegister {
   public BeanGetter<StandDb> db;
 
   @Override
-  public long getCount(String nameFilter) {
+  public long getCount(ClientRecordRequest request) {
     List<ClientDot> clientDots = new ArrayList<>(db.get().clientStorage.values());
-    clientDots = this.getFilteredList(clientDots, nameFilter);
+    clientDots = this.getFilteredList(clientDots, request.nameFilter);
 
     return clientDots.size();
   }
 
   @Override
-  public List<ClientRecord> getRecordList(ClientRecordListRequest listRequest) {
+  public List<ClientRecord> getRecordList(ClientRecordRequest request) {
     List<ClientDot> clientDots = new ArrayList<>(db.get().clientStorage.values());
     List<ClientRecord> clientRecords = new ArrayList<>();
 
-    clientDots = this.getFilteredList(clientDots, listRequest.nameFilter);
+    clientDots = this.getFilteredList(clientDots, request.nameFilter);
 
-    switch (listRequest.columnSortType) {
+    switch (request.columnSortType) {
       case AGE:
-        clientDots = this.getListByAge(clientDots, listRequest.sortAscend);
+        clientDots = this.getListByAge(clientDots, request.sortAscend);
         break;
       case TOTALACCOUNTBALANCE:
-        clientDots = this.getListByTotalAccountBalance(clientDots, listRequest.sortAscend);
+        clientDots = this.getListByTotalAccountBalance(clientDots, request.sortAscend);
         break;
       case MAXACCOUNTBALANCE:
-        clientDots = this.getListByMaxAccountBalance(clientDots, listRequest.sortAscend);
+        clientDots = this.getListByMaxAccountBalance(clientDots, request.sortAscend);
         break;
       case MINACCOUNTBALANCE:
-        clientDots = this.getListByMinAccountBalance(clientDots, listRequest.sortAscend);
+        clientDots = this.getListByMinAccountBalance(clientDots, request.sortAscend);
         break;
       default:
         clientDots = this.getDefaultList(clientDots);
     }
 
     PageUtils.cutPage(clientDots,
-      listRequest.clientRecordCountToSkip,
-      listRequest.clientRecordCount);
+      request.clientRecordCountToSkip,
+      request.clientRecordCount);
 
     for (ClientDot clientDot : clientDots)
       clientRecords.add(clientDot.toClientRecord());
@@ -195,7 +198,7 @@ public class ClientRegisterStand implements ClientRegister {
       clientDetails.registrationAddressInfo.street = "";
       clientDetails.registrationAddressInfo.house = "";
       clientDetails.registrationAddressInfo.flat = "";
-      
+
       clientDetails.factualAddressInfo = new AddressInfo();
       clientDetails.factualAddressInfo.type = AddressType.REGISTRATION;
       clientDetails.factualAddressInfo.street = "";
