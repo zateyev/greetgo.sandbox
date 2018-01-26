@@ -7,7 +7,7 @@ import org.apache.ibatis.annotations.*;
 import java.sql.Date;
 
 public interface ClientDao {
-  @Delete("DELETE FROM client WHERE id=#{id}")
+  @Update("UPDATE client SET actual=0 WHERE id=#{id}")
   void deleteRowById(@Param("id") long id);
 
   @Select("SELECT EXISTS (SELECT true FROM client WHERE id=#{id} AND actual=1)")
