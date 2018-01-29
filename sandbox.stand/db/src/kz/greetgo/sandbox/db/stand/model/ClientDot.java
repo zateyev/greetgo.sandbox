@@ -1,8 +1,12 @@
 package kz.greetgo.sandbox.db.stand.model;
 
 import kz.greetgo.sandbox.controller.model.*;
+import kz.greetgo.sandbox.controller.util.Util;
+import kz.greetgo.util.RND;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
 public class ClientDot {
   public long id;
@@ -99,12 +103,10 @@ public class ClientDot {
   }
 
   public static void generateAgeAndBalance(ClientDot clientDot) {
-    Random random = new Random();
-
-    clientDot.age = random.nextInt(40) + 18;
-    clientDot.totalAccountBalance = "" + random.nextInt();
-    clientDot.maxAccountBalance = "" + random.nextInt();
-    clientDot.minAccountBalance = "" + random.nextInt();
+    clientDot.age = RND.plusInt(40) + 18;
+    clientDot.totalAccountBalance = Util.floatToString((float) RND.plusDouble(100000, 2) - 50000);
+    clientDot.maxAccountBalance = Util.floatToString((float) RND.plusDouble(100000, 2) - 50000);
+    clientDot.minAccountBalance = Util.floatToString((float) RND.plusDouble(100000, 2) - 50000);
   }
 
   @Override

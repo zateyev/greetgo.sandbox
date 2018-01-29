@@ -9,6 +9,7 @@ import kz.greetgo.sandbox.db.stand.model.PersonDot;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
+import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicLong;
 
@@ -162,9 +163,9 @@ public class StandDb implements HasAfterInject {
   // https://stackoverflow.com/a/3985467
   private String generateDate() {
     long time = -946771200000L + (Math.abs(new Random().nextLong()) % (70L * 365 * 24 * 60 * 60 * 1000));
-    Date dt = new Date(time);
+    Date date = new Date(time);
 
-    return dt.toString();
+    return new SimpleDateFormat("yyyy-MM-dd").format(date);
   }
 
   private Charm generateCharm() {

@@ -22,6 +22,8 @@ export class ClientDetailsComponent {
   //TODO: Static data
   genderEnum = Gender;
   genderList: { [key: string]: string } = {};
+  todayStringDate: string;
+  minStringDate: string;
   phoneTypeEnum = PhoneType;
   phoneTypeList: { [key: string]: string } = {};
   phoneToAdd: Phone = new Phone();
@@ -32,6 +34,9 @@ export class ClientDetailsComponent {
     this.genderList[Gender.EMPTY] = "Неизвестно";
     this.genderList[Gender.MALE] = "Мужской";
     this.genderList[Gender.FEMALE] = "Женский";
+
+    this.todayStringDate = new Date().toJSON().split('T')[0];
+    this.minStringDate = "1900-01-01";
 
     this.phoneTypeList[PhoneType.EMBEDDED] = "Встроенный";
     this.phoneTypeList[PhoneType.MOBILE] = "Мобильный";
@@ -99,12 +104,17 @@ export class ClientDetailsComponent {
 
   //TODO: rawClientDetails скорее всего не нежно, т. к. используется ngModel связка с this.clientDetails
   onClientRecordFormSubmit(rawClientDetails: ClientDetails) {
+    if (!this.isNameValid(this.clientDetails.surname) ||
+      !this.isNameValid(this.clientDetails.name) ||
+      !this.isStringDateValid(this.clientDetails.birthdate))
+      return;
+
     let clientDetailsToSave = new ClientDetailsToSave();
 
     clientDetailsToSave.id = this.clientDetails.id;
-    clientDetailsToSave.surname = this.clientDetails.surname.trim();
-    clientDetailsToSave.name = this.clientDetails.name.trim();
-    clientDetailsToSave.patronymic = this.clientDetails.patronymic.trim();
+    clientDetailsToSave.surname = this.normalizeName(this.clientDetails.surname);
+    clientDetailsToSave.name = this.normalizeName(this.clientDetails.name);
+    clientDetailsToSave.patronymic = this.normalizeName(this.clientDetails.patronymic);
     clientDetailsToSave.gender = this.clientDetails.gender;
     clientDetailsToSave.birthdate = this.clientDetails.birthdate;
     clientDetailsToSave.charmId = this.clientDetails.charmId;
@@ -151,5 +161,19 @@ export class ClientDetailsComponent {
   private setDefaultPhone() {
     this.phoneToAdd.number = "+7";
     this.phoneToAdd.type = PhoneType.MOBILE;
+  }
+
+  private normalizeName(name: string): string {
+    return name.trim();
+  }
+
+  private isNameValid(name: string): boolean {
+    return this.normalizeName(name).length > 0;
+  }
+
+  private isStringDateValid(date: string): boolean {
+    return date.length > 0 &&
+      new Date(date) >= new Date(this.minStringDate) &&
+      new Date(date) <= new Date(this.todayStringDate);
   }
 }

@@ -23,7 +23,7 @@
       <div class="modal-body">
         <div class="row">
           <div class="form-group col-xs-4"
-               [ngClass]="{'has-error': clientDetails.surname.length == 0 == true}">
+               [ngClass]="{'has-error': isNameValid(clientDetails.surname) == false}">
             <label for="surname" class="control-label"> Фамилия</label>
             <input type="text"
                    class="form-control"
@@ -33,7 +33,7 @@
                    [(ngModel)]="clientDetails.surname">
           </div>
           <div class="form-group has-error col-xs-4"
-               [ngClass]="{'has-error': clientDetails.name.length == 0 == true}">
+               [ngClass]="{'has-error': isNameValid(clientDetails.name) == false}">
             <label for="name" class="control-label"> Имя</label>
             <input type="text"
                    class="form-control"
@@ -42,8 +42,7 @@
                    placeholder="Имя"
                    [(ngModel)]="clientDetails.name">
           </div>
-          <div class="form-group col-xs-4"
-               [ngClass]="{'has-error': clientDetails.patronymic.length == 0 == true}">
+          <div class="form-group col-xs-4">
             <label for="patronymic" class="control-label"> Отчество</label>
             <input type="text"
                    class="form-control"
@@ -75,13 +74,16 @@
             </select>
           </div>
           <div class="form-group col-xs-4"
-               [ngClass]="{'has-error': clientDetails.birthdate.length == 0 == true}">
+               [ngClass]="{'has-error': isStringDateValid(clientDetails.birthdate) == false}">
             <label for="birthdate" class="control-label"> Дата рождения</label>
-            <input type="text"
+            <input type="date"
                    class="form-control"
                    id="birthdate"
                    placeholder="Дата рождения"
                    name="birthdate"
+                   onkeydown="return false"
+                   [min]="minStringDate"
+                   [max]="todayStringDate"
                    [(ngModel)]="clientDetails.birthdate">
           </div>
           <div class="form-group col-xs-4">
@@ -101,8 +103,7 @@
         <div class="form-group">
           <label for="residential-address" class="control-label"> Адрес проживания</label>
           <div class="row" id="residential-address">
-            <div class="col-xs-4"
-                 [ngClass]="{'has-error': clientDetails.factualAddressInfo.street.length == 0 == true}">
+            <div class="col-xs-4">
               <input type="text"
                      class="form-control"
                      id="residential-street"
@@ -110,8 +111,7 @@
                      name="residential-street"
                      [(ngModel)]="clientDetails.factualAddressInfo.street">
             </div>
-            <div class="col-xs-4"
-                 [ngClass]="{'has-error': clientDetails.factualAddressInfo.house.length == 0 == true}">
+            <div class="col-xs-4">
               <input type="text"
                      class="form-control"
                      id="residential-home"
@@ -119,8 +119,7 @@
                      name="residential-home"
                      [(ngModel)]="clientDetails.factualAddressInfo.house">
             </div>
-            <div class="col-xs-4"
-                 [ngClass]="{'has-error': clientDetails.factualAddressInfo.flat.length == 0 == true}">
+            <div class="col-xs-4">
               <input type="text"
                      class="form-control"
                      id="residential-flat"
@@ -133,8 +132,7 @@
         <div class="form-group">
           <label for="registration-address" class="control-label"> Адрес регистрации</label>
           <div class="row" id="registration-address">
-            <div class="col-xs-4"
-                 [ngClass]="{'has-error': clientDetails.registrationAddressInfo.street.length == 0 == true}">
+            <div class="col-xs-4">
               <input type="text"
                      class="form-control"
                      id="registration-street"
@@ -142,8 +140,7 @@
                      name="registration-street"
                      [(ngModel)]="clientDetails.registrationAddressInfo.street">
             </div>
-            <div class="col-xs-4"
-                 [ngClass]="{'has-error': clientDetails.registrationAddressInfo.house.length == 0 == true}">
+            <div class="col-xs-4">
               <input type="text"
                      class="form-control"
                      id="registration-home"
@@ -151,8 +148,7 @@
                      name="registration-home"
                      [(ngModel)]="clientDetails.registrationAddressInfo.house">
             </div>
-            <div class="col-xs-4"
-                 [ngClass]="{'has-error': clientDetails.registrationAddressInfo.flat.length == 0 == true}">
+            <div class="col-xs-4">
               <input type="text"
                      class="form-control"
                      id="registration-flat"

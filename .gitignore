@@ -3,6 +3,8 @@
 .idea/
 .classpath
 .project
+/ideaDataSources
+/dataSources
 *.ids
 *.iml
 *.ipr

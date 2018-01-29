@@ -15,7 +15,7 @@ public class Util {
     return Float.parseFloat(s);
   }
 
-  public static final String datePattern = "DD-MM-YYYY";
+  public static final String datePattern = "YYYY-MM-DD";
 
   public static LocalDate generateLocalDate() {
     return LocalDate.ofEpochDay(RND.plusLong(LocalDate.now().toEpochDay()));

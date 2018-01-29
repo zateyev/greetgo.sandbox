@@ -12,9 +12,9 @@ export class ClientRecord {
     this.fullName = o.fullName;
     this.charmName = o.charmName;
     this.age = o.age;
-    this.totalAccountBalance = o.totalAccountBalance;
-    this.maxAccountBalance = o.maxAccountBalance;
-    this.minAccountBalance = o.minAccountBalance;
+    this.totalAccountBalance = parseFloat(o.totalAccountBalance).toFixed(2).toString();
+    this.maxAccountBalance = parseFloat(o.maxAccountBalance).toFixed(2).toString();
+    this.minAccountBalance = parseFloat(o.minAccountBalance).toFixed(2).toString();
     return this;
   }
 
