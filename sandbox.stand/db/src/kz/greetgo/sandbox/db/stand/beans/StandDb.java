@@ -9,28 +9,23 @@ import kz.greetgo.sandbox.db.stand.model.PersonDot;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
+import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicLong;
 
 @Bean
 public class StandDb implements HasAfterInject {
-  //public final Map<String, String> genderStorage = new HashMap<>();
-  public final Map<String, CharmDot> charmStorage = new HashMap<>();
+  public final Map<Integer, CharmDot> charmStorage = new HashMap<>();
   public final Map<String, PersonDot> personStorage = new HashMap<>();
   public final Map<Long, ClientDot> clientStorage = new HashMap<>();
+  public AtomicLong curClientId = new AtomicLong(0);
 
   @Override
   public void afterInject() throws Exception {
     //TODO parse only once, not in separate files
-    this.initGenders();
     this.parseCharms();
     this.parsePersons();
     this.parseClients();
-  }
-
-  private void initGenders() {
-    /*genderStorage.put(Gender.a.name(), "Неизвестно");
-    genderStorage.put(Gender.MALE.name(), "Мужской");
-    genderStorage.put(Gender.FEMALE.name(), "Женский");*/
   }
 
   private void parseCharms() throws Exception {
@@ -65,7 +60,7 @@ public class StandDb implements HasAfterInject {
   private void appendCharm(String[] splitLine, String line, int lineNo) {
     CharmDot charmDot = new CharmDot();
 
-    charmDot.id = splitLine[1].trim();
+    charmDot.id = Integer.parseInt(splitLine[1].trim());
     charmDot.name = splitLine[2].trim();
     charmDot.isDisabled = false;
 
@@ -141,6 +136,8 @@ public class StandDb implements HasAfterInject {
             throw new RuntimeException("Unknown command " + command);
         }
       }
+
+      curClientId.set(lineNo);
     }
   }
 
@@ -149,13 +146,13 @@ public class StandDb implements HasAfterInject {
     ClientDot c = new ClientDot();
     c.id = lineNo - 1;
     c.surname = splitLine[1].trim();
-    c.lastname = splitLine[2].trim();
+    c.name = splitLine[2].trim();
     c.patronymic = splitLine[3].trim();
     c.gender = toGender(Integer.parseInt(splitLine[4].trim()));
     c.birthDate = this.generateDate();
     c.charm = this.generateCharm();
-    c.residentialAddressInfo = this.generateResidentialAddress();
-    c.registrationAddressInfo = this.generateRegistrationAddressInfo();
+    c.factualAddressInfo = this.generateAddressInfo(AddressType.FACTUAL);
+    c.registrationAddressInfo = this.generateAddressInfo(AddressType.REGISTRATION);
     c.phones = this.generatePhones();
 
     ClientDot.generateAgeAndBalance(c);
@@ -166,9 +163,9 @@ public class StandDb implements HasAfterInject {
   // https://stackoverflow.com/a/3985467
   private String generateDate() {
     long time = -946771200000L + (Math.abs(new Random().nextLong()) % (70L * 365 * 24 * 60 * 60 * 1000));
-    Date dt = new Date(time);
+    Date date = new Date(time);
 
-    return dt.toString();
+    return new SimpleDateFormat("yyyy-MM-dd").format(date);
   }
 
   private Charm generateCharm() {
@@ -178,23 +175,13 @@ public class StandDb implements HasAfterInject {
     return charmDot.toCharm();
   }
 
-  private ResidentialAddressInfo generateResidentialAddress() {
+  private AddressInfo generateAddressInfo(AddressType addressType) {
     Random random = new Random();
-    ResidentialAddressInfo ret = new ResidentialAddressInfo();
+    AddressInfo ret = new AddressInfo();
 
+    ret.type = addressType;
     ret.street = this.generateString(random.nextInt(10) + 5, false);
-    ret.home = this.generateString(random.nextInt(3) + 2, false);
-    ret.flat = this.generateString(random.nextInt(3) + 2, true);
-
-    return ret;
-  }
-
-  private RegistrationAddressInfo generateRegistrationAddressInfo() {
-    Random random = new Random();
-    RegistrationAddressInfo ret = new RegistrationAddressInfo();
-
-    ret.street = this.generateString(random.nextInt(10) + 5, false);
-    ret.home = this.generateString(random.nextInt(3) + 2, false);
+    ret.house = this.generateString(random.nextInt(3) + 2, false);
     ret.flat = this.generateString(random.nextInt(3) + 2, true);
 
     return ret;
@@ -205,7 +192,7 @@ public class StandDb implements HasAfterInject {
     List<Phone> ret = new ArrayList<>();
     int n = random.nextInt(3) + 1;
 
-    for(int i = 0; i < n; i++) {
+    for (int i = 0; i < n; i++) {
       Phone phone = new Phone();
       phone.number = "+" + this.generateString(11, true);
       phone.type = toPhoneType(random.nextInt(PhoneType.values().length));

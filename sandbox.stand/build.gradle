@@ -23,7 +23,10 @@ dependencies {
 
   compile 'jstl:jstl:1.2'
 
+  // https://mvnrepository.com/artifact/com.itextpdf/itextpdf
+  compile group: 'com.itextpdf', name: 'itextpdf', version: '5.5.12'
+  // https://mvnrepository.com/artifact/kz.greetgo/greetgo.msoffice
+  compile group: 'kz.greetgo', name: 'greetgo.msoffice', version: '0.4.23'
 
   testCompile "kz.greetgo.depinject:greetgo.depinject.testng:$depinjectVersion"
-
 }

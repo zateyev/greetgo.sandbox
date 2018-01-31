@@ -1,4 +1,4 @@
 export class Charm {
-  public id: string;
+  public id: number/*int*/;
   public name: string;
 }

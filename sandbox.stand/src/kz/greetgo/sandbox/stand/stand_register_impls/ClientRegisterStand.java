@@ -1,16 +1,30 @@
 package kz.greetgo.sandbox.stand.stand_register_impls;
 
+import com.itextpdf.text.*;
+import com.itextpdf.text.pdf.*;
 import kz.greetgo.depinject.core.Bean;
 import kz.greetgo.depinject.core.BeanGetter;
+import kz.greetgo.msoffice.xlsx.gen.Align;
+import kz.greetgo.msoffice.xlsx.gen.NumFmt;
+import kz.greetgo.msoffice.xlsx.gen.Sheet;
+import kz.greetgo.msoffice.xlsx.gen.Xlsx;
 import kz.greetgo.sandbox.controller.errors.NotFound;
 import kz.greetgo.sandbox.controller.model.*;
 import kz.greetgo.sandbox.controller.register.ClientRegister;
+import kz.greetgo.sandbox.controller.util.Util;
 import kz.greetgo.sandbox.db.stand.beans.StandDb;
 import kz.greetgo.sandbox.db.stand.model.CharmDot;
 import kz.greetgo.sandbox.db.stand.model.ClientDot;
+import kz.greetgo.sandbox.stand.launchers.LaunchStandServer;
 import kz.greetgo.sandbox.stand.util.PageUtils;
 
-import java.util.*;
+import java.io.OutputStream;
+import java.net.URL;
+import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Map;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -21,40 +35,24 @@ public class ClientRegisterStand implements ClientRegister {
   public BeanGetter<StandDb> db;
 
   @Override
-  public long getCount(String namefilter) {
+  public long getCount(ClientRecordRequest request) {
     List<ClientDot> clientDots = new ArrayList<>(db.get().clientStorage.values());
-    clientDots = this.getFilteredList(clientDots, namefilter);
+    clientDots = this.getFilteredList(clientDots, request.nameFilter);
 
-    return clientDots.size() ;
+    return clientDots.size();
   }
 
   @Override
-  public List<ClientRecord> getRecordList(ClientRecordListRequest listRequest) {
+  public List<ClientRecord> getRecordList(ClientRecordRequest request) {
     List<ClientDot> clientDots = new ArrayList<>(db.get().clientStorage.values());
     List<ClientRecord> clientRecords = new ArrayList<>();
 
-    clientDots = this.getFilteredList(clientDots, listRequest.nameFilter);
-
-    switch (listRequest.columnSortType) {
-      case AGE:
-        clientDots = this.getListByAge(clientDots, listRequest.sortAscend);
-        break;
-      case TOTALACCOUNTBALANCE:
-        clientDots = this.getListByTotalAccountBalance(clientDots, listRequest.sortAscend);
-        break;
-      case MAXACCOUNTBALANCE:
-        clientDots = this.getListByMaxAccountBalance(clientDots, listRequest.sortAscend);
-        break;
-      case MINACCOUNTBALANCE:
-        clientDots = this.getListByMinAccountBalance(clientDots, listRequest.sortAscend);
-        break;
-      default:
-        clientDots = this.getDefaultList(clientDots);
-    }
+    clientDots = this.getFilteredList(clientDots, request.nameFilter);
+    clientDots = this.getSortedList(clientDots, request.columnSortType, request.sortAscend);
 
     PageUtils.cutPage(clientDots,
-      listRequest.clientRecordCountToSkip,
-      listRequest.clientRecordCount);
+      request.clientRecordCountToSkip,
+      request.clientRecordCount);
 
     for (ClientDot clientDot : clientDots)
       clientRecords.add(clientDot.toClientRecord());
@@ -72,7 +70,7 @@ public class ClientRegisterStand implements ClientRegister {
       @Override
       public boolean test(ClientDot clientDot) {
         if (clientDot.surname.toLowerCase().contains(loweredNameFilter) ||
-          clientDot.lastname.toLowerCase().contains(loweredNameFilter) ||
+          clientDot.name.toLowerCase().contains(loweredNameFilter) ||
           clientDot.patronymic.toLowerCase().contains(loweredNameFilter))
           return true;
 
@@ -81,6 +79,27 @@ public class ClientRegisterStand implements ClientRegister {
     });
 
     clientDots = stream.collect(Collectors.toList());
+
+    return clientDots;
+  }
+
+  private List<ClientDot> getSortedList(List<ClientDot> clientDots, ColumnSortType columnSortType, boolean sortAscend) {
+    switch (columnSortType) {
+      case AGE:
+        clientDots = this.getListByAge(clientDots, sortAscend);
+        break;
+      case TOTALACCOUNTBALANCE:
+        clientDots = this.getListByTotalAccountBalance(clientDots, sortAscend);
+        break;
+      case MAXACCOUNTBALANCE:
+        clientDots = this.getListByMaxAccountBalance(clientDots, sortAscend);
+        break;
+      case MINACCOUNTBALANCE:
+        clientDots = this.getListByMinAccountBalance(clientDots, sortAscend);
+        break;
+      default:
+        clientDots = this.getDefaultList(clientDots);
+    }
 
     return clientDots;
   }
@@ -113,13 +132,13 @@ public class ClientRegisterStand implements ClientRegister {
     if (ascend) {
       clientDots.sort(new Comparator<ClientDot>() {
         public int compare(ClientDot o1, ClientDot o2) {
-          return Long.valueOf(o1.totalAccountBalance).compareTo(o2.totalAccountBalance);
+          return Float.compare(Util.stringToFloat(o1.totalAccountBalance), Util.stringToFloat(o2.totalAccountBalance));
         }
       });
     } else {
       clientDots.sort(new Comparator<ClientDot>() {
         public int compare(ClientDot o1, ClientDot o2) {
-          return Long.valueOf(o2.totalAccountBalance).compareTo(o1.totalAccountBalance);
+          return Float.compare(Util.stringToFloat(o2.totalAccountBalance), Util.stringToFloat(o1.totalAccountBalance));
         }
       });
     }
@@ -132,13 +151,13 @@ public class ClientRegisterStand implements ClientRegister {
     if (ascend) {
       clientDots.sort(new Comparator<ClientDot>() {
         public int compare(ClientDot o1, ClientDot o2) {
-          return Long.valueOf(o1.maxAccountBalance).compareTo(o2.maxAccountBalance);
+          return Float.compare(Util.stringToFloat(o1.maxAccountBalance), Util.stringToFloat(o2.maxAccountBalance));
         }
       });
     } else {
       clientDots.sort(new Comparator<ClientDot>() {
         public int compare(ClientDot o1, ClientDot o2) {
-          return Long.valueOf(o2.maxAccountBalance).compareTo(o1.maxAccountBalance);
+          return Float.compare(Util.stringToFloat(o2.maxAccountBalance), Util.stringToFloat(o1.maxAccountBalance));
         }
       });
     }
@@ -151,13 +170,13 @@ public class ClientRegisterStand implements ClientRegister {
     if (ascend) {
       clientDots.sort(new Comparator<ClientDot>() {
         public int compare(ClientDot o1, ClientDot o2) {
-          return Long.valueOf(o1.minAccountBalance).compareTo(o2.minAccountBalance);
+          return Float.compare(Util.stringToFloat(o1.minAccountBalance), Util.stringToFloat(o2.minAccountBalance));
         }
       });
     } else {
       clientDots.sort(new Comparator<ClientDot>() {
         public int compare(ClientDot o1, ClientDot o2) {
-          return Long.valueOf(o2.minAccountBalance).compareTo(o1.minAccountBalance);
+          return Float.compare(Util.stringToFloat(o2.minAccountBalance), Util.stringToFloat(o1.minAccountBalance));
         }
       });
     }
@@ -183,21 +202,23 @@ public class ClientRegisterStand implements ClientRegister {
 
       clientDetails.id = null;
       clientDetails.surname = "";
-      clientDetails.lastname = "";
+      clientDetails.name = "";
       clientDetails.patronymic = "";
       clientDetails.gender = Gender.EMPTY;
       clientDetails.birthdate = "";
       clientDetails.charmId = charmDots.get(0).toCharm().id;
 
-      clientDetails.registrationAddressInfo = new RegistrationAddressInfo();
+      clientDetails.registrationAddressInfo = new AddressInfo();
+      clientDetails.registrationAddressInfo.type = AddressType.REGISTRATION;
       clientDetails.registrationAddressInfo.street = "";
-      clientDetails.registrationAddressInfo.home = "";
+      clientDetails.registrationAddressInfo.house = "";
       clientDetails.registrationAddressInfo.flat = "";
 
-      clientDetails.residentialAddressInfo = new ResidentialAddressInfo();
-      clientDetails.residentialAddressInfo.street = "";
-      clientDetails.residentialAddressInfo.home = "";
-      clientDetails.residentialAddressInfo.flat = "";
+      clientDetails.factualAddressInfo = new AddressInfo();
+      clientDetails.factualAddressInfo.type = AddressType.REGISTRATION;
+      clientDetails.factualAddressInfo.street = "";
+      clientDetails.factualAddressInfo.house = "";
+      clientDetails.factualAddressInfo.flat = "";
 
       clientDetails.phones = new ArrayList<>();
     } else {
@@ -212,17 +233,165 @@ public class ClientRegisterStand implements ClientRegister {
   }
 
   @Override
-  public void saveDetails(ClientDetailsToSave detailstoSave) {
+  public void saveDetails(ClientDetailsToSave detailsToSave) {
     Map<Long, ClientDot> clientDotMap = db.get().clientStorage;
     ClientDot clientDot;
+    long id = db.get().curClientId.getAndIncrement();
+    db.get().curClientId.set(id + 1);
 
-    if (detailstoSave.id == null) {
+    if (detailsToSave.id == null) {
       clientDot = new ClientDot();
-      clientDot.toClientDot(detailstoSave, (long) clientDotMap.size() + 1, db.get().charmStorage);
-      clientDotMap.put((long) clientDotMap.size() + 1, clientDot);
+      clientDot.toClientDot(detailsToSave, id, db.get().charmStorage);
+      clientDotMap.put(id, clientDot);
     } else {
-      clientDot = clientDotMap.get(detailstoSave.id);
-      clientDot.toClientDot(detailstoSave, null, db.get().charmStorage);
+      clientDot = clientDotMap.get(detailsToSave.id);
+      clientDot.toClientDot(detailsToSave, null, db.get().charmStorage);
     }
   }
+
+  @Override
+  public void streamRecordList(OutputStream outStream, ClientRecordRequest request, FileContentType fileContentType,
+                               String personId) throws Exception {
+    List<ClientDot> clientDots = new ArrayList<>(db.get().clientStorage.values());
+    clientDots = this.getFilteredList(clientDots, request.nameFilter);
+    clientDots = this.getSortedList(clientDots, request.columnSortType, request.sortAscend);
+
+    switch (fileContentType) {
+      case PDF:
+        this.streamRecordListToPdf(outStream, request, clientDots);
+        break;
+      case XLSX:
+        this.streamRecordListToXlsx(outStream, request, clientDots);
+        break;
+    }
+  }
+
+  private void streamRecordListToXlsx(OutputStream outStream, ClientRecordRequest request, List<ClientDot> clientDots) {
+    Xlsx document = new Xlsx();
+    Sheet sheet = document.newSheet(true);
+
+    int curCol = 1;
+    sheet.setWidth(curCol++, 30f);
+    sheet.setWidth(curCol++, 15f);
+    sheet.setWidth(curCol++, 10f);
+    sheet.setWidth(curCol++, 25f);
+    sheet.setWidth(curCol++, 25f);
+    sheet.setWidth(curCol, 25f);
+
+    sheet.style().alignment().setHorizontal(Align.center);
+    sheet.style().font().setSize(10);
+    sheet.style().font().setBold(true);
+    curCol = 1;
+    sheet.row().start();
+    sheet.cellStr(curCol++, "ФИО");
+    sheet.cellStr(curCol++, "Характер");
+    if (request.columnSortType == ColumnSortType.AGE) {
+      sheet.style().font().setItalic(true);
+      sheet.cellStr(curCol++, "Возраст");
+      sheet.style().font().setItalic(false);
+    } else {
+      sheet.cellStr(curCol++, "Возраст");
+    }
+    if (request.columnSortType == ColumnSortType.TOTALACCOUNTBALANCE) {
+      sheet.style().font().setItalic(true);
+      sheet.cellStr(curCol++, "Общий остаток счетов");
+      sheet.style().font().setItalic(false);
+    } else {
+      sheet.cellStr(curCol++, "Общий остаток счетов");
+    }
+    if (request.columnSortType == ColumnSortType.MAXACCOUNTBALANCE) {
+      sheet.style().font().setItalic(true);
+      sheet.cellStr(curCol++, "Максимальный остаток");
+      sheet.style().font().setItalic(false);
+    } else {
+      sheet.cellStr(curCol++, "Максимальный остаток");
+    }
+    if (request.columnSortType == ColumnSortType.MINACCOUNTBALANCE) {
+      sheet.style().font().setItalic(true);
+      sheet.cellStr(curCol, "Минимальный остаток");
+      sheet.style().font().setItalic(false);
+    } else {
+      sheet.cellStr(curCol, "Минимальный остаток");
+    }
+    sheet.row().finish();
+
+    sheet.style().alignment().setHorizontal(Align.left);
+    sheet.style().font().setSize(10);
+    sheet.style().font().setBold(false);
+    for (ClientDot clientDot : clientDots) {
+      curCol = 1;
+      sheet.row().start();
+      sheet.cellStr(curCol++, Util.getFullname(clientDot.surname, clientDot.name, clientDot.patronymic));
+      sheet.cellStr(curCol++, clientDot.charm.name);
+      sheet.cellInt(curCol++, clientDot.age);
+      sheet.cellDouble(curCol++, Util.stringToFloat(clientDot.totalAccountBalance), NumFmt.NUM_SIMPLE2);
+      sheet.cellDouble(curCol++, Util.stringToFloat(clientDot.maxAccountBalance), NumFmt.NUM_SIMPLE2);
+      sheet.cellDouble(curCol, Util.stringToFloat(clientDot.minAccountBalance), NumFmt.NUM_SIMPLE2);
+      sheet.row().finish();
+    }
+
+    document.complete(outStream);
+  }
+
+  private void streamRecordListToPdf(OutputStream outStream, ClientRecordRequest request, List<ClientDot> clientDots)
+    throws Exception {
+    URL resource = LaunchStandServer.class.getResource("/Roboto-Regular.ttf");
+    String fontPath = Paths.get(resource.toURI()).toAbsolutePath().toString();
+    BaseFont bf = BaseFont.createFont(fontPath, BaseFont.IDENTITY_H, BaseFont.EMBEDDED);
+    Font headerFont = new Font(bf, 10);
+    Font defaultFont = new Font(bf, 10);
+
+    Document document = new Document();
+    PdfWriter.getInstance(document, outStream);
+    document.open();
+
+    float[] columnWidthWeights = {4, 4, 2, 3, 3, 3};
+    PdfPTable table = new PdfPTable(columnWidthWeights);
+    table.setWidthPercentage(100);
+
+    table.addCell(this.pdfPCellDefault(new PdfPCell(new Phrase("ФИО", headerFont))));
+    table.addCell(this.pdfPCellDefault(new PdfPCell(new Phrase("Характер", headerFont))));
+    table.addCell(this.pdfPCellHeaderBuilder("Возраст",
+      request.columnSortType == ColumnSortType.AGE, headerFont));
+    table.addCell(this.pdfPCellHeaderBuilder("Общий остаток счетов",
+      request.columnSortType == ColumnSortType.TOTALACCOUNTBALANCE, headerFont));
+    table.addCell(this.pdfPCellHeaderBuilder("Максимальный остаток",
+      request.columnSortType == ColumnSortType.MAXACCOUNTBALANCE, headerFont));
+    table.addCell(this.pdfPCellHeaderBuilder("Минимальный остаток",
+      request.columnSortType == ColumnSortType.MINACCOUNTBALANCE, headerFont));
+
+    this.pdfPCellDefault(table.getDefaultCell()).setBackgroundColor(GrayColor.GRAYWHITE);
+    for (ClientDot clientDot : clientDots) {
+      table.addCell(new Phrase(Util.getFullname(clientDot.surname, clientDot.name, clientDot.patronymic), defaultFont));
+      table.addCell(new Phrase(clientDot.charm.name, defaultFont));
+      table.addCell(new Phrase(String.valueOf(clientDot.age), defaultFont));
+      table.addCell(new Phrase(String.format("%.2f", Util.stringToFloat(clientDot.totalAccountBalance)), defaultFont));
+      table.addCell(new Phrase(String.format("%.2f", Util.stringToFloat(clientDot.maxAccountBalance)), defaultFont));
+      table.addCell(new Phrase(String.format("%.2f", Util.stringToFloat(clientDot.minAccountBalance)), defaultFont));
+    }
+
+    document.add(table);
+    document.close();
+  }
+
+  private PdfPCell pdfPCellHeaderBuilder(String text, boolean sort, Font font) {
+    PdfPCell cell = new PdfPCell(new Phrase(text, font));
+    if (sort)
+      cell.setBackgroundColor(new BaseColor(102, 144, 102));
+    else
+      cell.setBackgroundColor(new BaseColor(191, 191, 191));
+
+    return this.pdfPCellDefault(cell);
+  }
+
+  private PdfPCell pdfPCellDefault(PdfPCell cell) {
+    cell.setUseAscender(true);
+    cell.setUseDescender(true);
+    cell.setHorizontalAlignment(Element.ALIGN_CENTER);
+    cell.setVerticalAlignment(Element.ALIGN_MIDDLE);
+
+    return cell;
+  }
+
+
 }

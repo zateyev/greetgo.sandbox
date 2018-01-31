@@ -3,18 +3,18 @@ export class ClientRecord {
   public fullName: string;
   public charmName: string;
   public age: number/*int*/;
-  public totalAccountBalance: number/*long*/;
-  public maxAccountBalance: number/*long*/;
-  public minAccountBalance: number/*long*/;
+  public totalAccountBalance: string;
+  public maxAccountBalance: string;
+  public minAccountBalance: string;
 
   public assign(o: any): ClientRecord {
     this.id = o.id;
     this.fullName = o.fullName;
     this.charmName = o.charmName;
     this.age = o.age;
-    this.totalAccountBalance = o.totalAccountBalance;
-    this.maxAccountBalance = o.maxAccountBalance;
-    this.minAccountBalance = o.minAccountBalance;
+    this.totalAccountBalance = parseFloat(o.totalAccountBalance).toFixed(2).toString();
+    this.maxAccountBalance = parseFloat(o.maxAccountBalance).toFixed(2).toString();
+    this.minAccountBalance = parseFloat(o.minAccountBalance).toFixed(2).toString();
     return this;
   }
 

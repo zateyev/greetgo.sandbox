@@ -1,9 +1,10 @@
 import {Component} from "@angular/core";
 import {HttpService} from "../HttpService";
 import {ClientRecord} from "../../model/ClientRecord";
-import {ClientRecordListRequest} from "../../model/ClientRecordListRequest";
+import {ClientRecordRequest} from "../../model/ClientRecordRequest";
 import {ColumnSortType} from "../../model/ColumnSortType";
 import {ClientDetailsComponent} from "./client-details.component";
+import {FileContentType} from "../../model/FileContentType";
 
 @Component({
   selector: 'client-list-component',
@@ -18,14 +19,18 @@ export class ClientListComponent {
   pageNums: number[];
   records: ClientRecord[] | null = [];
   selectedRecordId: number | null = null;
-  listRequest: ClientRecordListRequest = new ClientRecordListRequest();
+  request: ClientRecordRequest = new ClientRecordRequest();
   filterSuccessState: boolean | null = null;
   isModalFormActive: boolean = false;
+  fileContentTypeEnum = FileContentType;
+  downloadContentType: FileContentType;
 
   constructor(private httpService: HttpService) {
-    this.listRequest.columnSortType = ColumnSortType.NONE;
-    this.listRequest.sortAscend = false;
-    this.listRequest.nameFilter = "";
+    this.request.columnSortType = ColumnSortType.NONE;
+    this.request.sortAscend = false;
+    this.request.nameFilter = "";
+
+    this.downloadContentType = FileContentType.PDF;
 
     this.refreshClientRecordList();
   }
@@ -38,10 +43,10 @@ export class ClientListComponent {
 
   private updatePageNumeration() {
     this.httpService.get("/client/count", {
-      'clientRecordNameFilter': this.listRequest.nameFilter
+      'clientRecordRequest': JSON.stringify(this.request)
     }).toPromise().then(result => {
       this.pageCount = Math.floor(result.json() as number / this.httpService.pageSize);
-      if ( result.json() as number % this.httpService.pageSize > 0 )
+      if (result.json() as number % this.httpService.pageSize > 0)
         this.pageCount++;
 
       this.pageNums = [];
@@ -49,25 +54,21 @@ export class ClientListComponent {
       if (this.pageCount > 0) {
         this.filterSuccessState = true;
 
-        for (let i = 0; i < this.pageCount; i++) {
+        for (let i = 0; i < this.pageCount; i++)
           this.pageNums[i] = i + 1;
-        }
-      } else {
+      } else
         this.filterSuccessState = false;
-      }
     }, error => {
       console.log(error);
     });
   }
 
   private getClientRecordList() {
-    this.listRequest.clientRecordCountToSkip = this.curPageNum * this.httpService.pageSize;
-    this.listRequest.clientRecordCount = this.httpService.pageSize;
-
-    console.log(JSON.stringify(this.listRequest));
+    this.request.clientRecordCountToSkip = this.curPageNum * this.httpService.pageSize;
+    this.request.clientRecordCount = this.httpService.pageSize;
 
     this.httpService.get("/client/list", {
-      'clientRecordListRequest': JSON.stringify(this.listRequest)
+      'clientRecordRequest': JSON.stringify(this.request)
     }).toPromise().then(result => {
       this.records = (result.json() as ClientRecord[]).map(ClientRecord.copy);
 
@@ -84,19 +85,28 @@ export class ClientListComponent {
   }
 
   private onClick(event: any) {
-    /*console.log("active " + this.isModalFormActive);
-
-     if (!(<HTMLElement>event.target).classList.contains('modal')) {
-     event.stopPropagation();
-     }
-
-     if (!this.isModalFormActive && !(<HTMLElement>event.target).classList.contains('client-record-keep-selection'))
-     this.selectedRecordId = null;*/
   }
 
   protected onFilterTextChange(event) {
     if (this.filterSuccessState || this.filterSuccessState == false)
       this.filterSuccessState = null;
+  }
+
+  onClientRecordListDownloadButtonClick() {
+    window.open(this.httpService.url("/client/report" +
+      "?clientRecordRequest=" + JSON.stringify(this.request) +
+      "&fileContentType=" + JSON.stringify(this.downloadContentType) +
+      "&token=" + this.httpService.token
+    ));
+    /*
+     this.httpService.get("/client/report", {
+     'clientRecordRequest': JSON.stringify(this.request),
+     'fileContentType': JSON.stringify(FileContentType.PDF)
+     }).toPromise().then(result => {
+     console.log(result);
+     }, error => {
+     console.log(error);
+     });*/
   }
 
   onFilterButtonClick(filterValue: any) {
@@ -106,7 +116,7 @@ export class ClientListComponent {
     if (filter == null || filter.length == 0)
       filter = "";
 
-    this.listRequest.nameFilter = filter;
+    this.request.nameFilter = filter;
     this.refreshClientRecordList();
   }
 
@@ -115,19 +125,19 @@ export class ClientListComponent {
   }
 
   onSortingButtonClick(columnSortTypeName: string, sortAscend: boolean) {
-    this.listRequest.columnSortType = columnSortTypeName as ColumnSortType;
-    this.listRequest.sortAscend = sortAscend;
+    this.request.columnSortType = columnSortTypeName as ColumnSortType;
+    this.request.sortAscend = sortAscend;
     this.curPageNum = 0;
 
     this.refreshClientRecordList();
   }
 
   isSortingButtonActive(columnSortTypeName: string, sortAscend: boolean): boolean {
-    if (columnSortTypeName == this.listRequest.columnSortType) {
+    if (columnSortTypeName == this.request.columnSortType) {
       if (columnSortTypeName == "NONE")
         return true;
 
-      if (sortAscend == this.listRequest.sortAscend)
+      if (sortAscend == this.request.sortAscend)
         return true;
     }
 
@@ -135,10 +145,6 @@ export class ClientListComponent {
   }
 
   onPageNumberButtonClick(pageNum: number) {
-    // TODO: может ли клиент кликать по текущей странице?
-    //if (this.curPageNum == pageNum)
-    //  return;
-
     this.curPageNum = pageNum;
     this.refreshClientRecordList();
   }

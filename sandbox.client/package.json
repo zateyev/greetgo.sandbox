@@ -30,6 +30,7 @@
     "browser-sync": "^2.18.13",
     "core-js": "^2.5.1",
     "del": "^3.0.0",
+    "glyphicons": "^0.2.0",
     "gulp": "github:gulpjs/gulp#6d71a65",
     "gulp-clean-css": "^3.9.0",
     "gulp-debug": "^3.1.0",

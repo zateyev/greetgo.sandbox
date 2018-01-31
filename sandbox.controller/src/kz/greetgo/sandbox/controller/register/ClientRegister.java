@@ -1,21 +1,19 @@
 package kz.greetgo.sandbox.controller.register;
 
-import kz.greetgo.sandbox.controller.model.ClientDetails;
-import kz.greetgo.sandbox.controller.model.ClientDetailsToSave;
-import kz.greetgo.sandbox.controller.model.ClientRecord;
-import kz.greetgo.sandbox.controller.model.ClientRecordListRequest;
+import kz.greetgo.sandbox.controller.model.*;
 
+import java.io.IOException;
+import java.io.OutputStream;
 import java.util.List;
-import java.util.Map;
 
 public interface ClientRegister {
   /**
    * Предоставляет количество страниц клиентских записей
    *
-   * @param nameFilter текущая применяемая фильтрация
+   * @param request принимаемые параметры страницы, сортировки и фильтрации в виде модели
    * @return количество страниц
    */
-  long getCount(String nameFilter);
+  long getCount(ClientRecordRequest request);
 
   /**
    * Предоставляет список клиентских записей
@@ -23,7 +21,7 @@ public interface ClientRegister {
    * @param listRequest принимаемые параметры страницы, сортировки и фильтрации в виде модели
    * @return список клиентских записей
    */
-  List<ClientRecord> getRecordList(ClientRecordListRequest listRequest);
+  List<ClientRecord> getRecordList(ClientRecordRequest listRequest);
 
   /**
    * Удаление клиентской записи
@@ -36,7 +34,7 @@ public interface ClientRegister {
    * Возвращает клиентские детали
    *
    * @param id идентификатор клиентской записи
-   * @return клиентский детали одного клиента
+   * @return клиентские детали одного клиента
    */
   ClientDetails getDetails(Long id);
 
@@ -46,4 +44,15 @@ public interface ClientRegister {
    * @param detailsToSave клиентские детали
    */
   void saveDetails(ClientDetailsToSave detailsToSave);
+
+  /**
+   * Возвращает полный список записей в выходной поток
+   *
+   * @param outStream       выходной поток
+   * @param request         принимаемые параметры страницы, сортировки и фильтрации в виде модели
+   * @param fileContentType тип контента для формирования файла
+   * @param personId        идентификатор текущего пользователя
+   */
+  void streamRecordList(OutputStream outStream, ClientRecordRequest request, FileContentType fileContentType,
+                        String personId) throws Exception;
 }

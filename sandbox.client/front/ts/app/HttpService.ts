@@ -77,7 +77,8 @@ export class HttpService {
     let data = new URLSearchParams();
     for (let key in keyValue) {
       let value = keyValue[key];
-      if (value) data.append(key, value as string);
+      //fixme: пофикшен баг, когда значение 0 игнорировалось
+      if (value != undefined) data.append(key, value as string);
     }
 
     let ob = this.newOptionsBuilder();
@@ -95,7 +96,8 @@ export class HttpService {
       let appended = false;
       for (let key in keyValue) {
         let value = keyValue[key];
-        if (value) {
+        //fixme: пофикшен баг, когда значение 0 игнорировалось
+        if (value != undefined) {
           data.append(key, value as string);
           appended = true;
         }

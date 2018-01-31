@@ -14,7 +14,7 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 
 @Bean
-public class LiquibaseManagerImpl implements LiquibaseManager {
+public class  LiquibaseManagerImpl implements LiquibaseManager {
 
   public BeanGetter<DbConfig> dbConfig;
 

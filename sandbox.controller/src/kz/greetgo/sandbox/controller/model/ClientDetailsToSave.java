@@ -2,20 +2,20 @@ package kz.greetgo.sandbox.controller.model;
 
 import java.util.ArrayList;
 import java.util.List;
+import kz.greetgo.sandbox.controller.model.AddressInfo;
 import kz.greetgo.sandbox.controller.model.Gender;
 import kz.greetgo.sandbox.controller.model.Phone;
-import kz.greetgo.sandbox.controller.model.RegistrationAddressInfo;
-import kz.greetgo.sandbox.controller.model.ResidentialAddressInfo;
 
 public class ClientDetailsToSave {
   public Long id;
   public String surname;
-  public String lastname;
+  public String name;
   public String patronymic;
   public Gender gender;
   public String birthdate;
-  public String charmId;
-  public RegistrationAddressInfo registrationAddressInfo;
-  public ResidentialAddressInfo residentialAddressInfo;
+  public int charmId;
+  public AddressInfo registrationAddressInfo;
+  public AddressInfo factualAddressInfo;
   public List<Phone> phones = new ArrayList<>();
+  public List<Phone> deletedPhones = new ArrayList<>();
 }
