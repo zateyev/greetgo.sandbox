@@ -1,43 +1,45 @@
-<client-details-component #client_details_component (onModalCloseOutput)="onModalClose($event)"></client-details-component>
+<client-details-component #client_details_component
+                          (onModalCloseOutput)="onModalClose($event)"></client-details-component>
 
-<form class="form-group form-inline"
-      [attr.disabled]="isModalFormActive"
-      #filter_form="ngForm"
-      (ngSubmit)="onFilterButtonClick(filter_form.value)">
-  <label for="input-filter" class="sr-only">
-    Фильтрация ФИО
-  </label>
-  <div class="input-group input-group-lg col-lg-3">
-    <input id="input-filter"
-           type="text"
-           name="filter"
-           class="form-control client-record-keep-selection"
-           (ngModelChange)="onFilterTextChange($event)"
-           ngModel>
-    <span class="input-group-btn">
-          <button class="btn"
-                  [ngClass]="{'btn-default': filterSuccessState == null,
-                    'btn-success': filterSuccessState == true,
-                    'btn-danger': filterSuccessState == false}"
-                  type="submit">
-            <span class="glyphicon glyphicon-filter"></span>
-          </button>
-      </span>
-  </div>
-</form>
-
+<div class="row">
+  <form class="form-group form-inline col-xs-3"
+        [attr.disabled]="isModalFormActive"
+        #filter_form="ngForm"
+        (ngSubmit)="onFilterButtonClick(filter_form.value)">
+    <div class="input-group input-group-lg filter-input-group">
+      <label for="input-filter" class="sr-only">
+        Фильтрация ФИО
+      </label>
+      <input id="input-filter"
+             type="text"
+             name="filter"
+             class="form-control client-record-keep-selection"
+             (ngModelChange)="onFilterTextChange($event)"
+             ngModel>
+      <span class="input-group-btn">
+            <button class="btn"
+                    [ngClass]="{'btn-default': filterSuccessState == null,
+                      'btn-success': filterSuccessState == true,
+                      'btn-danger': filterSuccessState == false}"
+                    type="submit">
+              <span class="glyphicon glyphicon-filter"></span>
+            </button>
+        </span>
+    </div>
+  </form>
+</div>
 <div class="row">
   <div class="col-lg-11">
     <table class="table table-bordered">
       <thead>
       <tr>
-        <th class="col-xs-3 center-all">
+        <th class="center-all col-xs-3">
           <span class="center-block">ФИО</span>
         </th>
         <th class="col-xs-1 center-all">
           <span class="center-block">Характер</span>
         </th>
-        <th class="col-xs-1 center-all">
+        <th class="center-all col-xs-1">
           <span class="center-block">Возраст</span>
           <div class="btn-group btn-group-sm">
             <button class="btn btn-default glyphicon glyphicon-arrow-up"
@@ -54,7 +56,7 @@
             </button>
           </div>
         </th>
-        <th class="col-xs-2 center-all">
+        <th class="center-all col-xs-2">
           <span class="center-block">Общий остаток счетов</span>
           <div class="btn-group btn-group-sm">
             <button class="btn btn-default glyphicon glyphicon-arrow-up"
@@ -72,7 +74,7 @@
             </button>
           </div>
         </th>
-        <th class="col-xs-2 center-all">
+        <th class="center-all col-xs-2">
           <span class="center-block">Максимальный остаток</span>
           <div class="btn-group btn-group-sm">
             <button class="btn btn-default glyphicon glyphicon-arrow-up"
@@ -89,7 +91,7 @@
             </button>
           </div>
         </th>
-        <th class="col-xs-2 center-all">
+        <th class="center-all col-xs-2">
           <span class="center-block">Минимальный остаток</span>
           <div class="btn-group btn-group-sm">
             <button class="btn btn-default glyphicon glyphicon-arrow-up"
@@ -121,34 +123,63 @@
       </tbody>
     </table>
   </div>
-  <div class="col-sm-1 text-center">
-    <div class="btn-group-vertical btn-group-lg">
-      <button class="btn btn-success btn-operation"
-              (click)="onClientRecordEditButtonClick(client_details_component, false);">
-        +
-      </button>
-      <button class="btn btn-operation client-record-keep-selection"
-              [ngClass]="{'btn-primary': selectedRecordId != null}"
-              (click)="onClientRecordEditButtonClick(client_details_component, true)"
-              [disabled]="selectedRecordId == null">
-        ...
-      </button>
-      <button class="btn btn-operation"
-              [ngClass]="{'btn-danger': selectedRecordId != null}"
-              (click)="onClientRecordRemoveButtonClick()"
-              [disabled]="selectedRecordId == null">
-        -
-      </button>
+  <div class="col-sm-1">
+    <div class="text-center">
+      <div class="btn-group-vertical btn-group-lg">
+        <button class="btn btn-success btn-operation"
+                (click)="onClientRecordEditButtonClick(client_details_component, false);">
+          +
+        </button>
+        <button class="btn btn-operation client-record-keep-selection"
+                [ngClass]="{'btn-primary': selectedRecordId != null}"
+                (click)="onClientRecordEditButtonClick(client_details_component, true)"
+                [disabled]="selectedRecordId == null">
+          ...
+        </button>
+        <button class="btn btn-operation"
+                [ngClass]="{'btn-danger': selectedRecordId != null}"
+                (click)="onClientRecordRemoveButtonClick()"
+                [disabled]="selectedRecordId == null">
+          -
+        </button>
+      </div>
     </div>
   </div>
 </div>
-<div class="text-center">
-  <div class="btn-group btn-group-lg">
-    <button *ngFor="let pageNum of pageNums"
-            class="btn btn-default"
-            [ngClass]="{'active': pageNum == curPageNum + 1}"
-            (click)="onPageNumberButtonClick(pageNum-1)">
-      {{pageNum}}
+<div class="row">
+  <div class="btn-group form-inline col-xs-3">
+    <select class="btn form-control"
+            id="content-type"
+            name="content-type"
+            [ngClass]="{'btn-danger': downloadContentType == fileContentTypeEnum.PDF,
+                    'btn-success': downloadContentType == fileContentTypeEnum.XLSX}"
+            [(ngModel)]="downloadContentType">
+      <option [value]="fileContentTypeEnum.PDF"
+              [selected]="downloadContentType == fileContentTypeEnum.PDF">
+        PDF
+      </option>
+      <option [value]="fileContentTypeEnum.XLSX"
+              [selected]="downloadContentType == fileContentTypeEnum.XLSX">
+        XLSX
+      </option>
+    </select>
+    <button class="btn btn-default"
+            (click)="onClientRecordListDownloadButtonClick()"
+            [disabled]="records.length == 0">
+      Загрузить список
     </button>
   </div>
+  <div class="col-xs-8 col-xs-pull-1">
+    <div class="text-center">
+      <div class="btn-group btn-group-lg">
+        <button *ngFor="let pageNum of pageNums"
+                class="btn btn-default"
+                [ngClass]="{'active': pageNum == curPageNum + 1}"
+                (click)="onPageNumberButtonClick(pageNum-1)">
+          {{pageNum}}
+        </button>
+      </div>
+    </div>
+  </div>
 </div>
+

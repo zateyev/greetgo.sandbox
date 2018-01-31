@@ -24,4 +24,21 @@ public class Util {
   public static Date generateDate() {
     return Date.valueOf(generateLocalDate());
   }
+
+  public static String getFullname(String surname, String name, String patronymic) {
+    StringBuilder b = new StringBuilder();
+
+    if (!surname.isEmpty()) {
+      b.append(surname);
+      b.append(" ");
+    }
+    if (!name.isEmpty()) {
+      b.append(name);
+      b.append(" ");
+    }
+    if (!patronymic.isEmpty())
+      b.append(patronymic);
+
+    return b.toString().trim();
+  }
 }

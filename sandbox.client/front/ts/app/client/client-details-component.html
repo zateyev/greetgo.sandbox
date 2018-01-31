@@ -82,7 +82,7 @@
                    placeholder="Дата рождения"
                    name="birthdate"
                    onkeydown="return false"
-                   [min]="minStringDate"
+                   [max]="todayStringDate"
                    [max]="todayStringDate"
                    [(ngModel)]="clientDetails.birthdate">
           </div>

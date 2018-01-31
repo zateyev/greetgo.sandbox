@@ -104,7 +104,7 @@ public class GetClientList extends GetClientCommon implements ConnectionCallback
     ClientRecord ret = new ClientRecord();
 
     ret.id = rs.getLong("id");
-    ret.fullName = this.getFullname(rs.getString("surname"), rs.getString("name"), rs.getString("patronymic"));
+    ret.fullName = Util.getFullname(rs.getString("surname"), rs.getString("name"), rs.getString("patronymic"));
     ret.charmName = rs.getString("charmName");
     ret.age = rs.getInt("age");
     ret.totalAccountBalance = Util.floatToString(rs.getFloat("totalAccountBalance"));
@@ -112,22 +112,5 @@ public class GetClientList extends GetClientCommon implements ConnectionCallback
     ret.minAccountBalance = Util.floatToString(rs.getFloat("minAccountBalance"));
 
     return ret;
-  }
-
-  private String getFullname(String surname, String name, String patronymic) {
-    StringBuilder b = new StringBuilder();
-
-    if (!surname.isEmpty()) {
-      b.append(surname);
-      b.append(" ");
-    }
-    if (!name.isEmpty()) {
-      b.append(name);
-      b.append(" ");
-    }
-    if (!patronymic.isEmpty())
-      b.append(patronymic);
-
-    return b.toString().trim();
   }
 }

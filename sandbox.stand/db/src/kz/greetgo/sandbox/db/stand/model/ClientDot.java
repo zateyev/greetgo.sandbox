@@ -57,7 +57,7 @@ public class ClientDot {
     ClientRecord ret = new ClientRecord();
 
     ret.id = id;
-    ret.fullName = surname + " " + name + " " + patronymic;
+    ret.fullName = Util.getFullname(surname, name, patronymic);
     ret.age = age;
     ret.charmName = charm.name;
     ret.totalAccountBalance = totalAccountBalance;

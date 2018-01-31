@@ -4,6 +4,7 @@ import {ClientRecord} from "../../model/ClientRecord";
 import {ClientRecordRequest} from "../../model/ClientRecordRequest";
 import {ColumnSortType} from "../../model/ColumnSortType";
 import {ClientDetailsComponent} from "./client-details.component";
+import {FileContentType} from "../../model/FileContentType";
 
 @Component({
   selector: 'client-list-component',
@@ -21,11 +22,15 @@ export class ClientListComponent {
   request: ClientRecordRequest = new ClientRecordRequest();
   filterSuccessState: boolean | null = null;
   isModalFormActive: boolean = false;
+  fileContentTypeEnum = FileContentType;
+  downloadContentType: FileContentType;
 
   constructor(private httpService: HttpService) {
     this.request.columnSortType = ColumnSortType.NONE;
     this.request.sortAscend = false;
     this.request.nameFilter = "";
+
+    this.downloadContentType = FileContentType.PDF;
 
     this.refreshClientRecordList();
   }
@@ -85,6 +90,23 @@ export class ClientListComponent {
   protected onFilterTextChange(event) {
     if (this.filterSuccessState || this.filterSuccessState == false)
       this.filterSuccessState = null;
+  }
+
+  onClientRecordListDownloadButtonClick() {
+    window.open(this.httpService.url("/client/report" +
+      "?clientRecordRequest=" + JSON.stringify(this.request) +
+      "&fileContentType=" + JSON.stringify(this.downloadContentType) +
+      "&token=" + this.httpService.token
+    ));
+    /*
+     this.httpService.get("/client/report", {
+     'clientRecordRequest': JSON.stringify(this.request),
+     'fileContentType': JSON.stringify(FileContentType.PDF)
+     }).toPromise().then(result => {
+     console.log(result);
+     }, error => {
+     console.log(error);
+     });*/
   }
 
   onFilterButtonClick(filterValue: any) {

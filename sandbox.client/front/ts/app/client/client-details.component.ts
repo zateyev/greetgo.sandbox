@@ -18,8 +18,6 @@ export class ClientDetailsComponent {
   isVisible: boolean = false;
   isAnimating: boolean = false;
   clientDetails: ClientDetails;
-
-  //TODO: Static data
   genderEnum = Gender;
   genderList: { [key: string]: string } = {};
   todayStringDate: string;
