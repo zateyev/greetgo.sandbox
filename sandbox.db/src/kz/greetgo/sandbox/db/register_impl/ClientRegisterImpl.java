@@ -13,6 +13,7 @@ import kz.greetgo.sandbox.db.register_impl.jdbc.client_list.GetClientCount;
 import kz.greetgo.sandbox.db.register_impl.jdbc.client_list.GetClientList;
 import kz.greetgo.sandbox.db.util.JdbcSandbox;
 
+import java.io.OutputStream;
 import java.sql.Date;
 import java.util.ArrayList;
 import java.util.List;
@@ -125,5 +126,10 @@ public class ClientRegisterImpl implements ClientRegister {
       for (Phone phone : detailsToSave.phones)
         clientPhoneDao.get().insert(detailsToSave.id, phone.number, phone.type.name());
     }
+  }
+
+  @Override
+  public void streamRecordList(OutputStream outStream, ClientRecordRequest request, FileContentType fileContentType, String personId) throws Exception {
+    throw new UnsupportedOperationException();
   }
 }
