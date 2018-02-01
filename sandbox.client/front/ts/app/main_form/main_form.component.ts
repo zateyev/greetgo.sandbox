@@ -2,7 +2,7 @@ import {Component, EventEmitter, Output} from "@angular/core";
 import {UserInfo} from "../../model/UserInfo";
 import {HttpService} from "../HttpService";
 import {PhoneType} from "../../model/PhoneType";
-
+// test pull request
 @Component({
   selector: 'main-form-component',
   template: `
