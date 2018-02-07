@@ -4,6 +4,7 @@ import kz.greetgo.depinject.core.Bean;
 import kz.greetgo.depinject.core.BeanGetter;
 import kz.greetgo.sandbox.controller.errors.AuthError;
 import kz.greetgo.sandbox.controller.model.AuthInfo;
+import kz.greetgo.sandbox.controller.model.ClientsListInfo;
 import kz.greetgo.sandbox.controller.model.UserInfo;
 import kz.greetgo.sandbox.controller.register.AuthRegister;
 import kz.greetgo.sandbox.controller.register.model.SessionInfo;
@@ -19,6 +20,8 @@ import java.io.FileNotFoundException;
 import java.io.PrintStream;
 import java.io.UnsupportedEncodingException;
 import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.List;
 
 @Bean
 public class AuthRegisterStand implements AuthRegister {
@@ -125,5 +128,38 @@ public class AuthRegisterStand implements AuthRegister {
   @Override
   public UserInfo getUserInfo(String personId) {
     return db.get().personStorage.get(personId).toUserInfo();
+  }
+
+  @Override
+  public ClientsListInfo getClientsList(int page, int pageSize) {
+
+    List<PersonDot> personDots = new ArrayList<>(db.get().personStorage.values());
+    List<UserInfo> clientsList = new ArrayList<>();
+    personDots.forEach(personDot -> clientsList.add(personDot.toUserInfo()));
+
+
+    int offset = page * pageSize;
+    if (offset > clientsList.size()) return null;
+
+    int rightRange = (offset + pageSize) < clientsList.size() ? pageSize + offset : clientsList.size();
+
+    return new ClientsListInfo(clientsList.size(), clientsList.subList(offset, rightRange));
+  }
+
+  @Override
+  public List<UserInfo> filterClientsList(String filtersInput, String  filterBy) {
+
+    List<PersonDot> personDots = new ArrayList<>(db.get().personStorage.values());
+    List<UserInfo> clientsList = new ArrayList<>();
+    personDots.forEach(personDot -> clientsList.add(personDot.toUserInfo()));
+
+    List<UserInfo> filteredClients = new ArrayList<>();
+    for (UserInfo client : clientsList) {
+      if ("Фамилия".equals(filterBy) && client.surname.contains(filtersInput)) filteredClients.add(client);
+      if ("Имя".equals(filterBy) && client.name.contains(filtersInput)) filteredClients.add(client);
+      if ("Отчество".equals(filterBy) && client.patronymic.contains(filtersInput)) filteredClients.add(client);
+    }
+
+    return filteredClients;
   }
 }

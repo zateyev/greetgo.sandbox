@@ -1,0 +1,209 @@
+<div class="container">
+    <p>
+        <button (click)="exit.emit()">Выход</button>
+    </p>
+
+    <h2>Список клиентов</h2>
+
+    <form #f="ngForm" (submit)="filter(f)" novalidate>
+        <div class="form-row">
+            <div class="form-group col-md-3">
+                <label for="inputFilterVal">Фильтрация</label>
+                <input name="filtersInput" ngModel required #first="ngModel" type="text" class="form-control" id="inputFilterVal">
+            </div>
+            <div class="form-group col-md-2">
+                <label for="inputState">Тип</label>
+                <select name="filterBy" ngModel id="inputState" class="form-control">
+                    <option selected>Фамилия</option>
+                    <option>Имя</option>
+                    <option>Отчество</option>
+                </select>
+            </div>
+            <div class="form-group col-md-2">
+                <button type="submit" class="btn btn-primary">Искать</button>
+            </div>
+        </div>
+    </form>
+
+    <label>Показать
+        <select name="entryNum" id="entry-num" class="form-control input-sm">
+            <option value="10">10</option>
+            <option value="25">25</option>
+            <option value="50">50</option>
+            <option value="100">100</option>
+        </select> входов
+    </label>
+
+    <div class="col-md-10">
+    <table class="table table-hover" id="clientsListTable">
+        <thead>
+        <tr>
+            <th>ФИО</th>
+            <th>Характер</th>
+            <th>Возраст</th>
+            <th>Общий остаток счетов</th>
+            <th>Минимальный остаток</th>
+            <th>Максимальный остаток</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr class="clickable-row" *ngFor="let client of clientsList">
+            <td>{{client.surname}} {{client.name}} {{client.patronymic}}</td>
+            <td>{{client.charm}}</td>
+            <td>{{client.age}}</td>
+            <td>{{client.totalBalance}}</td>
+            <td>{{client.minBalance}}</td>
+            <td>{{client.maxBalance}}</td>
+        </tr>
+
+        </tbody>
+    </table>
+    </div>
+    <div class="col-md-2">
+        <p>
+            <button onclick="document.getElementById('id01').style.display='block'" type="button" class="btn btn-link">
+                <span class="glyphicon glyphicon-plus"></span>
+            </button>
+        </p>
+        <p>
+            <button id="edit-button" type="button" class="btn btn-link" disabled>
+                <span class="glyphicon glyphicon-option-horizontal"></span>
+            </button>
+        </p>
+        <p>
+            <button id="new-client-button" type="button" class="btn btn-link" disabled>
+                <span class="glyphicon glyphicon-minus"></span>
+            </button>
+        </p>
+    </div>
+
+    <!--Pagination-->
+    <div class="text-center col-md-10">
+        <!-- items being paged -->
+        <!--<div *ngFor="let item of pagedItems">{{item.name}}</div>-->
+        <!-- pager -->
+        <ul *ngIf="pager.pages && pager.pages.length" class="pagination">
+            <li [ngClass]="{disabled:pager.currentPage === 1}">
+                <a (click)="setPage(1)">Начало</a>
+            </li>
+            <li [ngClass]="{disabled:pager.currentPage === 1}">
+                <a (click)="setPage(pager.currentPage - 1)">Пред.</a>
+            </li>
+            <li *ngFor="let page of pager.pages" [ngClass]="{active:pager.currentPage === page}">
+                <a (click)="setPage(page)">{{page}}</a>
+            </li>
+            <li [ngClass]="{disabled:pager.currentPage === pager.totalPages}">
+                <a (click)="setPage(pager.currentPage + 1)">След.</a>
+            </li>
+            <li [ngClass]="{disabled:pager.currentPage === pager.totalPages}">
+                <a (click)="setPage(pager.totalPages)">Конец</a>
+            </li>
+        </ul>
+    </div>
+
+    <!-- Modal form-->
+    <div id="id01" class="modal">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2 class="modal-title">Добавление нового пользователя</h2>
+                </div>
+                <div class="modal-body">
+                    <form #newClient="ngForm" (submit)="createNewClient(newClient)" id="newData" action="#">
+                        <div class="form-row">
+                            <div class="form-group col-md-4">
+                                <label for="last-name">Фамилия</label>
+                                <input type="text" class="form-control" name="surname" ngModel id="last-name" placeholder="Фамилия">
+                            </div>
+                            <div class="form-group col-md-4">
+                                <label for="first-name">Имя</label>
+                                <input type="text" class="form-control" name="name" ngModel id="first-name" placeholder="Имя">
+                            </div>
+                            <div class="form-group col-md-4">
+                                <label for="patronymic">Отчество</label>
+                                <input type="text" class="form-control" name="patronymic" ngModel id="patronymic" placeholder="Отчество">
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group col-md-4">
+                                <label for="inputCharm">Характер</label>
+                                <select id="inputCharm" name="charm" ngModel class="form-control">
+                                    <option selected>Выбрать...</option>
+                                    <option>Уситчивый</option>
+                                    <option>Агрессивный</option>
+                                </select>
+                            </div>
+                            <div class="form-group col-md-3">
+                                <label for="inputGender">Пол</label>
+                                <select id="inputGender" name="gender" ngModel class="form-control">
+                                    <option selected>муж</option>
+                                    <option>жен</option>
+                                </select>
+                            </div>
+                            <div class="form-group col-md-5">
+                                <label for="inputBirthDate">Дата рождения</label>
+                                <input type="date" name="dateOfBirth" ngModel class="form-control" id="inputBirthDate" max="2018-01-01" min="1900-01-01">
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group col-md-4">
+                                <label for="inputStreet">Улица</label>
+                                <input type="text" name="street1" ngModel class="form-control" id="inputStreet" placeholder="Улица">
+                            </div>
+                            <div class="form-group col-md-4">
+                                <label for="inputBuilding">Дом</label>
+                                <input type="number" name="building1" ngModel min="0" class="form-control" id="inputBuilding" placeholder="Дом">
+                            </div>
+                            <div class="form-group col-md-4">
+                                <label for="inputAprtm">Квартира</label>
+                                <input type="number" name="apartment1" ngModel min="0" class="form-control" id="inputAprtm" placeholder="Квартира">
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group col-md-4">
+                                <label for="inputStreetR">Улица</label>
+                                <input type="text" name="street2" ngModel class="form-control" id="inputStreetR" placeholder="Улица">
+                            </div>
+                            <div class="form-group col-md-4">
+                                <label for="inputBuildingR">Дом</label>
+                                <input type="number" name="building2" ngModel min="0" class="form-control" id="inputBuildingR" placeholder="Дом">
+                            </div>
+                            <div class="form-group col-md-4">
+                                <label for="inputAprtmR">Квартира</label>
+                                <input type="number" name="apartment2" ngModel min="0" class="form-control" id="inputAprtmR" placeholder="Квартира">
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="entry form-group">
+                            <div class=" col-md-4">
+                                <label for="inputPhoneType1">Тип телефона</label>
+                                <select id="inputPhoneType1" name="phoneType1" ngModel class="form-control">
+                                    <option selected>Выбрать...</option>
+                                    <option>Домашний</option>
+                                    <option>Рабочий</option>
+                                    <option>Мобильный</option>
+                                </select>
+                            </div>
+                            <div class="input-group col-md-8">
+                                <label for="inputPhoneNumber1">Номер телефона</label>
+                                <input type="text" class="form-control" name="phoneNumber" ngModel id="inputPhoneNumber1" placeholder="Номер телефона">
+                                <span class="input-group-btn">
+                                    <button class="btn btn-success btn-add" type="button">
+                                        <span class="glyphicon glyphicon-plus"></span>
+                                    </button>
+                                </span>
+                            </div>
+                            </div>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary">Добавить</button>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button onclick="document.getElementById('id01').style.display='none'" type="button" class="btn btn-default" data-dismiss="modal">Отмена</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

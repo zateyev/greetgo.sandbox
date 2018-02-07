@@ -1,10 +1,13 @@
 package kz.greetgo.sandbox.controller.register;
 
 import kz.greetgo.sandbox.controller.model.AuthInfo;
+import kz.greetgo.sandbox.controller.model.ClientsListInfo;
 import kz.greetgo.sandbox.controller.model.UserInfo;
 import kz.greetgo.sandbox.controller.register.model.SessionInfo;
 import kz.greetgo.sandbox.controller.register.model.UserParamName;
 import kz.greetgo.sandbox.controller.security.SecurityError;
+
+import java.util.List;
 
 /**
  * Аутентификация, авторизация и работа с сессией
@@ -70,4 +73,22 @@ public interface AuthRegister {
    * @return детальная информация о пользователе
    */
   UserInfo getUserInfo(String personId);
+
+  /**
+   * Предоставляет список клиентов
+   *
+   * @param page номер запрашиваемой страницы
+   * @param pageSize максимальное количество элементов на странице
+   * @return список клиентов с детальной информацией
+   */
+  ClientsListInfo getClientsList(int page, int pageSize);
+
+  /**
+   * Предоставляет отфильтрованный список клиентов
+   *
+   * @param filtersInput входные данные для фильтрации
+   * @param filterBy фильтровать по (напр. Фамилия, Имя, Отчество)
+   * @return отфильтрованный список клиентов с детальной информацией
+   */
+  List<UserInfo> filterClientsList(String filtersInput, String  filterBy);
 }

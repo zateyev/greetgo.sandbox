@@ -1,2 +1,20 @@
 PERSON; p1; pushkin   111 ; Александр Сергеевич Пушкин
 PERSON; p2; lermontov 111 ; Михаил Юрьевич Лермонтов
+PERSON; p3; ateyev 111 ; Атеев Жасулан Маратович
+PERSON; p4; anisimov 111 ; Анисимов Николай Николаевич
+PERSON; p5; machehina 111 ; Мачехина Любовь Андреевна
+PERSON; p6; shambulova 111 ; Шамбулова Айя
+PERSON; p7; beresnev 111 ; Береснев Алексей
+PERSON; p8; albert 111 ; Эйнштейн Альберт
+PERSON; p9; herz 111 ; Генрих Герц Рудольф
+PERSON; p10; max 111 ; Планк Макс
+PERSON; p11; newton 111 ; Ньютон Исаак
+PERSON; p12; dulatov 111 ; Дулатов Миржакип
+PERSON; p13; seifullin 111 ; Сейфуллин Сакен
+PERSON; p14; zhansugurov 111 ; Жансугуров Ильяс
+PERSON; p15; baitursynov 111 ; Байтурсынов Ахмет
+PERSON; p16; bekbergenov 111 ; Бекбергенов Тимур Нургалиевич
+PERSON; p17; bastaubayev 111 ; Бастаубаев Газиз Сабитович
+PERSON; p18; ggg 111 ; Головкин Геннадий Геннадьевич
+PERSON; p19; amze 111 ; Амзе Даурен
+PERSON; p20; kunanbay 111 ; Кунанбаев Абай Ибрагимович
