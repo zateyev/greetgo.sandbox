@@ -73,22 +73,4 @@ public interface AuthRegister {
    * @return детальная информация о пользователе
    */
   UserInfo getUserInfo(String personId);
-
-  /**
-   * Предоставляет список клиентов
-   *
-   * @param page номер запрашиваемой страницы
-   * @param pageSize максимальное количество элементов на странице
-   * @return список клиентов с детальной информацией
-   */
-  ClientsListInfo getClientsList(int page, int pageSize);
-
-  /**
-   * Предоставляет отфильтрованный список клиентов
-   *
-   * @param filtersInput входные данные для фильтрации
-   * @param filterBy фильтровать по (напр. Фамилия, Имя, Отчество)
-   * @return отфильтрованный список клиентов с детальной информацией
-   */
-  List<UserInfo> filterClientsList(String filtersInput, String  filterBy);
 }

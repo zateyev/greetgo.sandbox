@@ -2,20 +2,12 @@ package kz.greetgo.sandbox.controller.controller;
 
 import kz.greetgo.depinject.core.Bean;
 import kz.greetgo.depinject.core.BeanGetter;
-import kz.greetgo.mvc.annotations.AsIs;
-import kz.greetgo.mvc.annotations.Mapping;
-import kz.greetgo.mvc.annotations.Par;
-import kz.greetgo.mvc.annotations.ParSession;
-import kz.greetgo.mvc.annotations.ToJson;
-import kz.greetgo.sandbox.controller.model.AuthInfo;
-import kz.greetgo.sandbox.controller.model.ClientsListInfo;
-import kz.greetgo.sandbox.controller.model.UserInfo;
+import kz.greetgo.mvc.annotations.*;
+import kz.greetgo.sandbox.controller.model.*;
 import kz.greetgo.sandbox.controller.register.AuthRegister;
+import kz.greetgo.sandbox.controller.register.ClientRegister;
 import kz.greetgo.sandbox.controller.security.NoSecurity;
 import kz.greetgo.sandbox.controller.util.Controller;
-
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * как составлять контроллеры написано
@@ -26,6 +18,7 @@ import java.util.List;
 public class AuthController implements Controller {
 
   public BeanGetter<AuthRegister> authRegister;
+  public BeanGetter<ClientRegister> clientRegister;
 
   @AsIs
   @NoSecurity
@@ -49,13 +42,52 @@ public class AuthController implements Controller {
   @ToJson
   @Mapping("/clientsList")
   public ClientsListInfo clientsList(@Par("page") int page, @Par("pageSize") int pageSize) {
-    return authRegister.get().getClientsList(page, pageSize);
+    return clientRegister.get().getClientsList(page, pageSize);
+  }
+
+  @ToJson
+  @Mapping("/clientsFullInfo")
+  public ClientsFullInfo clientsFullInfo(@Par("clientsId") String clientsId) {
+    return clientRegister.get().getClientsFullInfo(clientsId);
   }
 
   @ToJson
   @Mapping("/filterClientsList")
-  public List<UserInfo> filterClientsList(@Par("filtersInput") String filtersInput,
-                                          @Par("filterBy") String filterBy) {
-    return authRegister.get().filterClientsList(filtersInput, filterBy);
+  public ClientsListInfo filterClientsList(@Par("filtersInput") String filtersInput,
+                                           @Par("filterBy") String filterBy,
+                                           @Par("page") int page,
+                                           @Par("pageSize") int pageSize) {
+    return clientRegister.get().filterClientsList(filtersInput, filterBy, page, pageSize);
+  }
+
+  @ToJson
+  @Mapping("/sortClientsList")
+  public ClientsListInfo sortClientsList(@Par("sortBy") String sortBy,
+                                         @Par("desc") String desc,
+                                         @Par("page") int page,
+                                         @Par("pageSize") int pageSize) {
+    return clientRegister.get().sortClientsList(sortBy, desc, page, pageSize);
+  }
+
+  @ToJson
+  @Mapping("/addNewClient")
+  public boolean addNewClient(@Par("newClient") String newClient) {
+    return clientRegister.get().addNewClient(newClient);
+  }
+
+  @ToJson
+  @Mapping("/updateClient")
+  public ClientsListInfo updateClient(@Par("clientParams") String clientParams,
+                                    @Par("page") int page,
+                                    @Par("pageSize") int pageSize) {
+    return clientRegister.get().updateClient(clientParams, page, pageSize);
+  }
+
+  @ToJson
+  @Mapping("/removeClient")
+  public ClientsListInfo removeClient(@Par("clientsId") String clientsId,
+                                      @Par("page") int page,
+                                      @Par("pageSize") int pageSize) {
+    return clientRegister.get().removeClient(clientsId, page, pageSize);
   }
 }

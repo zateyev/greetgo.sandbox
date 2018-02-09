@@ -4,7 +4,7 @@ import java.util.List;
 
 public class ClientsListInfo {
     private int totalClientsNumber;
-    private List<UserInfo> clients;
+    private List<ClientInfo> clients;
 
     public int getTotalClientsNumber() {
         return totalClientsNumber;
@@ -14,15 +14,15 @@ public class ClientsListInfo {
         this.totalClientsNumber = totalClientsNumber;
     }
 
-    public List<UserInfo> getClients() {
+    public List<ClientInfo> getClients() {
         return clients;
     }
 
-    public void setClients(List<UserInfo> clients) {
+    public void setClients(List<ClientInfo> clients) {
         this.clients = clients;
     }
 
-    public ClientsListInfo(int totalNumber, List<UserInfo> clients) {
+    public ClientsListInfo(int totalNumber, List<ClientInfo> clients) {
         this.totalClientsNumber = totalNumber;
         this.clients = clients;
     }
