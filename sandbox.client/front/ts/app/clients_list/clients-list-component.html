@@ -6,7 +6,7 @@
     <h2>Список клиентов</h2>
 
     <label for="filterForm">Искать</label>
-    <form #f="ngForm" (submit)="filter(f)" id="filterForm" novalidate>
+    <form #f="ngForm" (submit)="filterList(f)" id="filterForm" novalidate>
         <div class="form-row">
             <div class="form-group col-md-3">
                 <input name="filtersInput" ngModel required #first="ngModel" type="text" class="form-control" id="inputFilterVal">
@@ -25,29 +25,21 @@
     </form>
 
     <label class="form-inline">Показать
-        <select name="entryNum" id="entry-num" class="form-control input-sm">
-            <option value="10">10</option>
-            <option value="25">25</option>
-            <option value="50">50</option>
-            <option value="100">100</option>
+        <select [ngModel]="pageSize" name="entryNum" class="form-control input-sm" id="entry-num" (ngModelChange)="setPageSize($event)">
+            <option *ngFor="let i of pageSizeOptions" [ngValue]="i">{{i}}</option>
         </select> входов
     </label>
-
 
     <div class="col-md-10">
     <table class="table table-hover" id="clientsListTable">
         <thead>
         <tr style="white-space:nowrap">
-            <th>ФИО</th>
-            <th>Характер</th>
-            <th id="age">Возраст&nbsp;<span class="glyphicon glyphicon-sort"></span></th>
-            <th id="totalBalance">Общий остаток счетов&nbsp;<span class="glyphicon glyphicon-sort"></span></th>
-            <th id="minBalance">Минимальный остаток&nbsp;<span class="glyphicon glyphicon-sort"></span></th>
-            <th id="maxBalance">Максимальный остаток&nbsp;<span class="glyphicon glyphicon-sort"></span></th>
+            <th *ngFor="let col of columns; let i = index" (click)="orderBy(i)"
+                [ngClass]="{sort1:sortBy === columnsId[i] && !isDescending, sort0:sortBy === columnsId[i] && isDescending}">{{col}}</th>
         </tr>
         </thead>
         <tbody>
-        <tr class="clickable-row" *ngFor="let client of clientsList; let i = index" id="{{i}}">
+        <tr class="clickable-row" *ngFor="let client of clientsList; let i = index" id="{{i}}" [ngClass]="{active:selClientId === i}" (click)="selectClient(i)">
             <td>{{client.surname}} {{client.name}} {{client.patronymic}}</td>
             <td>{{client.charm}}</td>
             <td>{{client.age}}</td>
@@ -61,12 +53,12 @@
     </div>
     <div class="col-md-2">
         <p>
-            <button id="add-client-btn" onclick="document.getElementById('id01').style.display='block'" type="button" class="btn btn-link">
+            <button (click)="onAddBtnClicked()" type="button" class="btn btn-link">
                 <span class="glyphicon glyphicon-plus"></span>
             </button>
         </p>
         <p>
-            <button onclick="document.getElementById('id01').style.display='block'" id="edit-button" type="button" class="btn btn-link" disabled>
+            <button (click)="onEditBtnClicked()" id="edit-button" type="button" class="btn btn-link" disabled>
                 <span class="glyphicon glyphicon-option-horizontal"></span>
             </button>
         </p>
@@ -104,12 +96,13 @@
     <!-- Modal form-->
     <div id="id01" class="modal">
         <div class="modal-dialog">
+            <form #newClient="ngForm" (submit)="modalFormSubmitted(newClient)" id="newData" action="#">
             <div class="modal-content">
                 <div class="modal-header">
                     <h2 class="modal-title">Добавление нового пользователя</h2>
                 </div>
                 <div class="modal-body">
-                    <form #newClient="ngForm" (submit)="modalFormSubmitted(newClient)" id="newData" action="#">
+                    <!--<form #newClient="ngForm" (submit)="modalFormSubmitted(newClient)" id="newData" action="#">-->
                         <div class="form-row">
                             <div class="form-group col-md-4">
                                 <label for="last-name">Фамилия</label>
@@ -127,17 +120,25 @@
                         <div class="form-row">
                             <div class="form-group col-md-4">
                                 <label for="inputCharm">Характер</label>
-                                <select id="inputCharm" name="charm" ngModel class="form-control">
-                                    <option selected>{{selectedClient.charm}}</option>
-                                    <option>Уситчивый</option>
-                                    <option>Агрессивный</option>
+                                <!--<select id="inputCharm" name="charm" ngModel class="form-control">-->
+                                    <!--<option selected>{{selectedClient.charm}}</option>-->
+                                    <!--<option>Уситчивый</option>-->
+                                    <!--<option>Агрессивный</option>-->
+                                <!--</select>-->
+
+                                <select [ngModel]="selectedClient.charm" name="charm" class="form-control" id="inputCharm">
+                                    <option *ngFor="let i of charm" [ngValue]="i">{{i}}</option>
                                 </select>
                             </div>
                             <div class="form-group col-md-3">
                                 <label for="inputGender">Пол</label>
-                                <select id="inputGender" name="gender" ngModel class="form-control">
-                                    <option selected>муж</option>
-                                    <option>жен</option>
+                                <!--<select id="inputGender" name="gender" ngModel class="form-control">-->
+                                    <!--<option selected>муж</option>-->
+                                    <!--<option>жен</option>-->
+                                <!--</select>-->
+
+                                <select [ngModel]="selectedClient.gender" name="gender" class="form-control" id="inputGender">
+                                    <option *ngFor="let i of gender" [ngValue]="i">{{i}}</option>
                                 </select>
                             </div>
                             <div class="form-group col-md-5">
@@ -196,14 +197,29 @@
                             </div>
                         </div>
 
-                        <button type="submit" class="btn btn-primary" id="modal-form-submit">Добавить</button>
-                    </form>
+                        <!--<button type="submit" class="btn btn-primary" id="modal-form-submit">Добавить</button>-->
+                    <!--</form>-->
                 </div>
                 <div class="modal-footer">
-                    <button id="cancel-modal-submit" type="button" class="btn btn-default" data-dismiss="modal">Отмена</button>
+                    <button type="submit" class="btn btn-primary" id="modal-form-submit" (click)="onModalFormAction()">Добавить</button>
+                    <button id="cancel-modal-submit" type="button" class="btn btn-default" data-dismiss="modal" (click)="onModalFormAction()">Отмена</button>
                 </div>
             </div>
+            </form>
         </div>
     </div>
+
+
+    <!--<form [formGroup]="form">-->
+        <!--<div formGroupName="name">-->
+            <!--<input formControlName="first" placeholder="First">-->
+            <!--<input formControlName="last" placeholder="Last">-->
+        <!--</div>-->
+        <!--<input formControlName="email" placeholder="Email">-->
+        <!--<button>Submit</button>-->
+    <!--</form>-->
+
+    <!--<p>Value: {{ form.value | json }}</p>-->
+    <!--<p>Validation status: {{ form.status }}</p>-->
 
 </div>

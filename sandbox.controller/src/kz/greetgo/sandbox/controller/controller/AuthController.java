@@ -71,23 +71,21 @@ public class AuthController implements Controller {
 
   @ToJson
   @Mapping("/addNewClient")
-  public boolean addNewClient(@Par("newClient") String newClient) {
+  public ClientInfo addNewClient(@Par("newClient") String newClient) {
     return clientRegister.get().addNewClient(newClient);
   }
 
   @ToJson
   @Mapping("/updateClient")
-  public ClientsListInfo updateClient(@Par("clientParams") String clientParams,
-                                    @Par("page") int page,
-                                    @Par("pageSize") int pageSize) {
-    return clientRegister.get().updateClient(clientParams, page, pageSize);
+  public ClientInfo updateClient(@Par("clientParams") String clientParams) {
+    return clientRegister.get().updateClient(clientParams);
   }
 
   @ToJson
   @Mapping("/removeClient")
-  public ClientsListInfo removeClient(@Par("clientsId") String clientsId,
+  public void removeClient(@Par("clientsId") String clientsId,
                                       @Par("page") int page,
                                       @Par("pageSize") int pageSize) {
-    return clientRegister.get().removeClient(clientsId, page, pageSize);
+    clientRegister.get().removeClient(clientsId, page, pageSize);
   }
 }

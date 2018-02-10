@@ -6,6 +6,7 @@ import kz.greetgo.sandbox.controller.model.ClientsFullInfo;
 import kz.greetgo.sandbox.controller.model.PhoneNumber;
 
 import java.time.LocalDate;
+import java.time.Period;
 import java.util.List;
 
 public class ClientDot {
@@ -23,14 +24,13 @@ public class ClientDot {
     private int minBalance;
     private int maxBalance;
 
-    public ClientDot(String id, String surname, String name, String patronymic, String charm, String gender, LocalDate dateOfBirth, Address addressF, Address addressR, List<PhoneNumber> phoneNumbers) {
+    public ClientDot(String id, String surname, String name, String patronymic, String charm, String gender, Address addressF, Address addressR, List<PhoneNumber> phoneNumbers) {
         this.id = id;
         this.surname = surname;
         this.name = name;
         this.patronymic = patronymic;
         this.charm = charm;
         this.gender = gender;
-        this.dateOfBirth = dateOfBirth;
         this.addressF = addressF;
         this.addressR = addressR;
         this.phoneNumbers = phoneNumbers;
@@ -151,6 +151,8 @@ public class ClientDot {
         ret.setName(name);
         ret.setPatronymic(patronymic);
         ret.setCharm(charm);
+        if (dateOfBirth != null)
+            ret.setAge(Period.between(dateOfBirth, LocalDate.now()).getYears());
         ret.setTotalBalance(totalBalance);
         ret.setMinBalance(minBalance);
         ret.setMaxBalance(maxBalance);
@@ -167,8 +169,6 @@ public class ClientDot {
         ret.setGender(gender);
         ret.setDateOfBirth(dateOfBirth);
 
-//        ret.setAddressF(addressF.getStreet(), addressF.getBuilding(), addressF.getApartment());
-//        ret.setAddressR(addressR.getStreet(), addressR.getBuilding(), addressR.getApartment());
         ret.setAddressF(addressF);
         ret.setAddressR(addressR);
 

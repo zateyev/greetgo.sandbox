@@ -1,10 +1,10 @@
-import {Component, EventEmitter, Input, OnInit, Output} from "@angular/core";
+import {Component, EventEmitter, Inject, Input, OnInit, Output} from "@angular/core";
 import {UserInfo} from "../../model/UserInfo";
 import {HttpService} from "../HttpService";
 import {PagerService} from "../PagerService";
 import * as $ from 'jquery';
 import 'datatables.net'
-import {NgForm} from "@angular/forms";
+import {FormBuilder, FormGroup, NgForm, Validators} from "@angular/forms";
 import {ClientDot} from "../../model/ClientDot";
 import {PhoneNumber} from "../../model/PhoneNumber";
 import {PhoneType} from "../../model/PhoneType";
@@ -18,13 +18,10 @@ export class ClientsListComponent {
     @Output() exit = new EventEmitter<void>();
 
     phoneNumbers: Array<PhoneNumber> = [new PhoneNumber()];
+    // phoneNumbers = [new PhoneNumber()];
 
     clientsList: Array<UserInfo> | null = null;
     selectedClient: ClientDot = new ClientDot();
-    ageDesc: boolean = false;
-    tBDesc: boolean = false;
-    minBDesc: boolean = false;
-    maxBDesc: boolean = false;
     editMode: boolean = false;
     loadUserInfoError: string | null;
     currentPage: number = 0;
@@ -33,6 +30,16 @@ export class ClientsListComponent {
     totalClientsNumber: number = 0;
     pagedItems: any[];
     pager: any = {};
+    filterParams: NgForm;
+    listMode: string = "";
+    sortBy: string = "";
+    isDescending: boolean = false;
+
+    pageSizeOptions = [10, 25, 50];
+    columns = ['ФИО', 'Характер', 'Возраст', 'Общий остаток счетов', 'Минимальный остаток', 'Максимальный остаток'];
+    columnsId = ['fio', 'charm', 'age', 'totalBalance', 'minBalance', 'maxBalance'];
+    gender = ["муж", "жен"];
+    charm = ["Уситчивый", "Агрессивный", "Общительный"];
 
     fio = 'ФИО';
 
@@ -42,10 +49,51 @@ export class ClientsListComponent {
         return keys.slice(keys.length / 5);
     }
 
-    constructor(private httpService: HttpService, private pagerService: PagerService) {}
+
+
+    // form: FormGroup;
+    constructor(/*@Inject(FormBuilder) fb: FormBuilder, */private httpService: HttpService, private pagerService: PagerService) {
+        // this.form = fb.group({
+        //     name: fb.group({
+        //         first: ['Nancydf', Validators.minLength(2)],
+        //         last: 'Drew',
+        //     }),
+        //     email: '',
+        // });
+    }
+
+    orderBy(colId: number) {
+        if (colId > 1) {
+            if (this.sortBy != this.columnsId[colId]) {
+                this.sortBy = this.columnsId[colId];
+                this.isDescending = false;
+            }
+            this.sort(this.sortBy, this.isDescending);
+            if (this.isDescending) {
+                $(this).find('.glyphicon').removeClass('glyphicon-arrow-down').removeClass('glyphicon-sort').addClass('glyphicon-arrow-up');
+            } else {
+                $(this).find('.glyphicon').removeClass('glyphicon-arrow-up').removeClass('glyphicon-sort').addClass('glyphicon-arrow-down');
+            }
+            this.isDescending = !this.isDescending;
+        }
+    }
 
     addPhoneNumber() {
         this.phoneNumbers.push(new PhoneNumber());
+    }
+
+    setPageSize(size: number) {
+        this.pageSize = size;
+        console.log(size);
+
+        this.setPage(1);
+    }
+
+    selectClient(id: number) {
+        this.selClientId = id;
+        $('#edit-button').prop("disabled", false);
+        $('#btn-remove').prop("disabled", false);
+        console.log(id);
     }
 
     removePhoneNumber(index: number) {
@@ -61,10 +109,17 @@ export class ClientsListComponent {
         // get pager object from service
         this.pager = this.pagerService.getPager(this.totalClientsNumber, page, this.pageSize);
         // get current page of items
-        this.pagedItems = this.clientsList.slice(this.pager.startIndex, this.pager.endIndex + 1);
+        // this.pagedItems = this.clientsList.slice(this.pager.startIndex, this.pager.endIndex + 1);
 
         this.currentPage = page - 1;
-        this.loadClientsList();
+
+        if (this.listMode == "whole") {
+            this.loadClientsList();
+        } else if (this.listMode == "filtered") {
+            this.filterList(this.filterParams);
+        } else if (this.listMode == "sorted") {
+            this.sort(this.sortBy, !this.isDescending);
+        }
     }
 
     loadClientsList() {
@@ -76,6 +131,10 @@ export class ClientsListComponent {
         }).toPromise().then(result => {
             this.clientsList = this.parseClientsList(result.json().clients);
             this.totalClientsNumber = result.json().totalClientsNumber;
+            if (this.listMode != "whole") {
+                this.listMode = "whole";
+                this.setPage(1);
+            }
         }, error => {
             console.log("ClientsList");
             console.log(error);
@@ -90,9 +149,9 @@ export class ClientsListComponent {
         }).toPromise().then(result => {
             console.log(result.json());
             this.selectedClient = ClientDot.copy(result.json());
-            this.phoneNumbers = this.parsePhoneNumbers(result.json().phoneNumbers);
-            console.log(this.phoneNumbers[0].number);
-            // this.totalClientsNumber = result.json().totalClientsNumber;
+            if (result.json().phoneNumbers && result.json().phoneNumbers.length > 0) {
+                this.phoneNumbers = this.parsePhoneNumbers(result.json().phoneNumbers);
+            }
         }, error => {
             console.log("clientsFullInfo");
             console.log(error);
@@ -100,22 +159,30 @@ export class ClientsListComponent {
         });
     }
 
-    filter(f: NgForm) {
+    filterList(f: NgForm) {
         console.log(f.value);
-        this.httpService.post("/auth/filterClientsList", Object.assign({}, f.value, {
+        this.filterParams = f;
+
+
+        this.httpService.post("/auth/filterClientsList", Object.assign({}, this.filterParams.value, {
             page: this.currentPage,
             pageSize: this.pageSize
         })).toPromise().then(result => {
-            console.log(Object.assign({}, f.value, {
+            console.log(Object.assign({}, this.filterParams.value, {
                 page: this.currentPage,
                 pageSize: this.pageSize
             }));
             this.clientsList = this.parseClientsList(result.json().clients);
             this.totalClientsNumber = result.json().totalClientsNumber;
+            if (this.listMode != "filtered") {
+                this.listMode = "filtered";
+                this.setPage(1);
+            }
         }, error => {
             console.log("filterClientsList");
             console.log(error);
         });
+
     }
 
     sort(sortBy: string, desc: boolean) {
@@ -127,6 +194,7 @@ export class ClientsListComponent {
         }).toPromise().then(result => {
             this.clientsList = this.parseClientsList(result.json().clients);
             this.totalClientsNumber = result.json().totalClientsNumber;
+            this.listMode = "sorted";
         }, error => {
             console.log("sortClientsList");
             console.log(error);
@@ -147,8 +215,11 @@ export class ClientsListComponent {
         this.httpService.post("/auth/addNewClient", {
             newClient: JSON.stringify(newClient.value)
         }).toPromise().then(result => {
-            console.log(result);
-            // TODO
+            console.log(result.json());
+            let userInfo = UserInfo.copy(result.json());
+            this.clientsList.push(userInfo);
+            this.totalClientsNumber++;
+            this.setPage(this.currentPage + 1);
         }, error => {
             console.log("addNewClient");
             console.log(error);
@@ -158,16 +229,16 @@ export class ClientsListComponent {
     updateClient(clientParams: NgForm) {
         let params = Object.assign({}, clientParams.value, {
             // id: this.selectedClientsId,
-            id: this.clientsList[this.selClientId].id,
-            page: this.currentPage,
-            pageSize: this.pageSize
+            id: this.clientsList[this.selClientId].id
         });
-        // console.log(JSON.stringify(params));
+        console.log(JSON.stringify(params));
         this.httpService.post("/auth/updateClient", {
             clientParams: JSON.stringify(params)
         }).toPromise().then(result => {
-            this.clientsList = this.parseClientsList(result.json().clients);
+            // this.clientsList = this.parseClientsList(result.json().clients);
+            this.clientsList[this.selClientId] = UserInfo.copy(result.json());
             this.totalClientsNumber = result.json().totalClientsNumber;
+            // this.setPage(this.currentPage + 1);
             // this.loadClientsList();
         }, error => {
             console.log("updateClient");
@@ -177,14 +248,17 @@ export class ClientsListComponent {
 
     removeClient() {
         this.httpService.post("/auth/removeClient", {
-            // clientsId: this.selectedClientsId,
-            id: this.clientsList[this.selClientId].id,
+            clientsId: this.clientsList[this.selClientId].id,
             page: this.currentPage,
             pageSize: this.pageSize
         }).toPromise().then(result => {
             console.log(result.json());
-            this.clientsList = this.parseClientsList(result.json().clients);
-            this.totalClientsNumber = result.json().totalClientsNumber;
+            // this.clientsList = this.parseClientsList(result.json().clients);
+            // this.totalClientsNumber = result.json().totalClientsNumber;
+
+            this.clientsList.splice(this.selClientId, 1);
+            this.totalClientsNumber--;
+            this.setPage(this.currentPage + 1);
         }, error => {
             console.log("removeClient");
             console.log(error);
@@ -213,106 +287,38 @@ export class ClientsListComponent {
         return numbers;
     }
 
+    onEditBtnClicked() {
+        $('#id01').show();
+        this.editMode = true;
+        this.loadClientsFullInfo();
+    }
+
+    onAddBtnClicked() {
+        $('#id01').show();
+        this.editMode = false;
+    }
+
+    onModalFormAction() {
+        $('#id01').hide();
+        this.selectedClient = new ClientDot();
+    }
+
     public ngOnInit()
     {
-        let self = this;
+        // let self = this;
 
-        this.httpService.post("/auth/clientsList", {
-            page: this.currentPage,
-            pageSize: this.pageSize
-        }).toPromise().then(result => {
-            this.clientsList = this.parseClientsList(result.json().clients);
-            this.totalClientsNumber = result.json().totalClientsNumber;
-            console.log(result.json().totalClientsNumber);
-            this.setPage(1);
+        this.loadClientsList();
 
-        }, error => {
-            console.log("ClientsList");
-            console.log(error);
-            this.loadUserInfoError = error;
-            this.clientsList = null;
-        });
-
-        $('#clientsListTable').on('click', '.clickable-row', function(event) {
-            self.selClientId = parseInt($(this).attr('id'));
-
-            console.log(self.selClientId);
-
-            $(this).addClass('active').siblings().removeClass('active');
-            $('#edit-button').prop("disabled", false);
-            $('#btn-remove').prop("disabled", false);
-            // self.loadClientsFullInfo();
-        });
-
-        $('#edit-button').on('click', function (event) {
-            self.editMode = true;
-            self.loadClientsFullInfo();
-        });
-
-        $('#add-client-btn').on('click', function (event) {
-            self.editMode = false;
-        });
-
-        $('#age').on('click', function(event) {
-            self.sort("age", self.ageDesc);
-            if (self.ageDesc) {
-                $(this).find('.glyphicon').removeClass('glyphicon-arrow-down').removeClass('glyphicon-sort').addClass('glyphicon-arrow-up');
-            } else {
-                $(this).find('.glyphicon').removeClass('glyphicon-arrow-up').removeClass('glyphicon-sort').addClass('glyphicon-arrow-down');
-            }
-            self.ageDesc = !self.ageDesc;
-        });
-
-        $('#totalBalance').on('click', function(event) {
-            self.sort("totalBalance", self.tBDesc);
-            if (self.tBDesc) {
-                $(this).find('.glyphicon').removeClass('glyphicon-arrow-down').removeClass('glyphicon-sort').addClass('glyphicon-arrow-up');
-            } else {
-                $(this).find('.glyphicon').removeClass('glyphicon-arrow-up').removeClass('glyphicon-sort').addClass('glyphicon-arrow-down');
-            }
-            self.tBDesc = !self.tBDesc;
-        });
-
-        $('#minBalance').on('click', function(event) {
-            self.sort("minBalance", self.minBDesc);
-            if (self.minBDesc) {
-                $(this).find('.glyphicon').removeClass('glyphicon-arrow-down').removeClass('glyphicon-sort').addClass('glyphicon-arrow-up');
-            } else {
-                $(this).find('.glyphicon').removeClass('glyphicon-arrow-up').removeClass('glyphicon-sort').addClass('glyphicon-arrow-down');
-            }
-            self.minBDesc = !self.minBDesc;
-        });
-
-        $('#maxBalance').on('click', function(event) {
-            self.sort("maxBalance", self.maxBDesc);
-            if (self.maxBDesc) {
-                $(this).find('.glyphicon').removeClass('glyphicon-arrow-down').removeClass('glyphicon-sort').addClass('glyphicon-arrow-up');
-            } else {
-                $(this).find('.glyphicon').removeClass('glyphicon-arrow-up').removeClass('glyphicon-sort').addClass('glyphicon-arrow-down');
-            }
-            self.maxBDesc = !self.maxBDesc;
-        });
-
-        $( "#entry-num" ).on('change', function() {
-            self.pageSize = parseInt($(this).val().toString());
-            if (!self.ageDesc) {
-                $(this).find('.glyphicon').removeClass('glyphicon-sort-by-order').addClass('glyphicon-sort-by-order-alt');
-            } else {
-                $(this).find('.glyphicon').removeClass('glyphicon-sort-by-order-alt').addClass('glyphicon-sort-by-order');
-            }
-            self.loadClientsList();
-        });
-
-        $('#modal-form-submit').on('click', function (event) {
-            $('#id01').hide();
-            // location.reload();
-            self.selectedClient = new ClientDot();
-        });
-
-        $('#cancel-modal-submit').on('click', function (event) {
-            $('#id01').hide();
-            // location.reload();
-            self.selectedClient = new ClientDot();
-        });
+        // $('#modal-form-submit').on('click', function (event) {
+        //     $('#id01').hide();
+        //     // location.reload();
+        //     self.selectedClient = new ClientDot();
+        // });
+        //
+        // $('#cancel-modal-submit').on('click', function (event) {
+        //     $('#id01').hide();
+        //     // location.reload();
+        //     self.selectedClient = new ClientDot();
+        // });
     }
 }

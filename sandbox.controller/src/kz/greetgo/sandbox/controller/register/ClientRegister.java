@@ -1,5 +1,6 @@
 package kz.greetgo.sandbox.controller.register;
 
+import kz.greetgo.sandbox.controller.model.ClientInfo;
 import kz.greetgo.sandbox.controller.model.ClientsFullInfo;
 import kz.greetgo.sandbox.controller.model.ClientsListInfo;
 
@@ -43,17 +44,16 @@ public interface ClientRegister {
      * Добавляет нового пользователя
      *
      * @param newClientsInfo данные нового пользователя в виде Json
-     * @return boolean об успехе добавления
+     * @return возвращает добавленный клиент с присвоенным id
      */
-    boolean addNewClient(String newClientsInfo);
+    ClientInfo addNewClient(String newClientsInfo);
 
     /**
      *  Удаляет клиента
      *
      * @param clientsId id клиента, которого надо удалить
-     * @return
      */
-    ClientsListInfo removeClient(String clientsId, int page, int pageSize);
+    void removeClient(String clientsId, int page, int pageSize);
 
-    ClientsListInfo updateClient(String clientParams, int page, int pageSize);
+    ClientInfo updateClient(String clientParams);
 }
