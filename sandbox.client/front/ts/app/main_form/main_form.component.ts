@@ -2,7 +2,7 @@ import {Component, EventEmitter, Output} from "@angular/core";
 import {UserInfo} from "../../model/UserInfo";
 import {HttpService} from "../HttpService";
 import {PhoneType} from "../../model/PhoneType";
-// test pull request
+
 @Component({
   selector: 'main-form-component',
   template: `
@@ -19,6 +19,9 @@ import {PhoneType} from "../../model/PhoneType";
           {{loadUserInfoError}}
         </div>
       </div>
+
+      <button type="button" (click)="loadClientsListClicked()">Список клиентов</button>
+        
       <div *ngIf="userInfo">
 
         <table>
