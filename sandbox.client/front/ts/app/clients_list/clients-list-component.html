@@ -71,9 +71,6 @@
 
     <!--Pagination-->
     <div class="text-center col-md-10">
-        <!-- items being paged -->
-        <!--<div *ngFor="let item of pagedItems">{{item.name}}</div>-->
-        <!-- pager -->
         <ul *ngIf="pager.pages && pager.pages.length" class="pagination">
             <li [ngClass]="{disabled:pager.currentPage === 1}">
                 <a (click)="setPage(1)">Начало</a>
@@ -99,10 +96,9 @@
             <form #newClient="ngForm" (submit)="modalFormSubmitted(newClient)" id="newData" action="#">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h2 class="modal-title">Добавление нового пользователя</h2>
+                    <h2 class="modal-title">{{formsTitle}}</h2>
                 </div>
                 <div class="modal-body">
-                    <!--<form #newClient="ngForm" (submit)="modalFormSubmitted(newClient)" id="newData" action="#">-->
                         <div class="form-row">
                             <div class="form-group col-md-4">
                                 <label for="last-name">Фамилия</label>
@@ -120,25 +116,14 @@
                         <div class="form-row">
                             <div class="form-group col-md-4">
                                 <label for="inputCharm">Характер</label>
-                                <!--<select id="inputCharm" name="charm" ngModel class="form-control">-->
-                                    <!--<option selected>{{selectedClient.charm}}</option>-->
-                                    <!--<option>Уситчивый</option>-->
-                                    <!--<option>Агрессивный</option>-->
-                                <!--</select>-->
-
-                                <select [ngModel]="selectedClient.charm" name="charm" class="form-control" id="inputCharm">
-                                    <option *ngFor="let i of charm" [ngValue]="i">{{i}}</option>
+                                <select ngModel name="charm" class="form-control" id="inputCharm">
+                                    <option *ngFor="let i of charm" [ngValue]="i" [selected]="i === selectedClient.charm">{{i}}</option>
                                 </select>
                             </div>
                             <div class="form-group col-md-3">
                                 <label for="inputGender">Пол</label>
-                                <!--<select id="inputGender" name="gender" ngModel class="form-control">-->
-                                    <!--<option selected>муж</option>-->
-                                    <!--<option>жен</option>-->
-                                <!--</select>-->
-
-                                <select [ngModel]="selectedClient.gender" name="gender" class="form-control" id="inputGender">
-                                    <option *ngFor="let i of gender" [ngValue]="i">{{i}}</option>
+                                <select ngModel name="gender" class="form-control" id="inputGender">
+                                    <option *ngFor="let i of gender" [ngValue]="i" [selected]="i === selectedClient.gender">{{i}}</option>
                                 </select>
                             </div>
                             <div class="form-group col-md-5">
@@ -180,7 +165,7 @@
                             <div class="entry form-group">
                                 <div class=" col-md-4">
                                     <select [ngModel]="phoneNumber.phoneType" name="phoneType{{i}}" class="form-control">
-                                        <option [ngValue]="i" *ngFor="let i of keys()">{{phoneType[i]}}</option>
+                                        <option [ngValue]="i" *ngFor="let i of phoneTypeKeys()">{{phoneType[i]}}</option>
                                     </select>
                                 </div>
                                 <div class="input-group col-md-8">
@@ -196,30 +181,13 @@
                                 </div>
                             </div>
                         </div>
-
-                        <!--<button type="submit" class="btn btn-primary" id="modal-form-submit">Добавить</button>-->
-                    <!--</form>-->
                 </div>
                 <div class="modal-footer">
-                    <button type="submit" class="btn btn-primary" id="modal-form-submit" (click)="onModalFormAction()">Добавить</button>
+                    <button type="submit" class="btn btn-primary" id="modal-form-submit" (click)="onModalFormAction()">{{formsBtn}}</button>
                     <button id="cancel-modal-submit" type="button" class="btn btn-default" data-dismiss="modal" (click)="onModalFormAction()">Отмена</button>
                 </div>
             </div>
             </form>
         </div>
     </div>
-
-
-    <!--<form [formGroup]="form">-->
-        <!--<div formGroupName="name">-->
-            <!--<input formControlName="first" placeholder="First">-->
-            <!--<input formControlName="last" placeholder="Last">-->
-        <!--</div>-->
-        <!--<input formControlName="email" placeholder="Email">-->
-        <!--<button>Submit</button>-->
-    <!--</form>-->
-
-    <!--<p>Value: {{ form.value | json }}</p>-->
-    <!--<p>Validation status: {{ form.status }}</p>-->
-
 </div>

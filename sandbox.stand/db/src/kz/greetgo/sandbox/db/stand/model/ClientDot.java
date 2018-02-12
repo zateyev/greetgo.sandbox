@@ -24,13 +24,11 @@ public class ClientDot {
     private int minBalance;
     private int maxBalance;
 
-    public ClientDot(String id, String surname, String name, String patronymic, String charm, String gender, Address addressF, Address addressR, List<PhoneNumber> phoneNumbers) {
+    public ClientDot(String id, String surname, String name, String patronymic, Address addressF, Address addressR, List<PhoneNumber> phoneNumbers) {
         this.id = id;
         this.surname = surname;
         this.name = name;
         this.patronymic = patronymic;
-        this.charm = charm;
-        this.gender = gender;
         this.addressF = addressF;
         this.addressR = addressR;
         this.phoneNumbers = phoneNumbers;

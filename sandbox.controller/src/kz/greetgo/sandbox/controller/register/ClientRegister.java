@@ -6,11 +6,11 @@ import kz.greetgo.sandbox.controller.model.ClientsListInfo;
 
 public interface ClientRegister {
     /**
-     * Предоставляет список клиентов
+     * Предоставляет список клиентов и общее количество клиентов в БД
      *
      * @param page номер запрашиваемой страницы
      * @param pageSize максимальное количество элементов на странице
-     * @return список клиентов с детальной информацией
+     * @return список клиентов с детальной информацией и общее количество клиентов в БД
      */
     ClientsListInfo getClientsList(int page, int pageSize);
 
@@ -26,17 +26,17 @@ public interface ClientRegister {
      * Предоставляет отфильтрованный список клиентов
      *
      * @param filtersInput входные данные для фильтрации
-     * @param filterBy фильтровать по (напр. Фамилия, Имя, Отчество)
-     * @return отфильтрованный список клиентов с детальной информацией
+     * @param filterBy поле по которой нужно фильтровать
+     * @return отфильтрованный список клиентов с детальной информацией и общее количество клиентов в БД
      */
     ClientsListInfo filterClientsList(String filtersInput, String  filterBy, int page, int pageSize);
 
     /**
      * Сортирует список клиентов
      *
-     * @param sortBy параметр по которому нужно сортировать
+     * @param sortBy поле по которой нужно сортировать
      * @param desc если true, то сортировать по убыванию
-     * @return отсортированный список клиентов с детальной информацией
+     * @return отсортированный список клиентов с детальной информацией и общее количество клиентов в БД
      */
     ClientsListInfo sortClientsList(String sortBy, String desc, int page, int pageSize);
 
@@ -55,5 +55,10 @@ public interface ClientRegister {
      */
     void removeClient(String clientsId, int page, int pageSize);
 
+    /**
+     *  Обновляет данные клиента
+     *
+     * @param clientParams новые данные клиента
+     */
     ClientInfo updateClient(String clientParams);
 }

@@ -26,14 +26,6 @@ public class ClientRegisterStand implements ClientRegister {
         List<ClientInfo> clientsList = new ArrayList<>();
         clientDots.forEach(clientDot -> clientsList.add(clientDot.toClientInfo()));
 
-
-//    int offset = page * pageSize;
-//    if (offset > clientsList.size()) return null;
-//
-//    int rightRange = (offset + pageSize) < clientsList.size() ? pageSize + offset : clientsList.size();
-//
-//    return new ClientsListInfo(clientsList.size(), clientsList.subList(offset, rightRange));
-
         int totalSize = clientsList.size();
         PageUtils.cutPage(clientsList, page*pageSize, pageSize);
 
@@ -120,12 +112,18 @@ public class ClientRegisterStand implements ClientRegister {
                 jsonObject.getString("surname"),
                 jsonObject.getString("name"),
                 jsonObject.getString("patronymic"),
-                jsonObject.getString("charm"),
-                jsonObject.getString("gender"),
                 addressF,
                 addressR,
                 phoneNumbers
         );
+
+        if (jsonObject.has("charm")) {
+            newClient.setCharm(jsonObject.getString("charm"));
+        }
+
+        if (jsonObject.has("gender")) {
+            newClient.setGender(jsonObject.getString("gender"));
+        }
 
         if (!jsonObject.getString("dateOfBirth").isEmpty()) {
             LocalDate dateOfBirth = LocalDate.parse(jsonObject.getString("dateOfBirth"));
@@ -140,24 +138,11 @@ public class ClientRegisterStand implements ClientRegister {
     @Override
     public void removeClient(String clientsId, int page, int pageSize) {
         clientD.get().clientStorage.remove(clientsId);
-
-//        List<ClientDot> clientDots = new ArrayList<>(clientD.get().clientStorage.values());
-//        List<ClientInfo> clientInfos = new ArrayList<>();
-//        clientDots.forEach(clientDot -> clientInfos.add(clientDot.toClientInfo()));
-//
-//        int totalSize = clientInfos.size();
-//        PageUtils.cutPage(clientInfos, page*pageSize, pageSize);
-//
-//        return new ClientsListInfo(totalSize, clientInfos);
-
-//        return true;
     }
 
     @Override
     public ClientInfo updateClient(String clientParams) {
-//        System.out.println(clientParams);
         JSONObject jsonObject = new JSONObject(clientParams);
-
 
         ClientDot clientDot = clientD.get().clientStorage.get(jsonObject.getString("id"));
 
@@ -173,6 +158,13 @@ public class ClientRegisterStand implements ClientRegister {
         if (!jsonObject.getString("dateOfBirth").isEmpty()) {
             LocalDate dateOfBirth = LocalDate.parse(jsonObject.getString("dateOfBirth"));
             clientDot.setDateOfBirth(dateOfBirth);
+        }
+        if (jsonObject.has("charm") && !jsonObject.getString("charm").isEmpty()) {
+            clientDot.setCharm(jsonObject.getString("charm"));
+        }
+
+        if (jsonObject.has("gender") && !jsonObject.getString("gender").isEmpty()) {
+            clientDot.setGender(jsonObject.getString("gender"));
         }
         if (!jsonObject.getString("streetF").isEmpty() &&
                 !jsonObject.getString("buildingF").isEmpty() &&
@@ -194,7 +186,7 @@ public class ClientRegisterStand implements ClientRegister {
                     jsonObject.getString("buildingR"),
                     jsonObject.getString("apartmentR")
             );
-            clientDot.setAddressF(addressR);
+            clientDot.setAddressR(addressR);
         }
         List<PhoneNumber> phoneNumbers = new ArrayList<>();
         int i = 0;
@@ -206,18 +198,7 @@ public class ClientRegisterStand implements ClientRegister {
         }
         clientDot.setPhoneNumbers(phoneNumbers);
 
-
         clientD.get().clientStorage.put(jsonObject.getString("id"), clientDot);
-
-//        List<ClientDot> clientDots = new ArrayList<>(clientD.get().clientStorage.values());
-//        List<ClientInfo> clientInfos = new ArrayList<>();
-//        clientDots.forEach(client -> clientInfos.add(client.toClientInfo()));
-//
-//        int totalSize = clientInfos.size();
-//
-//        page = jsonObject.getInt("page");
-//        pageSize = jsonObject.getInt("pageSize");
-//        PageUtils.cutPage(clientInfos, page*pageSize, pageSize);
 
         return clientDot.toClientInfo();
     }

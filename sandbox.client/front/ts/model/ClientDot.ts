@@ -1,5 +1,4 @@
 
-import {UserInfo} from "./UserInfo";
 import {PhoneNumber} from "./PhoneNumber";
 import {Address} from "./Address";
 
@@ -52,15 +51,6 @@ export class ClientDot {
             addressR.apartment = o.addressR.apartment;
             this.addressR = addressR;
         }
-
-        //
-        // this.phoneNumbers = [];
-        // for (let phoneNumber of o.phoneNumbers) {
-        //     let phone = new PhoneNumber();
-        //     phone.phoneType = phoneNumber.phoneType;
-        //     phone.number = phoneNumber.number;
-        //     this.phoneNumbers.push(phone);
-        // }
 
         return this;
     }

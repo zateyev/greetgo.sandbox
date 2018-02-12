@@ -4,7 +4,7 @@ import {HttpService} from "../HttpService";
 import {PagerService} from "../PagerService";
 import * as $ from 'jquery';
 import 'datatables.net'
-import {FormBuilder, FormGroup, NgForm, Validators} from "@angular/forms";
+import {NgForm, Validators} from "@angular/forms";
 import {ClientDot} from "../../model/ClientDot";
 import {PhoneNumber} from "../../model/PhoneNumber";
 import {PhoneType} from "../../model/PhoneType";
@@ -17,9 +17,7 @@ import {PhoneType} from "../../model/PhoneType";
 export class ClientsListComponent {
     @Output() exit = new EventEmitter<void>();
 
-    phoneNumbers: Array<PhoneNumber> = [new PhoneNumber()];
-    // phoneNumbers = [new PhoneNumber()];
-
+    phoneNumbers: any = [];
     clientsList: Array<UserInfo> | null = null;
     selectedClient: ClientDot = new ClientDot();
     editMode: boolean = false;
@@ -28,7 +26,6 @@ export class ClientsListComponent {
     pageSize: number = 10;
     selClientId: number;
     totalClientsNumber: number = 0;
-    pagedItems: any[];
     pager: any = {};
     filterParams: NgForm;
     listMode: string = "";
@@ -41,26 +38,16 @@ export class ClientsListComponent {
     gender = ["муж", "жен"];
     charm = ["Уситчивый", "Агрессивный", "Общительный"];
 
-    fio = 'ФИО';
+    formsTitle = "";
+    formsBtn = "";
 
     phoneType = PhoneType;
-    keys() : Array<string> {
+    phoneTypeKeys() : Array<string> {
         let keys = Object.keys(this.phoneType);
         return keys.slice(keys.length / 5);
     }
 
-
-
-    // form: FormGroup;
-    constructor(/*@Inject(FormBuilder) fb: FormBuilder, */private httpService: HttpService, private pagerService: PagerService) {
-        // this.form = fb.group({
-        //     name: fb.group({
-        //         first: ['Nancydf', Validators.minLength(2)],
-        //         last: 'Drew',
-        //     }),
-        //     email: '',
-        // });
-    }
+    constructor(private httpService: HttpService, private pagerService: PagerService) {}
 
     orderBy(colId: number) {
         if (colId > 1) {
@@ -108,8 +95,6 @@ export class ClientsListComponent {
         }
         // get pager object from service
         this.pager = this.pagerService.getPager(this.totalClientsNumber, page, this.pageSize);
-        // get current page of items
-        // this.pagedItems = this.clientsList.slice(this.pager.startIndex, this.pager.endIndex + 1);
 
         this.currentPage = page - 1;
 
@@ -123,9 +108,7 @@ export class ClientsListComponent {
     }
 
     loadClientsList() {
-        this.loadUserInfoError = null;
-
-        this.httpService.post("/auth/clientsList", {
+        this.httpService.post("/clientsList/clientsList", {
             page: this.currentPage,
             pageSize: this.pageSize
         }).toPromise().then(result => {
@@ -144,13 +127,15 @@ export class ClientsListComponent {
     }
 
     loadClientsFullInfo() {
-        this.httpService.post("/auth/clientsFullInfo", {
+        this.httpService.post("/clientsList/clientsFullInfo", {
             clientsId: this.clientsList[this.selClientId].id
         }).toPromise().then(result => {
             console.log(result.json());
             this.selectedClient = ClientDot.copy(result.json());
             if (result.json().phoneNumbers && result.json().phoneNumbers.length > 0) {
                 this.phoneNumbers = this.parsePhoneNumbers(result.json().phoneNumbers);
+            } else {
+                this.phoneNumbers = [new PhoneNumber()];
             }
         }, error => {
             console.log("clientsFullInfo");
@@ -164,7 +149,7 @@ export class ClientsListComponent {
         this.filterParams = f;
 
 
-        this.httpService.post("/auth/filterClientsList", Object.assign({}, this.filterParams.value, {
+        this.httpService.post("/clientsList/filterClientsList", Object.assign({}, this.filterParams.value, {
             page: this.currentPage,
             pageSize: this.pageSize
         })).toPromise().then(result => {
@@ -186,7 +171,7 @@ export class ClientsListComponent {
     }
 
     sort(sortBy: string, desc: boolean) {
-        this.httpService.post("/auth/sortClientsList", {
+        this.httpService.post("/clientsList/sortClientsList", {
             sortBy: sortBy,
             desc: desc.toString(),
             page: this.currentPage,
@@ -211,11 +196,9 @@ export class ClientsListComponent {
     }
 
     addNewClient(newClient: NgForm) {
-        console.log(newClient.value);
-        this.httpService.post("/auth/addNewClient", {
+        this.httpService.post("/clientsList/addNewClient", {
             newClient: JSON.stringify(newClient.value)
         }).toPromise().then(result => {
-            console.log(result.json());
             let userInfo = UserInfo.copy(result.json());
             this.clientsList.push(userInfo);
             this.totalClientsNumber++;
@@ -227,19 +210,14 @@ export class ClientsListComponent {
     }
 
     updateClient(clientParams: NgForm) {
+        console.log(clientParams.value);
         let params = Object.assign({}, clientParams.value, {
-            // id: this.selectedClientsId,
             id: this.clientsList[this.selClientId].id
         });
-        console.log(JSON.stringify(params));
-        this.httpService.post("/auth/updateClient", {
+        this.httpService.post("/clientsList/updateClient", {
             clientParams: JSON.stringify(params)
         }).toPromise().then(result => {
-            // this.clientsList = this.parseClientsList(result.json().clients);
             this.clientsList[this.selClientId] = UserInfo.copy(result.json());
-            this.totalClientsNumber = result.json().totalClientsNumber;
-            // this.setPage(this.currentPage + 1);
-            // this.loadClientsList();
         }, error => {
             console.log("updateClient");
             console.log(error);
@@ -247,14 +225,12 @@ export class ClientsListComponent {
     }
 
     removeClient() {
-        this.httpService.post("/auth/removeClient", {
+        this.httpService.post("/clientsList/removeClient", {
             clientsId: this.clientsList[this.selClientId].id,
             page: this.currentPage,
             pageSize: this.pageSize
         }).toPromise().then(result => {
             console.log(result.json());
-            // this.clientsList = this.parseClientsList(result.json().clients);
-            // this.totalClientsNumber = result.json().totalClientsNumber;
 
             this.clientsList.splice(this.selClientId, 1);
             this.totalClientsNumber--;
@@ -288,14 +264,20 @@ export class ClientsListComponent {
     }
 
     onEditBtnClicked() {
+        console.log(this.selectedClient);
+        this.formsTitle = "Изменение данных клиента";
+        this.formsBtn = "Изменить";
         $('#id01').show();
         this.editMode = true;
         this.loadClientsFullInfo();
     }
 
     onAddBtnClicked() {
+        this.formsTitle = "Добавление нового пользователя";
+        this.formsBtn = "Добавить";
         $('#id01').show();
         this.editMode = false;
+        this.phoneNumbers = [new PhoneNumber()];
     }
 
     onModalFormAction() {
@@ -305,20 +287,6 @@ export class ClientsListComponent {
 
     public ngOnInit()
     {
-        // let self = this;
-
         this.loadClientsList();
-
-        // $('#modal-form-submit').on('click', function (event) {
-        //     $('#id01').hide();
-        //     // location.reload();
-        //     self.selectedClient = new ClientDot();
-        // });
-        //
-        // $('#cancel-modal-submit').on('click', function (event) {
-        //     $('#id01').hide();
-        //     // location.reload();
-        //     self.selectedClient = new ClientDot();
-        // });
     }
 }
