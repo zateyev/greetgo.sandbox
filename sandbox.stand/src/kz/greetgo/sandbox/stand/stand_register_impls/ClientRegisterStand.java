@@ -5,87 +5,77 @@ import kz.greetgo.depinject.core.BeanGetter;
 import kz.greetgo.sandbox.controller.model.*;
 import kz.greetgo.sandbox.controller.register.ClientRegister;
 import kz.greetgo.sandbox.db.stand.beans.ClientStandDb;
+import kz.greetgo.sandbox.db.stand.model.CharmDot;
 import kz.greetgo.sandbox.db.stand.model.ClientDot;
 import kz.greetgo.sandbox.stand.util.PageUtils;
 import org.json.JSONObject;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
+import java.util.*;
 
 @Bean
 public class ClientRegisterStand implements ClientRegister {
     public BeanGetter<ClientStandDb> clientD;
 
     @Override
-    public ClientsListInfo getClientsList(int page, int pageSize) {
-
-        List<ClientDot> clientDots = new ArrayList<>(clientD.get().clientStorage.values());
-        List<ClientInfo> clientsList = new ArrayList<>();
-        clientDots.forEach(clientDot -> clientsList.add(clientDot.toClientInfo()));
-
-        int totalSize = clientsList.size();
-        PageUtils.cutPage(clientsList, page*pageSize, pageSize);
-
-        return new ClientsListInfo(totalSize, clientsList);
+    public long getTotalSize(String filterBy, String filterInputs) {
+        return filterClientsList(filterBy, filterInputs).size();
     }
 
     @Override
-    public ClientsFullInfo getClientsFullInfo(String clientsId) {
+    public List<ClientInfo> getClientsList(String filterBy, String filterInputs, String orderBy, String isDesc, int page, int pageSize) {
+        List<ClientInfo> clientsList = filterClientsList(filterBy, filterInputs);
+        if (clientsList.isEmpty()) return clientsList;
+
+
+        String sortBy = orderBy != null ? orderBy.trim() : "";
+        if ("age".equals(sortBy))
+            clientsList.sort((Comparator.comparingInt(ClientInfo::getAge)));
+        else if ("totalBalance".equals(sortBy))
+            clientsList.sort((Comparator.comparingInt(ClientInfo::getTotalBalance)));
+        else if ("minBalance".equals(sortBy))
+            clientsList.sort((Comparator.comparingInt(ClientInfo::getMinBalance)));
+        else if ("maxBalance".equals(sortBy))
+            clientsList.sort((Comparator.comparingInt(ClientInfo::getMaxBalance)));
+        else
+            clientsList.sort(Comparator.comparing(ClientInfo::getSurname));
+
+        if (Boolean.valueOf(isDesc)) Collections.reverse(clientsList);
+
+
+        PageUtils.cutPage(clientsList, page*pageSize, pageSize);
+
+        return clientsList;
+    }
+
+    private List<ClientInfo> filterClientsList(String filterBy, String filterInputs) {
+        List<ClientInfo> clientsList = new ArrayList<>();
+        List<ClientDot> clientDots = new ArrayList<>(clientD.get().clientStorage.values());
+
+        if (filterBy != null && filterInputs != null) {
+            for (ClientDot clientDot : clientDots) {
+                if ("Фамилия".equals(filterBy) && clientDot.getSurname().toLowerCase().contains(filterInputs.toLowerCase()))
+                    clientsList.add(clientDot.toClientInfo());
+                else if ("Имя".equals(filterBy) && clientDot.getName().toLowerCase().contains(filterInputs.toLowerCase()))
+                    clientsList.add(clientDot.toClientInfo());
+                else if ("Отчество".equals(filterBy) && clientDot.getPatronymic().toLowerCase().contains(filterInputs.toLowerCase()))
+                    clientsList.add(clientDot.toClientInfo());
+            }
+
+        } else {
+            clientDots.forEach(clientDot -> clientsList.add(clientDot.toClientInfo()));
+        }
+        return clientsList;
+    }
+
+    @Override
+    public ClientDetails getClientDetails(String clientsId) {
         ClientDot clientDot = clientD.get().clientStorage.get(clientsId);
         return clientDot.toClientsFullInfo();
     }
 
     @Override
-    public ClientsListInfo filterClientsList(String filtersInput, String  filterBy, int page, int pageSize) {
-
-        List<ClientDot> clientDots = new ArrayList<>(clientD.get().clientStorage.values());
-        List<ClientInfo> clientInfos = new ArrayList<>();
-        clientDots.forEach(personDot -> clientInfos.add(personDot.toClientInfo()));
-
-        List<ClientInfo> filteredClients = new ArrayList<>();
-        for (ClientInfo client : clientInfos) {
-            if ("Фамилия".equals(filterBy) && client.getSurname().contains(filtersInput))
-                filteredClients.add(client);
-            else if ("Имя".equals(filterBy) && client.getName().contains(filtersInput))
-                filteredClients.add(client);
-            else if ("Отчество".equals(filterBy) && client.getPatronymic().contains(filtersInput))
-                filteredClients.add(client);
-        }
-
-        int totalSize = filteredClients.size();
-        PageUtils.cutPage(filteredClients, page*pageSize, pageSize);
-
-        return new ClientsListInfo(totalSize, filteredClients);
-    }
-
-    @Override
-    public ClientsListInfo sortClientsList(String sortBy, String desc, int page, int pageSize) {
-        List<ClientDot> clientDots = new ArrayList<>(clientD.get().clientStorage.values());
-        List<ClientInfo> clientInfos = new ArrayList<>();
-        clientDots.forEach(clientDot -> clientInfos.add(clientDot.toClientInfo()));
-
-        if ("age".equals(sortBy))
-            clientInfos.sort((Comparator.comparingInt(ClientInfo::getAge)));
-        else if ("totalBalance".equals(sortBy))
-            clientInfos.sort((Comparator.comparingInt(ClientInfo::getTotalBalance)));
-        else if ("minBalance".equals(sortBy))
-            clientInfos.sort((Comparator.comparingInt(ClientInfo::getMinBalance)));
-        else if ("maxBalance".equals(sortBy))
-            clientInfos.sort((Comparator.comparingInt(ClientInfo::getMaxBalance)));
-
-        if (Boolean.valueOf(desc)) Collections.reverse(clientInfos);
-
-        int totalSize = clientInfos.size();
-        PageUtils.cutPage(clientInfos, page*pageSize, pageSize);
-
-        return new ClientsListInfo(totalSize, clientInfos);
-    }
-
-    @Override
-    public ClientInfo addNewClient(String newClientsInfo) {
+    public ClientInfo addClient(String newClientsInfo) {
         JSONObject jsonObject = new JSONObject(newClientsInfo);
 
         Address addressF = new Address(
@@ -201,5 +191,13 @@ public class ClientRegisterStand implements ClientRegister {
         clientD.get().clientStorage.put(jsonObject.getString("id"), clientDot);
 
         return clientDot.toClientInfo();
+    }
+
+    @Override
+    public List<String> getCharms() {
+        List<String> charmNamesList = new ArrayList<>();
+        List<CharmDot> charms = new ArrayList<>(clientD.get().charmStorage.values());
+        charms.forEach(charmDot -> charmNamesList.add(charmDot.getName()));
+        return charmNamesList;
     }
 }

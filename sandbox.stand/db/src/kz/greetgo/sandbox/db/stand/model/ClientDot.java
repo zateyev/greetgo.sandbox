@@ -2,7 +2,7 @@ package kz.greetgo.sandbox.db.stand.model;
 
 import kz.greetgo.sandbox.controller.model.Address;
 import kz.greetgo.sandbox.controller.model.ClientInfo;
-import kz.greetgo.sandbox.controller.model.ClientsFullInfo;
+import kz.greetgo.sandbox.controller.model.ClientDetails;
 import kz.greetgo.sandbox.controller.model.PhoneNumber;
 
 import java.time.LocalDate;
@@ -157,8 +157,8 @@ public class ClientDot {
         return ret;
     }
 
-    public ClientsFullInfo toClientsFullInfo() {
-        ClientsFullInfo ret = new ClientsFullInfo();
+    public ClientDetails toClientsFullInfo() {
+        ClientDetails ret = new ClientDetails();
         ret.setId(id);
         ret.setSurname(surname);
         ret.setName(name);

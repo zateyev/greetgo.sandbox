@@ -4,7 +4,7 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Objects;
 
-public class ClientsFullInfo {
+public class ClientDetails {
     private String id;
     private String surname;
     private String name;
