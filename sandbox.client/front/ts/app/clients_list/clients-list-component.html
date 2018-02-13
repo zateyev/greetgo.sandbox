@@ -9,7 +9,7 @@
     <form #f="ngForm" (submit)="filterList(f)" id="filterForm" novalidate>
         <div class="form-row">
             <div class="form-group col-md-3">
-                <input name="filtersInput" ngModel required #first="ngModel" type="text" class="form-control" id="inputFilterVal">
+                <input name="filterInputs" ngModel required #first="ngModel" type="text" class="form-control" id="inputFilterVal">
             </div>
             <div class="form-group col-md-2">
                 <select name="filterBy" ngModel id="inputState" class="form-control">
@@ -34,8 +34,8 @@
     <table class="table table-hover" id="clientsListTable">
         <thead>
         <tr style="white-space:nowrap">
-            <th *ngFor="let col of columns; let i = index" (click)="orderBy(i)"
-                [ngClass]="{sort1:sortBy === columnsId[i] && !isDescending, sort0:sortBy === columnsId[i] && isDescending}">{{col}}</th>
+            <th *ngFor="let col of columnsId; let i = index" (click)="sort(i)"
+                [ngClass]="{sort0:orderBy === columnsId[i] && !isDescending, sort1:orderBy === columnsId[i] && isDescending}">{{columns[col]}}</th>
         </tr>
         </thead>
         <tbody>
@@ -117,7 +117,7 @@
                             <div class="form-group col-md-4">
                                 <label for="inputCharm">Характер</label>
                                 <select ngModel name="charm" class="form-control" id="inputCharm">
-                                    <option *ngFor="let i of charm" [ngValue]="i" [selected]="i === selectedClient.charm">{{i}}</option>
+                                    <option *ngFor="let i of charms" [ngValue]="i" [selected]="i === selectedClient.charm">{{i}}</option>
                                 </select>
                             </div>
                             <div class="form-group col-md-3">

@@ -28,7 +28,7 @@ export class ClientDot {
         this.name = o.name;
         this.surname = o.surname;
         this.patronymic = o.patronymic;
-        this.charm = o.charm;
+        this.charm = o.charms;
         this.gender = o.gender;
         this.dateOfBirth= o.dateOfBirth;
 
