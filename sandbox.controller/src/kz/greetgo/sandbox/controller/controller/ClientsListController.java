@@ -44,15 +44,9 @@ public class ClientsListController implements Controller {
   }
 
   @ToJson
-  @Mapping("/addClient")
-  public ClientInfo addNewClient(@Par("newClient") String newClient) {
-    return clientRegister.get().addClient(newClient);
-  }
-
-  @ToJson
-  @Mapping("/updateClient")
-  public ClientInfo updateClient(@Par("clientParams") String clientParams) {
-    return clientRegister.get().updateClient(clientParams);
+  @Mapping("/addOrUpdateClient")
+  public ClientInfo addClient(@Par("clientRecords") @Json ClientRecords clientRecords) {
+    return clientRegister.get().addOrUpdateClient(clientRecords);
   }
 
   @ToJson
@@ -61,11 +55,5 @@ public class ClientsListController implements Controller {
                            @Par("page") int page,
                            @Par("pageSize") int pageSize) {
     clientRegister.get().removeClient(clientsId, page, pageSize);
-  }
-
-  @ToJson
-  @Mapping("/charms")
-  public List<String> getCharms() {
-    return clientRegister.get().getCharms();
   }
 }

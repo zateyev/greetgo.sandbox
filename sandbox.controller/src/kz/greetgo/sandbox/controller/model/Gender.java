@@ -2,9 +2,8 @@ package kz.greetgo.sandbox.controller.model;
 
 
 
-public enum PhoneType {
-  HOME,
-  WORK,
-  MOBILE,
+public enum Gender {
+  MALE,
+  FEMALE,
   ;
 }

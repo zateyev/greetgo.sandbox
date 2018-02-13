@@ -1,6 +1,5 @@
 export enum PhoneType {
-  HOME = "Домашний",
-  WORK = "Рабочий",
-  MOBILE = "Мобильный",
-  // EMBEDDED = "EMBEDDED",
+  HOME = "HOME",
+  WORK = "WORK",
+  MOBILE = "MOBILE",
 }

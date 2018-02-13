@@ -7,7 +7,7 @@ import kz.greetgo.sandbox.controller.model.Charm;
 import kz.greetgo.sandbox.controller.model.Gender;
 import kz.greetgo.sandbox.controller.model.PhoneNumber;
 
-public class ClientDetails {
+public class ClientRecords {
   public String id;
   public String surname;
   public String name;

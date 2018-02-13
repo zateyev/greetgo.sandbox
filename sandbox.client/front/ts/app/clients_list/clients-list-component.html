@@ -6,16 +6,16 @@
     <h2>Список клиентов</h2>
 
     <label for="filterForm">Искать</label>
-    <form #f="ngForm" (submit)="filterList(f)" id="filterForm" novalidate>
+    <form #f="ngForm" (submit)="filterList()" id="filterForm" novalidate>
         <div class="form-row">
             <div class="form-group col-md-3">
-                <input name="filterInputs" ngModel required #first="ngModel" type="text" class="form-control" id="inputFilterVal">
+                <input name="filterInputs" [(ngModel)]="filterInputs" required type="text" class="form-control" id="inputFilterVal">
             </div>
             <div class="form-group col-md-2">
-                <select name="filterBy" ngModel id="inputState" class="form-control">
-                    <option selected>Фамилия</option>
-                    <option>Имя</option>
-                    <option>Отчество</option>
+                <select class="form-control"
+                        required
+                        [(ngModel)]="filterBy" name="charm">
+                    <option *ngFor="let col of filterColumns" [ngValue]="col">{{col}}</option>
                 </select>
             </div>
             <div class="form-group col-md-2">
@@ -41,7 +41,7 @@
         <tbody>
         <tr class="clickable-row" *ngFor="let client of clientsList; let i = index" id="{{i}}" [ngClass]="{active:selClientId === i}" (click)="selectClient(i)">
             <td>{{client.surname}} {{client.name}} {{client.patronymic}}</td>
-            <td>{{client.charm}}</td>
+            <td>{{client.charm.name}}</td>
             <td>{{client.age}}</td>
             <td>{{client.totalBalance}}</td>
             <td>{{client.minBalance}}</td>
@@ -93,7 +93,7 @@
     <!-- Modal form-->
     <div id="id01" class="modal">
         <div class="modal-dialog">
-            <form #newClient="ngForm" (submit)="modalFormSubmitted(newClient)" id="newData" action="#">
+            <form #newClient="ngForm" (submit)="addOrUpdateClient()" id="newData" action="#">
             <div class="modal-content">
                 <div class="modal-header">
                     <h2 class="modal-title">{{formsTitle}}</h2>
@@ -102,74 +102,78 @@
                         <div class="form-row">
                             <div class="form-group col-md-4">
                                 <label for="last-name">Фамилия</label>
-                                <input type="text" class="form-control" name="surname" ngModel id="last-name" placeholder="Фамилия" value="{{selectedClient.surname}}">
+                                <input type="text" class="form-control" name="surname" [(ngModel)]="clientRecords.surname" id="last-name" placeholder="Фамилия">
                             </div>
                             <div class="form-group col-md-4">
                                 <label for="first-name">Имя</label>
-                                <input type="text" class="form-control" name="name" ngModel id="first-name" placeholder="Имя" value="{{selectedClient.name}}">
+                                <input type="text" class="form-control" name="name" [(ngModel)]="clientRecords.name" id="first-name" placeholder="Имя">
                             </div>
                             <div class="form-group col-md-4">
                                 <label for="patronymic">Отчество</label>
-                                <input type="text" class="form-control" name="patronymic" ngModel id="patronymic" placeholder="Отчество" value="{{selectedClient.patronymic}}">
+                                <input type="text" class="form-control" name="patronymic" [(ngModel)]="clientRecords.patronymic" id="patronymic" placeholder="Отчество">
                             </div>
                         </div>
                         <div class="form-row">
                             <div class="form-group col-md-4">
                                 <label for="inputCharm">Характер</label>
-                                <select ngModel name="charm" class="form-control" id="inputCharm">
-                                    <option *ngFor="let i of charms" [ngValue]="i" [selected]="i === selectedClient.charm">{{i}}</option>
+                                <select class="form-control" id="inputCharm"
+                                        required
+                                        [(ngModel)]="clientRecords.charm.name" name="charm">
+                                    <option *ngFor="let charm of charms" [ngValue]="charm">{{charm}}</option>
                                 </select>
                             </div>
                             <div class="form-group col-md-3">
                                 <label for="inputGender">Пол</label>
-                                <select ngModel name="gender" class="form-control" id="inputGender">
-                                    <option *ngFor="let i of gender" [ngValue]="i" [selected]="i === selectedClient.gender">{{i}}</option>
+                                <select class="form-control" id="inputGender"
+                                        required
+                                        [(ngModel)]="clientRecords.gender" name="power">
+                                    <option *ngFor="let gender of genderTypes()" [ngValue]="gender">{{gender}}</option>
                                 </select>
                             </div>
                             <div class="form-group col-md-5">
                                 <label for="inputBirthDate">Дата рождения</label>
-                                <input type="date" name="dateOfBirth" ngModel class="form-control" id="inputBirthDate" min="1900-01-01" value="{{selectedClient.dateOfBirth}}">
+                                <input type="date" name="dateOfBirth" [(ngModel)]="clientRecords.dateOfBirth" class="form-control" id="inputBirthDate">
                             </div>
                         </div>
                         <div class="form-row">
                             <div class="form-group col-md-4">
                                 <label for="inputStreet">Улица</label>
-                                <input type="text" name="streetF" ngModel class="form-control" id="inputStreet" placeholder="Улица" value="{{selectedClient.addressF.street}}">
+                                <input type="text" name="streetF" [(ngModel)]="clientRecords.addressF.street" class="form-control" id="inputStreet" placeholder="Улица">
                             </div>
                             <div class="form-group col-md-4">
                                 <label for="inputBuilding">Дом</label>
-                                <input type="text" name="buildingF" ngModel class="form-control" id="inputBuilding" placeholder="Дом" value="{{selectedClient.addressF.building}}">
+                                <input type="text" name="buildingF" [(ngModel)]="clientRecords.addressF.house" class="form-control" id="inputBuilding" placeholder="Дом">
                             </div>
                             <div class="form-group col-md-4">
                                 <label for="inputAprtm">Квартира</label>
-                                <input type="text" name="apartmentF" ngModel class="form-control" id="inputAprtm" placeholder="Квартира" value="{{selectedClient.addressF.apartment}}">
+                                <input type="text" name="apartmentF" [(ngModel)]="clientRecords.addressF.flat" class="form-control" id="inputAprtm" placeholder="Квартира">
                             </div>
                         </div>
                         <div class="form-row">
                             <div class="form-group col-md-4">
                                 <label for="streetF">Улица</label>
-                                <input type="text" name="streetR" ngModel class="form-control" id="streetF" placeholder="Улица" value="{{selectedClient.addressR.street}}">
+                                <input type="text" name="streetR" [(ngModel)]="clientRecords.addressR.street" class="form-control" id="streetF" placeholder="Улица">
                             </div>
                             <div class="form-group col-md-4">
                                 <label for="buildingF">Дом</label>
-                                <input type="text" name="buildingR" ngModel class="form-control" id="buildingF" placeholder="Дом" value="{{selectedClient.addressR.building}}">
+                                <input type="text" name="buildingR" [(ngModel)]="clientRecords.addressR.house" class="form-control" id="buildingF" placeholder="Дом">
                             </div>
                             <div class="form-group col-md-4">
                                 <label for="apartmentF">Квартира</label>
-                                <input type="text" name="apartmentR" ngModel class="form-control" id="apartmentF" placeholder="Квартира" value="{{selectedClient.addressR.apartment}}">
+                                <input type="text" name="apartmentR" [(ngModel)]="clientRecords.addressR.flat" class="form-control" id="apartmentF" placeholder="Квартира">
                             </div>
                         </div>
 
                         <label for="phoneNumbers">Номер телефона</label>
-                        <div id="phoneNumbers" class="clickable-row" *ngFor="let phoneNumber of phoneNumbers; let i = index">
+                        <div id="phoneNumbers" class="clickable-row" *ngFor="let phoneNumber of clientRecords.phoneNumbers; let i = index">
                             <div class="entry form-group">
                                 <div class=" col-md-4">
-                                    <select [ngModel]="phoneNumber.phoneType" name="phoneType{{i}}" class="form-control">
+                                    <select [(ngModel)]="clientRecords.phoneNumbers[i].phoneType" name="phoneType{{i}}" class="form-control">
                                         <option [ngValue]="i" *ngFor="let i of phoneTypeKeys()">{{phoneType[i]}}</option>
                                     </select>
                                 </div>
                                 <div class="input-group col-md-8">
-                                    <input type="text" class="form-control" name="phoneNumber{{i}}" ngModel placeholder="Номер телефона" [ngModel]="phoneNumber.number">
+                                    <input type="text" class="form-control" name="phoneNumber{{i}}" ngModel placeholder="Номер телефона" [(ngModel)]="clientRecords.phoneNumbers[i].number">
                                     <span class="input-group-btn">
                                         <button class="btn btn-success btn-add" type="button" (click)="addPhoneNumber()">
                                             <span class="glyphicon glyphicon-plus"></span>
@@ -183,8 +187,8 @@
                         </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="submit" class="btn btn-primary" id="modal-form-submit" (click)="onModalFormAction()">{{formsBtn}}</button>
-                    <button id="cancel-modal-submit" type="button" class="btn btn-default" data-dismiss="modal" (click)="onModalFormAction()">Отмена</button>
+                    <button type="submit" class="btn btn-primary" id="modal-form-submit">{{formsBtn}}</button>
+                    <button id="cancel-modal-submit" type="button" class="btn btn-default" data-dismiss="modal" onclick="document.getElementById('id01').style.display='none'">Отмена</button>
                 </div>
             </div>
             </form>

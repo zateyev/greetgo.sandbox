@@ -1,13 +1,14 @@
 import {Component, EventEmitter, Inject, Input, OnInit, Output} from "@angular/core";
-import {UserInfo} from "../../model/UserInfo";
 import {HttpService} from "../HttpService";
 import {PagerService} from "../PagerService";
 import * as $ from 'jquery';
 import 'datatables.net'
-import {NgForm, Validators} from "@angular/forms";
-import {ClientDot} from "../../model/ClientDot";
+import {ClientDetails} from "../../model/ClientDetails";
 import {PhoneNumber} from "../../model/PhoneNumber";
 import {PhoneType} from "../../model/PhoneType";
+import {ClientInfo} from "../../model/ClientInfo";
+import {ClientRecords} from "../../model/ClientRecords";
+import {Gender} from "../../model/Gender";
 
 @Component({
   selector: 'clients-list-component',
@@ -17,9 +18,8 @@ import {PhoneType} from "../../model/PhoneType";
 export class ClientsListComponent {
   @Output() exit = new EventEmitter<void>();
 
-  phoneNumbers: any = [];
-  clientsList: Array<UserInfo> | null = null;
-  selectedClient: ClientDot = new ClientDot();
+  phoneNumbers: PhoneNumber[];
+  clientsList: Array<ClientInfo> | null = null;
   editMode: boolean = false;
   currentPage: number = 0;
   pageSize: number = 10;
@@ -31,26 +31,38 @@ export class ClientsListComponent {
   filterBy: string | null;
   filterInputs: string | null;
   orderBy: string | null;
-  loadUserInfoError: string | null;
+  loadClientInfoError: string | null;
+  clientRecords: ClientRecords = new ClientRecords();
+  charms: any = [];
 
   pageSizeOptions = [10, 25, 50];
   columnsId = ['fio', 'charm', 'age', 'totalBalance', 'minBalance', 'maxBalance'];
-  columns = {fio:'ФИО', charm:'Характер', age:'Возраст', totalBalance:'Общий остаток счетов',
-    minBalance:'Минимальный остаток', maxBalance:'Максимальный остаток'};
+  filterColumns = ['Фамилия', 'Имя', 'Отчество'];
 
-  gender = ["муж", "жен"];
-  charms: any = [];
+  columns = {
+    fio: 'ФИО', charm: 'Характер', age: 'Возраст', totalBalance: 'Общий остаток счетов',
+    minBalance: 'Минимальный остаток', maxBalance: 'Максимальный остаток'
+  };
 
   formsTitle = "";
   formsBtn = "";
 
   phoneType = PhoneType;
-  phoneTypeKeys() : Array<string> {
+
+  phoneTypeKeys(): Array<string> {
     let keys = Object.keys(this.phoneType);
     return keys.slice(keys.length / 5);
   }
 
-  constructor(private httpService: HttpService, private pagerService: PagerService) {}
+  gender = Gender;
+
+  genderTypes(): Array<string> {
+    let keys = Object.keys(this.gender);
+    return keys.slice(keys.length / 5);
+  }
+
+  constructor(private httpService: HttpService, private pagerService: PagerService) {
+  }
 
   sort(colId: number) {
     if (colId > 1) {
@@ -73,13 +85,11 @@ export class ClientsListComponent {
   }
 
   addPhoneNumber() {
-    this.phoneNumbers.push(new PhoneNumber());
+    this.clientRecords.phoneNumbers.push(new PhoneNumber);
   }
 
   setPageSize(size: number) {
     this.pageSize = size;
-    console.log(size);
-
     this.setPage(1);
   }
 
@@ -87,12 +97,11 @@ export class ClientsListComponent {
     this.selClientId = id;
     $('#edit-button').prop("disabled", false);
     $('#btn-remove').prop("disabled", false);
-    console.log(id);
   }
 
   removePhoneNumber(index: number) {
-    if (this.phoneNumbers.length > 1) {
-      this.phoneNumbers.splice(index, 1);
+    if (this.clientRecords.phoneNumbers.length > 1) {
+      this.clientRecords.phoneNumbers.splice(index, 1);
     }
   }
 
@@ -116,7 +125,7 @@ export class ClientsListComponent {
       isDesc: this.isDescending.toString(),
       page: this.currentPage,
       pageSize: this.pageSize
-  }).toPromise().then(result => {
+    }).toPromise().then(result => {
       this.clientsList = this.parseClientsList(result.json());
       if (!this.isInitialized) {
         this.isInitialized = true;
@@ -125,7 +134,7 @@ export class ClientsListComponent {
     }, error => {
       console.log("ClientsList");
       console.log(error);
-      this.loadUserInfoError = error;
+      this.loadClientInfoError = error;
       this.clientsList = null;
     });
   }
@@ -134,65 +143,35 @@ export class ClientsListComponent {
     this.httpService.post("/clientsList/clientDetails", {
       clientsId: this.clientsList[this.selClientId].id
     }).toPromise().then(result => {
-      console.log(result.json());
-      this.selectedClient = ClientDot.copy(result.json());
-      if (result.json().phoneNumbers && result.json().phoneNumbers.length > 0) {
-        this.phoneNumbers = this.parsePhoneNumbers(result.json().phoneNumbers);
-      } else {
-        this.phoneNumbers = [new PhoneNumber()];
-      }
+      this.clientRecords = ClientRecords.copy(result.json());
     }, error => {
-      console.log("clientDetails");
+      console.log("clientRecords");
       console.log(error);
-      this.loadUserInfoError = error;
+      this.loadClientInfoError = error;
     });
   }
 
-  filterList(f: NgForm) {
-    console.log(f.value);
-    this.filterBy = f.value.filterBy;
-    this.filterInputs = f.value.filterInputs;
-    this.getTotalSize(this.filterBy, this.filterInputs);
+  filterList() {
+    this.getTotalSize();
     this.isInitialized = false;
 
     this.setPage(1);
-    // this.loadClientsList();
   }
 
-  modalFormSubmitted(formVals: NgForm) {
-    if (this.editMode) {
-      this.updateClient(formVals);
-    }
-    else {
-      this.addClient(formVals);
-    }
-  }
-
-  addClient(clientRecord: NgForm) {
-    this.httpService.post("/clientsList/addClient", {
-      newClient: JSON.stringify(clientRecord.value)
+  addOrUpdateClient() {
+    $('#id01').hide();
+    this.httpService.post("/clientsList/addOrUpdateClient", {
+      clientRecords: JSON.stringify(this.clientRecords)
     }).toPromise().then(result => {
-      let userInfo = UserInfo.copy(result.json());
-      this.clientsList.push(userInfo);
-      this.totalSize++;
-      this.setPage(this.currentPage + 1);
+      if (result.json()) {
+        let clientInfo = ClientInfo.copy(result.json());
+        this.clientsList.push(clientInfo);
+        // this.getTotalSize();
+        if (!this.editMode) this.totalSize++;
+        this.setPage(this.currentPage + 1);
+      }
     }, error => {
       console.log("addClient");
-      console.log(error);
-    });
-  }
-
-  updateClient(clientParams: NgForm) {
-    console.log(clientParams.value);
-    let params = Object.assign({}, clientParams.value, {
-      id: this.clientsList[this.selClientId].id
-    });
-    this.httpService.post("/clientsList/updateClient", {
-      clientParams: JSON.stringify(params)
-    }).toPromise().then(result => {
-      this.clientsList[this.selClientId] = UserInfo.copy(result.json());
-    }, error => {
-      console.log("updateClient");
       console.log(error);
     });
   }
@@ -203,8 +182,6 @@ export class ClientsListComponent {
       page: this.currentPage,
       pageSize: this.pageSize
     }).toPromise().then(result => {
-      console.log(result.json());
-
       this.clientsList.splice(this.selClientId, 1);
       this.totalSize--;
       this.setPage(this.currentPage + 1);
@@ -218,8 +195,8 @@ export class ClientsListComponent {
     let clientsList = [];
 
     for (let client of clients) {
-      let userInfo = UserInfo.copy(client);
-      clientsList.push(userInfo);
+      let clientInfo = ClientInfo.copy(client);
+      clientsList.push(clientInfo);
     }
 
     return clientsList;
@@ -237,7 +214,6 @@ export class ClientsListComponent {
   }
 
   onEditBtnClicked() {
-    console.log(this.selectedClient);
     this.formsTitle = "Изменение данных клиента";
     this.formsBtn = "Изменить";
     $('#id01').show();
@@ -246,6 +222,7 @@ export class ClientsListComponent {
   }
 
   onAddBtnClicked() {
+    this.clientRecords = new ClientDetails();
     this.formsTitle = "Добавление нового пользователя";
     this.formsBtn = "Добавить";
     $('#id01').show();
@@ -253,17 +230,11 @@ export class ClientsListComponent {
     this.phoneNumbers = [new PhoneNumber()];
   }
 
-  onModalFormAction() {
-    $('#id01').hide();
-    this.selectedClient = new ClientDot();
-  }
-
-  getTotalSize(filterBy: string, filterInputs: string) {
+  getTotalSize() {
     this.httpService.post("/clientsList/totalSize", {
-      filterBy: filterBy,
-      filterInputs: filterInputs
+      filterBy: this.filterBy,
+      filterInputs: this.filterInputs
     }).toPromise().then(result => {
-      console.log(result.json());
       this.totalSize = result.json();
     }, error => {
       console.log("totalSize");
@@ -272,8 +243,7 @@ export class ClientsListComponent {
   }
 
   loadCharms() {
-    this.httpService.get("/clientsList/charms").toPromise().then(result => {
-      console.log(result.json());
+    this.httpService.get("/charm/getCharms").toPromise().then(result => {
       this.charms = result.json();
     }, error => {
       console.log("charms");
@@ -281,9 +251,8 @@ export class ClientsListComponent {
     });
   }
 
-  public ngOnInit()
-  {
-    this.getTotalSize(null, null);
+  public ngOnInit() {
+    this.getTotalSize();
     this.loadCharms();
     this.loadClientsList();
   }
