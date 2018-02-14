@@ -1,5 +1,6 @@
 package kz.greetgo.sandbox.db.register_impl;
 
+import kz.greetgo.depinject.core.Bean;
 import kz.greetgo.depinject.core.BeanGetter;
 import kz.greetgo.sandbox.controller.model.ClientDetails;
 import kz.greetgo.sandbox.controller.model.ClientInfo;
@@ -9,6 +10,7 @@ import kz.greetgo.sandbox.db.dao.ClientDao;
 
 import java.util.List;
 
+@Bean
 public class ClientRegisterImpl implements ClientRegister {
 
   public BeanGetter<ClientDao> clientDao;

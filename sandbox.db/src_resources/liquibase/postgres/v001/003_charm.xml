@@ -9,7 +9,7 @@
         id varchar(32) not null PRIMARY KEY,
         name varchar(255) not null,
         description varchar(255) not null,
-        energy real not null,
+        energy real not null
       )
     ]]></sql>
   </changeSet>

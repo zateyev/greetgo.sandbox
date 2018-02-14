@@ -7,7 +7,7 @@
     <sql endDelimiter=";;"><![CDATA[
       create table ClientAccount (
         id varchar(32) not null PRIMARY KEY,
-        client varchar(32) not null REFERENCES Client (id),
+        client varchar(32) not null,
         money real not null,
         number varchar(64) NOT NULL,
         registeredAt timestamp with time zone not null

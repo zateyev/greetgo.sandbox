@@ -1,17 +1,19 @@
 package kz.greetgo.sandbox.db.register_impl;
 
 import kz.greetgo.depinject.core.BeanGetter;
+import kz.greetgo.sandbox.controller.model.Charm;
+import kz.greetgo.sandbox.controller.model.Gender;
 import kz.greetgo.sandbox.controller.register.ClientRegister;
-import kz.greetgo.sandbox.controller.register.model.UserParamName;
+import kz.greetgo.sandbox.db.stand.model.ClientDot;
 import kz.greetgo.sandbox.db.test.dao.ClientTestDao;
 import kz.greetgo.sandbox.db.test.util.ParentTestNg;
 import kz.greetgo.util.RND;
-import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
-import java.util.Arrays;
+import java.sql.Date;
+import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import static org.fest.assertions.api.Assertions.assertThat;
 
@@ -24,29 +26,40 @@ public class ClientRegisterImplTest extends ParentTestNg {
   public BeanGetter<ClientTestDao> clientTestDao;
   public BeanGetter<IdGenerator> idGen;
 
-  @DataProvider
-  public Object[][] saveClient_DP() {
-    List<Object[]> list = Arrays.stream(UserParamName.values())
-      .map(a -> new Object[]{a})
-      .collect(Collectors.toList());
+  @Test
+  public void getTotalSize_noFilter() {
 
-    return list.toArray(new Object[list.size()][]);
+    clientTestDao.get().removeAllData();
+
+    List<ClientDot> clientDots = new ArrayList<>();
+
+    for (int i = 0; i < 5; i++) {
+      ClientDot clientDot = randClientDot();
+      clientTestDao.get().insertClientDot(clientDot.getId(), clientDot.getSurname(), clientDot.getName(),
+        clientDot.getPatronymic(), clientDot.getGender(), Date.valueOf(clientDot.getDateOfBirth()), clientDot.getCharm().name);
+      clientDots.add(clientDot);
+    }
+
+    //
+    //
+    long result = clientRegister.get().getTotalSize("name", "");
+    //
+    //
+
+    assertThat(result).isEqualTo(clientDots.size());
   }
 
-  @Test(dataProvider = "saveClient_DP")
-  public void getParam_value(UserParamName paramName) throws Exception {
-
-    String personId = RND.str(10);
-    String expectedValue = RND.str(10);
-
-    clientTestDao.get().insertClient(idGen.get().newId(), "", "", "", null, null, 1);
-
-    //
-    //
-    long size = clientRegister.get().getTotalSize("", "");
-    //
-    //
-
-    assertThat(size).isEqualTo(1);
+  private ClientDot randClientDot() {
+    ClientDot clientDot = new ClientDot();
+    clientDot.setId(idGen.get().newId());
+    clientDot.setSurname(RND.str(10));
+    clientDot.setName(RND.str(10));
+    clientDot.setPatronymic(RND.str(10));
+    Charm charm = new Charm();
+    charm.name = RND.str(10);
+    clientDot.setCharm(charm);
+    clientDot.setGender(RND.someEnum(Gender.values()));
+    clientDot.setDateOfBirth(LocalDate.now());
+    return clientDot;
   }
 }

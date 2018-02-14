@@ -6,7 +6,7 @@
   <changeSet author="zateyev" id="create-table-ClientPhone">
     <sql endDelimiter=";;"><![CDATA[
       create table ClientPhone (
-        client varchar(32) not null REFERENCES Client (id),
+        client varchar(32) not null,
         number varchar(32) NOT NULL,
         type varchar(32) NOT NULL,
         PRIMARY KEY (client, number)
