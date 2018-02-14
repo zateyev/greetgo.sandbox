@@ -12,7 +12,7 @@ public interface ClientRegister {
      *
      * @return общее количество клиентов в БД
      */
-    long getTotalSize(String filterBy, String filterInputs);
+    long getTotalSize(String filterBy, String filterInput);
 
     /**
      * Предоставляет список клиентов
@@ -26,10 +26,10 @@ public interface ClientRegister {
     /**
      * Предоставляет полную информацию о клиенте
      *
-     * @param clientsId id запрашиваемого клиента
+     * @param clientId id запрашиваемого клиента
      * @return полная информация о клиенте
      */
-    ClientDetails getClientDetails(String clientsId);
+    ClientDetails getClientDetails(String clientId);
 
     /**
      * Добавляет нового пользователя
@@ -44,5 +44,5 @@ public interface ClientRegister {
      *
      * @param clientsId id клиента, которого надо удалить
      */
-    void removeClient(String clientsId, int page, int pageSize);
+    void removeClient(String clientsId);
 }

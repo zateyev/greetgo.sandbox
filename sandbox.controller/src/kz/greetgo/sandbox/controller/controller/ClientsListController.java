@@ -51,9 +51,7 @@ public class ClientsListController implements Controller {
 
   @ToJson
   @Mapping("/removeClient")
-  public void removeClient(@Par("clientsId") String clientsId,
-                           @Par("page") int page,
-                           @Par("pageSize") int pageSize) {
-    clientRegister.get().removeClient(clientsId, page, pageSize);
+  public void removeClient(@Par("clientsId") String clientsId) {
+    clientRegister.get().removeClient(clientsId);
   }
 }

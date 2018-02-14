@@ -16,8 +16,9 @@ public class ClientRegisterImpl implements ClientRegister {
   public BeanGetter<ClientDao> clientDao;
 
   @Override
-  public long getTotalSize(String filterBy, String filterInputs) {
-    return clientDao.get().getTotalSize(filterBy, filterInputs);
+  public long getTotalSize(String filterBy, String filterInput) {
+    return clientDao.get().getTotalSize(filterBy != null ? filterBy : "surname",
+      filterInput != null ? filterInput : "");
   }
 
   @Override
@@ -26,7 +27,7 @@ public class ClientRegisterImpl implements ClientRegister {
   }
 
   @Override
-  public ClientDetails getClientDetails(String clientsId) {
+  public ClientDetails getClientDetails(String clientId) {
     return null;
   }
 
@@ -36,7 +37,7 @@ public class ClientRegisterImpl implements ClientRegister {
   }
 
   @Override
-  public void removeClient(String clientsId, int page, int pageSize) {
+  public void removeClient(String clientsId) {
 
   }
 }

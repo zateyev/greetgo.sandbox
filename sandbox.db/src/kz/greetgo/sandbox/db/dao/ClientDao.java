@@ -1,16 +1,12 @@
 package kz.greetgo.sandbox.db.dao;
 
-import kz.greetgo.sandbox.controller.model.UserInfo;
-import kz.greetgo.sandbox.controller.register.model.UserParamName;
 import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
 
 public interface ClientDao {
-  void saveUserParam(String personId, UserParamName name, String value);
-
   @Select("select count(*) from Client where position(#{filterInputs} in ${filterBy}) <> 0")
   long getTotalSize(@Param("filterBy") String filterBy,
-                      @Param("filterInputs") String filterInputs);
+                    @Param("filterInputs") String filterInputs);
 
 //  @Select("select id from Person where accountName = #{accountName} " +
 //    "and encryptedPassword = #{encryptedPassword} and blocked = 0")

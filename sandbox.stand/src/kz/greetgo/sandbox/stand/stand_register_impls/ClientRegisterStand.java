@@ -20,8 +20,8 @@ public class ClientRegisterStand implements ClientRegister {
     public BeanGetter<ClientStandDb> clientD;
 
     @Override
-    public long getTotalSize(String filterBy, String filterInputs) {
-        return filterClientsList(filterBy, filterInputs).size();
+    public long getTotalSize(String filterBy, String filterInput) {
+        return filterClientsList(filterBy, filterInput).size();
     }
 
     @Override
@@ -71,8 +71,8 @@ public class ClientRegisterStand implements ClientRegister {
     }
 
     @Override
-    public ClientDetails getClientDetails(String clientsId) {
-        ClientDot clientDot = clientD.get().clientStorage.get(clientsId);
+    public ClientDetails getClientDetails(String clientId) {
+        ClientDot clientDot = clientD.get().clientStorage.get(clientId);
         return clientDot.toClientDetails();
     }
 
@@ -98,7 +98,7 @@ public class ClientRegisterStand implements ClientRegister {
     }
 
     @Override
-    public void removeClient(String clientsId, int page, int pageSize) {
+    public void removeClient(String clientsId) {
         clientD.get().clientStorage.remove(clientsId);
     }
 }
