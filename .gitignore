@@ -30,3 +30,6 @@ Thumbs.db
 *.sqlite
 /classes
 /.shelf
+
+.ideaDataSources/
+dataSources/
