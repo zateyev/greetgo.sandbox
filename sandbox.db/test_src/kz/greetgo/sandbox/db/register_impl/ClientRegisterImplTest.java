@@ -110,7 +110,7 @@ public class ClientRegisterImplTest extends ParentTestNg {
     List<ClientDetails> clients = clearDbAndLoadTestData(200);
 
     int pageSize = RND.plusInt(clients.size());
-    int page = RND.plusInt((int) Math.ceil(clients.size()/pageSize));
+    int page = RND.plusInt((int) Math.ceil(clients.size() / pageSize));
 
     List<ClientInfo> expectingClientList = new ArrayList<>();
     clients.forEach(clientDetails -> expectingClientList.add(toClientInfo(clientDetails)));
@@ -139,7 +139,7 @@ public class ClientRegisterImplTest extends ParentTestNg {
     List<ClientDetails> clients = clearDbAndLoadTestData(200);
 
     int pageSize = RND.plusInt(clients.size());
-    int page = RND.plusInt((int) Math.ceil(clients.size()/pageSize));
+    int page = RND.plusInt((int) Math.ceil(clients.size() / pageSize));
 
     List<ClientInfo> expectingClientList = new ArrayList<>();
     clients.forEach(clientDetails -> expectingClientList.add(toClientInfo(clientDetails)));
@@ -168,7 +168,7 @@ public class ClientRegisterImplTest extends ParentTestNg {
     List<ClientDetails> clients = clearDbAndLoadTestData(200);
 
     int pageSize = RND.plusInt(clients.size());
-    int page = RND.plusInt((int) Math.ceil(clients.size()/pageSize));
+    int page = RND.plusInt((int) Math.ceil(clients.size() / pageSize));
 
     List<ClientInfo> expectingClientList = new ArrayList<>();
     clients.forEach(clientDetails -> expectingClientList.add(toClientInfo(clientDetails)));
@@ -197,7 +197,7 @@ public class ClientRegisterImplTest extends ParentTestNg {
     List<ClientDetails> clients = clearDbAndLoadTestData(200);
 
     int pageSize = RND.plusInt(clients.size());
-    int page = RND.plusInt((int) Math.ceil(clients.size()/pageSize));
+    int page = RND.plusInt((int) Math.ceil(clients.size() / pageSize));
 
     List<ClientInfo> expectingClientList = new ArrayList<>();
     clients.forEach(clientDetails -> expectingClientList.add(toClientInfo(clientDetails)));
@@ -227,7 +227,7 @@ public class ClientRegisterImplTest extends ParentTestNg {
     List<ClientDetails> clients = clearDbAndLoadTestData(200);
 
     int pageSize = RND.plusInt(clients.size());
-    int page = RND.plusInt((int) Math.ceil(clients.size()/pageSize));
+    int page = RND.plusInt((int) Math.ceil(clients.size() / pageSize));
 
     List<ClientInfo> expectingClientList = new ArrayList<>();
     clients.forEach(clientDetails -> expectingClientList.add(toClientInfo(clientDetails)));
@@ -256,7 +256,7 @@ public class ClientRegisterImplTest extends ParentTestNg {
     List<ClientDetails> clients = clearDbAndLoadTestData(200);
 
     int pageSize = RND.plusInt(clients.size());
-    int page = RND.plusInt((int) Math.ceil(clients.size()/pageSize));
+    int page = RND.plusInt((int) Math.ceil(clients.size() / pageSize));
 
     List<ClientInfo> expectingClientList = new ArrayList<>();
     clients.forEach(clientDetails -> expectingClientList.add(toClientInfo(clientDetails)));
@@ -294,7 +294,7 @@ public class ClientRegisterImplTest extends ParentTestNg {
     expectingClientList.sort(Comparator.comparing(o -> o.surname));
 
     int pageSize = RND.plusInt(clients.size());
-    int page = RND.plusInt((int) Math.ceil(clients.size()/pageSize));
+    int page = RND.plusInt((int) Math.ceil(clients.size() / pageSize));
     PageUtils.cutPage(expectingClientList, page * pageSize, pageSize);
 
     //
@@ -326,7 +326,7 @@ public class ClientRegisterImplTest extends ParentTestNg {
     expectingClientList.sort(Comparator.comparing(o -> o.surname));
 
     int pageSize = RND.plusInt(clients.size());
-    int page = RND.plusInt((int) Math.ceil(clients.size()/pageSize));
+    int page = RND.plusInt((int) Math.ceil(clients.size() / pageSize));
     PageUtils.cutPage(expectingClientList, page * pageSize, pageSize);
 
     //
@@ -358,7 +358,7 @@ public class ClientRegisterImplTest extends ParentTestNg {
     expectingClientList.sort(Comparator.comparing(o -> o.surname));
 
     int pageSize = RND.plusInt(clients.size());
-    int page = RND.plusInt((int) Math.ceil(clients.size()/pageSize));
+    int page = RND.plusInt((int) Math.ceil(clients.size() / pageSize));
     PageUtils.cutPage(expectingClientList, page * pageSize, pageSize);
 
     //
@@ -378,14 +378,32 @@ public class ClientRegisterImplTest extends ParentTestNg {
   @Test
   public void getClientDetails_ok() {
 
-    List<ClientDetails> clients = clearDbAndLoadTestData(20);
+    List<ClientDetails> clients = clearDbAndLoadTestData(10);
 
     ClientDetails expectingClient = clients.get(RND.plusInt(clients.size()));
 
+    //
+    //
     ClientDetails result = clientRegister.get().getClientDetails(expectingClient.id);
+    //
+    //
 
     assertThat(result).isNotNull();
     assertThat(result).isEqualsToByComparingFields(expectingClient);
+  }
+
+  @Test
+  public void getClientDetails_notFound() {
+
+    List<ClientDetails> clients = clearDbAndLoadTestData(10);
+
+    //
+    //
+    ClientDetails result = clientRegister.get().getClientDetails(idGen.get().newId());
+    //
+    //
+
+    assertThat(result).isNull();
   }
 
   @Test
@@ -413,10 +431,41 @@ public class ClientRegisterImplTest extends ParentTestNg {
     expectedClientInfo.minBalance = clientRecords.minBalance;
     expectedClientInfo.maxBalance = clientRecords.maxBalance;
 
+    //
+    //
     ClientInfo result = clientRegister.get().addOrUpdateClient(clientRecords);
+    //
+    //
 
     assertThat(result).isNotNull();
     assertThat(result).isEqualsToByComparingFields(expectedClientInfo);
+  }
+
+  @Test
+  public void addOrUpdateClient_update() {
+    clientTestDao.get().removeAllData();
+
+    ClientDetails client = createRndClient();
+
+    assertThat(client).isNotNull();
+
+    clientTestDao.get().insertClientDot(client.id, client.surname, client.name,
+      client.patronymic, client.gender, Date.valueOf(client.dateOfBirth), client.charm.name);
+
+    ClientDetails clientDetails = createRndClient();
+    clientDetails.id = client.id;
+
+    ClientInfo expectingClientInfo = toClientInfo(clientDetails);
+    ClientRecords clientRecords = toClientRecords(clientDetails);
+
+    //
+    //
+    ClientInfo result = clientRegister.get().addOrUpdateClient(clientRecords);
+    //
+    //
+
+    assertThat(result).isNotNull();
+    assertThat(result).isEqualsToByComparingFields(expectingClientInfo);
   }
 
   @Test
@@ -506,6 +555,20 @@ public class ClientRegisterImplTest extends ParentTestNg {
     clientInfo.patronymic = clientDetails.patronymic;
     clientInfo.charm = clientDetails.charm;
     clientInfo.age = Period.between(LocalDate.parse(clientDetails.dateOfBirth), LocalDate.now()).getYears();
+    clientInfo.totalBalance = clientDetails.totalBalance;
+    clientInfo.minBalance = clientDetails.minBalance;
+    clientInfo.maxBalance = clientDetails.maxBalance;
+    return clientInfo;
+  }
+
+  private ClientRecords toClientRecords(ClientDetails clientDetails) {
+    ClientRecords clientInfo = new ClientRecords();
+    clientInfo.id = clientDetails.id;
+    clientInfo.surname = clientDetails.surname;
+    clientInfo.name = clientDetails.name;
+    clientInfo.patronymic = clientDetails.patronymic;
+    clientInfo.charm = clientDetails.charm;
+    clientInfo.dateOfBirth = clientDetails.dateOfBirth;
     clientInfo.totalBalance = clientDetails.totalBalance;
     clientInfo.minBalance = clientDetails.minBalance;
     clientInfo.maxBalance = clientDetails.maxBalance;

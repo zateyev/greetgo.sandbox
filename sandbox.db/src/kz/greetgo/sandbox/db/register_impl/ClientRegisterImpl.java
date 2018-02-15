@@ -17,8 +17,10 @@ public class ClientRegisterImpl implements ClientRegister {
 
   @Override
   public long getTotalSize(String filterBy, String filterInput) {
-    return clientDao.get().getTotalSize(filterBy != null ? filterBy : "surname",
-      filterInput != null ? filterInput : "");
+//    return clientDao.get().getTotalSize(filterBy != null ? filterBy : "surname",
+//      filterInput != null ? filterInput : "");
+
+    return 0;
   }
 
   @Override
