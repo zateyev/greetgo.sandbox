@@ -10,7 +10,7 @@
         client varchar(32) not null,
         money real not null,
         number varchar(64) NOT NULL,
-        registeredAt timestamp with time zone not null
+        registered_at timestamp with time zone not null
       )
     ]]></sql>
   </changeSet>

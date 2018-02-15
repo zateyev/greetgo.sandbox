@@ -539,6 +539,7 @@ public class ClientRegisterImplTest extends ParentTestNg {
     client.name = RND.str(10);
     client.patronymic = RND.str(10);
     client.charm = new Charm();
+    client.charm.id = idGen.get().newId();
     client.charm.name = RND.str(10);
     client.gender = RND.someEnum(Gender.values());
     client.dateOfBirth = LocalDate.now().toString();
@@ -573,16 +574,17 @@ public class ClientRegisterImplTest extends ParentTestNg {
   }
 
   private ClientRecords toClientRecords(ClientDetails clientDetails) {
-    ClientRecords clientInfo = new ClientRecords();
-    clientInfo.id = clientDetails.id;
-    clientInfo.surname = clientDetails.surname;
-    clientInfo.name = clientDetails.name;
-    clientInfo.patronymic = clientDetails.patronymic;
-    clientInfo.charm = clientDetails.charm;
-    clientInfo.dateOfBirth = clientDetails.dateOfBirth;
-    clientInfo.totalBalance = clientDetails.totalBalance;
-    clientInfo.minBalance = clientDetails.minBalance;
-    clientInfo.maxBalance = clientDetails.maxBalance;
-    return clientInfo;
+    ClientRecords clientRecords = new ClientRecords();
+    clientRecords.id = clientDetails.id;
+    clientRecords.surname = clientDetails.surname;
+    clientRecords.name = clientDetails.name;
+    clientRecords.patronymic = clientDetails.patronymic;
+    clientRecords.charm = clientDetails.charm;
+    clientRecords.gender = clientDetails.gender;
+    clientRecords.dateOfBirth = clientDetails.dateOfBirth;
+    clientRecords.totalBalance = clientDetails.totalBalance;
+    clientRecords.minBalance = clientDetails.minBalance;
+    clientRecords.maxBalance = clientDetails.maxBalance;
+    return clientRecords;
   }
 }

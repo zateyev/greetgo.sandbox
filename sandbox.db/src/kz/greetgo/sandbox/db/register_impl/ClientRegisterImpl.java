@@ -8,7 +8,9 @@ import kz.greetgo.sandbox.controller.model.ClientInfo;
 import kz.greetgo.sandbox.controller.model.ClientRecords;
 import kz.greetgo.sandbox.controller.register.ClientRegister;
 import kz.greetgo.sandbox.db.dao.ClientDao;
+import kz.greetgo.util.RND;
 
+import java.sql.Date;
 import java.util.List;
 
 @Bean
@@ -31,17 +33,22 @@ public class ClientRegisterImpl implements ClientRegister {
 
   @Override
   public ClientDetails getClientDetails(String clientId) {
-//    throw new NotFound();
-    return null;
+    ClientDetails clientDetails = clientDao.get().selectClientDetailsById(clientId);
+    if (clientDetails == null) throw new NotFound();
+    return clientDetails;
   }
 
   @Override
   public ClientInfo addOrUpdateClient(ClientRecords clientRecords) {
-    return null;
+    clientDao.get().insertOrUpdateClient(clientRecords.id, clientRecords.surname, clientRecords.name,
+      clientRecords.patronymic, clientRecords.gender, Date.valueOf(clientRecords.dateOfBirth), clientRecords.charm.id);
+//    clientDao.get().insertOrUpdateClient(clientRecords);
+    return clientDao.get().selectClientInfoById(clientRecords.id);
   }
 
   @Override
   public void removeClient(String clientsId) {
+//    clientDao.get().removeById(clientsId);
 //    throw new NotFound();
   }
 }

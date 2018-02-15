@@ -9,7 +9,7 @@
         id varchar(32) not null PRIMARY KEY,
         account varchar(32) not null,
         money real not null,
-        finishedAt timestamp with time zone not null,
+        finished_at timestamp with time zone not null,
         type varchar(32) not null
       )
     ]]></sql>
