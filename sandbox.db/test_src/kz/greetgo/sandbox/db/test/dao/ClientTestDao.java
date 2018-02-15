@@ -23,12 +23,12 @@ public interface ClientTestDao {
 
   @Insert("insert into Client (id, surname, name, patronymic, gender, birth_date, charm) " +
     "values (#{id}, #{surname}, #{name}, #{patronymic}, #{gender}, #{birth_date}, 'charm')")
-//  void insertClientDot(ClientDot clientDot);
-  void insertClientDot(@Param("id") String personId,
-                       @Param("surname") String surname,
-                       @Param("name") String name,
-                       @Param("patronymic") String patronymic,
-                       @Param("gender") Gender gender,
-                       @Param("birth_date") Date birth_date,
-                       @Param("charm") String charm);
+//  void insertClient(ClientDot clientDot);
+  void insertClient(@Param("id") String personId,
+                    @Param("surname") String surname,
+                    @Param("name") String name,
+                    @Param("patronymic") String patronymic,
+                    @Param("gender") Gender gender,
+                    @Param("birth_date") Date birth_date,
+                    @Param("charm") String charm);
 }

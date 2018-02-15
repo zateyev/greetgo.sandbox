@@ -1,7 +1,8 @@
 package kz.greetgo.sandbox.db.test.dao.postgres;
 
-/**
- * Created by zateyev on 2/15/18.
- */
-public interface CharmTestDao {
+import kz.greetgo.depinject.core.Bean;
+import kz.greetgo.sandbox.db.test.dao.CharmTestDao;
+
+@Bean
+public interface CharmTestDaoPostgres extends CharmTestDao {
 }

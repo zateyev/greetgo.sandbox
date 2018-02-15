@@ -449,7 +449,7 @@ public class ClientRegisterImplTest extends ParentTestNg {
 
     assertThat(client).isNotNull();
 
-    clientTestDao.get().insertClientDot(client.id, client.surname, client.name,
+    clientTestDao.get().insertClient(client.id, client.surname, client.name,
       client.patronymic, client.gender, Date.valueOf(client.dateOfBirth), client.charm.name);
 
     ClientDetails clientDetails = createRndClient();
@@ -473,7 +473,7 @@ public class ClientRegisterImplTest extends ParentTestNg {
     clientTestDao.get().removeAllData();
 
     ClientDetails client = createRndClient();
-    clientTestDao.get().insertClientDot(client.id, client.surname, client.name,
+    clientTestDao.get().insertClient(client.id, client.surname, client.name,
       client.patronymic, client.gender, Date.valueOf(client.dateOfBirth), client.charm.name);
 
     assertThat(client).isNotNull();
@@ -492,7 +492,7 @@ public class ClientRegisterImplTest extends ParentTestNg {
     clientTestDao.get().removeAllData();
 
     ClientDetails client = createRndClient();
-    clientTestDao.get().insertClientDot(client.id, client.surname, client.name,
+    clientTestDao.get().insertClient(client.id, client.surname, client.name,
       client.patronymic, client.gender, Date.valueOf(client.dateOfBirth), client.charm.name);
 
     assertThat(client).isNotNull();
@@ -514,7 +514,7 @@ public class ClientRegisterImplTest extends ParentTestNg {
     List<ClientDetails> clients = new ArrayList<>();
     for (int i = 0; i < size; i++) {
       ClientDetails client = createRndClient();
-      clientTestDao.get().insertClientDot(client.id, client.surname, client.name,
+      clientTestDao.get().insertClient(client.id, client.surname, client.name,
         client.patronymic, client.gender, Date.valueOf(client.dateOfBirth), client.charm.name);
       clients.add(client);
     }

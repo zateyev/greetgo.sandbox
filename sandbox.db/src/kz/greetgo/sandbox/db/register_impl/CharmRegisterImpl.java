@@ -1,7 +1,19 @@
 package kz.greetgo.sandbox.db.register_impl;
 
-/**
- * Created by zateyev on 2/15/18.
- */
-public class CharmRegisterImpl {
+import kz.greetgo.depinject.core.Bean;
+import kz.greetgo.depinject.core.BeanGetter;
+import kz.greetgo.sandbox.controller.register.CharmRegister;
+import kz.greetgo.sandbox.db.dao.CharmDao;
+
+import java.util.List;
+
+@Bean
+public class CharmRegisterImpl implements CharmRegister {
+
+  public BeanGetter<CharmDao> charmDao;
+
+  @Override
+  public List<String> getCharms() {
+    return null;
+  }
 }
