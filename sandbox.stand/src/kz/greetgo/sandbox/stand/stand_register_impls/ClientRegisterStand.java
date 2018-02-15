@@ -25,7 +25,7 @@ public class ClientRegisterStand implements ClientRegister {
     }
 
     @Override
-    public List<ClientInfo> getClientsList(String filterBy, String filterInputs, String orderBy, String isDesc, int page, int pageSize) {
+    public List<ClientInfo> getClientsList(String filterBy, String filterInputs, String orderBy, boolean isDesc, int page, int pageSize) {
         List<ClientInfo> clientInfos = filterClientsList(filterBy, filterInputs);
         if (clientInfos.isEmpty()) return clientInfos;
 
@@ -42,7 +42,7 @@ public class ClientRegisterStand implements ClientRegister {
         else
             clientInfos.sort(Comparator.comparing(o -> o.surname));
 
-        if (Boolean.valueOf(isDesc)) Collections.reverse(clientInfos);
+        if (isDesc) Collections.reverse(clientInfos);
 
 
         PageUtils.cutPage(clientInfos, page*pageSize, pageSize);

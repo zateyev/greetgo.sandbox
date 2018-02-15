@@ -21,7 +21,7 @@ public interface ClientRegister {
      * @param pageSize максимальное количество элементов на странице
      * @return список клиентов
      */
-    List<ClientInfo> getClientsList(String filterBy, String filterInputs, String orderBy, String isDesc, int page, int pageSize);
+    List<ClientInfo> getClientsList(String filterBy, String filterInputs, String orderBy, boolean isDesc, int page, int pageSize);
 
     /**
      * Предоставляет полную информацию о клиенте

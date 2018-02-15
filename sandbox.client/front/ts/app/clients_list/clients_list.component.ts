@@ -122,7 +122,7 @@ export class ClientsListComponent {
       filterBy: this.filterBy,
       filterInputs: this.filterInputs,
       orderBy: this.orderBy,
-      isDesc: this.isDescending.toString(),
+      isDesc: this.isDescending,
       page: this.currentPage,
       pageSize: this.pageSize
     }).toPromise().then(result => {

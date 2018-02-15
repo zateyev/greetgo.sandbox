@@ -22,7 +22,7 @@ public class ClientRegisterImpl implements ClientRegister {
   }
 
   @Override
-  public List<ClientInfo> getClientsList(String filterBy, String filterInputs, String orderBy, String isDesc, int page, int pageSize) {
+  public List<ClientInfo> getClientsList(String filterBy, String filterInputs, String orderBy, boolean isDesc, int page, int pageSize) {
     return null;
   }
 

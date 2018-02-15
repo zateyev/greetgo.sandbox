@@ -31,7 +31,7 @@ public class ClientsListController implements Controller {
   public List<ClientInfo> clientsList(@Par("filterBy") String filterBy,
                                       @Par("filterInputs") String filterInputs,
                                       @Par("orderBy") String orderBy,
-                                      @Par("isDesc") String isDesc,
+                                      @Par("isDesc") boolean isDesc,
                                       @Par("page") int page,
                                       @Par("pageSize") int pageSize) {
     return clientRegister.get().getClientsList(filterBy, filterInputs, orderBy, isDesc, page, pageSize);
