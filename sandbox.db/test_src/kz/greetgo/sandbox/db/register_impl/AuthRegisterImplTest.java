@@ -44,7 +44,6 @@ public class AuthRegisterImplTest extends ParentTestNg {
 
   @Test(dataProvider = "saveParam_DP")
   public void saveParam_notNull_insert(UserParamName paramName) throws Exception {
-    System.out.println(paramName);
     String personId = RND.str(10);
     String expectedValue = RND.str(10);
 

@@ -2,6 +2,7 @@ package kz.greetgo.sandbox.db.register_impl;
 
 import kz.greetgo.depinject.core.Bean;
 import kz.greetgo.depinject.core.BeanGetter;
+import kz.greetgo.sandbox.controller.errors.NotFound;
 import kz.greetgo.sandbox.controller.model.ClientDetails;
 import kz.greetgo.sandbox.controller.model.ClientInfo;
 import kz.greetgo.sandbox.controller.model.ClientRecords;
@@ -30,6 +31,7 @@ public class ClientRegisterImpl implements ClientRegister {
 
   @Override
   public ClientDetails getClientDetails(String clientId) {
+//    throw new NotFound();
     return null;
   }
 
@@ -40,6 +42,6 @@ public class ClientRegisterImpl implements ClientRegister {
 
   @Override
   public void removeClient(String clientsId) {
-
+//    throw new NotFound();
   }
 }

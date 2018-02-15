@@ -21,14 +21,23 @@ public interface ClientTestDao {
   long countOfClients(@Param("filterBy") String filterBy,
                       @Param("filterInputs") String filterInputs);
 
+//  @Insert("insert into Client (id, surname, name, patronymic, gender, birth_date, charm) " +
+//    "values (#{id}, #{surname}, #{name}, #{patronymic}, #{gender}, #{birth_date}, 'charm')")
+//  void insertClient(@Param("id") String clientId,
+//                    @Param("surname") String surname,
+//                    @Param("name") String name,
+//                    @Param("patronymic") String patronymic,
+//                    @Param("gender") Gender gender,
+//                    @Param("birth_date") Date birth_date,
+//                    @Param("charm") String charm);
+
   @Insert("insert into Client (id, surname, name, patronymic, gender, birth_date, charm) " +
-    "values (#{id}, #{surname}, #{name}, #{patronymic}, #{gender}, #{birth_date}, 'charm')")
-//  void insertClient(ClientDot clientDot);
+    "values (#{id}, #{surname}, #{name}, #{patronymic}, #{gender}, #{birth_date}, #{charm})")
   void insertClient(@Param("id") String personId,
                     @Param("surname") String surname,
                     @Param("name") String name,
                     @Param("patronymic") String patronymic,
                     @Param("gender") Gender gender,
                     @Param("birth_date") Date birth_date,
-                    @Param("charm") String charm);
+                    @Param("charm") String charmId);
 }

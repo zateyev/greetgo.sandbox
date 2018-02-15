@@ -1,6 +1,7 @@
 package kz.greetgo.sandbox.db.register_impl;
 
 import kz.greetgo.depinject.core.BeanGetter;
+import kz.greetgo.sandbox.controller.errors.NotFound;
 import kz.greetgo.sandbox.controller.model.*;
 import kz.greetgo.sandbox.controller.register.ClientRegister;
 import kz.greetgo.sandbox.db.test.dao.ClientTestDao;
@@ -31,7 +32,7 @@ public class ClientRegisterImplTest extends ParentTestNg {
   @Test
   public void getTotalSize_noFilter() {
 
-    List<ClientDetails> clients = clearDbAndLoadTestData(100);
+    List<ClientDetails> clients = clearDbAndInsertTestData(100);
 
     assertThat(clients).isNotNull();
 
@@ -47,12 +48,12 @@ public class ClientRegisterImplTest extends ParentTestNg {
   @Test
   public void getTotalSize_filteredBySurname() {
 
-    List<ClientDetails> clients = clearDbAndLoadTestData(100);
+    List<ClientDetails> clients = clearDbAndInsertTestData(100);
 
     String filterInput = clients.get(RND.plusInt(clients.size())).surname.toLowerCase().substring(7);
     int count = 0;
     for (ClientDetails client : clients) {
-      if (client.surname.contains(filterInput)) count++;
+      if (client.surname.toLowerCase().contains(filterInput)) count++;
     }
 
     //
@@ -67,12 +68,12 @@ public class ClientRegisterImplTest extends ParentTestNg {
   @Test
   public void getTotalSize_filteredByName() {
 
-    List<ClientDetails> clients = clearDbAndLoadTestData(100);
+    List<ClientDetails> clients = clearDbAndInsertTestData(100);
 
     String filterInput = clients.get(RND.plusInt(clients.size())).name.toLowerCase().substring(7);
     int count = 0;
     for (ClientDetails client : clients) {
-      if (client.name.contains(filterInput)) count++;
+      if (client.name.toLowerCase().contains(filterInput)) count++;
     }
 
     //
@@ -87,12 +88,12 @@ public class ClientRegisterImplTest extends ParentTestNg {
   @Test
   public void getTotalSize_filteredByPatronymic() {
 
-    List<ClientDetails> clients = clearDbAndLoadTestData(100);
+    List<ClientDetails> clients = clearDbAndInsertTestData(100);
 
     String filterInput = clients.get(RND.plusInt(clients.size())).patronymic.toLowerCase().substring(7);
     int count = 0;
     for (ClientDetails client : clients) {
-      if (client.patronymic.contains(filterInput)) count++;
+      if (client.patronymic.toLowerCase().contains(filterInput)) count++;
     }
 
     //
@@ -107,7 +108,7 @@ public class ClientRegisterImplTest extends ParentTestNg {
   @Test
   public void getClientsList_default() {
 
-    List<ClientDetails> clients = clearDbAndLoadTestData(200);
+    List<ClientDetails> clients = clearDbAndInsertTestData(200);
 
     int pageSize = RND.plusInt(clients.size());
     int page = RND.plusInt((int) Math.ceil(clients.size() / pageSize));
@@ -136,7 +137,7 @@ public class ClientRegisterImplTest extends ParentTestNg {
   @Test
   public void getClientsList_orderedByAge() {
 
-    List<ClientDetails> clients = clearDbAndLoadTestData(200);
+    List<ClientDetails> clients = clearDbAndInsertTestData(200);
 
     int pageSize = RND.plusInt(clients.size());
     int page = RND.plusInt((int) Math.ceil(clients.size() / pageSize));
@@ -144,7 +145,7 @@ public class ClientRegisterImplTest extends ParentTestNg {
     List<ClientInfo> expectingClientList = new ArrayList<>();
     clients.forEach(clientDetails -> expectingClientList.add(toClientInfo(clientDetails)));
 
-    expectingClientList.sort(Comparator.comparing(o -> o.age));
+    expectingClientList.sort(Comparator.comparingInt(o -> o.age));
 
     PageUtils.cutPage(expectingClientList, page * pageSize, pageSize);
 
@@ -165,7 +166,7 @@ public class ClientRegisterImplTest extends ParentTestNg {
   @Test
   public void getClientsList_orderedByTotalBalance() {
 
-    List<ClientDetails> clients = clearDbAndLoadTestData(200);
+    List<ClientDetails> clients = clearDbAndInsertTestData(200);
 
     int pageSize = RND.plusInt(clients.size());
     int page = RND.plusInt((int) Math.ceil(clients.size() / pageSize));
@@ -173,7 +174,7 @@ public class ClientRegisterImplTest extends ParentTestNg {
     List<ClientInfo> expectingClientList = new ArrayList<>();
     clients.forEach(clientDetails -> expectingClientList.add(toClientInfo(clientDetails)));
 
-    expectingClientList.sort(Comparator.comparing(o -> o.totalBalance));
+    expectingClientList.sort(Comparator.comparingInt(o -> o.totalBalance));
 
     PageUtils.cutPage(expectingClientList, page * pageSize, pageSize);
 
@@ -194,7 +195,7 @@ public class ClientRegisterImplTest extends ParentTestNg {
   @Test
   public void getClientsList_descOrderedByTotalBalance() {
 
-    List<ClientDetails> clients = clearDbAndLoadTestData(200);
+    List<ClientDetails> clients = clearDbAndInsertTestData(200);
 
     int pageSize = RND.plusInt(clients.size());
     int page = RND.plusInt((int) Math.ceil(clients.size() / pageSize));
@@ -202,7 +203,7 @@ public class ClientRegisterImplTest extends ParentTestNg {
     List<ClientInfo> expectingClientList = new ArrayList<>();
     clients.forEach(clientDetails -> expectingClientList.add(toClientInfo(clientDetails)));
 
-    expectingClientList.sort(Comparator.comparing(o -> o.totalBalance));
+    expectingClientList.sort(Comparator.comparingInt(o -> o.totalBalance));
     Collections.reverse(expectingClientList);
 
     PageUtils.cutPage(expectingClientList, page * pageSize, pageSize);
@@ -224,7 +225,7 @@ public class ClientRegisterImplTest extends ParentTestNg {
   @Test
   public void getClientsList_orderedByMinBalance() {
 
-    List<ClientDetails> clients = clearDbAndLoadTestData(200);
+    List<ClientDetails> clients = clearDbAndInsertTestData(200);
 
     int pageSize = RND.plusInt(clients.size());
     int page = RND.plusInt((int) Math.ceil(clients.size() / pageSize));
@@ -232,7 +233,7 @@ public class ClientRegisterImplTest extends ParentTestNg {
     List<ClientInfo> expectingClientList = new ArrayList<>();
     clients.forEach(clientDetails -> expectingClientList.add(toClientInfo(clientDetails)));
 
-    expectingClientList.sort(Comparator.comparing(o -> o.minBalance));
+    expectingClientList.sort(Comparator.comparingInt(o -> o.minBalance));
 
     PageUtils.cutPage(expectingClientList, page * pageSize, pageSize);
 
@@ -253,7 +254,7 @@ public class ClientRegisterImplTest extends ParentTestNg {
   @Test
   public void getClientsList_orderedByMaxBalance() {
 
-    List<ClientDetails> clients = clearDbAndLoadTestData(200);
+    List<ClientDetails> clients = clearDbAndInsertTestData(200);
 
     int pageSize = RND.plusInt(clients.size());
     int page = RND.plusInt((int) Math.ceil(clients.size() / pageSize));
@@ -261,7 +262,7 @@ public class ClientRegisterImplTest extends ParentTestNg {
     List<ClientInfo> expectingClientList = new ArrayList<>();
     clients.forEach(clientDetails -> expectingClientList.add(toClientInfo(clientDetails)));
 
-    expectingClientList.sort(Comparator.comparing(o -> o.maxBalance));
+    expectingClientList.sort(Comparator.comparingInt(o -> o.maxBalance));
 
     PageUtils.cutPage(expectingClientList, page * pageSize, pageSize);
 
@@ -282,7 +283,7 @@ public class ClientRegisterImplTest extends ParentTestNg {
   @Test
   public void getClientsList_filteredBySurname() {
 
-    List<ClientDetails> clients = clearDbAndLoadTestData(200);
+    List<ClientDetails> clients = clearDbAndInsertTestData(200);
 
     List<ClientInfo> expectingClientList = new ArrayList<>();
     clients.forEach(clientDetails -> expectingClientList.add(toClientInfo(clientDetails)));
@@ -314,7 +315,7 @@ public class ClientRegisterImplTest extends ParentTestNg {
   @Test
   public void getClientsList_filteredByName() {
 
-    List<ClientDetails> clients = clearDbAndLoadTestData(200);
+    List<ClientDetails> clients = clearDbAndInsertTestData(200);
 
     List<ClientInfo> expectingClientList = new ArrayList<>();
     clients.forEach(clientDetails -> expectingClientList.add(toClientInfo(clientDetails)));
@@ -346,7 +347,7 @@ public class ClientRegisterImplTest extends ParentTestNg {
   @Test
   public void getClientsList_filteredByPatronymic() {
 
-    List<ClientDetails> clients = clearDbAndLoadTestData(200);
+    List<ClientDetails> clients = clearDbAndInsertTestData(200);
 
     List<ClientInfo> expectingClientList = new ArrayList<>();
     clients.forEach(clientDetails -> expectingClientList.add(toClientInfo(clientDetails)));
@@ -376,9 +377,41 @@ public class ClientRegisterImplTest extends ParentTestNg {
   }
 
   @Test
+  public void getClientsList_filteredByPatronymicAndOrderedByMinBalance() {
+
+    List<ClientDetails> clients = clearDbAndInsertTestData(200);
+
+    List<ClientInfo> expectingClientList = new ArrayList<>();
+    clients.forEach(clientDetails -> expectingClientList.add(toClientInfo(clientDetails)));
+
+    String filterInput = clients.get(RND.plusInt(clients.size())).patronymic.toLowerCase().substring(7);
+
+    filterClientList(expectingClientList, "patronymic", filterInput);
+
+    expectingClientList.sort(Comparator.comparingInt(o -> o.minBalance));
+
+    int pageSize = RND.plusInt(clients.size());
+    int page = RND.plusInt((int) Math.ceil(clients.size() / pageSize));
+    PageUtils.cutPage(expectingClientList, page * pageSize, pageSize);
+
+    //
+    //
+    List<ClientInfo> result = clientRegister.get().getClientsList("patronymic", filterInput, null,
+      false, page, pageSize);
+    //
+    //
+
+    assertThat(result).isNotNull();
+    assertThat(result.size()).isEqualTo(expectingClientList.size());
+    for (int i = 0; i < expectingClientList.size(); i++) {
+      assertThat(result.get(i)).isEqualsToByComparingFields(expectingClientList.get(i));
+    }
+  }
+
+  @Test
   public void getClientDetails_ok() {
 
-    List<ClientDetails> clients = clearDbAndLoadTestData(10);
+    List<ClientDetails> clients = clearDbAndInsertTestData(10);
 
     ClientDetails expectingClient = clients.get(RND.plusInt(clients.size()));
 
@@ -392,44 +425,25 @@ public class ClientRegisterImplTest extends ParentTestNg {
     assertThat(result).isEqualsToByComparingFields(expectingClient);
   }
 
-  @Test
-  public void getClientDetails_notFound() {
+  @Test(expectedExceptions = NotFound.class)
+  public void getClientDetails_NotFound() throws Exception {
 
-    List<ClientDetails> clients = clearDbAndLoadTestData(10);
+    List<ClientDetails> clients = clearDbAndInsertTestData(10);
 
     //
     //
     ClientDetails result = clientRegister.get().getClientDetails(idGen.get().newId());
     //
     //
-
-    assertThat(result).isNull();
   }
 
   @Test
   public void addOrUpdateClient_add() {
     clientTestDao.get().removeAllData();
 
-    ClientRecords clientRecords = new ClientRecords();
-    clientRecords.id = idGen.get().newId();
-    clientRecords.surname = RND.str(10);
-    clientRecords.name = RND.str(10);
-    clientRecords.patronymic = RND.str(10);
-    clientRecords.charm = new Charm();
-    clientRecords.charm.name = RND.str(10);
-    clientRecords.gender = RND.someEnum(Gender.values());
-    clientRecords.dateOfBirth = LocalDate.now().toString();
-
-    ClientInfo expectedClientInfo = new ClientInfo();
-    expectedClientInfo.id = clientRecords.id;
-    expectedClientInfo.surname = clientRecords.surname;
-    expectedClientInfo.name = clientRecords.name;
-    expectedClientInfo.patronymic = clientRecords.patronymic;
-    expectedClientInfo.charm = clientRecords.charm;
-    expectedClientInfo.age = Period.between(LocalDate.parse(clientRecords.dateOfBirth), LocalDate.now()).getYears();
-    expectedClientInfo.totalBalance = clientRecords.totalBalance;
-    expectedClientInfo.minBalance = clientRecords.minBalance;
-    expectedClientInfo.maxBalance = clientRecords.maxBalance;
+    ClientDetails clientDetails = createRndClient();
+    ClientInfo expectingClientInfo = toClientInfo(clientDetails);
+    ClientRecords clientRecords = toClientRecords(clientDetails);
 
     //
     //
@@ -438,7 +452,7 @@ public class ClientRegisterImplTest extends ParentTestNg {
     //
 
     assertThat(result).isNotNull();
-    assertThat(result).isEqualsToByComparingFields(expectedClientInfo);
+    assertThat(result).isEqualsToByComparingFields(expectingClientInfo);
   }
 
   @Test
@@ -487,8 +501,8 @@ public class ClientRegisterImplTest extends ParentTestNg {
     assertThat(clientTestDao.get().getClientById(client.id)).isNull();
   }
 
-  @Test
-  public void removeClient_notFound() {
+  @Test(expectedExceptions = NotFound.class)
+  public void removeClient_NotFound() throws Exception {
     clientTestDao.get().removeAllData();
 
     ClientDetails client = createRndClient();
@@ -504,12 +518,9 @@ public class ClientRegisterImplTest extends ParentTestNg {
     clientRegister.get().removeClient(clientId);
     //
     //
-
-    // FIXME: 2/14/18 this is awkward
-    assertThat(clientTestDao.get().getClientById(client.id)).isNotNull();
   }
 
-  private List<ClientDetails> clearDbAndLoadTestData(int size) {
+  private List<ClientDetails> clearDbAndInsertTestData(int size) {
     clientTestDao.get().removeAllData();
     List<ClientDetails> clients = new ArrayList<>();
     for (int i = 0; i < size; i++) {
