@@ -6,5 +6,5 @@ public class Charm {
   public String id;
   public String name;
   public String description;
-  public int energy;
+  public double energy;
 }
