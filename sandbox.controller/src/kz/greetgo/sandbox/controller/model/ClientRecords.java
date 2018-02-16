@@ -18,7 +18,7 @@ public class ClientRecords {
   public Address addressF;
   public Address addressR;
   public List<PhoneNumber> phoneNumbers = new ArrayList<>();
-  public int totalBalance;
-  public int minBalance;
-  public int maxBalance;
+  public int totalBalance;/**/
+  public int minBalance;/**/
+  public int maxBalance;/**/
 }

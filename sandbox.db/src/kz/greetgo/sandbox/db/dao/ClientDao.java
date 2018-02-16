@@ -33,6 +33,19 @@ public interface ClientDao {
   ClientInfo selectClientInfoById(@Param("id") String clientId);
 
   void insertOrUpdateClient(String id, String surname, String name, String patronymic, Gender gender, Date dateOfBirth, String charm);
+
+  void insertPhoneNumber(String clientId, String number, PhoneType type);
+
+  void insertAddress(String clientId, AddressType type, String street, String house, String flat);
+
+  @Delete("DELETE FROM Client WHERE id = #{id}")
+  void removeClientById(@Param("id") String clientsId);
+
+  @Delete("DELETE FROM ClientAddr WHERE client = #{client}")
+  void removeAddressOfClient(@Param("client") String clientsId);
+
+  @Delete("DELETE FROM ClientPhone WHERE client = #{client}")
+  void removePhoneNumbersOfClient(@Param("client") String clientsId);
 //  void insertOrUpdateClient(ClientRecords clientRecords);
 
 //  @Select("select count(1) from Client where position(#{filterInputs} in ${filterBy}) <> 0")

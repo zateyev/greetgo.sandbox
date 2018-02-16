@@ -501,7 +501,7 @@ public class ClientRegisterImplTest extends ParentTestNg {
     assertThat(clientTestDao.get().getClientById(client.id)).isNull();
   }
 
-  @Test(expectedExceptions = NotFound.class)
+  @Test
   public void removeClient_NotFound() throws Exception {
     clientTestDao.get().removeAllData();
 
@@ -511,13 +511,13 @@ public class ClientRegisterImplTest extends ParentTestNg {
 
     assertThat(client).isNotNull();
 
-    String clientId = idGen.get().newId();
+    //
+    //
+    clientRegister.get().removeClient(idGen.get().newId());
+    //
+    //
 
-    //
-    //
-    clientRegister.get().removeClient(clientId);
-    //
-    //
+    assertThat(clientTestDao.get().getClientById(client.id)).isNotNull();
   }
 
   private List<ClientDetails> clearDbAndInsertTestData(int size) {
@@ -543,6 +543,22 @@ public class ClientRegisterImplTest extends ParentTestNg {
     client.charm.name = RND.str(10);
     client.gender = RND.someEnum(Gender.values());
     client.dateOfBirth = LocalDate.now().toString();
+    client.addressF = new Address();
+    client.addressF.type = AddressType.FACT;
+    client.addressF.street = RND.str(10);
+    client.addressF.house = RND.str(5);
+    client.addressF.flat = RND.str(5);
+    client.addressR = new Address();
+    client.addressR.type = AddressType.REG;
+    client.addressR.street = RND.str(10);
+    client.addressR.house = RND.str(5);
+    client.addressR.flat = RND.str(5);
+    for (int i = 0; i < RND.plusInt(2) + 3; i++) {
+      PhoneNumber phoneNumber = new PhoneNumber();
+      phoneNumber.phoneType = RND.someEnum(PhoneType.values());
+      phoneNumber.number = RND.str(10);
+      client.phoneNumbers.add(phoneNumber);
+    }
     return client;
   }
 
@@ -582,6 +598,9 @@ public class ClientRegisterImplTest extends ParentTestNg {
     clientRecords.charm = clientDetails.charm;
     clientRecords.gender = clientDetails.gender;
     clientRecords.dateOfBirth = clientDetails.dateOfBirth;
+    clientRecords.addressF = clientDetails.addressF;
+    clientRecords.addressR = clientDetails.addressR;
+    clientRecords.phoneNumbers = clientDetails.phoneNumbers;
     clientRecords.totalBalance = clientDetails.totalBalance;
     clientRecords.minBalance = clientDetails.minBalance;
     clientRecords.maxBalance = clientDetails.maxBalance;

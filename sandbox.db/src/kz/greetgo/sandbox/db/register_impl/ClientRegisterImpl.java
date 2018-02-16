@@ -3,12 +3,9 @@ package kz.greetgo.sandbox.db.register_impl;
 import kz.greetgo.depinject.core.Bean;
 import kz.greetgo.depinject.core.BeanGetter;
 import kz.greetgo.sandbox.controller.errors.NotFound;
-import kz.greetgo.sandbox.controller.model.ClientDetails;
-import kz.greetgo.sandbox.controller.model.ClientInfo;
-import kz.greetgo.sandbox.controller.model.ClientRecords;
+import kz.greetgo.sandbox.controller.model.*;
 import kz.greetgo.sandbox.controller.register.ClientRegister;
 import kz.greetgo.sandbox.db.dao.ClientDao;
-import kz.greetgo.util.RND;
 
 import java.sql.Date;
 import java.util.List;
@@ -40,15 +37,30 @@ public class ClientRegisterImpl implements ClientRegister {
 
   @Override
   public ClientInfo addOrUpdateClient(ClientRecords clientRecords) {
-    clientDao.get().insertOrUpdateClient(clientRecords.id, clientRecords.surname, clientRecords.name,
-      clientRecords.patronymic, clientRecords.gender, Date.valueOf(clientRecords.dateOfBirth), clientRecords.charm.id);
-//    clientDao.get().insertOrUpdateClient(clientRecords);
+    List<PhoneNumber> phoneNumbers = clientRecords.phoneNumbers;
+    Address addressFact = clientRecords.addressF;
+    Address addressReg = clientRecords.addressR;
+    for (PhoneNumber phoneNumber : phoneNumbers) {
+      clientDao.get().insertPhoneNumber(clientRecords.id, phoneNumber.number, phoneNumber.phoneType);
+    }
+    clientDao.get().insertAddress(clientRecords.id, addressFact.type, addressFact.street, addressFact.house, addressFact.flat);
+    clientDao.get().insertAddress(clientRecords.id, addressReg.type, addressReg.street, addressReg.house, addressReg.flat);
+
+    clientDao.get().insertOrUpdateClient(clientRecords.id,
+      clientRecords.surname,
+      clientRecords.name,
+      clientRecords.patronymic,
+      clientRecords.gender,
+      Date.valueOf(clientRecords.dateOfBirth),
+      clientRecords.charm.id);
+
     return clientDao.get().selectClientInfoById(clientRecords.id);
   }
 
   @Override
   public void removeClient(String clientsId) {
-//    clientDao.get().removeById(clientsId);
-//    throw new NotFound();
+    clientDao.get().removeClientById(clientsId);
+    clientDao.get().removeAddressOfClient(clientsId);
+    clientDao.get().removePhoneNumbersOfClient(clientsId);
   }
 }

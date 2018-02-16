@@ -4,9 +4,7 @@ import kz.greetgo.depinject.core.Bean;
 import kz.greetgo.mvc.annotations.Json;
 import kz.greetgo.mvc.annotations.Par;
 import kz.greetgo.mvc.annotations.ParamsTo;
-import kz.greetgo.sandbox.controller.model.ClientInfo;
-import kz.greetgo.sandbox.controller.model.ClientRecords;
-import kz.greetgo.sandbox.controller.model.Gender;
+import kz.greetgo.sandbox.controller.model.*;
 import kz.greetgo.sandbox.db.dao.ClientDao;
 import org.apache.ibatis.annotations.*;
 
@@ -26,4 +24,18 @@ public interface ClientDaoPostgres extends ClientDao {
                             @Param("gender") Gender gender,
                             @Param("birth_date") Date birth_date,
                             @Param("charm") String charmId);
+
+  @Insert("INSERT INTO ClientPhone (client, number, type) VALUES (#{client}, #{number}, #{type}) " +
+    "ON CONFLICT (client, number) DO NOTHING")
+  void insertPhoneNumber(@Param("client") String clientId,
+                         @Param("number") String number,
+                         @Param("type") PhoneType type);
+
+  @Insert("INSERT INTO ClientAddr (client, type, street, house, flat) VALUES (#{client}, #{type}, #{street}, #{house}, #{flat}) " +
+    "ON CONFLICT (client, type) DO NOTHING")
+  void insertAddress(@Param("client") String clientId,
+                     @Param("type") AddressType type,
+                     @Param("street") String street,
+                     @Param("house") String house,
+                     @Param("flat") String flat);
 }
