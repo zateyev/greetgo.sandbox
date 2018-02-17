@@ -1,7 +1,5 @@
 package kz.greetgo.sandbox.controller.model;
 
-import kz.greetgo.sandbox.controller.model.Charm;
-
 public class ClientInfo {
   public String id;
   public String surname;
@@ -9,7 +7,7 @@ public class ClientInfo {
   public String patronymic;
   public Charm charm;
   public int age;
-  public int totalBalance;
-  public int minBalance;
-  public int maxBalance;
+  public double totalBalance;
+  public double minBalance;
+  public double maxBalance;
 }

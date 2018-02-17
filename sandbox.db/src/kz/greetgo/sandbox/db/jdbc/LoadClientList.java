@@ -58,6 +58,22 @@ public class LoadClientList implements ConnectionCallback<List<ClientInfo>> {
   }
 
   private ClientInfo readRecord(ResultSet rs) throws SQLException {
+//    ClientInfo ret = new ClientInfo();
+//    ret.id = rs.getString("Client.id");
+//    ret.surname = rs.getString("Client.surname");
+//    ret.name = rs.getString("Client.name");
+//    ret.patronymic = rs.getString("Client.patronymic");
+//    ret.charm = new Charm();
+//    ret.charm.id = rs.getString("Client.charm");
+//    ret.charm.name = rs.getString("Charm.name");
+//    ret.charm.description = rs.getString("Charm.description");
+//    ret.charm.energy = rs.getDouble("Charm.energy");
+////    ret.age = rs.getInt("age");
+//    ret.totalBalance = rs.getInt("totalBalance");
+//    ret.minBalance = rs.getInt("minBalance");
+//    ret.maxBalance = rs.getInt("maxBalance");
+//    return ret;
+
     ClientInfo ret = new ClientInfo();
     ret.id = rs.getString("id");
     ret.surname = rs.getString("surname");
@@ -65,22 +81,24 @@ public class LoadClientList implements ConnectionCallback<List<ClientInfo>> {
     ret.patronymic = rs.getString("patronymic");
     ret.charm = new Charm();
     ret.charm.id = rs.getString("charm");
-    ret.charm.name = rs.getString("Charm.name");
-    ret.charm.description = rs.getString("Charm.description");
-    ret.charm.energy = rs.getDouble("Charm.energy");
-    ret.age = rs.getInt("age");
-    ret.totalBalance = rs.getInt("totalBalance");
-    ret.minBalance = rs.getInt("minBalance");
-    ret.maxBalance = rs.getInt("maxBalance");
+    ret.charm.name = rs.getString("cn");
+    ret.charm.description = rs.getString("cd");
+    ret.charm.energy = rs.getDouble("ce");
+//    ret.age = rs.getInt("age");
+//    ret.totalBalance = rs.getInt("totalBalance");
+//    ret.minBalance = rs.getInt("minBalance");
+//    ret.maxBalance = rs.getInt("maxBalance");
     return ret;
   }
 
   private void select() {
-    sql.append("select id, surname, name, patronymic, charm, Charm.name, Charm.description, Charm.energy, " +
-      "DIF(now() - birth_date) as age, " +
-      "tot() as totalBalance, " +
-      "min() as minBalance, " +
-      "max() as maxBalance");
+    sql.append("select Client.id, Client.surname, Client.name, Client.patronymic, Client.charm, " +
+      "Charm.name as cn, Charm.description as cd, Charm.energy as ce ");
+//      "Charm.name, Charm.description, Charm.energy, " +
+//      "age(Client.birth_date) as age, " +
+//      "sum(ClientAccount.money) as totalBalance, " +
+//      "min(ClientAccount.money) as minBalance, " +
+//      "max(ClientAccount.money) as maxBalance ");
   }
 
   private void prepareSql(DbType dbType) {
@@ -108,10 +126,57 @@ public class LoadClientList implements ConnectionCallback<List<ClientInfo>> {
   }
 
   private void prepareFromWhereForPostgres() {
-    sql.append("from Client ");
-    sql.append("where ...");
+//    sql.append("from Client inner join Charm on " +
+//      "Client.charm = Charm.id inner join ClientAccount on " +
+//      "Client.id = ClientAccount.client ");
+    sql.append("from Client inner join Charm on " +
+      "Client.charm = Charm.id ");
 
-    sql.append("and asd = ?");
-    params.add("wow");
+    switch (filterBy) {
+
+      case "surname":
+        sql.append("where Client.surname like ? ");
+        params.add("%" + filterInput + "%");
+        return;
+
+      case "name":
+        sql.append("where Client.name like ? ");
+        params.add("%" + filterInput + "%");
+        return;
+
+      case "patronymic":
+        sql.append("where Client.patronymic like ? ");
+        params.add("%" + filterInput + "%");
+        return;
+
+    }
+//    sql.append("group by Client.id ");
+
+    switch (orderBy) {
+      case "age":
+        sql.append("order by age ");
+        return;
+
+      case "totalBalance":
+        sql.append("order by totalBalance ");
+        return;
+
+      case "minBalance":
+        sql.append("order by minBalance ");
+        return;
+
+      case "maxBalance":
+        sql.append("order by maxBalance ");
+        return;
+
+      default:
+        sql.append("order by Client.surname ");
+    }
+
+    if (isDesc) sql.append("desc ");
+
+    sql.append("limit ? offset ? ");
+    params.add(pageSize);
+    params.add(page * pageSize);
   }
 }

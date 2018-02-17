@@ -7,10 +7,10 @@
     <sql endDelimiter=";;"><![CDATA[
       create table ClientAccount (
         id varchar(32) not null PRIMARY KEY,
-        client varchar(32) not null,
+        client varchar(32) not null REFERENCES Client (id),
         money real not null,
-        number varchar(64) NOT NULL,
-        registered_at timestamp with time zone not null
+        number varchar(64) not null,
+        registered_at timestamp with time zone
       )
     ]]></sql>
   </changeSet>

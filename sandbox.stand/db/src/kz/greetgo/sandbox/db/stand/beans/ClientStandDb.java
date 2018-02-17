@@ -3,7 +3,6 @@ package kz.greetgo.sandbox.db.stand.beans;
 import kz.greetgo.depinject.core.Bean;
 import kz.greetgo.depinject.core.HasAfterInject;
 import kz.greetgo.sandbox.controller.model.Charm;
-import kz.greetgo.sandbox.db.stand.model.CharmDot;
 import kz.greetgo.sandbox.db.stand.model.ClientDot;
 
 import java.io.BufferedReader;

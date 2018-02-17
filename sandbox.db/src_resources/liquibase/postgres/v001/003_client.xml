@@ -12,7 +12,7 @@
         patronymic varchar(255),
         gender varchar(12) not null,
         birth_date date not null,
-        charm varchar(32) not null
+        charm varchar(32) not null REFERENCES Charm (id)
       )
     ]]></sql>
   </changeSet>

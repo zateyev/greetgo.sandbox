@@ -1,17 +1,22 @@
 package kz.greetgo.sandbox.db.register_impl;
 
+import kz.greetgo.db.ConnectionCallback;
 import kz.greetgo.depinject.core.BeanGetter;
 import kz.greetgo.sandbox.controller.errors.NotFound;
 import kz.greetgo.sandbox.controller.model.*;
 import kz.greetgo.sandbox.controller.register.ClientRegister;
+import kz.greetgo.sandbox.db.jdbc.LoadClientList;
 import kz.greetgo.sandbox.db.test.dao.ClientTestDao;
 import kz.greetgo.sandbox.db.test.util.ParentTestNg;
+import kz.greetgo.sandbox.db.util.JdbcSandbox;
 import kz.greetgo.sandbox.db.util.PageUtils;
 import kz.greetgo.util.RND;
 import org.testng.annotations.Test;
 
+import java.sql.Connection;
 import java.sql.Date;
 import java.time.LocalDate;
+import java.time.OffsetDateTime;
 import java.time.Period;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -28,6 +33,40 @@ public class ClientRegisterImplTest extends ParentTestNg {
   public BeanGetter<ClientRegister> clientRegister;
   public BeanGetter<ClientTestDao> clientTestDao;
   public BeanGetter<IdGenerator> idGen;
+
+  public BeanGetter<JdbcSandbox> jdbcSandbox;
+
+//  private List<ClientInfo> getClientList(String filterBy, String filterInput, String orderBy, boolean isDesc, int page, int pageSize) {
+//    return jdbcSandbox.get().execute(new LoadClientList(filterBy, filterInput, orderBy, isDesc, page, pageSize));
+//  }
+
+  @Test
+  public void testingTest() {
+    List<ClientDetails> clients = clearDbAndInsertTestData(200);
+
+    int pageSize = RND.plusInt(clients.size());
+    int page = RND.plusInt((int) Math.ceil(clients.size() / pageSize));
+
+    List<ClientInfo> expectingClientList = new ArrayList<>();
+    clients.forEach(clientDetails -> expectingClientList.add(toClientInfo(clientDetails)));
+
+    expectingClientList.sort(Comparator.comparing(o -> o.surname));
+
+    PageUtils.cutPage(expectingClientList, page * pageSize, pageSize);
+
+    //
+    //
+    List<ClientInfo> result = clientRegister.get().getClientsList("", "", "",
+      false, page, pageSize);
+    //
+    //
+
+    assertThat(result).isNotNull();
+    assertThat(result.size()).isEqualTo(expectingClientList.size());
+    for (int i = 0; i < expectingClientList.size(); i++) {
+      assertThat(result.get(i)).isEqualsToByComparingFields(expectingClientList.get(i));
+    }
+  }
 
   @Test
   public void getTotalSize_noFilter() {
@@ -174,7 +213,7 @@ public class ClientRegisterImplTest extends ParentTestNg {
     List<ClientInfo> expectingClientList = new ArrayList<>();
     clients.forEach(clientDetails -> expectingClientList.add(toClientInfo(clientDetails)));
 
-    expectingClientList.sort(Comparator.comparingInt(o -> o.totalBalance));
+    expectingClientList.sort(Comparator.comparingDouble(o -> o.totalBalance));
 
     PageUtils.cutPage(expectingClientList, page * pageSize, pageSize);
 
@@ -203,7 +242,7 @@ public class ClientRegisterImplTest extends ParentTestNg {
     List<ClientInfo> expectingClientList = new ArrayList<>();
     clients.forEach(clientDetails -> expectingClientList.add(toClientInfo(clientDetails)));
 
-    expectingClientList.sort(Comparator.comparingInt(o -> o.totalBalance));
+    expectingClientList.sort(Comparator.comparingDouble(o -> o.totalBalance));
     Collections.reverse(expectingClientList);
 
     PageUtils.cutPage(expectingClientList, page * pageSize, pageSize);
@@ -233,7 +272,7 @@ public class ClientRegisterImplTest extends ParentTestNg {
     List<ClientInfo> expectingClientList = new ArrayList<>();
     clients.forEach(clientDetails -> expectingClientList.add(toClientInfo(clientDetails)));
 
-    expectingClientList.sort(Comparator.comparingInt(o -> o.minBalance));
+    expectingClientList.sort(Comparator.comparingDouble(o -> o.minBalance));
 
     PageUtils.cutPage(expectingClientList, page * pageSize, pageSize);
 
@@ -262,7 +301,7 @@ public class ClientRegisterImplTest extends ParentTestNg {
     List<ClientInfo> expectingClientList = new ArrayList<>();
     clients.forEach(clientDetails -> expectingClientList.add(toClientInfo(clientDetails)));
 
-    expectingClientList.sort(Comparator.comparingInt(o -> o.maxBalance));
+    expectingClientList.sort(Comparator.comparingDouble(o -> o.maxBalance));
 
     PageUtils.cutPage(expectingClientList, page * pageSize, pageSize);
 
@@ -388,7 +427,7 @@ public class ClientRegisterImplTest extends ParentTestNg {
 
     filterClientList(expectingClientList, "patronymic", filterInput);
 
-    expectingClientList.sort(Comparator.comparingInt(o -> o.minBalance));
+    expectingClientList.sort(Comparator.comparingDouble(o -> o.minBalance));
 
     int pageSize = RND.plusInt(clients.size());
     int page = RND.plusInt((int) Math.ceil(clients.size() / pageSize));
@@ -525,8 +564,12 @@ public class ClientRegisterImplTest extends ParentTestNg {
     List<ClientDetails> clients = new ArrayList<>();
     for (int i = 0; i < size; i++) {
       ClientDetails client = createRndClient();
+      clientTestDao.get().insertCharm(client.charm.id, client.charm.name, client.charm.description, client.charm.energy);
       clientTestDao.get().insertClient(client.id, client.surname, client.name,
-        client.patronymic, client.gender, Date.valueOf(client.dateOfBirth), client.charm.name);
+        client.patronymic, client.gender, Date.valueOf(client.dateOfBirth), client.charm.id);
+      // TODO: 2/16/18 registeredAt timestamp should be OffsetDateTime
+      clientTestDao.get().insertClientAccount(idGen.get().newId(), client.id, RND.plusDouble(1000, 2),
+        RND.str(10), null);
       clients.add(client);
     }
     return clients;
@@ -541,6 +584,8 @@ public class ClientRegisterImplTest extends ParentTestNg {
     client.charm = new Charm();
     client.charm.id = idGen.get().newId();
     client.charm.name = RND.str(10);
+    client.charm.description = RND.str(10);
+    client.charm.energy = RND.plusDouble(100, 2);
     client.gender = RND.someEnum(Gender.values());
     client.dateOfBirth = LocalDate.now().toString();
     client.addressF = new Address();

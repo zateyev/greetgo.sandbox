@@ -6,7 +6,7 @@
   <changeSet author="zateyev" id="create-table-ClientAddr">
     <sql endDelimiter=";;"><![CDATA[
       create table ClientAddr (
-        client varchar(32) not null,
+        client varchar(32) not null REFERENCES Client (id),
         type varchar(32) not null,
         street varchar(255) not null,
         house varchar(32) not null,

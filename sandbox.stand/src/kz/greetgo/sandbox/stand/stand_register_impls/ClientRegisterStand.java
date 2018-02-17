@@ -34,11 +34,11 @@ public class ClientRegisterStand implements ClientRegister {
         if ("age".equals(sortBy))
             clientInfos.sort(Comparator.comparingInt(o -> o.age));
         else if ("totalBalance".equals(sortBy))
-            clientInfos.sort(Comparator.comparingInt(o -> o.totalBalance));
+            clientInfos.sort(Comparator.comparingDouble(o -> o.totalBalance));
         else if ("minBalance".equals(sortBy))
-            clientInfos.sort(Comparator.comparingInt(o -> o.minBalance));
+            clientInfos.sort(Comparator.comparingDouble(o -> o.minBalance));
         else if ("maxBalance".equals(sortBy))
-            clientInfos.sort(Comparator.comparingInt(o -> o.maxBalance));
+            clientInfos.sort(Comparator.comparingDouble(o -> o.maxBalance));
         else
             clientInfos.sort(Comparator.comparing(o -> o.surname));
 

@@ -6,6 +6,8 @@ import kz.greetgo.sandbox.controller.errors.NotFound;
 import kz.greetgo.sandbox.controller.model.*;
 import kz.greetgo.sandbox.controller.register.ClientRegister;
 import kz.greetgo.sandbox.db.dao.ClientDao;
+import kz.greetgo.sandbox.db.jdbc.LoadClientList;
+import kz.greetgo.sandbox.db.util.JdbcSandbox;
 
 import java.sql.Date;
 import java.util.List;
@@ -14,6 +16,7 @@ import java.util.List;
 public class ClientRegisterImpl implements ClientRegister {
 
   public BeanGetter<ClientDao> clientDao;
+  public BeanGetter<JdbcSandbox> jdbcSandbox;
 
   @Override
   public long getTotalSize(String filterBy, String filterInput) {
@@ -24,8 +27,9 @@ public class ClientRegisterImpl implements ClientRegister {
   }
 
   @Override
-  public List<ClientInfo> getClientsList(String filterBy, String filterInputs, String orderBy, boolean isDesc, int page, int pageSize) {
-    return null;
+  public List<ClientInfo> getClientsList(String filterBy, String filterInput, String orderBy, boolean isDesc, int page, int pageSize) {
+//    return null;
+    return jdbcSandbox.get().execute(new LoadClientList(filterBy, filterInput, orderBy, isDesc, page, pageSize));
   }
 
   @Override

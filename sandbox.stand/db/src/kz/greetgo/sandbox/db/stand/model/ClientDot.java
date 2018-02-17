@@ -17,9 +17,9 @@ public class ClientDot {
   private Address addressF;
   private Address addressR;
   private List<PhoneNumber> phoneNumbers;
-  private int totalBalance;
-  private int minBalance;
-  private int maxBalance;
+  private double totalBalance;
+  private double minBalance;
+  private double maxBalance;
 
   public ClientDot(String id, String surname, String name, String patronymic, Address addressF, Address addressR, List<PhoneNumber> phoneNumbers) {
     this.id = id;
@@ -119,27 +119,27 @@ public class ClientDot {
     this.phoneNumbers = phoneNumbers;
   }
 
-  public int getTotalBalance() {
+  public double getTotalBalance() {
     return totalBalance;
   }
 
-  public void setTotalBalance(int totalBalance) {
+  public void setTotalBalance(double totalBalance) {
     this.totalBalance = totalBalance;
   }
 
-  public int getMinBalance() {
+  public double getMinBalance() {
     return minBalance;
   }
 
-  public void setMinBalance(int minBalance) {
+  public void setMinBalance(double minBalance) {
     this.minBalance = minBalance;
   }
 
-  public int getMaxBalance() {
+  public double getMaxBalance() {
     return maxBalance;
   }
 
-  public void setMaxBalance(int maxBalance) {
+  public void setMaxBalance(double maxBalance) {
     this.maxBalance = maxBalance;
   }
 
