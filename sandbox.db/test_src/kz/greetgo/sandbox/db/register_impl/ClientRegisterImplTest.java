@@ -44,13 +44,15 @@ public class ClientRegisterImplTest extends ParentTestNg {
   public void testingTest() {
     List<ClientDetails> clients = clearDbAndInsertTestData(200);
 
-    int pageSize = RND.plusInt(clients.size());
-    int page = RND.plusInt((int) Math.ceil(clients.size() / pageSize));
+//    int pageSize = RND.plusInt(clients.size());
+//    int page = RND.plusInt((int) Math.ceil(clients.size() / pageSize));
+    int pageSize = 100;
+    int page = 0;
 
     List<ClientInfo> expectingClientList = new ArrayList<>();
     clients.forEach(clientDetails -> expectingClientList.add(toClientInfo(clientDetails)));
 
-    expectingClientList.sort(Comparator.comparing(o -> o.surname));
+    expectingClientList.sort(Comparator.comparing(o -> o.surname.toLowerCase()));
 
     PageUtils.cutPage(expectingClientList, page * pageSize, pageSize);
 
@@ -64,7 +66,15 @@ public class ClientRegisterImplTest extends ParentTestNg {
     assertThat(result).isNotNull();
     assertThat(result.size()).isEqualTo(expectingClientList.size());
     for (int i = 0; i < expectingClientList.size(); i++) {
-      assertThat(result.get(i)).isEqualsToByComparingFields(expectingClientList.get(i));
+      assertThat(result.get(i).id).isEqualTo(expectingClientList.get(i).id);
+      assertThat(result.get(i).surname).isEqualTo(expectingClientList.get(i).surname);
+      assertThat(result.get(i).name).isEqualTo(expectingClientList.get(i).name);
+      assertThat(result.get(i).patronymic).isEqualTo(expectingClientList.get(i).patronymic);
+      assertThat(result.get(i).charm.id).isEqualTo(expectingClientList.get(i).charm.id);
+      assertThat(result.get(i).age).isEqualTo(expectingClientList.get(i).age);
+      assertThat(Math.abs(result.get(i).totalBalance - expectingClientList.get(i).totalBalance)).isLessThan(0.001);
+      assertThat(Math.abs(result.get(i).minBalance - expectingClientList.get(i).minBalance)).isLessThan(0.001);
+      assertThat(Math.abs(result.get(i).maxBalance - expectingClientList.get(i).maxBalance)).isLessThan(0.001);
     }
   }
 
@@ -568,8 +578,20 @@ public class ClientRegisterImplTest extends ParentTestNg {
       clientTestDao.get().insertClient(client.id, client.surname, client.name,
         client.patronymic, client.gender, Date.valueOf(client.dateOfBirth), client.charm.id);
       // TODO: 2/16/18 registeredAt timestamp should be OffsetDateTime
-      clientTestDao.get().insertClientAccount(idGen.get().newId(), client.id, RND.plusDouble(1000, 2),
-        RND.str(10), null);
+      double total = 0.0;
+      double min = 1000.0;
+      double max = 0.0;
+      for (int j = 0; j < RND.plusInt(4); j++) {
+        double money = RND.plusDouble(1000, 2);
+        total += money;
+        if (money < min) min = money;
+        if (money > max) max = money;
+        clientTestDao.get().insertClientAccount(idGen.get().newId(), client.id, money,
+          RND.str(10), null);
+      }
+      client.totalBalance = total;
+      client.minBalance = min < 1000.0 ? min : 0.0;
+      client.maxBalance = max;
       clients.add(client);
     }
     return clients;

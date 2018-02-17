@@ -84,21 +84,21 @@ public class LoadClientList implements ConnectionCallback<List<ClientInfo>> {
     ret.charm.name = rs.getString("cn");
     ret.charm.description = rs.getString("cd");
     ret.charm.energy = rs.getDouble("ce");
-//    ret.age = rs.getInt("age");
-//    ret.totalBalance = rs.getInt("totalBalance");
-//    ret.minBalance = rs.getInt("minBalance");
-//    ret.maxBalance = rs.getInt("maxBalance");
+    ret.age = rs.getInt("age");
+    ret.totalBalance = rs.getDouble("totalBalance");
+    ret.minBalance = rs.getDouble("minBalance");
+    ret.maxBalance = rs.getDouble("maxBalance");
     return ret;
   }
 
   private void select() {
     sql.append("select Client.id, Client.surname, Client.name, Client.patronymic, Client.charm, " +
-      "Charm.name as cn, Charm.description as cd, Charm.energy as ce ");
+      "Charm.name as cn, Charm.description as cd, Charm.energy as ce, " +
 //      "Charm.name, Charm.description, Charm.energy, " +
-//      "age(Client.birth_date) as age, " +
-//      "sum(ClientAccount.money) as totalBalance, " +
-//      "min(ClientAccount.money) as minBalance, " +
-//      "max(ClientAccount.money) as maxBalance ");
+      "date_part('year', age(Client.birth_date)) as age, " +
+      "sum(ClientAccount.money) as totalBalance, " +
+      "min(ClientAccount.money) as minBalance, " +
+      "max(ClientAccount.money) as maxBalance ");
   }
 
   private void prepareSql(DbType dbType) {
@@ -126,11 +126,11 @@ public class LoadClientList implements ConnectionCallback<List<ClientInfo>> {
   }
 
   private void prepareFromWhereForPostgres() {
+    sql.append("from Client left join Charm on " +
+      "Client.charm = Charm.id left join ClientAccount on " +
+      "Client.id = ClientAccount.client ");
 //    sql.append("from Client inner join Charm on " +
-//      "Client.charm = Charm.id inner join ClientAccount on " +
-//      "Client.id = ClientAccount.client ");
-    sql.append("from Client inner join Charm on " +
-      "Client.charm = Charm.id ");
+//      "Client.charm = Charm.id ");
 
     switch (filterBy) {
 
@@ -150,7 +150,7 @@ public class LoadClientList implements ConnectionCallback<List<ClientInfo>> {
         return;
 
     }
-//    sql.append("group by Client.id ");
+    sql.append("group by client.id, charm.id ");
 
     switch (orderBy) {
       case "age":
