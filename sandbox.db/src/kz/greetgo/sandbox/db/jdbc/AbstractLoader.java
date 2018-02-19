@@ -84,19 +84,19 @@ public abstract class AbstractLoader<T> implements ConnectionCallback<T> {
           break;
 
         case "totalBalance":
-          sql.append("order by totalBalance ");
+          sql.append("order by ca.totalBalance nulls first, lower(Client.surname) ");
           break;
 
         case "minBalance":
-          sql.append("order by minBalance ");
+          sql.append("order by ca.minBalance ");
           break;
 
         case "maxBalance":
-          sql.append("order by maxBalance ");
+          sql.append("order by ca.maxBalance ");
           break;
 
         default:
-          sql.append("order by Client.surname ");
+          sql.append("order by lower(Client.surname) ");
       }
 
       if (isDesc) sql.append("desc ");

@@ -134,15 +134,7 @@ public class ClientRegisterImplTest extends ParentTestNg {
     assertThat(result).isNotNull();
     assertThat(result.size()).isEqualTo(expectingClientList.size());
     for (int i = 0; i < expectingClientList.size(); i++) {
-      assertThat(result.get(i).id).isEqualTo(expectingClientList.get(i).id);
-      assertThat(result.get(i).surname).isEqualTo(expectingClientList.get(i).surname);
-      assertThat(result.get(i).name).isEqualTo(expectingClientList.get(i).name);
-      assertThat(result.get(i).patronymic).isEqualTo(expectingClientList.get(i).patronymic);
-      assertThat(result.get(i).charm.id).isEqualTo(expectingClientList.get(i).charm.id);
-      assertThat(result.get(i).age).isEqualTo(expectingClientList.get(i).age);
-      assertThat(Math.abs(result.get(i).totalBalance - expectingClientList.get(i).totalBalance)).isLessThan(0.001);
-      assertThat(Math.abs(result.get(i).minBalance - expectingClientList.get(i).minBalance)).isLessThan(0.001);
-      assertThat(Math.abs(result.get(i).maxBalance - expectingClientList.get(i).maxBalance)).isLessThan(0.001);
+      assertThatAreEqual(result.get(i), expectingClientList.get(i));
     }
   }
 
@@ -196,12 +188,28 @@ public class ClientRegisterImplTest extends ParentTestNg {
 //    int page = pageSize > 0 ? RND.plusInt((int) Math.ceil(clients.size() / pageSize)) : 0;
 
     int pageSize = 25;
-    int page = 1;
+    int page = 0;
 
     List<ClientInfo> expectingClientList = new ArrayList<>();
     clients.forEach(clientDetails -> expectingClientList.add(toClientInfo(clientDetails)));
 
-    expectingClientList.sort(Comparator.comparingDouble(o -> o.totalBalance));
+//    expectingClientList.sort(Comparator.comparingDouble(o -> o.totalBalance));
+//    Collections.sort(expectingClientList, new Comparator() {
+//
+//      public int compare(Object o1, Object o2) {
+//
+//        String x1 = ((ClientInfo) o1).surname;
+//        String x2 = ((ClientInfo) o2).surname;
+//        int sComp = x1.compareTo(x2);
+//
+//        if (sComp != 0) {
+//          return sComp;
+//        } else {
+//          Double x1 = ((ClientInfo) o1).totalBalance;
+//          Double x2 = ((ClientInfo) o2).totalBalance;
+//          return x1.compareTo(x2);
+//        }
+//      }});
 
     PageUtils.cutPage(expectingClientList, page * pageSize, pageSize);
 
