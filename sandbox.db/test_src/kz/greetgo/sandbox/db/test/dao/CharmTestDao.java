@@ -5,7 +5,7 @@ import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
 
 public interface CharmTestDao {
-  @Select("TRUNCATE Charm")
+  @Select("TRUNCATE Charm CASCADE")
   void removeAllData();
 
   @Insert("insert into Charm (id, name, description, energy) values (#{id}, #{name}, #{description}, #{energy})")

@@ -8,8 +8,8 @@ import kz.greetgo.sandbox.db.test.util.ParentTestNg;
 import kz.greetgo.util.RND;
 import org.testng.annotations.Test;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.text.Collator;
+import java.util.*;
 
 import static org.fest.assertions.api.Assertions.assertThat;
 
@@ -33,6 +33,8 @@ public class CharmRegisterImplTest extends ParentTestNg {
       charms.add(charm);
     }
 
+    charms.sort(Comparator.comparing(charm -> charm.name.toLowerCase()));
+
     List<String> charmNames = new ArrayList<>();
     charms.forEach(charm -> charmNames.add(charm.name));
 
@@ -45,8 +47,21 @@ public class CharmRegisterImplTest extends ParentTestNg {
     assertThat(result).isNotNull();
     assertThat(result.size()).isEqualTo(charmNames.size());
     for (int i = 0; i < charmNames.size(); i++) {
-      assertThat(result.get(i)).isEqualToIgnoringCase(charmNames.get(i));
+      assertThat(result.get(i)).isEqualTo(charmNames.get(i));
     }
+  }
+
+  @Test
+  public void getCharms_empty() {
+    charmTestDao.get().removeAllData();
+
+    //
+    //
+    List<String> result = charmRegister.get().getCharms();
+    //
+    //
+
+    assertThat(result).isEmpty();
   }
 
   private Charm createRndCharm() {

@@ -14,6 +14,6 @@ public class CharmRegisterImpl implements CharmRegister {
 
   @Override
   public List<String> getCharms() {
-    return null;
+    return charmDao.get().loadCharmNames();
   }
 }
