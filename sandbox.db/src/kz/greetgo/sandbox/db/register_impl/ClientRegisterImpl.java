@@ -37,6 +37,9 @@ public class ClientRegisterImpl implements ClientRegister {
   public ClientDetails getClientDetails(String clientId) {
     ClientDetails clientDetails = clientDao.get().selectClientDetailsById(clientId);
     if (clientDetails == null) throw new NotFound();
+    clientDetails.addressF = clientDao.get().selectAddrByClientId(clientId, AddressType.FACT);
+    clientDetails.addressR = clientDao.get().selectAddrByClientId(clientId, AddressType.REG);
+    clientDetails.phoneNumbers = clientDao.get().selectPhonesByClientId(clientId);
     return clientDetails;
   }
 

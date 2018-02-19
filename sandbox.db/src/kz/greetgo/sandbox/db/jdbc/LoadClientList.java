@@ -22,7 +22,7 @@ public class LoadClientList extends AbstractLoader<List<ClientInfo>> {
   @Override
   public List<ClientInfo> doInConnection(Connection connection) throws Exception {
 
-    prepareSql(DbType.detect(connection));
+    prepareSql(DbType.detect(connection), true, true);
 
     try (PreparedStatement ps = connection.prepareStatement(sql.toString())) {
 

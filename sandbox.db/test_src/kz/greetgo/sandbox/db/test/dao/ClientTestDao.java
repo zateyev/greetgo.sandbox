@@ -1,7 +1,9 @@
 package kz.greetgo.sandbox.db.test.dao;
 
+import kz.greetgo.sandbox.controller.model.AddressType;
 import kz.greetgo.sandbox.controller.model.ClientDetails;
 import kz.greetgo.sandbox.controller.model.Gender;
+import kz.greetgo.sandbox.controller.model.PhoneType;
 import org.apache.ibatis.annotations.Insert;
 import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
@@ -12,7 +14,7 @@ import java.util.Date;
 public interface ClientTestDao {
   //  @Select("TRUNCATE Charm; TRUNCATE Client; TRUNCATE ClientAddr; TRUNCATE ClientPhone; TRUNCATE ClientAccount; " +
 //  "TRUNCATE TransactionType; TRUNCATE ClientAccountTransaction")
-  @Select("TRUNCATE Client CASCADE")
+  @Select("TRUNCATE Client CASCADE; TRUNCATE ClientPhone")
   void removeAllData();
 
   @Select("select id, surname, name, patronymic from Client where id = #{id}")
@@ -56,4 +58,18 @@ public interface ClientTestDao {
                            @Param("money") double money,
                            @Param("number") String number,
                            @Param("registered_at") OffsetDateTime registeredAt);
+
+  @Insert("insert into ClientAddr (client, type, street, house, flat) " +
+    "values (#{client}, #{type}, #{street}, #{house}, #{flat})")
+  void insertAddress(@Param("client") String clientId,
+                     @Param("type") AddressType type,
+                     @Param("street") String street,
+                     @Param("house") String house,
+                     @Param("flat") String flat);
+
+  @Insert("INSERT INTO ClientPhone (client, number, type) VALUES (#{client}, #{number}, #{type}) " + "" +
+    "on conflict do nothing")
+  void insertPhoneNumber(@Param("client") String clientId,
+                         @Param("number") String number,
+                         @Param("type") PhoneType type);
 }

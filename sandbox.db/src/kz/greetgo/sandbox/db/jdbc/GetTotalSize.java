@@ -15,7 +15,7 @@ public class GetTotalSize extends AbstractLoader<Long> {
 
   @Override
   public Long doInConnection(Connection connection) throws Exception {
-    prepareSql(DbType.detect(connection));
+    prepareSql(DbType.detect(connection), false, false);
 
     try (PreparedStatement ps = connection.prepareStatement(sql.toString())) {
 

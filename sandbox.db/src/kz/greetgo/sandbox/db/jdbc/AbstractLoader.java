@@ -28,13 +28,13 @@ public abstract class AbstractLoader<T> implements ConnectionCallback<T> {
 
   abstract void select();
 
-  protected void prepareSql(DbType dbType) {
+  protected void prepareSql(DbType dbType, boolean isOrdered, boolean isListLimited) {
     select();
 
     switch (dbType) {
 
       case Postgres:
-        prepareFromWhereForPostgres();
+        prepareFromWhereForPostgres(isOrdered, isListLimited);
         return;
 
       case Oracle:
@@ -51,7 +51,7 @@ public abstract class AbstractLoader<T> implements ConnectionCallback<T> {
 
   }
 
-  protected void prepareFromWhereForPostgres() {
+  protected void prepareFromWhereForPostgres(boolean isOrdered, boolean isListLimited) {
 
     sql.append("from Client left join " +
       "(select client, sum(money) totalBalance, min(money) minBalance, " +
@@ -63,22 +63,21 @@ public abstract class AbstractLoader<T> implements ConnectionCallback<T> {
       case "surname":
         sql.append("where lower(Client.surname) like lower(?) ");
         params.add("%" + filterInput + "%");
-        return;
+        break;
 
       case "name":
         sql.append("where lower(Client.name) like lower(?) ");
         params.add("%" + filterInput + "%");
-        return;
+        break;
 
       case "patronymic":
         sql.append("where lower(Client.patronymic) like lower(?) ");
         params.add("%" + filterInput + "%");
-        return;
+        break;
 
     }
 
-    if (pageSize > 0) {
-
+    if (isOrdered) {
       switch (orderBy) {
         case "age":
           sql.append("order by age ");
@@ -101,7 +100,9 @@ public abstract class AbstractLoader<T> implements ConnectionCallback<T> {
       }
 
       if (isDesc) sql.append("desc ");
+    }
 
+    if (isListLimited) {
       sql.append("limit ? offset ? ");
       params.add(pageSize);
       params.add(page * pageSize);

@@ -14,7 +14,7 @@ public class ClientDetails {
   public Address addressF;
   public Address addressR;
   public List<PhoneNumber> phoneNumbers = new ArrayList<>();
-  public double totalBalance;
-  public double minBalance;
-  public double maxBalance;
+  public double totalBalance;/**/
+  public double minBalance;/**/
+  public double maxBalance;/**/
 }
