@@ -6,6 +6,7 @@ import kz.greetgo.sandbox.controller.errors.NotFound;
 import kz.greetgo.sandbox.controller.model.*;
 import kz.greetgo.sandbox.controller.register.ClientRegister;
 import kz.greetgo.sandbox.db.jdbc.LoadClientList;
+import kz.greetgo.sandbox.db.test.dao.CharmTestDao;
 import kz.greetgo.sandbox.db.test.dao.ClientTestDao;
 import kz.greetgo.sandbox.db.test.util.ParentTestNg;
 import kz.greetgo.sandbox.db.util.JdbcSandbox;
@@ -32,51 +33,8 @@ public class ClientRegisterImplTest extends ParentTestNg {
 
   public BeanGetter<ClientRegister> clientRegister;
   public BeanGetter<ClientTestDao> clientTestDao;
+  public BeanGetter<CharmTestDao> charmTestDao;
   public BeanGetter<IdGenerator> idGen;
-
-  public BeanGetter<JdbcSandbox> jdbcSandbox;
-
-//  private List<ClientInfo> getClientList(String filterBy, String filterInput, String orderBy, boolean isDesc, int page, int pageSize) {
-//    return jdbcSandbox.get().execute(new LoadClientList(filterBy, filterInput, orderBy, isDesc, page, pageSize));
-//  }
-
-  @Test
-  public void testingTest() {
-    List<ClientDetails> clients = clearDbAndInsertTestData(200);
-
-//    int pageSize = RND.plusInt(clients.size());
-//    int page = RND.plusInt((int) Math.ceil(clients.size() / pageSize));
-    int pageSize = 100;
-    int page = 0;
-
-    List<ClientInfo> expectingClientList = new ArrayList<>();
-    clients.forEach(clientDetails -> expectingClientList.add(toClientInfo(clientDetails)));
-
-    expectingClientList.sort(Comparator.comparing(o -> o.surname.toLowerCase()));
-
-    PageUtils.cutPage(expectingClientList, page * pageSize, pageSize);
-
-    //
-    //
-    List<ClientInfo> result = clientRegister.get().getClientsList("", "", "",
-      false, page, pageSize);
-    //
-    //
-
-    assertThat(result).isNotNull();
-    assertThat(result.size()).isEqualTo(expectingClientList.size());
-    for (int i = 0; i < expectingClientList.size(); i++) {
-      assertThat(result.get(i).id).isEqualTo(expectingClientList.get(i).id);
-      assertThat(result.get(i).surname).isEqualTo(expectingClientList.get(i).surname);
-      assertThat(result.get(i).name).isEqualTo(expectingClientList.get(i).name);
-      assertThat(result.get(i).patronymic).isEqualTo(expectingClientList.get(i).patronymic);
-      assertThat(result.get(i).charm.id).isEqualTo(expectingClientList.get(i).charm.id);
-      assertThat(result.get(i).age).isEqualTo(expectingClientList.get(i).age);
-      assertThat(Math.abs(result.get(i).totalBalance - expectingClientList.get(i).totalBalance)).isLessThan(0.001);
-      assertThat(Math.abs(result.get(i).minBalance - expectingClientList.get(i).minBalance)).isLessThan(0.001);
-      assertThat(Math.abs(result.get(i).maxBalance - expectingClientList.get(i).maxBalance)).isLessThan(0.001);
-    }
-  }
 
   @Test
   public void getTotalSize_noFilter() {
@@ -87,7 +45,7 @@ public class ClientRegisterImplTest extends ParentTestNg {
 
     //
     //
-    long result = clientRegister.get().getTotalSize(null, null);
+    long result = clientRegister.get().getTotalSize("", "");
     //
     //
 
@@ -159,19 +117,21 @@ public class ClientRegisterImplTest extends ParentTestNg {
 
     List<ClientDetails> clients = clearDbAndInsertTestData(200);
 
-    int pageSize = RND.plusInt(clients.size());
-    int page = RND.plusInt((int) Math.ceil(clients.size() / pageSize));
+//    int pageSize = RND.plusInt(clients.size());
+//    int page = RND.plusInt((int) Math.ceil(clients.size() / pageSize));
+    int pageSize = 25;
+    int page = 1;
 
     List<ClientInfo> expectingClientList = new ArrayList<>();
     clients.forEach(clientDetails -> expectingClientList.add(toClientInfo(clientDetails)));
 
-    expectingClientList.sort(Comparator.comparing(o -> o.surname));
+    expectingClientList.sort(Comparator.comparing(o -> o.surname.toLowerCase()));
 
     PageUtils.cutPage(expectingClientList, page * pageSize, pageSize);
 
     //
     //
-    List<ClientInfo> result = clientRegister.get().getClientsList(null, null, null,
+    List<ClientInfo> result = clientRegister.get().getClientsList("", "", "",
       false, page, pageSize);
     //
     //
@@ -179,7 +139,15 @@ public class ClientRegisterImplTest extends ParentTestNg {
     assertThat(result).isNotNull();
     assertThat(result.size()).isEqualTo(expectingClientList.size());
     for (int i = 0; i < expectingClientList.size(); i++) {
-      assertThat(result.get(i)).isEqualsToByComparingFields(expectingClientList.get(i));
+      assertThat(result.get(i).id).isEqualTo(expectingClientList.get(i).id);
+      assertThat(result.get(i).surname).isEqualTo(expectingClientList.get(i).surname);
+      assertThat(result.get(i).name).isEqualTo(expectingClientList.get(i).name);
+      assertThat(result.get(i).patronymic).isEqualTo(expectingClientList.get(i).patronymic);
+      assertThat(result.get(i).charm.id).isEqualTo(expectingClientList.get(i).charm.id);
+      assertThat(result.get(i).age).isEqualTo(expectingClientList.get(i).age);
+      assertThat(Math.abs(result.get(i).totalBalance - expectingClientList.get(i).totalBalance)).isLessThan(0.001);
+      assertThat(Math.abs(result.get(i).minBalance - expectingClientList.get(i).minBalance)).isLessThan(0.001);
+      assertThat(Math.abs(result.get(i).maxBalance - expectingClientList.get(i).maxBalance)).isLessThan(0.001);
     }
   }
 
@@ -259,7 +227,7 @@ public class ClientRegisterImplTest extends ParentTestNg {
 
     //
     //
-    List<ClientInfo> result = clientRegister.get().getClientsList(null, null, "totalBalance",
+    List<ClientInfo> result = clientRegister.get().getClientsList("", "", "totalBalance",
       true, page, pageSize);
     //
     //
@@ -490,9 +458,13 @@ public class ClientRegisterImplTest extends ParentTestNg {
   public void addOrUpdateClient_add() {
     clientTestDao.get().removeAllData();
 
+
     ClientDetails clientDetails = createRndClient();
     ClientInfo expectingClientInfo = toClientInfo(clientDetails);
     ClientRecords clientRecords = toClientRecords(clientDetails);
+
+    charmTestDao.get().insertCharm(clientRecords.charm.id, clientRecords.charm.name,
+      clientRecords.charm.description, clientRecords.charm.energy);
 
     //
     //
@@ -512,14 +484,20 @@ public class ClientRegisterImplTest extends ParentTestNg {
 
     assertThat(client).isNotNull();
 
+    charmTestDao.get().insertCharm(client.charm.id, client.charm.name,
+      client.charm.description, client.charm.energy);
+
     clientTestDao.get().insertClient(client.id, client.surname, client.name,
-      client.patronymic, client.gender, Date.valueOf(client.dateOfBirth), client.charm.name);
+      client.patronymic, client.gender, Date.valueOf(client.dateOfBirth), client.charm.id);
 
     ClientDetails clientDetails = createRndClient();
     clientDetails.id = client.id;
 
     ClientInfo expectingClientInfo = toClientInfo(clientDetails);
     ClientRecords clientRecords = toClientRecords(clientDetails);
+
+    charmTestDao.get().insertCharm(clientRecords.charm.id, clientRecords.charm.name,
+      clientRecords.charm.description, clientRecords.charm.energy);
 
     //
     //
@@ -528,6 +506,7 @@ public class ClientRegisterImplTest extends ParentTestNg {
     //
 
     assertThat(result).isNotNull();
+    // TODO: 2/19/18 isEqualsToByComparingFields gives incorrect statement
     assertThat(result).isEqualsToByComparingFields(expectingClientInfo);
   }
 
@@ -577,7 +556,7 @@ public class ClientRegisterImplTest extends ParentTestNg {
       clientTestDao.get().insertCharm(client.charm.id, client.charm.name, client.charm.description, client.charm.energy);
       clientTestDao.get().insertClient(client.id, client.surname, client.name,
         client.patronymic, client.gender, Date.valueOf(client.dateOfBirth), client.charm.id);
-      // TODO: 2/16/18 registeredAt timestamp should be OffsetDateTime
+      // TODO: 2/16/18 type of registeredAt timestamp should be OffsetDateTime
       double total = 0.0;
       double min = 1000.0;
       double max = 0.0;

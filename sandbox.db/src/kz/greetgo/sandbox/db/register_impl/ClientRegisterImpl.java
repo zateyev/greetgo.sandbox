@@ -6,6 +6,7 @@ import kz.greetgo.sandbox.controller.errors.NotFound;
 import kz.greetgo.sandbox.controller.model.*;
 import kz.greetgo.sandbox.controller.register.ClientRegister;
 import kz.greetgo.sandbox.db.dao.ClientDao;
+import kz.greetgo.sandbox.db.jdbc.GetTotalSize;
 import kz.greetgo.sandbox.db.jdbc.LoadClientList;
 import kz.greetgo.sandbox.db.util.JdbcSandbox;
 
@@ -23,12 +24,12 @@ public class ClientRegisterImpl implements ClientRegister {
 //    return clientDao.get().getTotalSize(filterBy != null ? filterBy : "surname",
 //      filterInput != null ? filterInput : "");
 
-    return 0;
+    return jdbcSandbox.get().execute(new GetTotalSize(filterBy, filterInput));
+
   }
 
   @Override
   public List<ClientInfo> getClientsList(String filterBy, String filterInput, String orderBy, boolean isDesc, int page, int pageSize) {
-//    return null;
     return jdbcSandbox.get().execute(new LoadClientList(filterBy, filterInput, orderBy, isDesc, page, pageSize));
   }
 
@@ -41,6 +42,15 @@ public class ClientRegisterImpl implements ClientRegister {
 
   @Override
   public ClientInfo addOrUpdateClient(ClientRecords clientRecords) {
+
+    clientDao.get().insertOrUpdateClient(clientRecords.id,
+      clientRecords.surname,
+      clientRecords.name,
+      clientRecords.patronymic,
+      clientRecords.gender,
+      Date.valueOf(clientRecords.dateOfBirth),
+      clientRecords.charm.id);
+
     List<PhoneNumber> phoneNumbers = clientRecords.phoneNumbers;
     Address addressFact = clientRecords.addressF;
     Address addressReg = clientRecords.addressR;
@@ -50,13 +60,6 @@ public class ClientRegisterImpl implements ClientRegister {
     clientDao.get().insertAddress(clientRecords.id, addressFact.type, addressFact.street, addressFact.house, addressFact.flat);
     clientDao.get().insertAddress(clientRecords.id, addressReg.type, addressReg.street, addressReg.house, addressReg.flat);
 
-    clientDao.get().insertOrUpdateClient(clientRecords.id,
-      clientRecords.surname,
-      clientRecords.name,
-      clientRecords.patronymic,
-      clientRecords.gender,
-      Date.valueOf(clientRecords.dateOfBirth),
-      clientRecords.charm.id);
 
     return clientDao.get().selectClientInfoById(clientRecords.id);
   }
