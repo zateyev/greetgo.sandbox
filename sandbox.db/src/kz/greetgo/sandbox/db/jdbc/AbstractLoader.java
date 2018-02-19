@@ -61,17 +61,17 @@ public abstract class AbstractLoader<T> implements ConnectionCallback<T> {
     switch (filterBy) {
 
       case "surname":
-        sql.append("where Client.surname like ? ");
+        sql.append("where lower(Client.surname) like lower(?) ");
         params.add("%" + filterInput + "%");
         return;
 
       case "name":
-        sql.append("where Client.name like ? ");
+        sql.append("where lower(Client.name) like lower(?) ");
         params.add("%" + filterInput + "%");
         return;
 
       case "patronymic":
-        sql.append("where Client.patronymic like ? ");
+        sql.append("where lower(Client.patronymic) like lower(?) ");
         params.add("%" + filterInput + "%");
         return;
 
@@ -82,19 +82,19 @@ public abstract class AbstractLoader<T> implements ConnectionCallback<T> {
       switch (orderBy) {
         case "age":
           sql.append("order by age ");
-          return;
+          break;
 
         case "totalBalance":
           sql.append("order by totalBalance ");
-          return;
+          break;
 
         case "minBalance":
           sql.append("order by minBalance ");
-          return;
+          break;
 
         case "maxBalance":
           sql.append("order by maxBalance ");
-          return;
+          break;
 
         default:
           sql.append("order by Client.surname ");
