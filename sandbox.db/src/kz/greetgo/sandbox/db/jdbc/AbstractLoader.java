@@ -80,7 +80,7 @@ public abstract class AbstractLoader<T> implements ConnectionCallback<T> {
     if (isOrdered) {
       switch (orderBy) {
         case "age":
-          sql.append("order by age ");
+          sql.append("order by age nulls first, lower(Client.surname) ");
           break;
 
         case "totalBalance":
@@ -88,11 +88,11 @@ public abstract class AbstractLoader<T> implements ConnectionCallback<T> {
           break;
 
         case "minBalance":
-          sql.append("order by ca.minBalance ");
+          sql.append("order by ca.minBalance nulls first, lower(Client.surname) ");
           break;
 
         case "maxBalance":
-          sql.append("order by ca.maxBalance ");
+          sql.append("order by ca.maxBalance nulls first, lower(Client.surname) ");
           break;
 
         default:

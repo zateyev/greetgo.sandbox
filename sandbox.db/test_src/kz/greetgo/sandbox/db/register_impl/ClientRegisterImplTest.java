@@ -9,6 +9,7 @@ import kz.greetgo.sandbox.db.test.dao.ClientTestDao;
 import kz.greetgo.sandbox.db.test.util.ParentTestNg;
 import kz.greetgo.sandbox.db.util.PageUtils;
 import kz.greetgo.util.RND;
+import org.apache.ibatis.annotations.Insert;
 import org.testng.annotations.Test;
 
 import java.sql.Date;
@@ -149,7 +150,23 @@ public class ClientRegisterImplTest extends ParentTestNg {
     List<ClientInfo> expectingClientList = new ArrayList<>();
     clients.forEach(clientDetails -> expectingClientList.add(toClientInfo(clientDetails)));
 
-    expectingClientList.sort(Comparator.comparingInt(o -> o.age));
+//    expectingClientList.sort(Comparator.comparingInt(o -> o.age));
+    Collections.sort(expectingClientList, new Comparator() {
+
+      public int compare(Object o1, Object o2) {
+
+        Integer tb1 = ((ClientInfo) o1).age;
+        Integer tb2 = ((ClientInfo) o2).age;
+        int sComp = tb1.compareTo(tb2);
+
+        if (sComp != 0) {
+          return sComp;
+        } else {
+          String sn1 = ((ClientInfo) o1).surname.toLowerCase();
+          String sn2 = ((ClientInfo) o2).surname.toLowerCase();
+          return sn1.compareTo(sn2);
+        }
+      }});
 
     PageUtils.cutPage(expectingClientList, page * pageSize, pageSize);
 
@@ -184,32 +201,32 @@ public class ClientRegisterImplTest extends ParentTestNg {
 
     List<ClientDetails> clients = clearDbAndInsertTestData(200);
 
-//    int pageSize = RND.plusInt(clients.size());
-//    int page = pageSize > 0 ? RND.plusInt((int) Math.ceil(clients.size() / pageSize)) : 0;
+    int pageSize = RND.plusInt(clients.size());
+    int page = pageSize > 0 ? RND.plusInt((int) Math.ceil(clients.size() / pageSize)) : 0;
 
-    int pageSize = 25;
-    int page = 0;
+//    int pageSize = 25;
+//    int page = 0;
 
     List<ClientInfo> expectingClientList = new ArrayList<>();
     clients.forEach(clientDetails -> expectingClientList.add(toClientInfo(clientDetails)));
 
 //    expectingClientList.sort(Comparator.comparingDouble(o -> o.totalBalance));
-//    Collections.sort(expectingClientList, new Comparator() {
-//
-//      public int compare(Object o1, Object o2) {
-//
-//        String x1 = ((ClientInfo) o1).surname;
-//        String x2 = ((ClientInfo) o2).surname;
-//        int sComp = x1.compareTo(x2);
-//
-//        if (sComp != 0) {
-//          return sComp;
-//        } else {
-//          Double x1 = ((ClientInfo) o1).totalBalance;
-//          Double x2 = ((ClientInfo) o2).totalBalance;
-//          return x1.compareTo(x2);
-//        }
-//      }});
+    Collections.sort(expectingClientList, new Comparator() {
+
+      public int compare(Object o1, Object o2) {
+
+        Double tb1 = ((ClientInfo) o1).totalBalance;
+        Double tb2 = ((ClientInfo) o2).totalBalance;
+        int sComp = tb1.compareTo(tb2);
+
+        if (sComp != 0) {
+          return sComp;
+        } else {
+          String sn1 = ((ClientInfo) o1).surname.toLowerCase();
+          String sn2 = ((ClientInfo) o2).surname.toLowerCase();
+          return sn1.compareTo(sn2);
+        }
+      }});
 
     PageUtils.cutPage(expectingClientList, page * pageSize, pageSize);
 
@@ -232,15 +249,31 @@ public class ClientRegisterImplTest extends ParentTestNg {
 
     List<ClientDetails> clients = clearDbAndInsertTestData(200);
 
-//    int pageSize = RND.plusInt(clients.size());
-//    int page = pageSize > 0 ? RND.plusInt((int) Math.ceil(clients.size() / pageSize)) : 0;
-    int pageSize = 25;
-    int page = 1;
+    int pageSize = RND.plusInt(clients.size());
+    int page = pageSize > 0 ? RND.plusInt((int) Math.ceil(clients.size() / pageSize)) : 0;
+//    int pageSize = 25;
+//    int page = 1;
 
     List<ClientInfo> expectingClientList = new ArrayList<>();
     clients.forEach(clientDetails -> expectingClientList.add(toClientInfo(clientDetails)));
 
-    expectingClientList.sort(Comparator.comparingDouble(o -> o.totalBalance));
+//    expectingClientList.sort(Comparator.comparingDouble(o -> o.totalBalance));
+    Collections.sort(expectingClientList, new Comparator() {
+
+      public int compare(Object o1, Object o2) {
+
+        Double tb1 = ((ClientInfo) o1).totalBalance;
+        Double tb2 = ((ClientInfo) o2).totalBalance;
+        int sComp = tb1.compareTo(tb2);
+
+        if (sComp != 0) {
+          return sComp;
+        } else {
+          String sn1 = ((ClientInfo) o1).surname.toLowerCase();
+          String sn2 = ((ClientInfo) o2).surname.toLowerCase();
+          return sn1.compareTo(sn2);
+        }
+      }});
     Collections.reverse(expectingClientList);
 
     PageUtils.cutPage(expectingClientList, page * pageSize, pageSize);
@@ -264,16 +297,32 @@ public class ClientRegisterImplTest extends ParentTestNg {
 
     List<ClientDetails> clients = clearDbAndInsertTestData(200);
 
-//    int pageSize = RND.plusInt(clients.size());
-//    int page = pageSize > 0 ? RND.plusInt((int) Math.ceil(clients.size() / pageSize)) : 0;
+    int pageSize = RND.plusInt(clients.size());
+    int page = pageSize > 0 ? RND.plusInt((int) Math.ceil(clients.size() / pageSize)) : 0;
 
-    int pageSize = 25;
-    int page = 1;
+//    int pageSize = 25;
+//    int page = 1;
 
     List<ClientInfo> expectingClientList = new ArrayList<>();
     clients.forEach(clientDetails -> expectingClientList.add(toClientInfo(clientDetails)));
 
-    expectingClientList.sort(Comparator.comparingDouble(o -> o.minBalance));
+//    expectingClientList.sort(Comparator.comparingDouble(o -> o.minBalance));
+    Collections.sort(expectingClientList, new Comparator() {
+
+      public int compare(Object o1, Object o2) {
+
+        Double tb1 = ((ClientInfo) o1).minBalance;
+        Double tb2 = ((ClientInfo) o2).minBalance;
+        int sComp = tb1.compareTo(tb2);
+
+        if (sComp != 0) {
+          return sComp;
+        } else {
+          String sn1 = ((ClientInfo) o1).surname.toLowerCase();
+          String sn2 = ((ClientInfo) o2).surname.toLowerCase();
+          return sn1.compareTo(sn2);
+        }
+      }});
 
     PageUtils.cutPage(expectingClientList, page * pageSize, pageSize);
 
@@ -296,16 +345,32 @@ public class ClientRegisterImplTest extends ParentTestNg {
 
     List<ClientDetails> clients = clearDbAndInsertTestData(200);
 
-//    int pageSize = RND.plusInt(clients.size());
-//    int page = pageSize > 0 ? RND.plusInt((int) Math.ceil(clients.size() / pageSize)) : 0;
+    int pageSize = RND.plusInt(clients.size());
+    int page = pageSize > 0 ? RND.plusInt((int) Math.ceil(clients.size() / pageSize)) : 0;
 
-    int pageSize = 25;
-    int page = 1;
+//    int pageSize = 25;
+//    int page = 1;
 
     List<ClientInfo> expectingClientList = new ArrayList<>();
     clients.forEach(clientDetails -> expectingClientList.add(toClientInfo(clientDetails)));
 
-    expectingClientList.sort(Comparator.comparingDouble(o -> o.maxBalance));
+//    expectingClientList.sort(Comparator.comparingDouble(o -> o.maxBalance));
+    Collections.sort(expectingClientList, new Comparator() {
+
+      public int compare(Object o1, Object o2) {
+
+        Double tb1 = ((ClientInfo) o1).maxBalance;
+        Double tb2 = ((ClientInfo) o2).maxBalance;
+        int sComp = tb1.compareTo(tb2);
+
+        if (sComp != 0) {
+          return sComp;
+        } else {
+          String sn1 = ((ClientInfo) o1).surname.toLowerCase();
+          String sn2 = ((ClientInfo) o2).surname.toLowerCase();
+          return sn1.compareTo(sn2);
+        }
+      }});
 
     PageUtils.cutPage(expectingClientList, page * pageSize, pageSize);
 
