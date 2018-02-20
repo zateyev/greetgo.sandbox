@@ -13,9 +13,9 @@ import java.io.OutputStream;
 public class ReportRegisterImpl implements ReportRegister {
 
   @Override
-  public void genReport(String clientId, String contractId, String viewType, OutputStream out) throws Exception {
+  public void genReport(String clientId, String contractId, ReportView view/*, String view, OutputStream out*/) throws Exception {
     ClientInfo inData = getInDataFromDb(contractId, contractId);
-    ReportView view = getView(viewType, out);
+//    ReportView view = getView(viewType, out);
     view.generate(inData);
   }
 

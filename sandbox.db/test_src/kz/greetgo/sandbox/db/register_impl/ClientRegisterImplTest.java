@@ -9,7 +9,6 @@ import kz.greetgo.sandbox.db.test.dao.ClientTestDao;
 import kz.greetgo.sandbox.db.test.util.ParentTestNg;
 import kz.greetgo.sandbox.db.util.PageUtils;
 import kz.greetgo.util.RND;
-import org.apache.ibatis.annotations.Insert;
 import org.testng.annotations.Test;
 
 import java.sql.Date;

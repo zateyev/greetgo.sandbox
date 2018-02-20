@@ -2,85 +2,54 @@ package kz.greetgo.sandbox.db.register_impl;
 
 import kz.greetgo.depinject.core.BeanGetter;
 import kz.greetgo.sandbox.controller.model.*;
-import kz.greetgo.sandbox.controller.register.BigReportRegister;
-import kz.greetgo.sandbox.controller.report.BigReportView;
-import kz.greetgo.sandbox.controller.report.ReportFootData;
-import kz.greetgo.sandbox.controller.report.ReportHeadData;
+import kz.greetgo.sandbox.controller.register.ReportRegister;
+import kz.greetgo.sandbox.controller.report.ReportView;
 import kz.greetgo.sandbox.db.test.dao.ClientTestDao;
-import kz.greetgo.sandbox.db.test.util.ParentTestNg;
 import kz.greetgo.sandbox.db.util.PageUtils;
 import kz.greetgo.util.RND;
+import org.fest.assertions.api.Assertions;
 import org.testng.annotations.Test;
 
-import java.io.PrintStream;
+import java.sql.Date;
 import java.time.LocalDate;
 import java.time.Period;
 import java.util.ArrayList;
 import java.util.Comparator;
-import java.util.Date;
 import java.util.List;
 
-import static org.fest.assertions.api.Assertions.assertThat;
+import static org.fest.assertions.api.Assertions.*;
+import static org.testng.Assert.*;
 
-/**
- * Набор автоматизированных тестов для тестирования методов класса {@link BigReportRegisterImpl}
- */
-public class BigReportRegisterImplTest extends ParentTestNg {
+public class ReportRegisterImplTest {
 
-  public BeanGetter<BigReportRegister> bigReportRegister;
+  public BeanGetter<ReportRegister> reportRegister;
   public BeanGetter<ClientTestDao> clientTestDao;
   public BeanGetter<IdGenerator> idGen;
 
-  private static class TestReportView implements BigReportView {
-
-    public ReportHeadData headData = null;
-    public ReportFootData footData = null;
-
-    @Override
-    public void start(ReportHeadData headData) {
-
-      this.headData = headData;
-    }
-
-    public final List<ClientInfo> clientList = new ArrayList<>();
-
-    @Override
-    public void addRow(ClientInfo row) {
-      clientList.add(row);
-    }
-
-    @Override
-    public void finish(ReportFootData footData) {
-
-      this.footData = footData;
-    }
-  }
-
   @Test
   public void genReport() throws Exception {
-    List<ClientDetails> clients = clearDbAndInsertTestData(50);
+
+    List<ClientDetails> clients = clearDbAndInsertTestData(100);
 
     List<ClientInfo> expectingClientList = new ArrayList<>();
     clients.forEach(clientDetails -> expectingClientList.add(toClientInfo(clientDetails)));
 
     expectingClientList.sort(Comparator.comparing(o -> o.surname.toLowerCase()));
 
-    TestReportView testReportView = new TestReportView();
+    final ClientInfo clientList[] = new ClientInfo[1];
 
     //
     //
-    bigReportRegister.get().genReport("", "", "", false, testReportView);
+    reportRegister.get().genReport("", "", new ReportView() {
+      @Override
+      public void generate(ClientInfo clientInfo) throws Exception {
+        clientList[0] = clientInfo;
+      }
+    });
     //
     //
 
-    assertThat(testReportView.headData).isNotNull();
-    assertThat(testReportView.headData.title).isEqualTo("Список клиентов");
-    assertThat(testReportView.footData).isNotNull();
-
-    assertThat(testReportView.clientList).hasSize(50);
-    assertThat(testReportView.clientList.get(3).id).isEqualTo(expectingClientList.get(3).id);
-    assertThat(testReportView.clientList.get(3).surname).isEqualTo(expectingClientList.get(3).surname);
-    assertThat(testReportView.clientList.get(3).name).isEqualTo(expectingClientList.get(3).name);
+    assertThat(clientList[0].id).isNotNull();
   }
 
   private ClientInfo toClientInfo(ClientDetails clientDetails) {
@@ -105,7 +74,7 @@ public class BigReportRegisterImplTest extends ParentTestNg {
       ClientDetails client = createRndClient();
       clientTestDao.get().insertCharm(client.charm.id, client.charm.name, client.charm.description, client.charm.energy);
       clientTestDao.get().insertClient(client.id, client.surname, client.name,
-        client.patronymic, client.gender, java.sql.Date.valueOf(client.dateOfBirth), client.charm.id);
+        client.patronymic, client.gender, Date.valueOf(client.dateOfBirth), client.charm.id);
       clientTestDao.get().insertAddress(client.id, client.addressF.type, client.addressF.street, client.addressF.house, client.addressF.flat);
       clientTestDao.get().insertAddress(client.id, client.addressR.type, client.addressR.street, client.addressR.house, client.addressR.flat);
       for (PhoneNumber phoneNumber : client.phoneNumbers) {
@@ -165,4 +134,5 @@ public class BigReportRegisterImplTest extends ParentTestNg {
     }
     return client;
   }
+
 }
