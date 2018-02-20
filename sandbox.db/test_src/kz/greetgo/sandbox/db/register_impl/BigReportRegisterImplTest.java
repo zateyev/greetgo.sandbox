@@ -8,16 +8,13 @@ import kz.greetgo.sandbox.controller.report.ReportFootData;
 import kz.greetgo.sandbox.controller.report.ReportHeadData;
 import kz.greetgo.sandbox.db.test.dao.ClientTestDao;
 import kz.greetgo.sandbox.db.test.util.ParentTestNg;
-import kz.greetgo.sandbox.db.util.PageUtils;
 import kz.greetgo.util.RND;
 import org.testng.annotations.Test;
 
-import java.io.PrintStream;
 import java.time.LocalDate;
 import java.time.Period;
 import java.util.ArrayList;
 import java.util.Comparator;
-import java.util.Date;
 import java.util.List;
 
 import static org.fest.assertions.api.Assertions.assertThat;

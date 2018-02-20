@@ -1,4 +1,5 @@
 dependencies {
+  compile project(":sandbox.db")
   compile "kz.greetgo.mvc:greetgo.mvc:$greetgoMvcVersion"
   compile "kz.greetgo.depinject:greetgo.depinject:$depinjectVersion"
 

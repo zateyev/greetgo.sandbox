@@ -122,7 +122,7 @@ export class ClientsListComponent {
       filterBy: this.filterBy,
       filterInputs: this.filterInputs,
       orderBy: this.orderBy,
-      isDesc: this.isDescending,
+      isDesc: this.isDescending.toString(),
       page: this.currentPage,
       pageSize: this.pageSize
     }).toPromise().then(result => {
@@ -247,6 +247,16 @@ export class ClientsListComponent {
       this.charms = result.json();
     }, error => {
       console.log("charms");
+      console.log(error);
+    });
+  }
+
+  loadReport() {
+    this.httpService.get("/big_report/pdf").toPromise().then(result => {
+      // this.charms = result.json();
+      console.log("report loaded");
+    }, error => {
+      console.log("report");
       console.log(error);
     });
   }
