@@ -1,21 +1,24 @@
 package kz.greetgo.sandbox.db.jdbc;
 
+import kz.greetgo.db.ConnectionCallback;
 import kz.greetgo.db.DbType;
 import kz.greetgo.sandbox.controller.model.Charm;
 import kz.greetgo.sandbox.controller.model.ClientInfo;
+import kz.greetgo.sandbox.controller.report.BigReportView;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
 import java.util.List;
 
+public class BigReportJdbc extends AbstractLoader<List<ClientInfo>> {
 
-public class LoadClientList extends AbstractLoader<List<ClientInfo>> {
+  private BigReportView reportView;
 
-  public LoadClientList(String filterBy, String filterInput, String orderBy, boolean isDesc, int page, int pageSize) {
+  public BigReportJdbc(String filterBy, String filterInput, String orderBy, boolean isDesc, int page, int pageSize, BigReportView view) {
     super(filterBy, filterInput, orderBy, isDesc, page, pageSize);
+    this.reportView = view;
   }
 
   @Override
@@ -33,12 +36,13 @@ public class LoadClientList extends AbstractLoader<List<ClientInfo>> {
       }
 
       try (ResultSet rs = ps.executeQuery()) {
-        List<ClientInfo> ret = new ArrayList<>();
 
         while (rs.next()) {
-          ret.add(readRecord(rs));
+
+          reportView.addRow(readRecord(rs));
+//          ret.add(readRecord(rs));
         }
-        return ret;
+        return null;
       }
     }
   }
@@ -80,7 +84,6 @@ public class LoadClientList extends AbstractLoader<List<ClientInfo>> {
       case Postgres:
         prepareFromWhereForPostgres();
         orderBy();
-        limit();
         return;
 
       case Oracle:
