@@ -1,180 +1,201 @@
 package kz.greetgo.sandbox.db.stand.model;
 
-import kz.greetgo.sandbox.controller.model.Address;
-import kz.greetgo.sandbox.controller.model.ClientInfo;
-import kz.greetgo.sandbox.controller.model.ClientDetails;
-import kz.greetgo.sandbox.controller.model.PhoneNumber;
+import kz.greetgo.sandbox.controller.model.*;
 
 import java.time.LocalDate;
 import java.time.Period;
 import java.util.List;
 
 public class ClientDot {
-    private String id;
-    private String surname;
-    private String name;
-    private String patronymic;
-    private String charm;
-    private String gender;
-    private LocalDate dateOfBirth;
-    private Address addressF;
-    private Address addressR;
-    private List<PhoneNumber> phoneNumbers;
-    private int totalBalance;
-    private int minBalance;
-    private int maxBalance;
+  private String id;
+  private String surname;
+  private String name;
+  private String patronymic;
+  private Charm charm;
+  private Gender gender;
+  private LocalDate dateOfBirth;
+  private Address addressF;
+  private Address addressR;
+  private List<PhoneNumber> phoneNumbers;
+  private double totalBalance;
+  private double minBalance;
+  private double maxBalance;
 
-    public ClientDot(String id, String surname, String name, String patronymic, Address addressF, Address addressR, List<PhoneNumber> phoneNumbers) {
-        this.id = id;
-        this.surname = surname;
-        this.name = name;
-        this.patronymic = patronymic;
-        this.addressF = addressF;
-        this.addressR = addressR;
-        this.phoneNumbers = phoneNumbers;
+  public ClientDot(String id, String surname, String name, String patronymic, Address addressF, Address addressR, List<PhoneNumber> phoneNumbers) {
+    this.id = id;
+    this.surname = surname;
+    this.name = name;
+    this.patronymic = patronymic;
+    this.addressF = addressF;
+    this.addressR = addressR;
+    this.phoneNumbers = phoneNumbers;
+  }
+
+  public ClientDot() {
+
+  }
+
+  public ClientDot(ClientRecords clientRecords) {
+    saveRecords(clientRecords);
+  }
+
+  public String getId() {
+    return id;
+  }
+
+  public void setId(String id) {
+    this.id = id;
+  }
+
+  public String getSurname() {
+    return surname;
+  }
+
+  public void setSurname(String surname) {
+    this.surname = surname;
+  }
+
+  public String getName() {
+    return name;
+  }
+
+  public void setName(String name) {
+    this.name = name;
+  }
+
+  public String getPatronymic() {
+    return patronymic;
+  }
+
+  public void setPatronymic(String patronymic) {
+    this.patronymic = patronymic;
+  }
+
+  public Charm getCharm() {
+    return charm;
+  }
+
+  public void setCharm(Charm charm) {
+    this.charm = charm;
+  }
+
+  public Gender getGender() {
+    return gender;
+  }
+
+  public void setGender(Gender gender) {
+    this.gender = gender;
+  }
+
+  public LocalDate getDateOfBirth() {
+    return dateOfBirth;
+  }
+
+  public void setDateOfBirth(LocalDate dateOfBirth) {
+    this.dateOfBirth = dateOfBirth;
+  }
+
+  public Address getAddressF() {
+    return addressF;
+  }
+
+  public void setAddressF(Address addressF) {
+    this.addressF = addressF;
+  }
+
+  public Address getAddressR() {
+    return addressR;
+  }
+
+  public void setAddressR(Address addressR) {
+    this.addressR = addressR;
+  }
+
+  public List<PhoneNumber> getPhoneNumbers() {
+    return phoneNumbers;
+  }
+
+  public void setPhoneNumbers(List<PhoneNumber> phoneNumbers) {
+    this.phoneNumbers = phoneNumbers;
+  }
+
+  public double getTotalBalance() {
+    return totalBalance;
+  }
+
+  public void setTotalBalance(double totalBalance) {
+    this.totalBalance = totalBalance;
+  }
+
+  public double getMinBalance() {
+    return minBalance;
+  }
+
+  public void setMinBalance(double minBalance) {
+    this.minBalance = minBalance;
+  }
+
+  public double getMaxBalance() {
+    return maxBalance;
+  }
+
+  public void setMaxBalance(double maxBalance) {
+    this.maxBalance = maxBalance;
+  }
+
+  public ClientInfo toClientInfo() {
+    ClientInfo ret = new ClientInfo();
+    ret.id = id;
+    ret.surname = surname;
+    ret.name = name;
+    ret.patronymic = patronymic;
+    ret.charm = charm;
+    if (dateOfBirth != null)
+      ret.age = Period.between(dateOfBirth, LocalDate.now()).getYears();
+    ret.totalBalance = totalBalance;
+    ret.minBalance = minBalance;
+    ret.maxBalance = maxBalance;
+    return ret;
+  }
+
+  public ClientDetails toClientDetails() {
+    ClientDetails ret = new ClientDetails();
+    ret.id = id;
+    ret.surname = surname;
+    ret.name = name;
+    ret.patronymic = patronymic;
+    ret.charm = charm;
+    ret.gender = gender;
+    if (dateOfBirth != null) ret.dateOfBirth = dateOfBirth.toString();
+    ret.addressF = addressF;
+    ret.addressR = addressR;
+    ret.phoneNumbers = phoneNumbers;
+    ret.totalBalance = totalBalance;
+    ret.minBalance = minBalance;
+    ret.maxBalance = maxBalance;
+    return ret;
+  }
+
+  public void saveRecords(ClientRecords clientRecords) {
+    this.id = clientRecords.id;
+    this.surname = clientRecords.surname != null ? clientRecords.surname : "";
+    this.name = clientRecords.name != null ? clientRecords.name : "";
+    this.patronymic = clientRecords.patronymic != null ? clientRecords.patronymic : "";
+    if (clientRecords.charm != null) {
+      this.charm = clientRecords.charm;
+    } else {
+      this.charm = new Charm();
     }
-
-    public ClientDot() {
-
+    this.gender = clientRecords.gender;
+    System.out.println(clientRecords.dateOfBirth);
+    if (clientRecords.dateOfBirth != null && !clientRecords.dateOfBirth.isEmpty()) {
+      this.dateOfBirth = LocalDate.parse(clientRecords.dateOfBirth);
     }
-
-    public String getId() {
-        return id;
-    }
-
-    public void setId(String id) {
-        this.id = id;
-    }
-
-    public String getSurname() {
-        return surname;
-    }
-
-    public void setSurname(String surname) {
-        this.surname = surname;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public String getPatronymic() {
-        return patronymic;
-    }
-
-    public void setPatronymic(String patronymic) {
-        this.patronymic = patronymic;
-    }
-
-    public String getCharm() {
-        return charm;
-    }
-
-    public void setCharm(String charm) {
-        this.charm = charm;
-    }
-
-    public String getGender() {
-        return gender;
-    }
-
-    public void setGender(String gender) {
-        this.gender = gender;
-    }
-
-    public LocalDate getDateOfBirth() {
-        return dateOfBirth;
-    }
-
-    public void setDateOfBirth(LocalDate dateOfBirth) {
-        this.dateOfBirth = dateOfBirth;
-    }
-
-    public Address getAddressF() {
-        return addressF;
-    }
-
-    public void setAddressF(Address addressF) {
-        this.addressF = addressF;
-    }
-
-    public Address getAddressR() {
-        return addressR;
-    }
-
-    public void setAddressR(Address addressR) {
-        this.addressR = addressR;
-    }
-
-    public List<PhoneNumber> getPhoneNumbers() {
-        return phoneNumbers;
-    }
-
-    public void setPhoneNumbers(List<PhoneNumber> phoneNumbers) {
-        this.phoneNumbers = phoneNumbers;
-    }
-
-    public int getTotalBalance() {
-        return totalBalance;
-    }
-
-    public void setTotalBalance(int totalBalance) {
-        this.totalBalance = totalBalance;
-    }
-
-    public int getMinBalance() {
-        return minBalance;
-    }
-
-    public void setMinBalance(int minBalance) {
-        this.minBalance = minBalance;
-    }
-
-    public int getMaxBalance() {
-        return maxBalance;
-    }
-
-    public void setMaxBalance(int maxBalance) {
-        this.maxBalance = maxBalance;
-    }
-
-    public ClientInfo toClientInfo() {
-        ClientInfo ret = new ClientInfo();
-        ret.setId(id);
-        ret.setSurname(surname);
-        ret.setName(name);
-        ret.setPatronymic(patronymic);
-        ret.setCharm(charm);
-        if (dateOfBirth != null)
-            ret.setAge(Period.between(dateOfBirth, LocalDate.now()).getYears());
-        ret.setTotalBalance(totalBalance);
-        ret.setMinBalance(minBalance);
-        ret.setMaxBalance(maxBalance);
-        return ret;
-    }
-
-    public ClientDetails toClientsFullInfo() {
-        ClientDetails ret = new ClientDetails();
-        ret.setId(id);
-        ret.setSurname(surname);
-        ret.setName(name);
-        ret.setPatronymic(patronymic);
-        ret.setCharm(charm);
-        ret.setGender(gender);
-        ret.setDateOfBirth(dateOfBirth);
-
-        ret.setAddressF(addressF);
-        ret.setAddressR(addressR);
-
-        ret.setPhoneNumbers(phoneNumbers);
-
-        ret.setTotalBalance(totalBalance);
-        ret.setMinBalance(minBalance);
-        ret.setMaxBalance(maxBalance);
-        return ret;
-    }
+    this.addressF = clientRecords.addressF;
+    this.addressR = clientRecords.addressR;
+    this.phoneNumbers = clientRecords.phoneNumbers;
+    this.totalBalance = clientRecords.totalBalance;
+    this.minBalance = clientRecords.minBalance;
+    this.maxBalance = clientRecords.maxBalance;
+  }
 }

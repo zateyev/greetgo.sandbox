@@ -1,6 +1,9 @@
 
+import {AddressType} from "./AddressType";
 export class Address {
+    public id: string;
+    public type: AddressType;
     public street: string;
-    public building: string;
-    public apartment: string;
+    public house: string;
+    public flat: string;
 }

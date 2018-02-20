@@ -3,7 +3,7 @@ import {PhoneType} from "./PhoneType";
 
 export class PhoneNumber {
     public phoneType: PhoneType;
-    public number: number;
+    public number: number/*int*/;
 
     public assign(o: any): PhoneNumber {
         this.phoneType = o.phoneType;

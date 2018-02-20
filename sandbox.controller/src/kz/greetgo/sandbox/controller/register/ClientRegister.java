@@ -1,8 +1,8 @@
 package kz.greetgo.sandbox.controller.register;
 
-import kz.greetgo.sandbox.controller.model.ClientInfo;
 import kz.greetgo.sandbox.controller.model.ClientDetails;
-import kz.greetgo.sandbox.controller.model.ClientsListInfo;
+import kz.greetgo.sandbox.controller.model.ClientInfo;
+import kz.greetgo.sandbox.controller.model.ClientRecords;
 
 import java.util.List;
 
@@ -12,46 +12,37 @@ public interface ClientRegister {
      *
      * @return общее количество клиентов в БД
      */
-    long getTotalSize(String filterBy, String filterInputs);
+    long getTotalSize(String filterBy, String filterInput);
 
     /**
-     * Предоставляет список клиентов и общее количество клиентов в БД
+     * Предоставляет список клиентов
      *
      * @param page номер запрашиваемой страницы
      * @param pageSize максимальное количество элементов на странице
-     * @return список клиентов с детальной информацией и общее количество клиентов в БД
+     * @return список клиентов
      */
-    List<ClientInfo> getClientsList(String filterBy, String filterInputs, String orderBy, String isDesc, int page, int pageSize);
+    List<ClientInfo> getClientsList(String filterBy, String filterInputs, String orderBy, boolean isDesc, int page, int pageSize);
 
     /**
      * Предоставляет полную информацию о клиенте
      *
-     * @param clientsId id запрашиваемого клиента
+     * @param clientId id запрашиваемого клиента
      * @return полная информация о клиенте
      */
-    ClientDetails getClientDetails(String clientsId);
+    ClientDetails getClientDetails(String clientId);
 
     /**
      * Добавляет нового пользователя
      *
-     * @param newClientsInfo данные нового пользователя в виде Json
+     * @param clientRecords  записи нового пользователя
      * @return возвращает добавленный клиент с присвоенным id
      */
-    ClientInfo addClient(String newClientsInfo);
+    ClientInfo addOrUpdateClient(ClientRecords clientRecords);
 
     /**
      *  Удаляет клиента
      *
      * @param clientsId id клиента, которого надо удалить
      */
-    void removeClient(String clientsId, int page, int pageSize);
-
-    /**
-     *  Обновляет данные клиента
-     *
-     * @param clientParams новые данные клиента
-     */
-    ClientInfo updateClient(String clientParams);
-
-    List<String> getCharms();
+    void removeClient(String clientsId);
 }

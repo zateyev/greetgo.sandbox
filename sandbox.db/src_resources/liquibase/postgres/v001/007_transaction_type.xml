@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-2.0.xsd">
+
+  <changeSet author="zateyev" id="create-table-TransactionType">
+    <sql endDelimiter=";;"><![CDATA[
+      create table TransactionType (
+        id varchar(32) not null PRIMARY KEY,
+        code varchar(255) not null,
+        name varchar(255) not null
+      )
+    ]]></sql>
+  </changeSet>
+
+
+</databaseChangeLog>

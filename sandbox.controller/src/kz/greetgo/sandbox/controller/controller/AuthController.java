@@ -18,7 +18,6 @@ import kz.greetgo.sandbox.controller.util.Controller;
 public class AuthController implements Controller {
 
   public BeanGetter<AuthRegister> authRegister;
-  public BeanGetter<ClientRegister> clientRegister;
 
   @AsIs
   @NoSecurity

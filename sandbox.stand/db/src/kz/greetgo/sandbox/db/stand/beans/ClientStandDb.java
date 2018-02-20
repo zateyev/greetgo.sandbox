@@ -2,7 +2,7 @@ package kz.greetgo.sandbox.db.stand.beans;
 
 import kz.greetgo.depinject.core.Bean;
 import kz.greetgo.depinject.core.HasAfterInject;
-import kz.greetgo.sandbox.db.stand.model.CharmDot;
+import kz.greetgo.sandbox.controller.model.Charm;
 import kz.greetgo.sandbox.db.stand.model.ClientDot;
 
 import java.io.BufferedReader;
@@ -12,18 +12,18 @@ import java.util.*;
 @Bean
 public class ClientStandDb implements HasAfterInject {
     public final Map<String, ClientDot> clientStorage = new HashMap<>();
-    public final Map<String, CharmDot> charmStorage = new HashMap<>();
+    public final Map<String, Charm> charmStorage = new HashMap<>();
 
     @Override
     public void afterInject() throws Exception {
         String[] charmNames = {"Уситчивый", "Агрессивный", "Спокойный", "Грубый", "Тактичный"};
 
         for (int i = 0; i < charmNames.length; i++) {
-            CharmDot charmdot = new CharmDot();
-            charmdot.setId("ch" + i);
-            charmdot.setName(charmNames[i]);
+            Charm charm = new Charm();
+            charm.id = "ch" + i;
+            charm.name = charmNames[i];
 
-            this.charmStorage.put(charmdot.getId(), charmdot);
+            this.charmStorage.put(charm.id, charm);
         }
 
         Random rand = new Random(System.currentTimeMillis());
@@ -46,7 +46,7 @@ public class ClientStandDb implements HasAfterInject {
                 String command = splitLine[0].trim();
                 switch (command) {
                     case "CLIENT":
-                        appendClient(splitLine, line, lineNo, charmStorage.get("ch" + rand.nextInt(charmStorage.size())).getName());
+                        appendClient(splitLine, line, lineNo, charmStorage.get("ch" + rand.nextInt(charmStorage.size())));
                         break;
 
                     default:
@@ -57,9 +57,9 @@ public class ClientStandDb implements HasAfterInject {
     }
 
     @SuppressWarnings("unused")
-    private void appendClient(String[] splitLine, String line, int lineNo, String charmName) {
+    private void appendClient(String[] splitLine, String line, int lineNo, Charm charm) {
         ClientDot client = new ClientDot();
-        client.setCharm(charmName);
+        client.setCharm(charm);
         client.setId(splitLine[1].trim());
         String[] ap = splitLine[2].trim().split("\\s+");
         String[] fio = splitLine[3].trim().split("\\s+");

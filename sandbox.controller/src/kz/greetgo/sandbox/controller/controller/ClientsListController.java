@@ -31,7 +31,7 @@ public class ClientsListController implements Controller {
   public List<ClientInfo> clientsList(@Par("filterBy") String filterBy,
                                       @Par("filterInputs") String filterInputs,
                                       @Par("orderBy") String orderBy,
-                                      @Par("isDesc") String isDesc,
+                                      @Par("isDesc") boolean isDesc,
                                       @Par("page") int page,
                                       @Par("pageSize") int pageSize) {
     return clientRegister.get().getClientsList(filterBy, filterInputs, orderBy, isDesc, page, pageSize);
@@ -44,28 +44,14 @@ public class ClientsListController implements Controller {
   }
 
   @ToJson
-  @Mapping("/addClient")
-  public ClientInfo addNewClient(@Par("newClient") String newClient) {
-    return clientRegister.get().addClient(newClient);
-  }
-
-  @ToJson
-  @Mapping("/updateClient")
-  public ClientInfo updateClient(@Par("clientParams") String clientParams) {
-    return clientRegister.get().updateClient(clientParams);
+  @Mapping("/addOrUpdateClient")
+  public ClientInfo addClient(@Par("clientRecords") @Json ClientRecords clientRecords) {
+    return clientRegister.get().addOrUpdateClient(clientRecords);
   }
 
   @ToJson
   @Mapping("/removeClient")
-  public void removeClient(@Par("clientsId") String clientsId,
-                           @Par("page") int page,
-                           @Par("pageSize") int pageSize) {
-    clientRegister.get().removeClient(clientsId, page, pageSize);
-  }
-
-  @ToJson
-  @Mapping("/charms")
-  public List<String> getCharms() {
-    return clientRegister.get().getCharms();
+  public void removeClient(@Par("clientsId") String clientsId) {
+    clientRegister.get().removeClient(clientsId);
   }
 }

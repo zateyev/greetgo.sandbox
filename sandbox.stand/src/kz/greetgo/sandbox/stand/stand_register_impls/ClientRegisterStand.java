@@ -2,50 +2,52 @@ package kz.greetgo.sandbox.stand.stand_register_impls;
 
 import kz.greetgo.depinject.core.Bean;
 import kz.greetgo.depinject.core.BeanGetter;
-import kz.greetgo.sandbox.controller.model.*;
+import kz.greetgo.sandbox.controller.model.ClientDetails;
+import kz.greetgo.sandbox.controller.model.ClientInfo;
+import kz.greetgo.sandbox.controller.model.ClientRecords;
 import kz.greetgo.sandbox.controller.register.ClientRegister;
 import kz.greetgo.sandbox.db.stand.beans.ClientStandDb;
-import kz.greetgo.sandbox.db.stand.model.CharmDot;
 import kz.greetgo.sandbox.db.stand.model.ClientDot;
 import kz.greetgo.sandbox.stand.util.PageUtils;
-import org.json.JSONObject;
 
-import java.time.LocalDate;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
 
 @Bean
 public class ClientRegisterStand implements ClientRegister {
     public BeanGetter<ClientStandDb> clientD;
 
     @Override
-    public long getTotalSize(String filterBy, String filterInputs) {
-        return filterClientsList(filterBy, filterInputs).size();
+    public long getTotalSize(String filterBy, String filterInput) {
+        return filterClientsList(filterBy, filterInput).size();
     }
 
     @Override
-    public List<ClientInfo> getClientsList(String filterBy, String filterInputs, String orderBy, String isDesc, int page, int pageSize) {
-        List<ClientInfo> clientsList = filterClientsList(filterBy, filterInputs);
-        if (clientsList.isEmpty()) return clientsList;
+    public List<ClientInfo> getClientsList(String filterBy, String filterInputs, String orderBy, boolean isDesc, int page, int pageSize) {
+        List<ClientInfo> clientInfos = filterClientsList(filterBy, filterInputs);
+        if (clientInfos.isEmpty()) return clientInfos;
 
 
         String sortBy = orderBy != null ? orderBy.trim() : "";
         if ("age".equals(sortBy))
-            clientsList.sort((Comparator.comparingInt(ClientInfo::getAge)));
+            clientInfos.sort(Comparator.comparingInt(o -> o.age));
         else if ("totalBalance".equals(sortBy))
-            clientsList.sort((Comparator.comparingInt(ClientInfo::getTotalBalance)));
+            clientInfos.sort(Comparator.comparingDouble(o -> o.totalBalance));
         else if ("minBalance".equals(sortBy))
-            clientsList.sort((Comparator.comparingInt(ClientInfo::getMinBalance)));
+            clientInfos.sort(Comparator.comparingDouble(o -> o.minBalance));
         else if ("maxBalance".equals(sortBy))
-            clientsList.sort((Comparator.comparingInt(ClientInfo::getMaxBalance)));
+            clientInfos.sort(Comparator.comparingDouble(o -> o.maxBalance));
         else
-            clientsList.sort(Comparator.comparing(ClientInfo::getSurname));
+            clientInfos.sort(Comparator.comparing(o -> o.surname));
 
-        if (Boolean.valueOf(isDesc)) Collections.reverse(clientsList);
+        if (isDesc) Collections.reverse(clientInfos);
 
 
-        PageUtils.cutPage(clientsList, page*pageSize, pageSize);
+        PageUtils.cutPage(clientInfos, page*pageSize, pageSize);
 
-        return clientsList;
+        return clientInfos;
     }
 
     private List<ClientInfo> filterClientsList(String filterBy, String filterInputs) {
@@ -69,135 +71,34 @@ public class ClientRegisterStand implements ClientRegister {
     }
 
     @Override
-    public ClientDetails getClientDetails(String clientsId) {
-        ClientDot clientDot = clientD.get().clientStorage.get(clientsId);
-        return clientDot.toClientsFullInfo();
+    public ClientDetails getClientDetails(String clientId) {
+        ClientDot clientDot = clientD.get().clientStorage.get(clientId);
+        return clientDot.toClientDetails();
     }
 
     @Override
-    public ClientInfo addClient(String newClientsInfo) {
-        JSONObject jsonObject = new JSONObject(newClientsInfo);
+    public ClientInfo addOrUpdateClient(ClientRecords clientRecords) {
 
-        Address addressF = new Address(
-                jsonObject.getString("streetF"),
-                jsonObject.getString("buildingF"),
-                jsonObject.getString("apartmentF")
-        );
-        Address addressR = new Address(
-                jsonObject.getString("streetR"),
-                jsonObject.getString("buildingR"),
-                jsonObject.getString("apartmentR")
-        );
-
-        List<PhoneNumber> phoneNumbers = new ArrayList<>();
-        int i = 0;
-        while (jsonObject.has("phoneType" + i) && jsonObject.has("phoneNumber" + i)) {
-            PhoneNumber phoneNumber = new PhoneNumber(PhoneType.valueOf(jsonObject.getString("phoneType" + i)),
-                    jsonObject.getString("phoneNumber" + i));
-            phoneNumbers.add(phoneNumber);
-            i++;
-        }
-        ClientDot newClient = new ClientDot(
-                "p" + (clientD.get().clientStorage.size() + 1),
-                jsonObject.getString("surname"),
-                jsonObject.getString("name"),
-                jsonObject.getString("patronymic"),
-                addressF,
-                addressR,
-                phoneNumbers
-        );
-
-        if (jsonObject.has("charm")) {
-            newClient.setCharm(jsonObject.getString("charm"));
+        if (clientRecords.id != null) {
+            ClientDot clientDot = clientD.get().clientStorage.get(clientRecords.id);
+            if (clientDot != null) {
+                clientDot.saveRecords(clientRecords);
+                return clientDot.toClientInfo();
+            }
+            return null;
         }
 
-        if (jsonObject.has("gender")) {
-            newClient.setGender(jsonObject.getString("gender"));
-        }
+        if (clientRecords.surname == null) return null;
 
-        if (!jsonObject.getString("dateOfBirth").isEmpty()) {
-            LocalDate dateOfBirth = LocalDate.parse(jsonObject.getString("dateOfBirth"));
-            newClient.setDateOfBirth(dateOfBirth);
-        }
-
-        clientD.get().clientStorage.put(newClient.getId(), newClient);
-
-        return newClient.toClientInfo();
-    }
-
-    @Override
-    public void removeClient(String clientsId, int page, int pageSize) {
-        clientD.get().clientStorage.remove(clientsId);
-    }
-
-    @Override
-    public ClientInfo updateClient(String clientParams) {
-        JSONObject jsonObject = new JSONObject(clientParams);
-
-        ClientDot clientDot = clientD.get().clientStorage.get(jsonObject.getString("id"));
-
-        if (!jsonObject.getString("surname").isEmpty()) {
-            clientDot.setSurname(jsonObject.getString("surname"));
-        }
-        if (!jsonObject.getString("name").isEmpty()) {
-            clientDot.setName(jsonObject.getString("name"));
-        }
-        if (!jsonObject.getString("patronymic").isEmpty()) {
-            clientDot.setPatronymic(jsonObject.getString("patronymic"));
-        }
-        if (!jsonObject.getString("dateOfBirth").isEmpty()) {
-            LocalDate dateOfBirth = LocalDate.parse(jsonObject.getString("dateOfBirth"));
-            clientDot.setDateOfBirth(dateOfBirth);
-        }
-        if (jsonObject.has("charm") && !jsonObject.getString("charm").isEmpty()) {
-            clientDot.setCharm(jsonObject.getString("charm"));
-        }
-
-        if (jsonObject.has("gender") && !jsonObject.getString("gender").isEmpty()) {
-            clientDot.setGender(jsonObject.getString("gender"));
-        }
-        if (!jsonObject.getString("streetF").isEmpty() &&
-                !jsonObject.getString("buildingF").isEmpty() &&
-                !jsonObject.getString("apartmentF").isEmpty()) {
-
-            Address addressF = new Address(
-                    jsonObject.getString("streetF"),
-                    jsonObject.getString("buildingF"),
-                    jsonObject.getString("apartmentF")
-            );
-            clientDot.setAddressF(addressF);
-        }
-        if (!jsonObject.getString("streetR").isEmpty() &&
-                !jsonObject.getString("buildingR").isEmpty() &&
-                !jsonObject.getString("apartmentR").isEmpty()) {
-
-            Address addressR = new Address(
-                    jsonObject.getString("streetR"),
-                    jsonObject.getString("buildingR"),
-                    jsonObject.getString("apartmentR")
-            );
-            clientDot.setAddressR(addressR);
-        }
-        List<PhoneNumber> phoneNumbers = new ArrayList<>();
-        int i = 0;
-        while (jsonObject.has("phoneType" + i) && jsonObject.has("phoneNumber" + i)) {
-            PhoneNumber phoneNumber = new PhoneNumber(PhoneType.valueOf(jsonObject.getString("phoneType" + i)),
-                    jsonObject.getString("phoneNumber" + i));
-            phoneNumbers.add(phoneNumber);
-            i++;
-        }
-        clientDot.setPhoneNumbers(phoneNumbers);
-
-        clientD.get().clientStorage.put(jsonObject.getString("id"), clientDot);
+        clientRecords.id = "p" + (clientD.get().clientStorage.size() + 1);
+        ClientDot clientDot = new ClientDot(clientRecords);
+        clientD.get().clientStorage.put(clientDot.getId(), clientDot);
 
         return clientDot.toClientInfo();
     }
 
     @Override
-    public List<String> getCharms() {
-        List<String> charmNamesList = new ArrayList<>();
-        List<CharmDot> charms = new ArrayList<>(clientD.get().charmStorage.values());
-        charms.forEach(charmDot -> charmNamesList.add(charmDot.getName()));
-        return charmNamesList;
+    public void removeClient(String clientsId) {
+        clientD.get().clientStorage.remove(clientsId);
     }
 }
