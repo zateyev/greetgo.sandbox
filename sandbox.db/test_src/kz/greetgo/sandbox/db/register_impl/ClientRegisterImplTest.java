@@ -275,6 +275,22 @@ public class ClientRegisterImplTest extends ParentTestNg {
         }
       }});
     Collections.reverse(expectingClientList);
+//    Collections.sort(expectingClientList, new Comparator() {
+//
+//      public int compare(Object o1, Object o2) {
+//
+//        Double tb1 = ((ClientInfo) o1).totalBalance;
+//        Double tb2 = ((ClientInfo) o2).totalBalance;
+//        int sComp = tb2.compareTo(tb1);
+//
+//        if (sComp != 0) {
+//          return sComp;
+//        } else {
+//          String sn1 = ((ClientInfo) o1).surname.toLowerCase();
+//          String sn2 = ((ClientInfo) o2).surname.toLowerCase();
+//          return sn2.compareTo(sn1);
+//        }
+//      }});
 
     PageUtils.cutPage(expectingClientList, page * pageSize, pageSize);
 
@@ -728,7 +744,7 @@ public class ClientRegisterImplTest extends ParentTestNg {
   private ClientDetails createRndClient() {
     ClientDetails client = new ClientDetails();
     client.id = idGen.get().newId();
-    client.surname = RND.str(10);
+    client.surname = (10000 + RND.plusInt(99999)) + RND.str(5);
     client.name = RND.str(10);
     client.patronymic = RND.str(10);
     client.charm = new Charm();

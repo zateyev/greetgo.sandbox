@@ -78,28 +78,39 @@ public abstract class AbstractLoader<T> implements ConnectionCallback<T> {
     }
 
     if (isOrdered) {
+      sql.append("order by ");
       switch (orderBy) {
         case "age":
-          sql.append("order by age nulls first, lower(Client.surname) ");
+          if (isDesc)
+            sql.append("age desc nulls last, lower(Client.surname) ");
+          else
+            sql.append("age nulls first, lower(Client.surname) ");
           break;
 
         case "totalBalance":
-          sql.append("order by ca.totalBalance nulls first, lower(Client.surname) ");
+          if (isDesc)
+            sql.append("ca.totalBalance desc nulls last, lower(Client.surname) ");
+          else
+            sql.append("ca.totalBalance nulls first, lower(Client.surname) ");
           break;
 
         case "minBalance":
-          sql.append("order by ca.minBalance nulls first, lower(Client.surname) ");
+          if (isDesc)
+            sql.append("ca.minBalance desc nulls last, lower(Client.surname) ");
+          else
+            sql.append("ca.minBalance nulls first, lower(Client.surname) ");
           break;
 
         case "maxBalance":
-          sql.append("order by ca.maxBalance nulls first, lower(Client.surname) ");
+          if (isDesc)
+            sql.append("ca.maxBalance desc nulls last, lower(Client.surname) ");
+          else
+            sql.append("ca.maxBalance nulls first, lower(Client.surname) ");
           break;
 
         default:
-          sql.append("order by lower(Client.surname) ");
+          sql.append("lower(Client.surname) ");
       }
-
-      if (isDesc) sql.append("desc ");
     }
 
     if (isListLimited) {
