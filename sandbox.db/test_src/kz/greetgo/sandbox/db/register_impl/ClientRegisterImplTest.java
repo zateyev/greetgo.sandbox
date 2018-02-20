@@ -113,10 +113,8 @@ public class ClientRegisterImplTest extends ParentTestNg {
 
     List<ClientDetails> clients = clearDbAndInsertTestData(200);
 
-//    int pageSize = RND.plusInt(clients.size());
-//    int page = pageSize > 0 ? RND.plusInt((int) Math.ceil(clients.size() / pageSize)) : 0;
-    int pageSize = 25;
-    int page = 1;
+    int pageSize = RND.plusInt(clients.size());
+    int page = pageSize > 0 ? RND.plusInt((int) Math.ceil(clients.size() / pageSize)) : 0;
 
     List<ClientInfo> expectingClientList = new ArrayList<>();
     clients.forEach(clientDetails -> expectingClientList.add(toClientInfo(clientDetails)));
@@ -275,22 +273,6 @@ public class ClientRegisterImplTest extends ParentTestNg {
         }
       }});
     Collections.reverse(expectingClientList);
-//    Collections.sort(expectingClientList, new Comparator() {
-//
-//      public int compare(Object o1, Object o2) {
-//
-//        Double tb1 = ((ClientInfo) o1).totalBalance;
-//        Double tb2 = ((ClientInfo) o2).totalBalance;
-//        int sComp = tb2.compareTo(tb1);
-//
-//        if (sComp != 0) {
-//          return sComp;
-//        } else {
-//          String sn1 = ((ClientInfo) o1).surname.toLowerCase();
-//          String sn2 = ((ClientInfo) o2).surname.toLowerCase();
-//          return sn2.compareTo(sn1);
-//        }
-//      }});
 
     PageUtils.cutPage(expectingClientList, page * pageSize, pageSize);
 
@@ -315,9 +297,6 @@ public class ClientRegisterImplTest extends ParentTestNg {
 
     int pageSize = RND.plusInt(clients.size());
     int page = pageSize > 0 ? RND.plusInt((int) Math.ceil(clients.size() / pageSize)) : 0;
-
-//    int pageSize = 25;
-//    int page = 1;
 
     List<ClientInfo> expectingClientList = new ArrayList<>();
     clients.forEach(clientDetails -> expectingClientList.add(toClientInfo(clientDetails)));
@@ -363,9 +342,6 @@ public class ClientRegisterImplTest extends ParentTestNg {
 
     int pageSize = RND.plusInt(clients.size());
     int page = pageSize > 0 ? RND.plusInt((int) Math.ceil(clients.size() / pageSize)) : 0;
-
-//    int pageSize = 25;
-//    int page = 1;
 
     List<ClientInfo> expectingClientList = new ArrayList<>();
     clients.forEach(clientDetails -> expectingClientList.add(toClientInfo(clientDetails)));

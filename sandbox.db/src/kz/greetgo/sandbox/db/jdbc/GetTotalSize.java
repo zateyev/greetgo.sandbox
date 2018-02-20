@@ -15,7 +15,7 @@ public class GetTotalSize extends AbstractLoader<Long> {
 
   @Override
   public Long doInConnection(Connection connection) throws Exception {
-    prepareSql(DbType.detect(connection), false, false);
+    prepareSql(DbType.detect(connection));
 
     try (PreparedStatement ps = connection.prepareStatement(sql.toString())) {
 
@@ -40,5 +40,24 @@ public class GetTotalSize extends AbstractLoader<Long> {
   @Override
   protected void select() {
     sql.append("select count(client.id) as size ");
+  }
+
+  @Override
+  void prepareSql(DbType dbType) {
+    select();
+
+    switch (dbType) {
+
+      case Postgres:
+        prepareFromWhereForPostgres();
+        return;
+
+      case Oracle:
+        prepareFromWhereForOracle();
+        return;
+
+      default:
+        throw new RuntimeException("Unknown DB " + dbType);
+    }
   }
 }

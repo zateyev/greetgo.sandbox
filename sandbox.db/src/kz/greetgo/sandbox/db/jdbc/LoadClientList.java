@@ -22,7 +22,7 @@ public class LoadClientList extends AbstractLoader<List<ClientInfo>> {
   @Override
   public List<ClientInfo> doInConnection(Connection connection) throws Exception {
 
-    prepareSql(DbType.detect(connection), true, true);
+    prepareSql(DbType.detect(connection));
 
     try (PreparedStatement ps = connection.prepareStatement(sql.toString())) {
 
@@ -70,5 +70,26 @@ public class LoadClientList extends AbstractLoader<List<ClientInfo>> {
       "ca.totalBalance, " +
       "ca.minBalance, " +
       "ca.maxBalance ");
+  }
+
+  @Override
+  void prepareSql(DbType dbType) {
+    select();
+
+    switch (dbType) {
+
+      case Postgres:
+        prepareFromWhereForPostgres();
+        orderBy();
+        limit();
+        return;
+
+      case Oracle:
+        prepareFromWhereForOracle();
+        return;
+
+      default:
+        throw new RuntimeException("Unknown DB " + dbType);
+    }
   }
 }
