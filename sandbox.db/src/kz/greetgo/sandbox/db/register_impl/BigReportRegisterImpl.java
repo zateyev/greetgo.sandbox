@@ -1,5 +1,6 @@
 package kz.greetgo.sandbox.db.register_impl;
 
+import com.itextpdf.text.DocumentException;
 import kz.greetgo.depinject.core.Bean;
 import kz.greetgo.depinject.core.BeanGetter;
 import kz.greetgo.sandbox.controller.register.BigReportRegister;
@@ -21,7 +22,7 @@ public class BigReportRegisterImpl implements BigReportRegister {
   public BeanGetter<ClientRegister> clientRegister;
 
   @Override
-  public void genReport(String filterBy, String filterInput, String orderBy, boolean isDesc, BigReportView view) {
+  public void genReport(String filterBy, String filterInput, String orderBy, boolean isDesc, BigReportView view) throws DocumentException {
 
     ReportHeadData head = new ReportHeadData();
     head.title = "Список клиентов";
