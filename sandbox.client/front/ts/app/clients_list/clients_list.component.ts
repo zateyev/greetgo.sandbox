@@ -252,8 +252,13 @@ export class ClientsListComponent {
   }
 
   loadReport() {
-    this.httpService.get("/big_report/pdf").toPromise().then(result => {
-      // this.charms = result.json();
+    this.httpService.post("/report/xlsx", {
+      filterBy: this.filterBy,
+      filterInputs: this.filterInputs,
+      orderBy: this.orderBy,
+      isDesc: this.isDescending.toString(),
+      viewType: "XLSX"
+    }).toPromise().then(result => {
       console.log("report loaded");
     }, error => {
       console.log("report");

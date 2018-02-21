@@ -23,7 +23,7 @@ public class ClientsListController implements Controller {
   @Mapping("/totalSize")
   public long getTotalSize(@Par("filterBy") String filterBy,
                            @Par("filterInputs") String filterInputs) {
-    return clientRegister.get().getTotalSize(filterBy, filterInputs);
+    return clientRegister.get().getTotalSize(filterBy != null ? filterBy : "", filterInputs != null ? filterInputs : "");
   }
 
   @ToJson
@@ -34,7 +34,7 @@ public class ClientsListController implements Controller {
                                       @Par("isDesc") boolean isDesc,
                                       @Par("page") int page,
                                       @Par("pageSize") int pageSize) {
-    return clientRegister.get().getClientsList(filterBy, filterInputs, orderBy, isDesc, page, pageSize);
+    return clientRegister.get().getClientsList(filterBy != null ? filterBy : "", filterInputs != null ? filterInputs : "", orderBy != null ? orderBy : "", isDesc, page, pageSize);
   }
 
   @ToJson
