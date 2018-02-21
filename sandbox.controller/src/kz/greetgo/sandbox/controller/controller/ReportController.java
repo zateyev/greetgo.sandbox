@@ -7,11 +7,8 @@ import kz.greetgo.mvc.annotations.ParPath;
 import kz.greetgo.mvc.interfaces.RequestTunnel;
 import kz.greetgo.sandbox.controller.register.BigReportRegister;
 import kz.greetgo.sandbox.controller.register.ReportRegister;
-import kz.greetgo.sandbox.controller.report.BigReportView;
-import kz.greetgo.sandbox.controller.report.ReportView;
-import kz.greetgo.sandbox.db.report.client_list.big_data.BigReportViewPdf;
+import kz.greetgo.sandbox.controller.report.ViewType;
 
-import javax.lang.model.type.UnknownTypeException;
 import java.io.OutputStream;
 import java.io.PrintStream;
 
@@ -28,8 +25,6 @@ public class ReportController {
     tunnel.setResponseHeader("Content-Disposition", "attachment; filename = result." + viewType);
     OutputStream out = tunnel.getResponseOutputStream();
 
-//    ReportView view = getView(viewType, out);
-//    reportRegister.get().genReport(clientId, contractId, viewType, out);
     tunnel.flushBuffer();
   }
 
@@ -38,21 +33,17 @@ public class ReportController {
                                 @Par("filterInputs") String filterInputs,
                                 @Par("orderBy") String orderBy,
                                 @Par("isDesc") boolean isDesc,
-//                                @ParPath("viewType") String viewType,
+                                @ParPath("viewType") String viewType,
                                 RequestTunnel tunnel) throws Exception {
 
-    tunnel.setResponseHeader("Content-Disposition", "attachment; filename = BigReport.txt"/* + viewType*/);
+    tunnel.setResponseHeader("Content-Disposition", "attachment; filename = BigReport." + viewType);
     OutputStream out = tunnel.getResponseOutputStream();
 
-    PrintStream printStream = new PrintStream(out, false, "UTF-8");
+//    PrintStream printStream = new PrintStream(out, false, "UTF-8");
 
-//    ReportView view = getView(viewType, out);
-//    bigReportRegister.get().genReport(clientId, viewType, printStream);
+    bigReportRegister.get().genReport(filterBy, filterInputs, orderBy, isDesc, ViewType.valueOf(viewType), out);
 
-    BigReportViewPdf viewPdf = new BigReportViewPdf(printStream);
-    bigReportRegister.get().genReport(filterBy, filterInputs, orderBy, isDesc, viewPdf);
-
-    printStream.flush();
+//    printStream.flush();
     tunnel.flushBuffer();
   }
 }

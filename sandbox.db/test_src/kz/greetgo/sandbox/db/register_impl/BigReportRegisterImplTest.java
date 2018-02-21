@@ -3,11 +3,13 @@ package kz.greetgo.sandbox.db.register_impl;
 import kz.greetgo.depinject.core.BeanGetter;
 import kz.greetgo.sandbox.controller.model.*;
 import kz.greetgo.sandbox.controller.register.BigReportRegister;
-import kz.greetgo.sandbox.controller.report.BigReportView;
-import kz.greetgo.sandbox.controller.report.ReportFootData;
-import kz.greetgo.sandbox.controller.report.ReportHeadData;
+import kz.greetgo.sandbox.db.jdbc.BigReportJdbc;
+import kz.greetgo.sandbox.db.report.client_list.big_data.BigReportView;
+import kz.greetgo.sandbox.db.report.client_list.ReportFootData;
+import kz.greetgo.sandbox.db.report.client_list.ReportHeadData;
 import kz.greetgo.sandbox.db.test.dao.ClientTestDao;
 import kz.greetgo.sandbox.db.test.util.ParentTestNg;
+import kz.greetgo.sandbox.db.util.JdbcSandbox;
 import kz.greetgo.util.RND;
 import org.testng.annotations.Test;
 
@@ -15,6 +17,7 @@ import java.time.LocalDate;
 import java.time.Period;
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.Date;
 import java.util.List;
 
 import static org.fest.assertions.api.Assertions.assertThat;
@@ -27,6 +30,7 @@ public class BigReportRegisterImplTest extends ParentTestNg {
   public BeanGetter<BigReportRegister> bigReportRegister;
   public BeanGetter<ClientTestDao> clientTestDao;
   public BeanGetter<IdGenerator> idGen;
+  public BeanGetter<JdbcSandbox> jdbcSandbox;
 
   private static class TestReportView implements BigReportView {
 
@@ -64,9 +68,16 @@ public class BigReportRegisterImplTest extends ParentTestNg {
 
     TestReportView testReportView = new TestReportView();
 
+
     //
     //
-    bigReportRegister.get().genReport("", "", "", false, testReportView);
+    ReportHeadData head = new ReportHeadData();
+    head.title = "Список клиентов";
+    testReportView.start(head);
+    jdbcSandbox.get().execute(new BigReportJdbc("", "", "", false, 0, 0, testReportView));
+    ReportFootData foot = new ReportFootData();
+    foot.generatedAt = new Date();
+    testReportView.finish(foot);
     //
     //
 

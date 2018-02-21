@@ -1,7 +1,6 @@
 package kz.greetgo.sandbox.db.report.client_list;
 
 import kz.greetgo.sandbox.controller.model.ClientInfo;
-import kz.greetgo.sandbox.controller.report.ReportView;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;

@@ -3,7 +3,7 @@ package kz.greetgo.sandbox.db.register_impl;
 import kz.greetgo.depinject.core.Bean;
 import kz.greetgo.sandbox.controller.model.ClientInfo;
 import kz.greetgo.sandbox.controller.register.ReportRegister;
-import kz.greetgo.sandbox.controller.report.ReportView;
+import kz.greetgo.sandbox.db.report.client_list.ReportView;
 import kz.greetgo.sandbox.db.report.client_list.ReportViewPdf;
 import kz.greetgo.sandbox.db.report.client_list.ReportViewXlsx;
 
@@ -13,10 +13,10 @@ import java.io.OutputStream;
 public class ReportRegisterImpl implements ReportRegister {
 
   @Override
-  public void genReport(String clientId, String contractId, ReportView view/*, String view, OutputStream out*/) throws Exception {
+  public void genReport(String clientId, String contractId/*, String view, OutputStream out*/) throws Exception {
     ClientInfo inData = getInDataFromDb(contractId, contractId);
 //    ReportView view = getView(viewType, out);
-    view.generate(inData);
+//    view.generate(inData);
   }
 
   private ClientInfo getInDataFromDb(String userId, String contractId) {

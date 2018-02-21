@@ -1,16 +1,13 @@
 package kz.greetgo.sandbox.db.report.client_list.big_data;
 
-import com.itextpdf.text.DocumentException;
 import kz.greetgo.sandbox.controller.model.Charm;
 import kz.greetgo.sandbox.controller.model.ClientInfo;
-import kz.greetgo.sandbox.controller.report.BigReportView;
-import kz.greetgo.sandbox.controller.report.ReportFootData;
-import kz.greetgo.sandbox.controller.report.ReportHeadData;
+import kz.greetgo.sandbox.db.report.client_list.ReportFootData;
+import kz.greetgo.sandbox.db.report.client_list.ReportHeadData;
 import kz.greetgo.msoffice.xlsx.gen.Sheet;
 import kz.greetgo.msoffice.xlsx.gen.Xlsx;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.OutputStream;
 import java.util.Date;
@@ -67,21 +64,12 @@ public class BigReportViewXlsx implements BigReportView {
   public void start(ReportHeadData headData) {
     sheet = xlsx.newSheet(true);
 
-    sheet.setWidth(1, 4.14);
-    sheet.setWidth(2, 36.71);
+    sheet.setWidth(1, 30.71);
+    sheet.setWidth(2, 30.71);
     sheet.setWidth(3, 13.86);
     sheet.setWidth(4, 22.29);
     sheet.setWidth(5, 14.43);
     sheet.setWidth(6, 17.57);
-
-//    final SimpleDateFormat f = new SimpleDateFormat("dd/MM/yyyy");
-//
-//    sheet.row().height(27.75).start();
-//    sheet.style().font().bold();
-//    sheet.style().font().setSize(17);
-//    sheet.cellStr(2, "Список договоров на дату: " + f.format(onDate));
-//    sheet.style().clean();
-//    sheet.row().finish();
 
     sheet.skipRow();
 

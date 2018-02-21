@@ -3,11 +3,9 @@ package kz.greetgo.sandbox.db.register_impl;
 import kz.greetgo.depinject.core.BeanGetter;
 import kz.greetgo.sandbox.controller.model.*;
 import kz.greetgo.sandbox.controller.register.ReportRegister;
-import kz.greetgo.sandbox.controller.report.ReportView;
+import kz.greetgo.sandbox.db.report.client_list.ReportView;
 import kz.greetgo.sandbox.db.test.dao.ClientTestDao;
-import kz.greetgo.sandbox.db.util.PageUtils;
 import kz.greetgo.util.RND;
-import org.fest.assertions.api.Assertions;
 import org.testng.annotations.Test;
 
 import java.sql.Date;
@@ -18,7 +16,6 @@ import java.util.Comparator;
 import java.util.List;
 
 import static org.fest.assertions.api.Assertions.*;
-import static org.testng.Assert.*;
 
 public class ReportRegisterImplTest {
 
@@ -40,12 +37,12 @@ public class ReportRegisterImplTest {
 
     //
     //
-    reportRegister.get().genReport("", "", new ReportView() {
-      @Override
-      public void generate(ClientInfo clientInfo) throws Exception {
-        clientList[0] = clientInfo;
-      }
-    });
+//    reportRegister.get().genReport("", "", new ReportView() {
+//      @Override
+//      public void generate(ClientInfo clientInfo) throws Exception {
+//        clientList[0] = clientInfo;
+//      }
+//    });
     //
     //
 

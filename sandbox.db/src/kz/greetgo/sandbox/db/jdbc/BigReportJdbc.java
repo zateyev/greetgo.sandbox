@@ -1,10 +1,9 @@
 package kz.greetgo.sandbox.db.jdbc;
 
-import kz.greetgo.db.ConnectionCallback;
 import kz.greetgo.db.DbType;
 import kz.greetgo.sandbox.controller.model.Charm;
 import kz.greetgo.sandbox.controller.model.ClientInfo;
-import kz.greetgo.sandbox.controller.report.BigReportView;
+import kz.greetgo.sandbox.db.report.client_list.big_data.BigReportView;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
