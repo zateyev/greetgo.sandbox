@@ -39,6 +39,7 @@ export class ClientsListComponent {
   pageSizeOptions = [10, 25, 50];
   columnsId = ['fio', 'charm', 'age', 'totalBalance', 'minBalance', 'maxBalance'];
   filterColumns = ['Фамилия', 'Имя', 'Отчество'];
+  viewTypes = ['xlsx', 'pdf'];
 
   columns = {
     fio: 'ФИО', charm: 'Характер', age: 'Возраст', totalBalance: 'Общий остаток счетов',
@@ -47,6 +48,7 @@ export class ClientsListComponent {
 
   formsTitle = "";
   formsBtn = "";
+  viewType = "xlsx";
 
   phoneType = PhoneType;
 
@@ -252,29 +254,15 @@ export class ClientsListComponent {
     });
   }
 
-  loadReport() {
-    // window.open("/report/xlsx");
-    // this.httpService.post("/report/xlsx", {
-    //   filterBy: this.filterBy,
-    //   filterInputs: this.filterInputs,
-    //   orderBy: this.orderBy,
-    //   isDesc: this.isDescending.toString()
-    // }).toPromise().then(result => {
-    //   console.log(result.toString());
-    //   console.log("report loaded");
-    // }, error => {
-    //   console.log("report");
-    //   console.log(error);
-    // });
-
-
-    this.httpService.downloadFile("/report/xlsx", {
+  loadReport(type: string) {
+    this.viewType = type;
+    this.httpService.downloadFile("/report/" + this.viewType, {
       filterBy: this.filterBy,
       filterInputs: this.filterInputs,
       orderBy: this.orderBy,
       isDesc: this.isDescending.toString()
     }).subscribe(blob => {
-      importedSaveAs(blob, "report.xlsx");
+      importedSaveAs(blob, "report." + this.viewType);
     });
   }
 

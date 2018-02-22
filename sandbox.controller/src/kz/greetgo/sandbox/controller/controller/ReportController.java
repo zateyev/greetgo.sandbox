@@ -23,18 +23,6 @@ public class ReportController implements Controller {
 //  public BeanGetter<ReportRegister> reportRegister;
   public BeanGetter<BigReportRegister> bigReportRegister;
 
-//  @Mapping("/{viewType}/{clientId}")
-//  public void downloadReport(@ParPath("viewType") String viewType,
-//                             @ParPath("clientId") String contractId,
-//                             RequestTunnel tunnel) throws Exception {
-//    String clientId = "asd"; // got from session
-//
-//    tunnel.setResponseHeader("Content-Disposition", "attachment; filename = result." + viewType);
-//    OutputStream out = tunnel.getResponseOutputStream();
-//
-//    tunnel.flushBuffer();
-//  }
-
   @ToJson
   @Mapping("/{viewType}")
   public void downloadBigReport(@Par("filterBy") String filterBy,
@@ -48,10 +36,7 @@ public class ReportController implements Controller {
     tunnel.setResponseHeader("Content-Disposition", "attachment; filename = BigReport." + viewType);
     OutputStream out = tunnel.getResponseOutputStream();
 
-    System.out.println(ViewType.valueOf(viewType.toUpperCase()));
-
-//    bigReportRegister.get().genReport(filterBy, filterInputs, orderBy, isDesc, ViewType.valueOf(viewType), out);
-    bigReportRegister.get().genReport(filterBy, filterInputs, orderBy, isDesc, ViewType.XLSX, out);
+    bigReportRegister.get().genReport(filterBy, filterInputs, orderBy, isDesc, ViewType.valueOf(viewType.toUpperCase()), out);
 
     tunnel.flushBuffer();
   }

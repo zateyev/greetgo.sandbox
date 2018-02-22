@@ -1,199 +1,230 @@
 <div class="container">
-    <p>
-        <button (click)="exit.emit()">Выход</button>
-    </p>
+  <p>
+    <button (click)="exit.emit()">Выход</button>
+  </p>
 
-    <h2>Список клиентов</h2>
+  <div class="row">
+    <div class="col-md-8"><h2>Список клиентов</h2></div>
+    <div class="col-md-4">
+      <label class="form-inline">Скачать
+        <select [ngModel]="viewType" name="entryNum" class="form-control input-sm" (ngModelChange)="loadReport($event)">
+          <option *ngFor="let i of viewTypes" [ngValue]="i">{{i}}</option>
+        </select>
+      </label>
+    </div>
+  </div>
 
-    <label for="filterForm">Искать</label>
-    <form #f="ngForm" (submit)="filterList()" id="filterForm" novalidate>
-        <div class="form-row">
-            <div class="form-group col-md-3">
-                <input name="filterInputs" [(ngModel)]="filterInputs" required type="text" class="form-control" id="inputFilterVal">
-            </div>
-            <div class="form-group col-md-2">
-                <select class="form-control"
-                        required
-                        [(ngModel)]="filterBy" name="charm">
-                    <option *ngFor="let col of filterColumns" [ngValue]="col">{{col}}</option>
-                </select>
-            </div>
-            <div class="form-group col-md-2">
-                <button type="submit" class="btn btn-primary">Поиск</button>
-            </div>
-        </div>
-    </form>
+  <label for="filterForm">Искать</label>
+  <form #f="ngForm" (submit)="filterList()" id="filterForm" novalidate>
+    <div class="form-row">
+      <div class="form-group col-md-3">
+        <input name="filterInputs" [(ngModel)]="filterInputs" required type="text" class="form-control"
+               id="inputFilterVal">
+      </div>
+      <div class="form-group col-md-2">
+        <select class="form-control"
+                required
+                [(ngModel)]="filterBy" name="charm">
+          <option *ngFor="let col of filterColumns" [ngValue]="col">{{col}}</option>
+        </select>
+      </div>
+      <div class="form-group col-md-2">
+        <button type="submit" class="btn btn-primary">Поиск</button>
+      </div>
+    </div>
+  </form>
 
-    <label class="form-inline">Показать
-        <select [ngModel]="pageSize" name="entryNum" class="form-control input-sm" id="entry-num" (ngModelChange)="setPageSize($event)">
-            <option *ngFor="let i of pageSizeOptions" [ngValue]="i">{{i}}</option>
-        </select> входов
-    </label>
+  <label class="form-inline">Показать
+    <select [ngModel]="pageSize" name="entryNum" class="form-control input-sm" id="entry-num"
+            (ngModelChange)="setPageSize($event)">
+      <option *ngFor="let i of pageSizeOptions" [ngValue]="i">{{i}}</option>
+    </select> входов
+  </label>
 
-    <button (click)="loadReport()">Загрузить полный список</button>
+  <!--<button (click)="loadReport()">Загрузить полный список</button>-->
 
-    <div class="col-md-10">
+  <div class="col-md-10">
     <table class="table table-hover" id="clientsListTable">
-        <thead>
-        <tr style="white-space:nowrap">
-            <th *ngFor="let col of columnsId; let i = index" (click)="sort(i)"
-                [ngClass]="{sort0:orderBy === columnsId[i] && !isDescending, sort1:orderBy === columnsId[i] && isDescending}">{{columns[col]}}</th>
-        </tr>
-        </thead>
-        <tbody>
-        <tr class="clickable-row" *ngFor="let client of clientsList; let i = index" id="{{i}}" [ngClass]="{active:selClientId === i}" (click)="selectClient(i)">
-            <td>{{client.surname}} {{client.name}} {{client.patronymic}}</td>
-            <td>{{client.charm.name}}</td>
-            <td>{{client.age}}</td>
-            <td>{{client.totalBalance}}</td>
-            <td>{{client.minBalance}}</td>
-            <td>{{client.maxBalance}}</td>
-        </tr>
+      <thead>
+      <tr style="white-space:nowrap">
+        <th *ngFor="let col of columnsId; let i = index" (click)="sort(i)"
+            [ngClass]="{sort0:orderBy === columnsId[i] && !isDescending, sort1:orderBy === columnsId[i] && isDescending}">
+          {{columns[col]}}
+        </th>
+      </tr>
+      </thead>
+      <tbody>
+      <tr class="clickable-row" *ngFor="let client of clientsList; let i = index" id="{{i}}"
+          [ngClass]="{active:selClientId === i}" (click)="selectClient(i)">
+        <td>{{client.surname}} {{client.name}} {{client.patronymic}}</td>
+        <td>{{client.charm.name}}</td>
+        <td>{{client.age}}</td>
+        <td>{{client.totalBalance}}</td>
+        <td>{{client.minBalance}}</td>
+        <td>{{client.maxBalance}}</td>
+      </tr>
 
-        </tbody>
+      </tbody>
     </table>
-    </div>
-    <div class="col-md-2">
-        <p>
-            <button (click)="onAddBtnClicked()" type="button" class="btn btn-link">
-                <span class="glyphicon glyphicon-plus"></span>
-            </button>
-        </p>
-        <p>
-            <button (click)="onEditBtnClicked()" id="edit-button" type="button" class="btn btn-link" disabled>
-                <span class="glyphicon glyphicon-option-horizontal"></span>
-            </button>
-        </p>
-        <p>
-            <button (click)="removeClient()" type="button" id="btn-remove" class="btn btn-link" disabled>
-                <span class="glyphicon glyphicon-minus"></span>
-            </button>
-        </p>
-    </div>
+  </div>
+  <div class="col-md-2">
+    <p>
+      <button (click)="onAddBtnClicked()" type="button" class="btn btn-link">
+        <span class="glyphicon glyphicon-plus"></span>
+      </button>
+    </p>
+    <p>
+      <button (click)="onEditBtnClicked()" id="edit-button" type="button" class="btn btn-link" disabled>
+        <span class="glyphicon glyphicon-option-horizontal"></span>
+      </button>
+    </p>
+    <p>
+      <button (click)="removeClient()" type="button" id="btn-remove" class="btn btn-link" disabled>
+        <span class="glyphicon glyphicon-minus"></span>
+      </button>
+    </p>
+  </div>
 
-    <!--Pagination-->
-    <div class="text-center col-md-10">
-        <ul *ngIf="pager.pages && pager.pages.length" class="pagination">
-            <li [ngClass]="{disabled:pager.currentPage === 1}">
-                <a (click)="setPage(1)">Начало</a>
-            </li>
-            <li [ngClass]="{disabled:pager.currentPage === 1}">
-                <a (click)="setPage(pager.currentPage - 1)">Пред.</a>
-            </li>
-            <li *ngFor="let page of pager.pages" [ngClass]="{active:pager.currentPage === page}">
-                <a (click)="setPage(page)">{{page}}</a>
-            </li>
-            <li [ngClass]="{disabled:pager.currentPage === pager.totalPages}">
-                <a (click)="setPage(pager.currentPage + 1)">След.</a>
-            </li>
-            <li [ngClass]="{disabled:pager.currentPage === pager.totalPages}">
-                <a (click)="setPage(pager.totalPages)">Конец</a>
-            </li>
-        </ul>
-    </div>
+  <!--Pagination-->
+  <div class="text-center col-md-10">
+    <ul *ngIf="pager.pages && pager.pages.length" class="pagination">
+      <li [ngClass]="{disabled:pager.currentPage === 1}">
+        <a (click)="setPage(1)">Начало</a>
+      </li>
+      <li [ngClass]="{disabled:pager.currentPage === 1}">
+        <a (click)="setPage(pager.currentPage - 1)">Пред.</a>
+      </li>
+      <li *ngFor="let page of pager.pages" [ngClass]="{active:pager.currentPage === page}">
+        <a (click)="setPage(page)">{{page}}</a>
+      </li>
+      <li [ngClass]="{disabled:pager.currentPage === pager.totalPages}">
+        <a (click)="setPage(pager.currentPage + 1)">След.</a>
+      </li>
+      <li [ngClass]="{disabled:pager.currentPage === pager.totalPages}">
+        <a (click)="setPage(pager.totalPages)">Конец</a>
+      </li>
+    </ul>
+  </div>
 
-    <!-- Modal form-->
-    <div id="id01" class="modal">
-        <div class="modal-dialog">
-            <form #newClient="ngForm" (submit)="addOrUpdateClient()" id="newData" action="#">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h2 class="modal-title">{{formsTitle}}</h2>
+  <!-- Modal form-->
+  <div id="id01" class="modal">
+    <div class="modal-dialog">
+      <form #newClient="ngForm" (submit)="addOrUpdateClient()" id="newData" action="#">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h2 class="modal-title">{{formsTitle}}</h2>
+          </div>
+          <div class="modal-body">
+            <div class="form-row">
+              <div class="form-group col-md-4">
+                <label for="last-name">Фамилия</label>
+                <input type="text" class="form-control" name="surname" [(ngModel)]="clientRecords.surname"
+                       id="last-name" placeholder="Фамилия">
+              </div>
+              <div class="form-group col-md-4">
+                <label for="first-name">Имя</label>
+                <input type="text" class="form-control" name="name" [(ngModel)]="clientRecords.name" id="first-name"
+                       placeholder="Имя">
+              </div>
+              <div class="form-group col-md-4">
+                <label for="patronymic">Отчество</label>
+                <input type="text" class="form-control" name="patronymic" [(ngModel)]="clientRecords.patronymic"
+                       id="patronymic" placeholder="Отчество">
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-group col-md-4">
+                <label for="inputCharm">Характер</label>
+                <select class="form-control" id="inputCharm"
+                        required
+                        [(ngModel)]="clientRecords.charm.name" name="charm">
+                  <option *ngFor="let charm of charms" [ngValue]="charm">{{charm}}</option>
+                </select>
+              </div>
+              <div class="form-group col-md-3">
+                <label for="inputGender">Пол</label>
+                <select class="form-control" id="inputGender"
+                        required
+                        [(ngModel)]="clientRecords.gender" name="power">
+                  <option *ngFor="let gender of genderTypes()" [ngValue]="gender">{{gender}}</option>
+                </select>
+              </div>
+              <div class="form-group col-md-5">
+                <label for="inputBirthDate">Дата рождения</label>
+                <input type="date" name="dateOfBirth" [(ngModel)]="clientRecords.dateOfBirth" class="form-control"
+                       id="inputBirthDate">
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-group col-md-4">
+                <label for="inputStreet">Улица</label>
+                <input type="text" name="streetF" [(ngModel)]="clientRecords.addressF.street" class="form-control"
+                       id="inputStreet" placeholder="Улица">
+              </div>
+              <div class="form-group col-md-4">
+                <label for="inputBuilding">Дом</label>
+                <input type="text" name="buildingF" [(ngModel)]="clientRecords.addressF.house" class="form-control"
+                       id="inputBuilding" placeholder="Дом">
+              </div>
+              <div class="form-group col-md-4">
+                <label for="inputAprtm">Квартира</label>
+                <input type="text" name="apartmentF" [(ngModel)]="clientRecords.addressF.flat" class="form-control"
+                       id="inputAprtm" placeholder="Квартира">
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-group col-md-4">
+                <label for="streetF">Улица</label>
+                <input type="text" name="streetR" [(ngModel)]="clientRecords.addressR.street" class="form-control"
+                       id="streetF" placeholder="Улица">
+              </div>
+              <div class="form-group col-md-4">
+                <label for="buildingF">Дом</label>
+                <input type="text" name="buildingR" [(ngModel)]="clientRecords.addressR.house" class="form-control"
+                       id="buildingF" placeholder="Дом">
+              </div>
+              <div class="form-group col-md-4">
+                <label for="apartmentF">Квартира</label>
+                <input type="text" name="apartmentR" [(ngModel)]="clientRecords.addressR.flat" class="form-control"
+                       id="apartmentF" placeholder="Квартира">
+              </div>
+            </div>
+
+            <label for="phoneNumbers">Номер телефона</label>
+            <div id="phoneNumbers" class="clickable-row"
+                 *ngFor="let phoneNumber of clientRecords.phoneNumbers; let i = index">
+              <div class="entry form-group">
+                <div class=" col-md-4">
+                  <select [(ngModel)]="clientRecords.phoneNumbers[i].phoneType" name="phoneType{{i}}"
+                          class="form-control">
+                    <option [ngValue]="i" *ngFor="let i of phoneTypeKeys()">{{phoneType[i]}}</option>
+                  </select>
                 </div>
-                <div class="modal-body">
-                        <div class="form-row">
-                            <div class="form-group col-md-4">
-                                <label for="last-name">Фамилия</label>
-                                <input type="text" class="form-control" name="surname" [(ngModel)]="clientRecords.surname" id="last-name" placeholder="Фамилия">
-                            </div>
-                            <div class="form-group col-md-4">
-                                <label for="first-name">Имя</label>
-                                <input type="text" class="form-control" name="name" [(ngModel)]="clientRecords.name" id="first-name" placeholder="Имя">
-                            </div>
-                            <div class="form-group col-md-4">
-                                <label for="patronymic">Отчество</label>
-                                <input type="text" class="form-control" name="patronymic" [(ngModel)]="clientRecords.patronymic" id="patronymic" placeholder="Отчество">
-                            </div>
-                        </div>
-                        <div class="form-row">
-                            <div class="form-group col-md-4">
-                                <label for="inputCharm">Характер</label>
-                                <select class="form-control" id="inputCharm"
-                                        required
-                                        [(ngModel)]="clientRecords.charm.name" name="charm">
-                                    <option *ngFor="let charm of charms" [ngValue]="charm">{{charm}}</option>
-                                </select>
-                            </div>
-                            <div class="form-group col-md-3">
-                                <label for="inputGender">Пол</label>
-                                <select class="form-control" id="inputGender"
-                                        required
-                                        [(ngModel)]="clientRecords.gender" name="power">
-                                    <option *ngFor="let gender of genderTypes()" [ngValue]="gender">{{gender}}</option>
-                                </select>
-                            </div>
-                            <div class="form-group col-md-5">
-                                <label for="inputBirthDate">Дата рождения</label>
-                                <input type="date" name="dateOfBirth" [(ngModel)]="clientRecords.dateOfBirth" class="form-control" id="inputBirthDate">
-                            </div>
-                        </div>
-                        <div class="form-row">
-                            <div class="form-group col-md-4">
-                                <label for="inputStreet">Улица</label>
-                                <input type="text" name="streetF" [(ngModel)]="clientRecords.addressF.street" class="form-control" id="inputStreet" placeholder="Улица">
-                            </div>
-                            <div class="form-group col-md-4">
-                                <label for="inputBuilding">Дом</label>
-                                <input type="text" name="buildingF" [(ngModel)]="clientRecords.addressF.house" class="form-control" id="inputBuilding" placeholder="Дом">
-                            </div>
-                            <div class="form-group col-md-4">
-                                <label for="inputAprtm">Квартира</label>
-                                <input type="text" name="apartmentF" [(ngModel)]="clientRecords.addressF.flat" class="form-control" id="inputAprtm" placeholder="Квартира">
-                            </div>
-                        </div>
-                        <div class="form-row">
-                            <div class="form-group col-md-4">
-                                <label for="streetF">Улица</label>
-                                <input type="text" name="streetR" [(ngModel)]="clientRecords.addressR.street" class="form-control" id="streetF" placeholder="Улица">
-                            </div>
-                            <div class="form-group col-md-4">
-                                <label for="buildingF">Дом</label>
-                                <input type="text" name="buildingR" [(ngModel)]="clientRecords.addressR.house" class="form-control" id="buildingF" placeholder="Дом">
-                            </div>
-                            <div class="form-group col-md-4">
-                                <label for="apartmentF">Квартира</label>
-                                <input type="text" name="apartmentR" [(ngModel)]="clientRecords.addressR.flat" class="form-control" id="apartmentF" placeholder="Квартира">
-                            </div>
-                        </div>
-
-                        <label for="phoneNumbers">Номер телефона</label>
-                        <div id="phoneNumbers" class="clickable-row" *ngFor="let phoneNumber of clientRecords.phoneNumbers; let i = index">
-                            <div class="entry form-group">
-                                <div class=" col-md-4">
-                                    <select [(ngModel)]="clientRecords.phoneNumbers[i].phoneType" name="phoneType{{i}}" class="form-control">
-                                        <option [ngValue]="i" *ngFor="let i of phoneTypeKeys()">{{phoneType[i]}}</option>
-                                    </select>
-                                </div>
-                                <div class="input-group col-md-8">
-                                    <input type="text" class="form-control" name="phoneNumber{{i}}" ngModel placeholder="Номер телефона" [(ngModel)]="clientRecords.phoneNumbers[i].number">
-                                    <span class="input-group-btn">
-                                        <button class="btn btn-success btn-add" type="button" (click)="addPhoneNumber()">
+                <div class="input-group col-md-8">
+                  <input type="text" class="form-control" name="phoneNumber{{i}}" ngModel placeholder="Номер телефона"
+                         [(ngModel)]="clientRecords.phoneNumbers[i].number">
+                  <span class="input-group-btn">
+                                        <button class="btn btn-success btn-add" type="button"
+                                                (click)="addPhoneNumber()">
                                             <span class="glyphicon glyphicon-plus"></span>
                                         </button>
-                                        <button class="btn btn-danger btn-remove" type="button" (click)="removePhoneNumber(i)">
+                                        <button class="btn btn-danger btn-remove" type="button"
+                                                (click)="removePhoneNumber(i)">
                                             <span class="glyphicon glyphicon-minus"></span>
                                         </button>
                                     </span>
-                                </div>
-                            </div>
-                        </div>
                 </div>
-                <div class="modal-footer">
-                    <button type="submit" class="btn btn-primary" id="modal-form-submit">{{formsBtn}}</button>
-                    <button id="cancel-modal-submit" type="button" class="btn btn-default" data-dismiss="modal" onclick="documentPdf.getElementById('id01').style.display='none'">Отмена</button>
-                </div>
+              </div>
             </div>
-            </form>
+          </div>
+          <div class="modal-footer">
+            <button type="submit" class="btn btn-primary" id="modal-form-submit">{{formsBtn}}</button>
+            <button id="cancel-modal-submit" type="button" class="btn btn-default" data-dismiss="modal"
+                    onclick="documentPdf.getElementById('id01').style.display='none'">Отмена
+            </button>
+          </div>
         </div>
+      </form>
     </div>
+  </div>
 </div>
