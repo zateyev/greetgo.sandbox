@@ -7,8 +7,8 @@ import java.util.Date;
 import java.util.List;
 
 public interface ClientDao {
-  @Select("SELECT Client.id, Client.surname, Client.name, Client.patronymic, Client.gender, " +
-    "Client.birth_date, Client.charm FROM Client WHERE id = #{id}")
+  @Select("SELECT client.id, client.surname, client.name, client.patronymic, client.gender, " +
+    "client.birth_date, client.charm FROM client WHERE id = #{id}")
   @Results({
     @Result(property = "id", column = "id"),
     @Result(property = "surname", column = "surname"),
@@ -20,8 +20,8 @@ public interface ClientDao {
   })
   ClientDetails selectClientDetailsById(@Param("id") String clientId);
 
-  @Select("SELECT Client.id, Client.surname, Client.name, Client.patronymic, " +
-    "Client.charm FROM Client WHERE id = #{id}")
+  @Select("SELECT client.id, client.surname, client.name, client.patronymic, " +
+    "client.charm FROM client WHERE id = #{id}")
   @Results({
     @Result(property = "id", column = "id"),
     @Result(property = "surname", column = "surname"),
@@ -37,20 +37,20 @@ public interface ClientDao {
 
   void insertAddress(String clientId, AddressType type, String street, String house, String flat);
 
-  @Delete("DELETE FROM Client WHERE id = #{id}")
+  @Delete("DELETE FROM client WHERE id = #{id}")
   void removeClientById(@Param("id") String clientsId);
 
-  @Delete("DELETE FROM ClientAddr WHERE client = #{client}")
+  @Delete("DELETE FROM client_addr WHERE client = #{client}")
   void removeAddressOfClient(@Param("client") String clientsId);
 
-  @Delete("DELETE FROM ClientAccount WHERE client = #{client}")
+  @Delete("DELETE FROM client_account WHERE client = #{client}")
   void removeClientAccount(@Param("client") String clientsId);
 
-  @Delete("DELETE FROM ClientPhone WHERE client = #{client}")
+  @Delete("DELETE FROM client_phone WHERE client = #{client}")
   void removePhoneNumbersOfClient(@Param("client") String clientsId);
 
   @Select("SELECT client, type, street, house, flat " +
-    "FROM ClientAddr WHERE client = #{client} and type = #{type}")
+    "FROM client_addr WHERE client = #{client} and type = #{type}")
   @Results({
     @Result(property = "id", column = "client"),
     @Result(property = "type", column = "type"),
@@ -62,15 +62,10 @@ public interface ClientDao {
                                @Param("type") AddressType type);
 
   @Select("SELECT number, type " +
-    "FROM ClientPhone WHERE client = #{client}")
+    "FROM client_phone WHERE client = #{client}")
   @Results({
     @Result(property = "phoneType", column = "type"),
     @Result(property = "number", column = "number")
   })
   List<PhoneNumber> selectPhonesByClientId(@Param("client") String clientId);
-//  void insertOrUpdateClient(ClientRecords clientRecords);
-
-//  @Select("select count(1) from Client where position(#{filterInputs} in ${filterBy}) <> 0")
-//  long getTotalSize(@Param("filterBy") String filterBy,
-//                    @Param("filterInputs") String filterInputs);
 }

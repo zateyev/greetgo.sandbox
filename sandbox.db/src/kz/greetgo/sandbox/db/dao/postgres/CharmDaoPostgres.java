@@ -7,7 +7,7 @@ import org.apache.ibatis.annotations.Param;
 
 @Bean
 public interface CharmDaoPostgres extends CharmDao {
-  @Insert("insert into Charm (id, name, description, energy) " +
+  @Insert("insert into charm (id, name, description, energy) " +
     "values (#{id}, #{name}), #{description}, #{energy}) " +
     "on conflict (id) do update set name = #{name}, description = #{description}, " +
     "energy = #{energy}")

@@ -31,27 +31,27 @@ public abstract class AbstractLoader<T> implements ConnectionCallback<T> {
   abstract void prepareSql(DbType dbType);
 
   void from() {
-    sql.append("from Client left join " +
+    sql.append("from client left join " +
       "(select client, sum(money) totalBalance, min(money) minBalance, " +
-      "max(money) maxBalance from ClientAccount group by client) ca on ca.client = Client.id " +
-      "left join Charm on Client.charm = Charm.id ");
+      "max(money) maxBalance from client_account group by client) ca on ca.client = client.id " +
+      "left join charm on client.charm = charm.id ");
   }
 
   void where() {
     switch (filterBy) {
 
       case "surname":
-        sql.append("where lower(Client.surname) like lower(?) ");
+        sql.append("where lower(client.surname) like lower(?) ");
         params.add("%" + filterInput + "%");
         break;
 
       case "name":
-        sql.append("where lower(Client.name) like lower(?) ");
+        sql.append("where lower(client.name) like lower(?) ");
         params.add("%" + filterInput + "%");
         break;
 
       case "patronymic":
-        sql.append("where lower(Client.patronymic) like lower(?) ");
+        sql.append("where lower(client.patronymic) like lower(?) ");
         params.add("%" + filterInput + "%");
         break;
     }
@@ -62,34 +62,34 @@ public abstract class AbstractLoader<T> implements ConnectionCallback<T> {
     switch (orderBy) {
       case "age":
         if (isDesc)
-          sql.append("age desc nulls last, lower(Client.surname) ");
+          sql.append("age desc nulls last, lower(client.surname) ");
         else
-          sql.append("age nulls first, lower(Client.surname) ");
+          sql.append("age nulls first, lower(client.surname) ");
         break;
 
       case "totalBalance":
         if (isDesc)
-          sql.append("ca.totalBalance desc nulls last, lower(Client.surname) ");
+          sql.append("ca.totalBalance desc nulls last, lower(client.surname) ");
         else
-          sql.append("ca.totalBalance nulls first, lower(Client.surname) ");
+          sql.append("ca.totalBalance nulls first, lower(client.surname) ");
         break;
 
       case "minBalance":
         if (isDesc)
-          sql.append("ca.minBalance desc nulls last, lower(Client.surname) ");
+          sql.append("ca.minBalance desc nulls last, lower(client.surname) ");
         else
-          sql.append("ca.minBalance nulls first, lower(Client.surname) ");
+          sql.append("ca.minBalance nulls first, lower(client.surname) ");
         break;
 
       case "maxBalance":
         if (isDesc)
-          sql.append("ca.maxBalance desc nulls last, lower(Client.surname) ");
+          sql.append("ca.maxBalance desc nulls last, lower(client.surname) ");
         else
-          sql.append("ca.maxBalance nulls first, lower(Client.surname) ");
+          sql.append("ca.maxBalance nulls first, lower(client.surname) ");
         break;
 
       default:
-        sql.append("lower(Client.surname) ");
+        sql.append("lower(client.surname) ");
     }
   }
 

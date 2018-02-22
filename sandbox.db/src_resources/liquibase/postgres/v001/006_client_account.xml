@@ -5,9 +5,9 @@
 
   <changeSet author="zateyev" id="create-table-ClientAccount">
     <sql endDelimiter=";;"><![CDATA[
-      create table ClientAccount (
+      create table client_account (
         id varchar(32) not null PRIMARY KEY,
-        client varchar(32) not null REFERENCES Client (id),
+        client varchar(32) not null REFERENCES client (id),
         money real not null,
         number varchar(64) not null,
         registered_at timestamp with time zone

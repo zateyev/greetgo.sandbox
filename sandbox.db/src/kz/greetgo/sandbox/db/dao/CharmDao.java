@@ -8,7 +8,7 @@ import org.apache.ibatis.annotations.Select;
 import java.util.List;
 
 public interface CharmDao {
-  @Select("SELECT id, name, description, energy FROM Charm ORDER BY lower(name)")
+  @Select("SELECT id, name, description, energy FROM charm ORDER BY lower(name)")
   @Results(value = {
     @Result(property = "id", column = "id"),
     @Result(property = "name", column = "name"),
