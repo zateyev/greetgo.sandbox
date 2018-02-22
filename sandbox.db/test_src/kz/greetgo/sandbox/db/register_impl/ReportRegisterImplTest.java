@@ -3,50 +3,92 @@ package kz.greetgo.sandbox.db.register_impl;
 import kz.greetgo.depinject.core.BeanGetter;
 import kz.greetgo.sandbox.controller.model.*;
 import kz.greetgo.sandbox.controller.register.ReportRegister;
-import kz.greetgo.sandbox.db.report.client_list.ReportView;
+import kz.greetgo.sandbox.db.jdbc.BigReportJdbc;
+import kz.greetgo.sandbox.db.report.client_list.big_data.BigReportView;
+import kz.greetgo.sandbox.db.report.client_list.ReportFootData;
+import kz.greetgo.sandbox.db.report.client_list.ReportHeadData;
 import kz.greetgo.sandbox.db.test.dao.ClientTestDao;
+import kz.greetgo.sandbox.db.test.util.ParentTestNg;
+import kz.greetgo.sandbox.db.util.JdbcSandbox;
 import kz.greetgo.util.RND;
 import org.testng.annotations.Test;
 
-import java.sql.Date;
 import java.time.LocalDate;
 import java.time.Period;
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.Date;
 import java.util.List;
 
-import static org.fest.assertions.api.Assertions.*;
+import static org.fest.assertions.api.Assertions.assertThat;
 
-public class ReportRegisterImplTest {
+/**
+ * Набор автоматизированных тестов для тестирования методов класса {@link ReportRegisterImpl}
+ */
+public class ReportRegisterImplTest extends ParentTestNg {
 
-  public BeanGetter<ReportRegister> reportRegister;
+  public BeanGetter<ReportRegister> bigReportRegister;
   public BeanGetter<ClientTestDao> clientTestDao;
   public BeanGetter<IdGenerator> idGen;
+  public BeanGetter<JdbcSandbox> jdbcSandbox;
+
+  private static class TestReportView implements BigReportView {
+
+    public ReportHeadData headData = null;
+    public ReportFootData footData = null;
+
+    @Override
+    public void start(ReportHeadData headData) {
+
+      this.headData = headData;
+    }
+
+    public final List<ClientInfo> clientList = new ArrayList<>();
+
+    @Override
+    public void addRow(ClientInfo row) {
+      clientList.add(row);
+    }
+
+    @Override
+    public void finish(ReportFootData footData) {
+
+      this.footData = footData;
+    }
+  }
 
   @Test
   public void genReport() throws Exception {
-
-    List<ClientDetails> clients = clearDbAndInsertTestData(100);
+    List<ClientDetails> clients = clearDbAndInsertTestData(50);
 
     List<ClientInfo> expectingClientList = new ArrayList<>();
     clients.forEach(clientDetails -> expectingClientList.add(toClientInfo(clientDetails)));
 
     expectingClientList.sort(Comparator.comparing(o -> o.surname.toLowerCase()));
 
-    final ClientInfo clientList[] = new ClientInfo[1];
+    TestReportView testReportView = new TestReportView();
+
 
     //
     //
-//    reportRegister.get().genReport("", "", new ReportView() {
-//      @Override
-//      public void generate(ClientInfo clientInfo) throws Exception {
-//        clientList[0] = clientInfo;
-//      }
-//    });
+    ReportHeadData head = new ReportHeadData();
+    head.title = "Список клиентов";
+    testReportView.start(head);
+    jdbcSandbox.get().execute(new BigReportJdbc("", "", "", false, 0, 0, testReportView));
+    ReportFootData foot = new ReportFootData();
+    foot.generatedAt = new Date();
+    testReportView.finish(foot);
     //
     //
 
-    assertThat(clientList[0].id).isNotNull();
+    assertThat(testReportView.headData).isNotNull();
+    assertThat(testReportView.headData.title).isEqualTo("Список клиентов");
+    assertThat(testReportView.footData).isNotNull();
+
+    assertThat(testReportView.clientList).hasSize(50);
+    assertThat(testReportView.clientList.get(3).id).isEqualTo(expectingClientList.get(3).id);
+    assertThat(testReportView.clientList.get(3).surname).isEqualTo(expectingClientList.get(3).surname);
+    assertThat(testReportView.clientList.get(3).name).isEqualTo(expectingClientList.get(3).name);
   }
 
   private ClientInfo toClientInfo(ClientDetails clientDetails) {
@@ -71,7 +113,7 @@ public class ReportRegisterImplTest {
       ClientDetails client = createRndClient();
       clientTestDao.get().insertCharm(client.charm.id, client.charm.name, client.charm.description, client.charm.energy);
       clientTestDao.get().insertClient(client.id, client.surname, client.name,
-        client.patronymic, client.gender, Date.valueOf(client.dateOfBirth), client.charm.id);
+        client.patronymic, client.gender, java.sql.Date.valueOf(client.dateOfBirth), client.charm.id);
       clientTestDao.get().insertAddress(client.id, client.addressF.type, client.addressF.street, client.addressF.house, client.addressF.flat);
       clientTestDao.get().insertAddress(client.id, client.addressR.type, client.addressR.street, client.addressR.house, client.addressR.flat);
       for (PhoneNumber phoneNumber : client.phoneNumbers) {
@@ -131,5 +173,4 @@ public class ReportRegisterImplTest {
     }
     return client;
   }
-
 }

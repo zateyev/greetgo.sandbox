@@ -1,38 +1,51 @@
 package kz.greetgo.sandbox.db.register_impl;
 
+import com.itextpdf.text.DocumentException;
 import kz.greetgo.depinject.core.Bean;
-import kz.greetgo.sandbox.controller.model.ClientInfo;
+import kz.greetgo.depinject.core.BeanGetter;
 import kz.greetgo.sandbox.controller.register.ReportRegister;
-import kz.greetgo.sandbox.db.report.client_list.ReportView;
-import kz.greetgo.sandbox.db.report.client_list.ReportViewPdf;
-import kz.greetgo.sandbox.db.report.client_list.ReportViewXlsx;
+import kz.greetgo.sandbox.controller.report.ViewType;
+import kz.greetgo.sandbox.db.jdbc.BigReportJdbc;
+import kz.greetgo.sandbox.db.report.client_list.ReportFootData;
+import kz.greetgo.sandbox.db.report.client_list.ReportHeadData;
+import kz.greetgo.sandbox.db.report.client_list.big_data.BigReportView;
+import kz.greetgo.sandbox.db.report.client_list.big_data.BigReportViewPdf;
+import kz.greetgo.sandbox.db.report.client_list.big_data.BigReportViewXlsx;
+import kz.greetgo.sandbox.db.util.JdbcSandbox;
 
 import java.io.OutputStream;
+import java.util.Date;
 
 @Bean
 public class ReportRegisterImpl implements ReportRegister {
 
+  public BeanGetter<JdbcSandbox> jdbcSandbox;
+
   @Override
-  public void genReport(String clientId, String contractId/*, String view, OutputStream out*/) throws Exception {
-    ClientInfo inData = getInDataFromDb(contractId, contractId);
-//    ReportView view = getView(viewType, out);
-//    view.generate(inData);
+  public void genReport(String filterBy, String filterInput, String orderBy, boolean isDesc, ViewType viewType, OutputStream out) throws DocumentException {
+
+    ReportHeadData head = new ReportHeadData();
+    head.title = "Список клиентов";
+
+    BigReportView view = getView(viewType, out);
+
+    view.start(head);
+
+    jdbcSandbox.get().execute(new BigReportJdbc("", "", "", false, 0, 0, view));
+
+    ReportFootData foot = new ReportFootData();
+    foot.generatedAt = new Date();
+
+    view.finish(foot);
   }
 
-  private ClientInfo getInDataFromDb(String userId, String contractId) {
-    ClientInfo ret = new ClientInfo();
-    ret.surname = userId;
-    return ret;
-  }
-
-  private ReportView getView(String viewType, OutputStream out) {
+  private BigReportView getView(ViewType viewType, OutputStream out) {
     switch (viewType) {
-      case "pdf":
-        return new ReportViewPdf(out);
-
-      case "xlsx":
-        return new ReportViewXlsx(out);
+      case PDF:
+        return new BigReportViewPdf(out);
+      case XLSX:
+        return new BigReportViewXlsx(out);
     }
-    throw new RuntimeException("Unknown type: " + viewType);
+    throw new RuntimeException("View type not found");
   }
 }

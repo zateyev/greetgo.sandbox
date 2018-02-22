@@ -48,7 +48,7 @@ export class ClientsListComponent {
 
   formsTitle = "";
   formsBtn = "";
-  viewType = "xlsx";
+  viewType = "xlsx ";
 
   phoneType = PhoneType;
 
