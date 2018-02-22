@@ -9,6 +9,7 @@ import {PhoneType} from "../../model/PhoneType";
 import {ClientInfo} from "../../model/ClientInfo";
 import {ClientRecords} from "../../model/ClientRecords";
 import {Gender} from "../../model/Gender";
+import { saveAs as importedSaveAs } from "file-saver";
 
 @Component({
   selector: 'clients-list-component',
@@ -252,17 +253,28 @@ export class ClientsListComponent {
   }
 
   loadReport() {
-    this.httpService.post("/report/xlsx", {
+    // window.open("/report/xlsx");
+    // this.httpService.post("/report/xlsx", {
+    //   filterBy: this.filterBy,
+    //   filterInputs: this.filterInputs,
+    //   orderBy: this.orderBy,
+    //   isDesc: this.isDescending.toString()
+    // }).toPromise().then(result => {
+    //   console.log(result.toString());
+    //   console.log("report loaded");
+    // }, error => {
+    //   console.log("report");
+    //   console.log(error);
+    // });
+
+
+    this.httpService.downloadFile("/report/xlsx", {
       filterBy: this.filterBy,
       filterInputs: this.filterInputs,
       orderBy: this.orderBy,
-      isDesc: this.isDescending.toString(),
-      viewType: "XLSX"
-    }).toPromise().then(result => {
-      console.log("report loaded");
-    }, error => {
-      console.log("report");
-      console.log(error);
+      isDesc: this.isDescending.toString()
+    }).subscribe(blob => {
+      importedSaveAs(blob, "report.xlsx");
     });
   }
 

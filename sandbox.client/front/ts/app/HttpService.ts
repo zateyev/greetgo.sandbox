@@ -1,6 +1,6 @@
 import {Injectable} from "@angular/core";
 import {Observable} from "rxjs";
-import {Headers, Http, Request, RequestOptionsArgs, Response} from "@angular/http";
+import {Headers, Http, Request, RequestOptionsArgs, Response, ResponseContentType} from "@angular/http";
 
 class OptionsBuilder {
   private appendingHeaders: { [key: string]: string }[] = [];
@@ -104,5 +104,28 @@ export class HttpService {
     }
 
     return this.http.delete(this.url(urlSuffix) + post, this.newOptionsBuilder().get());
+  }
+
+  public downloadFile(urlSuffix: string, keyValue?: { [key: string]: | string | number | null }): Observable<Blob> {
+    let post: string = '';
+
+    if (keyValue) {
+
+      let data = new URLSearchParams();
+      let appended = false;
+      for (let key in keyValue) {
+        let value = keyValue[key];
+        if (value) {
+          data.append(key, value as string);
+          appended = true;
+        }
+      }
+      if (appended) post = '?' + data.toString();
+    }
+
+    let options = this.newOptionsBuilder().get();
+    options.responseType = ResponseContentType.Blob;
+
+    return this.http.get(this.url(urlSuffix) + post, options).map(res => res.blob())
   }
 }
