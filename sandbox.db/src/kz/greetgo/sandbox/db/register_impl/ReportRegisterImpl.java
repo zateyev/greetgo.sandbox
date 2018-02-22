@@ -8,9 +8,9 @@ import kz.greetgo.sandbox.controller.report.ViewType;
 import kz.greetgo.sandbox.db.jdbc.BigReportJdbc;
 import kz.greetgo.sandbox.db.report.client_list.ReportFootData;
 import kz.greetgo.sandbox.db.report.client_list.ReportHeadData;
-import kz.greetgo.sandbox.db.report.client_list.big_data.BigReportView;
-import kz.greetgo.sandbox.db.report.client_list.big_data.BigReportViewPdf;
-import kz.greetgo.sandbox.db.report.client_list.big_data.BigReportViewXlsx;
+import kz.greetgo.sandbox.db.report.client_list.big_data.ReportView;
+import kz.greetgo.sandbox.db.report.client_list.big_data.ReportViewPdf;
+import kz.greetgo.sandbox.db.report.client_list.big_data.ReportViewXlsx;
 import kz.greetgo.sandbox.db.util.JdbcSandbox;
 
 import java.io.OutputStream;
@@ -27,11 +27,11 @@ public class ReportRegisterImpl implements ReportRegister {
     ReportHeadData head = new ReportHeadData();
     head.title = "Список клиентов";
 
-    BigReportView view = getView(viewType, out);
+    ReportView view = getView(viewType, out);
 
     view.start(head);
 
-    jdbcSandbox.get().execute(new BigReportJdbc("", "", "", false, 0, 0, view));
+    jdbcSandbox.get().execute(new BigReportJdbc(filterBy, filterInput, orderBy, isDesc, 0, 0, view));
 
     ReportFootData foot = new ReportFootData();
     foot.generatedAt = new Date();
@@ -39,12 +39,12 @@ public class ReportRegisterImpl implements ReportRegister {
     view.finish(foot);
   }
 
-  private BigReportView getView(ViewType viewType, OutputStream out) {
+  private ReportView getView(ViewType viewType, OutputStream out) {
     switch (viewType) {
       case PDF:
-        return new BigReportViewPdf(out);
+        return new ReportViewPdf(out);
       case XLSX:
-        return new BigReportViewXlsx(out);
+        return new ReportViewXlsx(out);
     }
     throw new RuntimeException("View type not found");
   }

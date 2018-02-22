@@ -2,11 +2,10 @@ package kz.greetgo.sandbox.db.register_impl;
 
 import kz.greetgo.depinject.core.BeanGetter;
 import kz.greetgo.sandbox.controller.model.*;
-import kz.greetgo.sandbox.controller.register.ReportRegister;
 import kz.greetgo.sandbox.db.jdbc.BigReportJdbc;
-import kz.greetgo.sandbox.db.report.client_list.big_data.BigReportView;
 import kz.greetgo.sandbox.db.report.client_list.ReportFootData;
 import kz.greetgo.sandbox.db.report.client_list.ReportHeadData;
+import kz.greetgo.sandbox.db.report.client_list.big_data.ReportView;
 import kz.greetgo.sandbox.db.test.dao.ClientTestDao;
 import kz.greetgo.sandbox.db.test.util.ParentTestNg;
 import kz.greetgo.sandbox.db.util.JdbcSandbox;
@@ -15,10 +14,7 @@ import org.testng.annotations.Test;
 
 import java.time.LocalDate;
 import java.time.Period;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 import static org.fest.assertions.api.Assertions.assertThat;
 
@@ -27,12 +23,11 @@ import static org.fest.assertions.api.Assertions.assertThat;
  */
 public class ReportRegisterImplTest extends ParentTestNg {
 
-  public BeanGetter<ReportRegister> bigReportRegister;
   public BeanGetter<ClientTestDao> clientTestDao;
   public BeanGetter<IdGenerator> idGen;
   public BeanGetter<JdbcSandbox> jdbcSandbox;
 
-  private static class TestReportView implements BigReportView {
+  private static class TestReportView implements ReportView {
 
     public ReportHeadData headData = null;
     public ReportFootData footData = null;
@@ -89,6 +84,56 @@ public class ReportRegisterImplTest extends ParentTestNg {
     assertThat(testReportView.clientList.get(3).id).isEqualTo(expectingClientList.get(3).id);
     assertThat(testReportView.clientList.get(3).surname).isEqualTo(expectingClientList.get(3).surname);
     assertThat(testReportView.clientList.get(3).name).isEqualTo(expectingClientList.get(3).name);
+  }
+
+  @Test
+  public void genReport_orderedByMinBalance() throws Exception {
+    List<ClientDetails> clients = clearDbAndInsertTestData(50);
+
+    List<ClientInfo> expectingClientList = new ArrayList<>();
+    clients.forEach(clientDetails -> expectingClientList.add(toClientInfo(clientDetails)));
+
+    Collections.sort(expectingClientList, new Comparator() {
+
+      public int compare(Object o1, Object o2) {
+
+        Double tb1 = ((ClientInfo) o1).minBalance;
+        Double tb2 = ((ClientInfo) o2).minBalance;
+        int sComp = tb1.compareTo(tb2);
+
+        if (sComp != 0) {
+          return sComp;
+        } else {
+          String sn1 = ((ClientInfo) o1).surname.toLowerCase();
+          String sn2 = ((ClientInfo) o2).surname.toLowerCase();
+          return sn1.compareTo(sn2);
+        }
+      }});
+
+    TestReportView testReportView = new TestReportView();
+
+
+    //
+    //
+    ReportHeadData head = new ReportHeadData();
+    head.title = "Список клиентов";
+    testReportView.start(head);
+    jdbcSandbox.get().execute(new BigReportJdbc("", "", "minBalance", false, 0, 0, testReportView));
+    ReportFootData foot = new ReportFootData();
+    foot.generatedAt = new Date();
+    testReportView.finish(foot);
+    //
+    //
+
+    assertThat(testReportView.headData).isNotNull();
+    assertThat(testReportView.headData.title).isEqualTo("Список клиентов");
+    assertThat(testReportView.footData).isNotNull();
+
+    assertThat(testReportView.clientList).hasSize(expectingClientList.size());
+    int rndInd = RND.plusInt(expectingClientList.size());
+    assertThat(testReportView.clientList.get(rndInd).id).isEqualTo(expectingClientList.get(rndInd).id);
+    assertThat(testReportView.clientList.get(rndInd).surname).isEqualTo(expectingClientList.get(rndInd).surname);
+    assertThat(testReportView.clientList.get(rndInd).name).isEqualTo(expectingClientList.get(rndInd).name);
   }
 
   private ClientInfo toClientInfo(ClientDetails clientDetails) {

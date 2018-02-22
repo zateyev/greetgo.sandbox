@@ -30,12 +30,14 @@ public abstract class AbstractLoader<T> implements ConnectionCallback<T> {
 
   abstract void prepareSql(DbType dbType);
 
-  void prepareFromWhereForPostgres() {
+  void from() {
     sql.append("from Client left join " +
       "(select client, sum(money) totalBalance, min(money) minBalance, " +
       "max(money) maxBalance from ClientAccount group by client) ca on ca.client = Client.id " +
       "left join Charm on Client.charm = Charm.id ");
+  }
 
+  void where() {
     switch (filterBy) {
 
       case "surname":

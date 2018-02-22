@@ -40,6 +40,7 @@ export class ClientsListComponent {
   pageSizeOptions = [10, 25, 50];
   columnsId = ['fio', 'charm', 'age', 'totalBalance', 'minBalance', 'maxBalance'];
   filterColumns = ['Фамилия', 'Имя', 'Отчество'];
+  filterColIds = ['surname', 'name', 'patronymic'];
   viewTypes = ['xlsx', 'pdf'];
 
   columns = {
@@ -49,7 +50,7 @@ export class ClientsListComponent {
 
   formsTitle = "";
   formsBtn = "";
-  viewType = "xlsx ";
+  viewType = "";
 
   phoneType = PhoneType;
 
@@ -249,14 +250,14 @@ export class ClientsListComponent {
   loadCharms() {
     this.httpService.get("/charm/getCharms").toPromise().then(result => {
       // this.charms = result.json();
-      this.charms = this.parseClientsList(result.json());
+      this.charms = this.parseCharms(result.json());
     }, error => {
       console.log("charms");
       console.log(error);
     });
   }
 
-  private parseCharm(charmRec: any) {
+  private parseCharms(charmRec: any) {
     let charms = [];
 
     for (let charmItem of charmRec) {

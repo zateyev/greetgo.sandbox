@@ -56,11 +56,11 @@ public class ClientRegisterStand implements ClientRegister {
 
         if (filterBy != null && filterInputs != null) {
             for (ClientDot clientDot : clientDots) {
-                if ("Фамилия".equals(filterBy) && clientDot.getSurname().toLowerCase().contains(filterInputs.toLowerCase()))
+                if ("surname".equals(filterBy) && clientDot.getSurname().toLowerCase().contains(filterInputs.toLowerCase()))
                     clientsList.add(clientDot.toClientInfo());
-                else if ("Имя".equals(filterBy) && clientDot.getName().toLowerCase().contains(filterInputs.toLowerCase()))
+                else if ("name".equals(filterBy) && clientDot.getName().toLowerCase().contains(filterInputs.toLowerCase()))
                     clientsList.add(clientDot.toClientInfo());
-                else if ("Отчество".equals(filterBy) && clientDot.getPatronymic().toLowerCase().contains(filterInputs.toLowerCase()))
+                else if ("patronymic".equals(filterBy) && clientDot.getPatronymic().toLowerCase().contains(filterInputs.toLowerCase()))
                     clientsList.add(clientDot.toClientInfo());
             }
 

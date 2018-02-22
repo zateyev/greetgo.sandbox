@@ -12,13 +12,13 @@ import java.io.FileOutputStream;
 import java.io.OutputStream;
 import java.util.Date;
 
-public class BigReportViewXlsx implements BigReportView {
+public class ReportViewXlsx implements ReportView {
   private final Xlsx xlsx = new Xlsx();
   private OutputStream out;
   private Sheet sheet;
   private int no = 1;
 
-  public BigReportViewXlsx(OutputStream out) {
+  public ReportViewXlsx(OutputStream out) {
     this.out = out;
   }
 
@@ -30,7 +30,7 @@ public class BigReportViewXlsx implements BigReportView {
     file.getParentFile().mkdirs();
 
     OutputStream out = new FileOutputStream(file);
-    BigReportViewXlsx v = new BigReportViewXlsx(out);
+    ReportViewXlsx v = new ReportViewXlsx(out);
 
     v.start(new ReportHeadData());
 

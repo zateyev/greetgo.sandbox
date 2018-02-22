@@ -31,11 +31,10 @@ public class ReportController implements Controller {
                              @ParPath("viewType") String viewType,
                              RequestTunnel tunnel) throws Exception {
 
-//    tunnel.setResponseContentType("application/application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
-    tunnel.setResponseHeader("Content-Disposition", "attachment; filename = BigReport." + viewType);
+    tunnel.setResponseHeader("Content-Disposition", "attachment; filename = report." + viewType);
     OutputStream out = tunnel.getResponseOutputStream();
 
-    reportRegister.get().genReport(filterBy, filterInputs, orderBy, isDesc, ViewType.valueOf(viewType.toUpperCase()), out);
+    reportRegister.get().genReport(filterBy != null ? filterBy : "", filterInputs != null ? filterInputs : "", orderBy != null ? orderBy : "", isDesc, ViewType.valueOf(viewType.toUpperCase()), out);
 
     tunnel.flushBuffer();
   }

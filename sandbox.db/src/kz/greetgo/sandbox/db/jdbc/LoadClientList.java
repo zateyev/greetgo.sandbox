@@ -43,7 +43,7 @@ public class LoadClientList extends AbstractLoader<List<ClientInfo>> {
     }
   }
 
-  private ClientInfo readRecord(ResultSet rs) throws SQLException {
+  protected ClientInfo readRecord(ResultSet rs) throws SQLException {
     ClientInfo ret = new ClientInfo();
     ret.id = rs.getString("id");
     ret.surname = rs.getString("surname");
@@ -78,7 +78,8 @@ public class LoadClientList extends AbstractLoader<List<ClientInfo>> {
     switch (dbType) {
 
       case Postgres:
-        prepareFromWhereForPostgres();
+        from();
+        where();
         orderBy();
         limit();
         return;

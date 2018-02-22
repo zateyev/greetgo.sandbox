@@ -25,7 +25,7 @@
         <select class="form-control"
                 required
                 [(ngModel)]="filterBy" name="charm">
-          <option *ngFor="let col of filterColumns" [ngValue]="col">{{col}}</option>
+          <option *ngFor="let col of filterColumns; let i = index" [ngValue]="filterColIds[i]">{{col}}</option>
         </select>
       </div>
       <div class="form-group col-md-2">

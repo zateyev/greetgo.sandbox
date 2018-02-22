@@ -15,9 +15,9 @@ import java.io.OutputStream;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
-public class BigReportViewPdf implements BigReportView {
+public class ReportViewPdf implements ReportView {
 
-  private static final String DEST = "build/report/Big_report.pdf";
+  private static final String DEST = "build/report/report.pdf";
   private static final String FONT_DIR = "fonts/FreeSans.ttf";
   private Font font = FontFactory.getFont(FONT_DIR, "Cp1251", BaseFont.EMBEDDED);
   private PdfPTable table;
@@ -29,12 +29,12 @@ public class BigReportViewPdf implements BigReportView {
     File file = new File(DEST);
     file.getParentFile().mkdirs();
 
-//        BigReportViewPdf viewPdf = new BigReportViewPdf(documentPdf);
-    BigReportViewPdf viewPdf;
+//        ReportViewPdf viewPdf = new ReportViewPdf(documentPdf);
+    ReportViewPdf viewPdf;
     ReportHeadData head;
     ReportFootData foot;
     try (OutputStream fileOutputStream = new FileOutputStream(DEST)) {
-      viewPdf = new BigReportViewPdf(fileOutputStream);
+      viewPdf = new ReportViewPdf(fileOutputStream);
       head = new ReportHeadData();
       head.title = "Мюон";
       viewPdf.start(head);
@@ -61,11 +61,11 @@ public class BigReportViewPdf implements BigReportView {
     }
   }
 
-  public BigReportViewPdf(Document documentPdf) {
+  public ReportViewPdf(Document documentPdf) {
     this.documentPdf = documentPdf;
   }
 
-  public BigReportViewPdf(OutputStream out) {
+  public ReportViewPdf(OutputStream out) {
     this.out = out;
   }
 

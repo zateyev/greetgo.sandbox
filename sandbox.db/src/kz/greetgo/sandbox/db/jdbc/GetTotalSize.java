@@ -49,7 +49,9 @@ public class GetTotalSize extends AbstractLoader<Long> {
     switch (dbType) {
 
       case Postgres:
-        prepareFromWhereForPostgres();
+//        prepareFromWhereForPostgres();
+        from();
+        where();
         return;
 
       case Oracle:
