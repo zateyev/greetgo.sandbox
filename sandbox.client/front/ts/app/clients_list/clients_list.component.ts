@@ -10,6 +10,7 @@ import {ClientInfo} from "../../model/ClientInfo";
 import {ClientRecords} from "../../model/ClientRecords";
 import {Gender} from "../../model/Gender";
 import { saveAs as importedSaveAs } from "file-saver";
+import {Charm} from "../../model/Charm";
 
 @Component({
   selector: 'clients-list-component',
@@ -34,7 +35,7 @@ export class ClientsListComponent {
   orderBy: string | null;
   loadClientInfoError: string | null;
   clientRecords: ClientRecords = new ClientRecords();
-  charms: any = [];
+  charms: Charm[];
 
   pageSizeOptions = [10, 25, 50];
   columnsId = ['fio', 'charm', 'age', 'totalBalance', 'minBalance', 'maxBalance'];
@@ -247,11 +248,23 @@ export class ClientsListComponent {
 
   loadCharms() {
     this.httpService.get("/charm/getCharms").toPromise().then(result => {
-      this.charms = result.json();
+      // this.charms = result.json();
+      this.charms = this.parseClientsList(result.json());
     }, error => {
       console.log("charms");
       console.log(error);
     });
+  }
+
+  private parseCharm(charmRec: any) {
+    let charms = [];
+
+    for (let charmItem of charmRec) {
+      let charm = Charm.copy(charmItem);
+      charms.push(charm);
+    }
+
+    return charms;
   }
 
   loadReport(type: string) {

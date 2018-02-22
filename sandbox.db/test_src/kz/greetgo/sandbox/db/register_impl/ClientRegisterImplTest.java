@@ -646,6 +646,9 @@ public class ClientRegisterImplTest extends ParentTestNg {
     clientTestDao.get().insertClient(client.id, client.surname, client.name,
       client.patronymic, client.gender, Date.valueOf(client.dateOfBirth), client.charm.id);
 
+    clientTestDao.get().insertAddress(client.id, client.addressF.type, client.addressF.street, client.addressF.house,
+      client.addressF.flat);
+
     assertThat(client).isNotNull();
 
     //

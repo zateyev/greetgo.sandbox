@@ -43,6 +43,9 @@ public interface ClientDao {
   @Delete("DELETE FROM ClientAddr WHERE client = #{client}")
   void removeAddressOfClient(@Param("client") String clientsId);
 
+  @Delete("DELETE FROM ClientAccount WHERE client = #{client}")
+  void removeClientAccount(@Param("client") String clientsId);
+
   @Delete("DELETE FROM ClientPhone WHERE client = #{client}")
   void removePhoneNumbersOfClient(@Param("client") String clientsId);
 

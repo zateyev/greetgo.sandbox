@@ -18,6 +18,7 @@ public class ClientRegisterImpl implements ClientRegister {
 
   public BeanGetter<ClientDao> clientDao;
   public BeanGetter<JdbcSandbox> jdbcSandbox;
+  public BeanGetter<IdGenerator> idGen;
 
   @Override
   public long getTotalSize(String filterBy, String filterInput) {
@@ -42,6 +43,10 @@ public class ClientRegisterImpl implements ClientRegister {
   @Override
   public ClientInfo addOrUpdateClient(ClientRecords clientRecords) {
 
+    if (clientRecords.id == null) {
+      clientRecords.id = idGen.get().newId();
+    }
+
     clientDao.get().insertOrUpdateClient(clientRecords.id,
       clientRecords.surname,
       clientRecords.name,
@@ -65,8 +70,9 @@ public class ClientRegisterImpl implements ClientRegister {
 
   @Override
   public void removeClient(String clientsId) {
-    clientDao.get().removeClientById(clientsId);
     clientDao.get().removeAddressOfClient(clientsId);
     clientDao.get().removePhoneNumbersOfClient(clientsId);
+    clientDao.get().removeClientAccount(clientsId);
+    clientDao.get().removeClientById(clientsId);
   }
 }
