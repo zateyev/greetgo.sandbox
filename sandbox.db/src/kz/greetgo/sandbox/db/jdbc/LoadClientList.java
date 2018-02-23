@@ -1,6 +1,5 @@
 package kz.greetgo.sandbox.db.jdbc;
 
-import kz.greetgo.db.ConnectionCallback;
 import kz.greetgo.db.DbType;
 import kz.greetgo.sandbox.controller.model.Charm;
 import kz.greetgo.sandbox.controller.model.ClientInfo;
@@ -22,7 +21,7 @@ public class LoadClientList extends AbstractLoader<List<ClientInfo>> {
   @Override
   public List<ClientInfo> doInConnection(Connection connection) throws Exception {
 
-    prepareSql(DbType.detect(connection), true, true);
+    prepareSql(DbType.detect(connection));
 
     try (PreparedStatement ps = connection.prepareStatement(sql.toString())) {
 
@@ -44,7 +43,7 @@ public class LoadClientList extends AbstractLoader<List<ClientInfo>> {
     }
   }
 
-  private ClientInfo readRecord(ResultSet rs) throws SQLException {
+  protected ClientInfo readRecord(ResultSet rs) throws SQLException {
     ClientInfo ret = new ClientInfo();
     ret.id = rs.getString("id");
     ret.surname = rs.getString("surname");
@@ -70,5 +69,27 @@ public class LoadClientList extends AbstractLoader<List<ClientInfo>> {
       "ca.totalBalance, " +
       "ca.minBalance, " +
       "ca.maxBalance ");
+  }
+
+  @Override
+  void prepareSql(DbType dbType) {
+    select();
+
+    switch (dbType) {
+
+      case Postgres:
+        from();
+        where();
+        orderBy();
+        limit();
+        return;
+
+      case Oracle:
+        prepareFromWhereForOracle();
+        return;
+
+      default:
+        throw new RuntimeException("Unknown DB " + dbType);
+    }
   }
 }

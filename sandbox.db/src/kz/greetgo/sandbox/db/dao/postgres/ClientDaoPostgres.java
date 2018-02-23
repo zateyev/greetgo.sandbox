@@ -13,7 +13,7 @@ import java.util.Date;
 
 @Bean
 public interface ClientDaoPostgres extends ClientDao {
-  @Insert("INSERT INTO Client (id, surname, name, patronymic, gender, birth_date, charm) " +
+  @Insert("INSERT INTO client (id, surname, name, patronymic, gender, birth_date, charm) " +
     "VALUES (#{id}, #{surname}, #{name}, #{patronymic}, #{gender}, #{birth_date}, #{charm}) " +
     "ON CONFLICT (id) DO UPDATE SET surname = #{surname}, name = #{name}, patronymic = #{patronymic}, " +
     "gender = #{gender}, birth_date = #{birth_date}, charm = #{charm}")
@@ -25,13 +25,13 @@ public interface ClientDaoPostgres extends ClientDao {
                             @Param("birth_date") Date birth_date,
                             @Param("charm") String charmId);
 
-  @Insert("INSERT INTO ClientPhone (client, number, type) VALUES (#{client}, #{number}, #{type}) " +
+  @Insert("INSERT INTO client_phone (client, number, type) VALUES (#{client}, #{number}, #{type}) " +
     "ON CONFLICT (client, number) DO NOTHING")
   void insertPhoneNumber(@Param("client") String clientId,
                          @Param("number") String number,
                          @Param("type") PhoneType type);
 
-  @Insert("INSERT INTO ClientAddr (client, type, street, house, flat) VALUES (#{client}, #{type}, #{street}, #{house}, #{flat}) " +
+  @Insert("INSERT INTO client_addr (client, type, street, house, flat) VALUES (#{client}, #{type}, #{street}, #{house}, #{flat}) " +
     "ON CONFLICT (client, type) DO NOTHING")
   void insertAddress(@Param("client") String clientId,
                      @Param("type") AddressType type,

@@ -26,8 +26,8 @@ public class CharmRegisterImplTest extends ParentTestNg {
   public void getCharms_ok() {
     charmTestDao.get().removeAllData();
 
-    List<Charm> charms = new ArrayList<>();
-    for (int i = 0; i < 50; i++) {
+    List<Charm> charms = new ArrayList<>( );
+    for (int i = 0; i < 500; i++) {
       Charm charm = createRndCharm();
       charmTestDao.get().insertCharm(charm.id, charm.name, charm.description, charm.energy);
       charms.add(charm);
@@ -35,19 +35,19 @@ public class CharmRegisterImplTest extends ParentTestNg {
 
     charms.sort(Comparator.comparing(charm -> charm.name.toLowerCase()));
 
-    List<String> charmNames = new ArrayList<>();
-    charms.forEach(charm -> charmNames.add(charm.name));
-
     //
     //
-    List<String> result = charmRegister.get().getCharms();
+    List<Charm> result = charmRegister.get().getCharms();
     //
     //
 
     assertThat(result).isNotNull();
-    assertThat(result.size()).isEqualTo(charmNames.size());
-    for (int i = 0; i < charmNames.size(); i++) {
-      assertThat(result.get(i)).isEqualTo(charmNames.get(i));
+    assertThat(result.size()).isEqualTo(charms.size());
+    for (int i = 0; i < charms.size(); i+=3) {
+      assertThat(result.get(i).id).isEqualTo(charms.get(i).id);
+      assertThat(result.get(i).name).isEqualTo(charms.get(i).name);
+      assertThat(result.get(i).description).isEqualTo(charms.get(i).description);
+      assertThat(Math.abs(result.get(i).energy - charms.get(i).energy)).isLessThan(0.001);
     }
   }
 
@@ -57,7 +57,7 @@ public class CharmRegisterImplTest extends ParentTestNg {
 
     //
     //
-    List<String> result = charmRegister.get().getCharms();
+    List<Charm> result = charmRegister.get().getCharms();
     //
     //
 
@@ -67,7 +67,7 @@ public class CharmRegisterImplTest extends ParentTestNg {
   private Charm createRndCharm() {
     Charm charm = new Charm();
     charm.id = idGen.get().newId();
-    charm.name = RND.str(10);
+    charm.name = (10000 + RND.plusInt(99999)) + RND.str(5);
     charm.description = RND.str(10);
     charm.energy = RND.plusDouble(100, 2);
     return charm;

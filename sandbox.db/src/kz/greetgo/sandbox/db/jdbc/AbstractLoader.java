@@ -14,7 +14,7 @@ public abstract class AbstractLoader<T> implements ConnectionCallback<T> {
   private final int page;
   private final int pageSize;
 
-  protected AbstractLoader(String filterBy, String filterInput, String orderBy, boolean isDesc, int page, int pageSize) {
+  AbstractLoader(String filterBy, String filterInput, String orderBy, boolean isDesc, int page, int pageSize) {
     this.filterBy = filterBy;
     this.filterInput = filterInput;
     this.orderBy = orderBy;
@@ -24,88 +24,82 @@ public abstract class AbstractLoader<T> implements ConnectionCallback<T> {
   }
 
   protected final StringBuilder sql = new StringBuilder();
-  protected final List<Object> params = new ArrayList<>();
+  final List<Object> params = new ArrayList<>();
 
   abstract void select();
 
-  protected void prepareSql(DbType dbType, boolean isOrdered, boolean isListLimited) {
-    select();
+  abstract void prepareSql(DbType dbType);
 
-    switch (dbType) {
-
-      case Postgres:
-        prepareFromWhereForPostgres(isOrdered, isListLimited);
-        return;
-
-      case Oracle:
-        prepareFromWhereForOracle();
-        return;
-
-      default:
-        throw new RuntimeException("Unknown DB " + dbType);
-    }
-
-  }
-
-  private void prepareFromWhereForOracle() {
-
-  }
-
-  protected void prepareFromWhereForPostgres(boolean isOrdered, boolean isListLimited) {
-
-    sql.append("from Client left join " +
+  void from() {
+    sql.append("from client left join " +
       "(select client, sum(money) totalBalance, min(money) minBalance, " +
-      "max(money) maxBalance from ClientAccount group by client) ca on ca.client = Client.id " +
-      "left join Charm on Client.charm = Charm.id ");
+      "max(money) maxBalance from client_account group by client) ca on ca.client = client.id " +
+      "left join charm on client.charm = charm.id ");
+  }
 
+  void where() {
     switch (filterBy) {
 
       case "surname":
-        sql.append("where lower(Client.surname) like lower(?) ");
+        sql.append("where lower(client.surname) like lower(?) ");
         params.add("%" + filterInput + "%");
         break;
 
       case "name":
-        sql.append("where lower(Client.name) like lower(?) ");
+        sql.append("where lower(client.name) like lower(?) ");
         params.add("%" + filterInput + "%");
         break;
 
       case "patronymic":
-        sql.append("where lower(Client.patronymic) like lower(?) ");
+        sql.append("where lower(client.patronymic) like lower(?) ");
         params.add("%" + filterInput + "%");
         break;
-
     }
+  }
 
-    if (isOrdered) {
-      switch (orderBy) {
-        case "age":
-          sql.append("order by age nulls first, lower(Client.surname) ");
-          break;
+  void orderBy() {
+    sql.append("order by ");
+    switch (orderBy) {
+      case "age":
+        if (isDesc)
+          sql.append("age desc nulls last, lower(client.surname) ");
+        else
+          sql.append("age nulls first, lower(client.surname) ");
+        break;
 
-        case "totalBalance":
-          sql.append("order by ca.totalBalance nulls first, lower(Client.surname) ");
-          break;
+      case "totalBalance":
+        if (isDesc)
+          sql.append("ca.totalBalance desc nulls last, lower(client.surname) ");
+        else
+          sql.append("ca.totalBalance nulls first, lower(client.surname) ");
+        break;
 
-        case "minBalance":
-          sql.append("order by ca.minBalance nulls first, lower(Client.surname) ");
-          break;
+      case "minBalance":
+        if (isDesc)
+          sql.append("ca.minBalance desc nulls last, lower(client.surname) ");
+        else
+          sql.append("ca.minBalance nulls first, lower(client.surname) ");
+        break;
 
-        case "maxBalance":
-          sql.append("order by ca.maxBalance nulls first, lower(Client.surname) ");
-          break;
+      case "maxBalance":
+        if (isDesc)
+          sql.append("ca.maxBalance desc nulls last, lower(client.surname) ");
+        else
+          sql.append("ca.maxBalance nulls first, lower(client.surname) ");
+        break;
 
-        default:
-          sql.append("order by lower(Client.surname) ");
-      }
-
-      if (isDesc) sql.append("desc ");
+      default:
+        sql.append("lower(client.surname) ");
     }
+  }
 
-    if (isListLimited) {
-      sql.append("limit ? offset ? ");
-      params.add(pageSize);
-      params.add(page * pageSize);
-    }
+  void limit() {
+    sql.append("limit ? offset ? ");
+    params.add(pageSize);
+    params.add(page * pageSize);
+  }
+
+  void prepareFromWhereForOracle() {
+
   }
 }

@@ -2,6 +2,7 @@ import {PhoneNumber} from "./PhoneNumber";
 import {Address} from "./Address";
 import {Charm} from "./Charm";
 import {Gender} from "./Gender";
+import {AddressType} from "./AddressType";
 
 export class ClientRecords {
   public id: string;
@@ -22,7 +23,9 @@ export class ClientRecords {
     this.charm = new Charm();
     // this.gender = new Gender();
     this.addressF = new Address();
+    this.addressF.type = AddressType.FACT;
     this.addressR = new Address();
+    this.addressR.type = AddressType.REG;
     this.phoneNumbers = [new PhoneNumber()];
   }
 

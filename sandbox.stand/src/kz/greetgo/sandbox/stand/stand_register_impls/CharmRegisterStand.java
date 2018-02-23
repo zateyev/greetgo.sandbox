@@ -14,10 +14,7 @@ public class CharmRegisterStand implements CharmRegister {
   public BeanGetter<ClientStandDb> clientD;
 
   @Override
-  public List<String> getCharms() {
-    List<String> charmNamesList = new ArrayList<>();
-    List<Charm> charms = new ArrayList<>(clientD.get().charmStorage.values());
-    charms.forEach(charm -> charmNamesList.add(charm.name));
-    return charmNamesList;
+  public List<Charm> getCharms() {
+    return new ArrayList<>(clientD.get().charmStorage.values());
   }
 }

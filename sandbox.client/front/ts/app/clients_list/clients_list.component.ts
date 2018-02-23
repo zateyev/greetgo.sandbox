@@ -9,6 +9,8 @@ import {PhoneType} from "../../model/PhoneType";
 import {ClientInfo} from "../../model/ClientInfo";
 import {ClientRecords} from "../../model/ClientRecords";
 import {Gender} from "../../model/Gender";
+import { saveAs as importedSaveAs } from "file-saver";
+import {Charm} from "../../model/Charm";
 
 @Component({
   selector: 'clients-list-component',
@@ -33,11 +35,13 @@ export class ClientsListComponent {
   orderBy: string | null;
   loadClientInfoError: string | null;
   clientRecords: ClientRecords = new ClientRecords();
-  charms: any = [];
+  charms: Charm[];
 
   pageSizeOptions = [10, 25, 50];
   columnsId = ['fio', 'charm', 'age', 'totalBalance', 'minBalance', 'maxBalance'];
   filterColumns = ['Фамилия', 'Имя', 'Отчество'];
+  filterColIds = ['surname', 'name', 'patronymic'];
+  viewTypes = ['xlsx', 'pdf'];
 
   columns = {
     fio: 'ФИО', charm: 'Характер', age: 'Возраст', totalBalance: 'Общий остаток счетов',
@@ -46,6 +50,7 @@ export class ClientsListComponent {
 
   formsTitle = "";
   formsBtn = "";
+  viewType = "";
 
   phoneType = PhoneType;
 
@@ -122,7 +127,7 @@ export class ClientsListComponent {
       filterBy: this.filterBy,
       filterInputs: this.filterInputs,
       orderBy: this.orderBy,
-      isDesc: this.isDescending,
+      isDesc: this.isDescending.toString(),
       page: this.currentPage,
       pageSize: this.pageSize
     }).toPromise().then(result => {
@@ -244,10 +249,34 @@ export class ClientsListComponent {
 
   loadCharms() {
     this.httpService.get("/charm/getCharms").toPromise().then(result => {
-      this.charms = result.json();
+      // this.charms = result.json();
+      this.charms = this.parseCharms(result.json());
     }, error => {
       console.log("charms");
       console.log(error);
+    });
+  }
+
+  private parseCharms(charmRec: any) {
+    let charms = [];
+
+    for (let charmItem of charmRec) {
+      let charm = Charm.copy(charmItem);
+      charms.push(charm);
+    }
+
+    return charms;
+  }
+
+  loadReport(type: string) {
+    this.viewType = type;
+    this.httpService.downloadFile("/report/" + this.viewType, {
+      filterBy: this.filterBy,
+      filterInputs: this.filterInputs,
+      orderBy: this.orderBy,
+      isDesc: this.isDescending.toString()
+    }).subscribe(blob => {
+      importedSaveAs(blob, "report." + this.viewType);
     });
   }
 

@@ -1,20 +1,26 @@
 package kz.greetgo.sandbox.db.jdbc;
 
 import kz.greetgo.db.DbType;
+import kz.greetgo.sandbox.controller.model.ClientInfo;
+import kz.greetgo.sandbox.db.report.client_list.big_data.ReportView;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.util.List;
 
-public class GetTotalSize extends AbstractLoader<Long> {
+public class BigReportJdbc extends LoadClientList {
 
-  public GetTotalSize(String filterBy, String filterInput) {
-    super(filterBy, filterInput, "", false, 0, 0);
+  private ReportView reportView;
+
+  public BigReportJdbc(String filterBy, String filterInput, String orderBy, boolean isDesc, int page, int pageSize, ReportView view) {
+    super(filterBy, filterInput, orderBy, isDesc, page, pageSize);
+    this.reportView = view;
   }
 
-
   @Override
-  public Long doInConnection(Connection connection) throws Exception {
+  public List<ClientInfo> doInConnection(Connection connection) throws Exception {
+
     prepareSql(DbType.detect(connection));
 
     try (PreparedStatement ps = connection.prepareStatement(sql.toString())) {
@@ -27,19 +33,14 @@ public class GetTotalSize extends AbstractLoader<Long> {
       }
 
       try (ResultSet rs = ps.executeQuery()) {
-        Long ret = 0L;
 
-        if (rs.next()) {
-          ret = rs.getLong("size");
+        while (rs.next()) {
+
+          reportView.addRow(readRecord(rs));
         }
-        return ret;
+        return null;
       }
     }
-  }
-
-  @Override
-  protected void select() {
-    sql.append("select count(client.id) as size ");
   }
 
   @Override
@@ -49,9 +50,9 @@ public class GetTotalSize extends AbstractLoader<Long> {
     switch (dbType) {
 
       case Postgres:
-//        prepareFromWhereForPostgres();
         from();
         where();
+        orderBy();
         return;
 
       case Oracle:

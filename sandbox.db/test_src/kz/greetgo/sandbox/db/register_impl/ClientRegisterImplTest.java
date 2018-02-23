@@ -9,7 +9,6 @@ import kz.greetgo.sandbox.db.test.dao.ClientTestDao;
 import kz.greetgo.sandbox.db.test.util.ParentTestNg;
 import kz.greetgo.sandbox.db.util.PageUtils;
 import kz.greetgo.util.RND;
-import org.apache.ibatis.annotations.Insert;
 import org.testng.annotations.Test;
 
 import java.sql.Date;
@@ -113,10 +112,8 @@ public class ClientRegisterImplTest extends ParentTestNg {
 
     List<ClientDetails> clients = clearDbAndInsertTestData(200);
 
-//    int pageSize = RND.plusInt(clients.size());
-//    int page = pageSize > 0 ? RND.plusInt((int) Math.ceil(clients.size() / pageSize)) : 0;
-    int pageSize = 25;
-    int page = 1;
+    int pageSize = RND.plusInt(clients.size());
+    int page = pageSize > 0 ? RND.plusInt((int) Math.ceil(clients.size() / pageSize)) : 0;
 
     List<ClientInfo> expectingClientList = new ArrayList<>();
     clients.forEach(clientDetails -> expectingClientList.add(toClientInfo(clientDetails)));
@@ -300,9 +297,6 @@ public class ClientRegisterImplTest extends ParentTestNg {
     int pageSize = RND.plusInt(clients.size());
     int page = pageSize > 0 ? RND.plusInt((int) Math.ceil(clients.size() / pageSize)) : 0;
 
-//    int pageSize = 25;
-//    int page = 1;
-
     List<ClientInfo> expectingClientList = new ArrayList<>();
     clients.forEach(clientDetails -> expectingClientList.add(toClientInfo(clientDetails)));
 
@@ -347,9 +341,6 @@ public class ClientRegisterImplTest extends ParentTestNg {
 
     int pageSize = RND.plusInt(clients.size());
     int page = pageSize > 0 ? RND.plusInt((int) Math.ceil(clients.size() / pageSize)) : 0;
-
-//    int pageSize = 25;
-//    int page = 1;
 
     List<ClientInfo> expectingClientList = new ArrayList<>();
     clients.forEach(clientDetails -> expectingClientList.add(toClientInfo(clientDetails)));
@@ -655,6 +646,9 @@ public class ClientRegisterImplTest extends ParentTestNg {
     clientTestDao.get().insertClient(client.id, client.surname, client.name,
       client.patronymic, client.gender, Date.valueOf(client.dateOfBirth), client.charm.id);
 
+    clientTestDao.get().insertAddress(client.id, client.addressF.type, client.addressF.street, client.addressF.house,
+      client.addressF.flat);
+
     assertThat(client).isNotNull();
 
     //
@@ -728,7 +722,7 @@ public class ClientRegisterImplTest extends ParentTestNg {
   private ClientDetails createRndClient() {
     ClientDetails client = new ClientDetails();
     client.id = idGen.get().newId();
-    client.surname = RND.str(10);
+    client.surname = (10000 + RND.plusInt(99999)) + RND.str(5);
     client.name = RND.str(10);
     client.patronymic = RND.str(10);
     client.charm = new Charm();
