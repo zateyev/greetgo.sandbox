@@ -11,6 +11,7 @@ import kz.greetgo.sandbox.db.jdbc.LoadClientList;
 import kz.greetgo.sandbox.db.util.JdbcSandbox;
 
 import java.sql.Date;
+import java.util.HashSet;
 import java.util.List;
 
 @Bean
@@ -36,7 +37,7 @@ public class ClientRegisterImpl implements ClientRegister {
     if (clientDetails == null) throw new NotFound();
     clientDetails.addressF = clientDao.get().selectAddrByClientId(clientId, AddressType.FACT);
     clientDetails.addressR = clientDao.get().selectAddrByClientId(clientId, AddressType.REG);
-    clientDetails.phoneNumbers = clientDao.get().selectPhonesByClientId(clientId);
+    clientDetails.phoneNumbers = clientDao.get().getPhonesByClientId(clientId);
     return clientDetails;
   }
 
@@ -53,14 +54,27 @@ public class ClientRegisterImpl implements ClientRegister {
       clientRecords.patronymic,
       clientRecords.gender,
       Date.valueOf(clientRecords.dateOfBirth),
-      clientRecords.charm.id);
+      clientRecords.charm.id
+    );
 
-    List<PhoneNumber> phoneNumbers = clientRecords.phoneNumbers;
+    List<PhoneNumber> phonesToSave = clientRecords.phoneNumbers;
+    List<PhoneNumber> existingPhones = clientDao.get().getPhonesByClientId(clientRecords.id);
+
+    HashSet<String> numbersToSave = new HashSet<>();
+    phonesToSave.forEach(phoneToSave -> numbersToSave.add(phoneToSave.number));
+
+    for (PhoneNumber existingPhone : existingPhones) {
+      if (!numbersToSave.contains(existingPhone.number)) {
+        clientDao.get().removePhoneNumber(clientRecords.id, existingPhone.number);
+      }
+    }
+
+    for (PhoneNumber phoneToSave : phonesToSave) {
+      clientDao.get().insertPhoneNumber(clientRecords.id, phoneToSave.number, phoneToSave.phoneType);
+    }
+
     Address addressFact = clientRecords.addressF;
     Address addressReg = clientRecords.addressR;
-    for (PhoneNumber phoneNumber : phoneNumbers) {
-      clientDao.get().insertPhoneNumber(clientRecords.id, phoneNumber.number, phoneNumber.phoneType);
-    }
     clientDao.get().insertAddress(clientRecords.id, addressFact.type, addressFact.street, addressFact.house, addressFact.flat);
     clientDao.get().insertAddress(clientRecords.id, addressReg.type, addressReg.street, addressReg.house, addressReg.flat);
 

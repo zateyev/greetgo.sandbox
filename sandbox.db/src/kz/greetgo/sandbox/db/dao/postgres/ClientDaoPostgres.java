@@ -1,14 +1,13 @@
 package kz.greetgo.sandbox.db.dao.postgres;
 
 import kz.greetgo.depinject.core.Bean;
-import kz.greetgo.mvc.annotations.Json;
-import kz.greetgo.mvc.annotations.Par;
-import kz.greetgo.mvc.annotations.ParamsTo;
-import kz.greetgo.sandbox.controller.model.*;
+import kz.greetgo.sandbox.controller.model.AddressType;
+import kz.greetgo.sandbox.controller.model.Gender;
+import kz.greetgo.sandbox.controller.model.PhoneType;
 import kz.greetgo.sandbox.db.dao.ClientDao;
-import org.apache.ibatis.annotations.*;
+import org.apache.ibatis.annotations.Insert;
+import org.apache.ibatis.annotations.Param;
 
-import java.time.LocalDate;
 import java.util.Date;
 
 @Bean
@@ -26,13 +25,13 @@ public interface ClientDaoPostgres extends ClientDao {
                             @Param("charm") String charmId);
 
   @Insert("INSERT INTO client_phone (client, number, type) VALUES (#{client}, #{number}, #{type}) " +
-    "ON CONFLICT (client, number) DO NOTHING")
+    "ON CONFLICT (client, number) DO UPDATE SET type = #{type}")
   void insertPhoneNumber(@Param("client") String clientId,
                          @Param("number") String number,
                          @Param("type") PhoneType type);
 
   @Insert("INSERT INTO client_addr (client, type, street, house, flat) VALUES (#{client}, #{type}, #{street}, #{house}, #{flat}) " +
-    "ON CONFLICT (client, type) DO NOTHING")
+    "ON CONFLICT (client, type) DO UPDATE SET  street = #{street}, house = #{house}, flat = #{flat}")
   void insertAddress(@Param("client") String clientId,
                      @Param("type") AddressType type,
                      @Param("street") String street,

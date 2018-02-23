@@ -7,6 +7,7 @@ import kz.greetgo.sandbox.db.stand.model.ClientDot;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
+import java.time.LocalDate;
 import java.util.*;
 
 @Bean
@@ -63,8 +64,10 @@ public class ClientStandDb implements HasAfterInject {
         client.setId(splitLine[1].trim());
         String[] ap = splitLine[2].trim().split("\\s+");
         String[] fio = splitLine[3].trim().split("\\s+");
+        client.setDateOfBirth(LocalDate.parse(splitLine[4].trim()));
         client.setMinBalance(Integer.parseInt(ap[0]));
         client.setMaxBalance(Integer.parseInt(ap[1]));
+        client.setTotalBalance(Integer.parseInt(ap[0]) + Integer.parseInt(ap[1]));
         client.setSurname(fio[0]);
         client.setName(fio[1]);
         if (fio.length > 2) client.setPatronymic(fio[2]);

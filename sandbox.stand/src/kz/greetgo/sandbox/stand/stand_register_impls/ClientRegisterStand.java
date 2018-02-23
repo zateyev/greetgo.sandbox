@@ -54,7 +54,7 @@ public class ClientRegisterStand implements ClientRegister {
         List<ClientInfo> clientsList = new ArrayList<>();
         List<ClientDot> clientDots = new ArrayList<>(clientD.get().clientStorage.values());
 
-        if (filterBy != null && filterInputs != null) {
+        if (filterBy != null && !filterBy.isEmpty() && filterInputs != null && !filterInputs.isEmpty()) {
             for (ClientDot clientDot : clientDots) {
                 if ("surname".equals(filterBy) && clientDot.getSurname().toLowerCase().contains(filterInputs.toLowerCase()))
                     clientsList.add(clientDot.toClientInfo());
