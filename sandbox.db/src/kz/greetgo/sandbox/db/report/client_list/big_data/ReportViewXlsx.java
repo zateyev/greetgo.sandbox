@@ -24,7 +24,7 @@ public class ReportViewXlsx implements ReportView {
 
   public static void main(String[] args) throws Exception {
     String dir = "build/report/";
-    String filename = "clientList.xlsx";
+    String filename = "report.xlsx";
 
     File file = new File(dir + filename);
     file.getParentFile().mkdirs();

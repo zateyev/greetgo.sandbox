@@ -20,7 +20,10 @@ export class ClientRecords {
   public maxBalance: number/*int*/;
 
   constructor() {
+    this.surname = "";
+    this.name = "";
     this.charm = new Charm();
+     
     // this.gender = new Gender();
     this.addressF = new Address();
     this.addressF.type = AddressType.FACT;

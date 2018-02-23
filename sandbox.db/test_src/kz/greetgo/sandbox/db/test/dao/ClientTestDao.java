@@ -1,15 +1,11 @@
 package kz.greetgo.sandbox.db.test.dao;
 
-import kz.greetgo.sandbox.controller.model.AddressType;
-import kz.greetgo.sandbox.controller.model.ClientDetails;
-import kz.greetgo.sandbox.controller.model.Gender;
-import kz.greetgo.sandbox.controller.model.PhoneType;
-import org.apache.ibatis.annotations.Insert;
-import org.apache.ibatis.annotations.Param;
-import org.apache.ibatis.annotations.Select;
+import kz.greetgo.sandbox.controller.model.*;
+import org.apache.ibatis.annotations.*;
 
 import java.time.OffsetDateTime;
 import java.util.Date;
+import java.util.List;
 
 public interface ClientTestDao {
   //  @Select("TRUNCATE Charm; TRUNCATE Client; TRUNCATE ClientAddr; TRUNCATE ClientPhone; TRUNCATE ClientAccount; " +
@@ -17,8 +13,18 @@ public interface ClientTestDao {
   @Select("TRUNCATE client CASCADE; TRUNCATE client_phone")
   void removeAllData();
 
-  @Select("select id, surname, name, patronymic from client where id = #{id}")
-  ClientDetails getClientById(@Param("id") String clientId);
+  @Select("SELECT client.id, client.surname, client.name, client.patronymic, client.gender, " +
+    "client.birth_date, client.charm FROM client WHERE id = #{id}")
+  @Results({
+    @Result(property = "id", column = "id"),
+    @Result(property = "surname", column = "surname"),
+    @Result(property = "name", column = "name"),
+    @Result(property = "patronymic", column = "patronymic"),
+    @Result(property = "gender", column = "gender"),
+    @Result(property = "dateOfBirth", column = "birth_date"),
+    @Result(property = "charm.id", column = "charm")
+  })
+  ClientDetails getClientDetailsById(@Param("id") String clientId);
 
   @Select("select count(1) from Client")
   long countOfClients(@Param("filterBy") String filterBy,
@@ -72,4 +78,24 @@ public interface ClientTestDao {
   void insertPhoneNumber(@Param("client") String clientId,
                          @Param("number") String number,
                          @Param("type") PhoneType type);
+
+  @Select("SELECT client, type, street, house, flat " +
+    "FROM client_addr WHERE client = #{client} and type = #{type}")
+  @Results({
+    @Result(property = "id", column = "client"),
+    @Result(property = "type", column = "type"),
+    @Result(property = "street", column = "street"),
+    @Result(property = "house", column = "house"),
+    @Result(property = "flat", column = "flat")
+  })
+  Address getAddrByClientId(@Param("client") String clientId,
+                               @Param("type") AddressType type);
+
+  @Select("SELECT number, type " +
+    "FROM client_phone WHERE client = #{client}")
+  @Results({
+    @Result(property = "phoneType", column = "type"),
+    @Result(property = "number", column = "number")
+  })
+  List<PhoneNumber> getPhonesByClientId(@Param("client") String clientId);
 }

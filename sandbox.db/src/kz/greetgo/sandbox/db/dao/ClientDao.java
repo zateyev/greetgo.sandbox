@@ -67,5 +67,9 @@ public interface ClientDao {
     @Result(property = "phoneType", column = "type"),
     @Result(property = "number", column = "number")
   })
-  List<PhoneNumber> selectPhonesByClientId(@Param("client") String clientId);
+  List<PhoneNumber> getPhonesByClientId(@Param("client") String clientId);
+
+  @Delete("DELETE FROM client_phone WHERE client = #{client} AND number = #{number}")
+  void removePhoneNumber(@Param("client") String clientId,
+                         @Param("number") String number);
 }

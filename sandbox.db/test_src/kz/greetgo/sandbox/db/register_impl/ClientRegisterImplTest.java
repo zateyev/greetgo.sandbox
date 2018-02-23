@@ -261,7 +261,7 @@ public class ClientRegisterImplTest extends ParentTestNg {
 
         Double tb1 = ((ClientInfo) o1).totalBalance;
         Double tb2 = ((ClientInfo) o2).totalBalance;
-        int sComp = tb1.compareTo(tb2);
+        int sComp = tb2.compareTo(tb1);
 
         if (sComp != 0) {
           return sComp;
@@ -271,7 +271,6 @@ public class ClientRegisterImplTest extends ParentTestNg {
           return sn1.compareTo(sn2);
         }
       }});
-    Collections.reverse(expectingClientList);
 
     PageUtils.cutPage(expectingClientList, page * pageSize, pageSize);
 
@@ -545,26 +544,7 @@ public class ClientRegisterImplTest extends ParentTestNg {
     //
 
     assertThat(result).isNotNull();
-    assertThat(result.id).isEqualTo(expectingClient.id);
-    assertThat(result.surname).isEqualTo(expectingClient.surname);
-    assertThat(result.name).isEqualTo(expectingClient.name);
-    assertThat(result.patronymic).isEqualTo(expectingClient.patronymic);
-    assertThat(result.gender).isEqualTo(expectingClient.gender);
-    assertThat(result.dateOfBirth).isEqualTo(expectingClient.dateOfBirth);
-    assertThat(result.charm.id).isEqualTo(expectingClient.charm.id);
-    assertThat(result.addressF.street).isEqualTo(expectingClient.addressF.street);
-    assertThat(result.addressF.house).isEqualTo(expectingClient.addressF.house);
-    assertThat(result.addressF.flat).isEqualTo(expectingClient.addressF.flat);
-    assertThat(result.addressR.street).isEqualTo(expectingClient.addressR.street);
-    assertThat(result.addressR.house).isEqualTo(expectingClient.addressR.house);
-    assertThat(result.addressR.flat).isEqualTo(expectingClient.addressR.flat);
-    result.phoneNumbers.sort(Comparator.comparing(phoneNumber -> phoneNumber.number.toLowerCase()));
-    expectingClient.phoneNumbers.sort(Comparator.comparing(phoneNumber -> phoneNumber.number.toLowerCase()));
-    for (int i = 0; i < result.phoneNumbers.size(); i++) {
-      assertThat(result.phoneNumbers.get(i).number).isEqualTo(expectingClient.phoneNumbers.get(i).number);
-      assertThat(result.phoneNumbers.get(i).phoneType).isEqualTo(expectingClient.phoneNumbers.get(i).phoneType);
-    }
-    assertThat(result.charm.id).isEqualTo(expectingClient.charm.id);
+    assertThatAreEqual(result, expectingClient);
   }
 
   @Test(expectedExceptions = NotFound.class)
@@ -599,6 +579,13 @@ public class ClientRegisterImplTest extends ParentTestNg {
 
     assertThat(result).isNotNull();
     assertThatAreEqual(result, expectingClientInfo);
+
+    ClientDetails actual = clientTestDao.get().getClientDetailsById(clientRecords.id);
+    assertThat(actual).isNotNull();
+    actual.addressF = clientTestDao.get().getAddrByClientId(clientRecords.id, AddressType.FACT);
+    actual.addressR = clientTestDao.get().getAddrByClientId(clientRecords.id, AddressType.REG);
+    actual.phoneNumbers = clientTestDao.get().getPhonesByClientId(clientRecords.id);
+    assertThatAreEqual(actual, clientDetails);
   }
 
   @Test
@@ -632,6 +619,13 @@ public class ClientRegisterImplTest extends ParentTestNg {
 
     assertThat(result).isNotNull();
     assertThatAreEqual(result, expectingClientInfo);
+
+    ClientDetails actual = clientTestDao.get().getClientDetailsById(clientRecords.id);
+    assertThat(actual).isNotNull();
+    actual.addressF = clientTestDao.get().getAddrByClientId(clientRecords.id, AddressType.FACT);
+    actual.addressR = clientTestDao.get().getAddrByClientId(clientRecords.id, AddressType.REG);
+    actual.phoneNumbers = clientTestDao.get().getPhonesByClientId(clientRecords.id);
+    assertThatAreEqual(actual, clientDetails);
   }
 
   @Test
@@ -657,7 +651,7 @@ public class ClientRegisterImplTest extends ParentTestNg {
     //
     //
 
-    assertThat(clientTestDao.get().getClientById(client.id)).isNull();
+    assertThat(clientTestDao.get().getClientDetailsById(client.id)).isNull();
   }
 
   @Test
@@ -680,7 +674,7 @@ public class ClientRegisterImplTest extends ParentTestNg {
     //
     //
 
-    assertThat(clientTestDao.get().getClientById(client.id)).isNotNull();
+    assertThat(clientTestDao.get().getClientDetailsById(client.id)).isNotNull();
   }
 
   private List<ClientDetails> clearDbAndInsertTestData(int size) {
@@ -795,5 +789,29 @@ public class ClientRegisterImplTest extends ParentTestNg {
     clientRecords.minBalance = clientDetails.minBalance;
     clientRecords.maxBalance = clientDetails.maxBalance;
     return clientRecords;
+  }
+
+  private void assertThatAreEqual(ClientDetails cd1, ClientDetails cd2) {
+    assertThat(cd1.id).isEqualTo(cd2.id);
+    assertThat(cd1.surname).isEqualTo(cd2.surname);
+    assertThat(cd1.name).isEqualTo(cd2.name);
+    assertThat(cd1.patronymic).isEqualTo(cd2.patronymic);
+    assertThat(cd1.gender).isEqualTo(cd2.gender);
+    assertThat(cd1.dateOfBirth).isEqualTo(cd2.dateOfBirth);
+    assertThat(cd1.charm.id).isEqualTo(cd2.charm.id);
+    assertThat(cd1.addressF.street).isEqualTo(cd2.addressF.street);
+    assertThat(cd1.addressF.house).isEqualTo(cd2.addressF.house);
+    assertThat(cd1.addressF.flat).isEqualTo(cd2.addressF.flat);
+    assertThat(cd1.addressR.street).isEqualTo(cd2.addressR.street);
+    assertThat(cd1.addressR.house).isEqualTo(cd2.addressR.house);
+    assertThat(cd1.addressR.flat).isEqualTo(cd2.addressR.flat);
+    cd1.phoneNumbers.sort(Comparator.comparing(phoneNumber -> phoneNumber.number.toLowerCase()));
+    cd2.phoneNumbers.sort(Comparator.comparing(phoneNumber -> phoneNumber.number.toLowerCase()));
+    assertThat(cd1.phoneNumbers).hasSize(cd2.phoneNumbers.size());
+    for (int i = 0; i < cd1.phoneNumbers.size(); i++) {
+      assertThat(cd1.phoneNumbers.get(i).number).isEqualTo(cd2.phoneNumbers.get(i).number);
+      assertThat(cd1.phoneNumbers.get(i).phoneType).isEqualTo(cd2.phoneNumbers.get(i).phoneType);
+    }
+    assertThat(cd1.charm.id).isEqualTo(cd2.charm.id);
   }
 }
