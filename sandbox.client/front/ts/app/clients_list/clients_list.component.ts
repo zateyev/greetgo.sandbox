@@ -9,7 +9,7 @@ import {PhoneType} from "../../model/PhoneType";
 import {ClientInfo} from "../../model/ClientInfo";
 import {ClientRecords} from "../../model/ClientRecords";
 import {Gender} from "../../model/Gender";
-import { saveAs as importedSaveAs } from "file-saver";
+import {saveAs as importedSaveAs} from "file-saver";
 import {Charm} from "../../model/Charm";
 
 @Component({
@@ -30,7 +30,7 @@ export class ClientsListComponent {
   pager: any = {};
   isInitialized: boolean = false;
   isDescending: boolean = false;
-  filterBy: string | null;
+  filterBy = 'surname';
   filterInputs: string | null;
   orderBy: string | null;
   loadClientInfoError: string | null;
@@ -38,41 +38,47 @@ export class ClientsListComponent {
   charms: Charm[];
 
   pageSizeOptions = [10, 25, 50];
-  columnsId = ['fio', 'charm', 'age', 'totalBalance', 'minBalance', 'maxBalance'];
-  filterColumns = ['Фамилия', 'Имя', 'Отчество'];
-  filterColIds = ['surname', 'name', 'patronymic'];
   viewTypes = ['xlsx', 'pdf'];
 
-  columns = {
-    fio: 'ФИО', charm: 'Характер', age: 'Возраст', totalBalance: 'Общий остаток счетов',
-    minBalance: 'Минимальный остаток', maxBalance: 'Максимальный остаток'
-  };
+  columns = [
+    {key: 'fio', value: 'ФИО'},
+    {key: 'charm', value: 'Характер'},
+    {key: 'age', value: 'Возраст'},
+    {key: 'totalBalance', value: 'Общий остаток счетов'},
+    {key: 'minBalance', value: 'Минимальный остаток'},
+    {key: 'maxBalance', value: 'Максимальный остаток'}
+  ];
+
+  filterColumns = [
+    {key: 'surname', value: 'Фамилия'},
+    {key: 'name', value: 'Имя'},
+    {key: 'patronymic', value: 'Отчество'}
+  ];
+
+  genderTypes = [
+    {type: Gender.MALE, name: 'муж'},
+    {type: Gender.FEMALE, name: 'жен'}
+  ];
+
+  phoneTypes = [
+    {type: PhoneType.HOME, name: 'Домашний'},
+    {type: PhoneType.WORK, name: 'Рабочий'},
+    {type: PhoneType.MOBILE, name: 'Мобильный'}
+  ];
 
   formsTitle = "";
+
   formsBtn = "";
+
   viewType = "";
-
-  phoneType = PhoneType;
-
-  phoneTypeKeys(): Array<string> {
-    let keys = Object.keys(this.phoneType);
-    return keys.slice(keys.length / 5);
-  }
-
-  gender = Gender;
-
-  genderTypes(): Array<string> {
-    let keys = Object.keys(this.gender);
-    return keys.slice(keys.length / 5);
-  }
 
   constructor(private httpService: HttpService, private pagerService: PagerService) {
   }
 
   sort(colId: number) {
     if (colId > 1) {
-      if (this.orderBy != this.columnsId[colId]) {
-        this.orderBy = this.columnsId[colId];
+      if (this.orderBy != this.columns[colId].key) {
+        this.orderBy = this.columns[colId].key;
         this.isDescending = false;
       }
       else {
@@ -284,5 +290,7 @@ export class ClientsListComponent {
     this.getTotalSize();
     this.loadCharms();
     this.loadClientsList();
+    console.log(this.genderTypes);
+    console.log(this.phoneTypes);
   }
 }

@@ -25,7 +25,7 @@
         <select class="form-control"
                 required
                 [(ngModel)]="filterBy" name="charm">
-          <option *ngFor="let col of filterColumns; let i = index" [ngValue]="filterColIds[i]">{{col}}</option>
+          <option *ngFor="let col of filterColumns" [ngValue]="col.key">{{col.value}}</option>
         </select>
       </div>
       <div class="form-group col-md-2">
@@ -41,15 +41,13 @@
     </select> входов
   </label>
 
-  <!--<button (click)="loadReport()">Загрузить полный список</button>-->
-
   <div class="col-md-10">
     <table class="table table-hover" id="clientsListTable">
       <thead>
       <tr style="white-space:nowrap">
-        <th *ngFor="let col of columnsId; let i = index" (click)="sort(i)"
-            [ngClass]="{sort0:orderBy === columnsId[i] && !isDescending, sort1:orderBy === columnsId[i] && isDescending}">
-          {{columns[col]}}
+        <th *ngFor="let col of columns; let i = index" (click)="sort(i)"
+            [ngClass]="{sort0:orderBy === col.key && !isDescending, sort1:orderBy === col.key && isDescending}">
+          {{col.value}}
         </th>
       </tr>
       </thead>
@@ -146,7 +144,7 @@
                 <select class="form-control" id="inputGender"
                         required
                         [(ngModel)]="clientRecords.gender" name="power">
-                  <option *ngFor="let gender of genderTypes()" [ngValue]="gender">{{gender}}</option>
+                  <option *ngFor="let gender of genderTypes" [ngValue]="gender.type">{{gender.name}}</option>
                 </select>
               </div>
               <div class="form-group col-md-5">
@@ -197,7 +195,7 @@
                 <div class=" col-md-4">
                   <select [(ngModel)]="clientRecords.phoneNumbers[i].phoneType" name="phoneType{{i}}"
                           class="form-control">
-                    <option [ngValue]="i" *ngFor="let i of phoneTypeKeys()">{{phoneType[i]}}</option>
+                    <option *ngFor="let phoneType of phoneTypes" [ngValue]="phoneType.type">{{phoneType.name}}</option>
                   </select>
                 </div>
                 <div class="input-group col-md-8">

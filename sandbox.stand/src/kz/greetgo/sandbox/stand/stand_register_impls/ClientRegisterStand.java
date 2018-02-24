@@ -60,7 +60,7 @@ public class ClientRegisterStand implements ClientRegister {
                     clientsList.add(clientDot.toClientInfo());
                 else if ("name".equals(filterBy) && clientDot.getName().toLowerCase().contains(filterInputs.toLowerCase()))
                     clientsList.add(clientDot.toClientInfo());
-                else if ("patronymic".equals(filterBy) && clientDot.getPatronymic().toLowerCase().contains(filterInputs.toLowerCase()))
+                else if ("patronymic".equals(filterBy) && clientDot.getPatronymic() != null && clientDot.getPatronymic().toLowerCase().contains(filterInputs.toLowerCase()))
                     clientsList.add(clientDot.toClientInfo());
             }
 
