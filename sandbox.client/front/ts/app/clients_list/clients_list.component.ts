@@ -139,8 +139,6 @@ export class ClientsListComponent {
       pageSize: this.pageSize
     }).toPromise().then(result => {
       this.clientsList = this.parseClientsList(result.json());
-      console.log(result.json());
-      console.log(this.clientsList);
     }, error => {
       console.log("ClientsList");
       console.log(error);

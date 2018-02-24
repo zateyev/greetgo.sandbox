@@ -12,6 +12,7 @@ import kz.greetgo.util.RND;
 import org.testng.annotations.Test;
 
 import java.sql.Date;
+import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.Period;
 import java.util.ArrayList;
@@ -725,7 +726,8 @@ public class ClientRegisterImplTest extends ParentTestNg {
     client.charm.description = RND.str(10);
     client.charm.energy = RND.plusDouble(100, 2);
     client.gender = RND.someEnum(Gender.values());
-    client.dateOfBirth = LocalDate.now().toString();
+    SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+    client.dateOfBirth = sdf.format(RND.dateDays(-20_000, 0));
     client.addressF = new Address();
     client.addressF.type = AddressType.FACT;
     client.addressF.street = RND.str(10);
