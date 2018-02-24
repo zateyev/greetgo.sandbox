@@ -2,7 +2,7 @@ package kz.greetgo.sandbox.db.register_impl;
 
 import kz.greetgo.depinject.core.BeanGetter;
 import kz.greetgo.sandbox.controller.model.*;
-import kz.greetgo.sandbox.db.jdbc.BigReportJdbc;
+import kz.greetgo.sandbox.db.jdbc.LoadClientListToReport;
 import kz.greetgo.sandbox.db.report.client_list.ReportFootData;
 import kz.greetgo.sandbox.db.report.client_list.ReportHeadData;
 import kz.greetgo.sandbox.db.report.client_list.big_data.ReportView;
@@ -69,7 +69,7 @@ public class ReportRegisterImplTest extends ParentTestNg {
     ReportHeadData head = new ReportHeadData();
     head.title = "Список клиентов";
     testReportView.start(head);
-    jdbcSandbox.get().execute(new BigReportJdbc("", "", "", false, 0, 0, testReportView));
+    jdbcSandbox.get().execute(new LoadClientListToReport("", "", "", false, 0, 0, testReportView));
     ReportFootData foot = new ReportFootData();
     foot.generatedAt = new Date();
     testReportView.finish(foot);
@@ -118,7 +118,7 @@ public class ReportRegisterImplTest extends ParentTestNg {
     ReportHeadData head = new ReportHeadData();
     head.title = "Список клиентов";
     testReportView.start(head);
-    jdbcSandbox.get().execute(new BigReportJdbc("", "", "minBalance", false, 0, 0, testReportView));
+    jdbcSandbox.get().execute(new LoadClientListToReport("", "", "minBalance", false, 0, 0, testReportView));
     ReportFootData foot = new ReportFootData();
     foot.generatedAt = new Date();
     testReportView.finish(foot);

@@ -116,18 +116,18 @@
             <div class="form-row">
               <div class="form-group col-md-4">
                 <label for="last-name">Фамилия</label>
-                <input type="text" class="form-control" name="surname" [(ngModel)]="clientRecords.surname"
+                <input type="text" class="form-control" name="surname" [(ngModel)]="clientRecordsToSave.surname"
                        id="last-name" placeholder="Фамилия"
-                       [ngClass]="{haserror:requiredNotFilled && clientRecords.surname == null}">
+                       [ngClass]="{haserror:requiredNotFilled && clientRecordsToSave.surname == null}">
               </div>
               <div class="form-group col-md-4">
                 <label for="first-name">Имя</label>
-                <input type="text" class="form-control" name="name" [(ngModel)]="clientRecords.name" id="first-name"
-                       placeholder="Имя" [ngClass]="{haserror:requiredNotFilled && clientRecords.name == null}">
+                <input type="text" class="form-control" name="name" [(ngModel)]="clientRecordsToSave.name" id="first-name"
+                       placeholder="Имя" [ngClass]="{haserror:requiredNotFilled && clientRecordsToSave.name == null}">
               </div>
               <div class="form-group col-md-4">
                 <label for="patronymic">Отчество</label>
-                <input type="text" class="form-control" name="patronymic" [(ngModel)]="clientRecords.patronymic"
+                <input type="text" class="form-control" name="patronymic" [(ngModel)]="clientRecordsToSave.patronymic"
                        id="patronymic" placeholder="Отчество">
               </div>
             </div>
@@ -135,86 +135,86 @@
               <div class="form-group col-md-4">
                 <label for="inputCharm">Характер</label>
                 <select class="form-control" id="inputCharm"
-                        [ngClass]="{haserror:requiredNotFilled && clientRecords.charm.id == null}"
+                        [ngClass]="{haserror:requiredNotFilled && clientRecordsToSave.charm.id == null}"
                         required
-                        [(ngModel)]="clientRecords.charm.id" name="charm">
+                        [(ngModel)]="clientRecordsToSave.charm.id" name="charm">
                   <option *ngFor="let charm of charms" [ngValue]="charm.id">{{charm.name}}</option>
                 </select>
               </div>
               <div class="form-group col-md-3">
                 <label for="inputGender">Пол</label>
                 <select class="form-control" id="inputGender"
-                        [ngClass]="{haserror:requiredNotFilled && clientRecords.gender == null}"
+                        [ngClass]="{haserror:requiredNotFilled && clientRecordsToSave.gender == null}"
                         required
-                        [(ngModel)]="clientRecords.gender" name="power">
+                        [(ngModel)]="clientRecordsToSave.gender" name="power">
                   <option *ngFor="let gender of genderTypes" [ngValue]="gender.type">{{gender.name}}</option>
                 </select>
               </div>
               <div class="form-group col-md-5">
                 <label for="inputBirthDate">Дата рождения</label>
-                <input type="date" name="dateOfBirth" [(ngModel)]="clientRecords.dateOfBirth" class="form-control"
+                <input type="date" name="dateOfBirth" [(ngModel)]="clientRecordsToSave.dateOfBirth" class="form-control"
                        id="inputBirthDate"
-                       [ngClass]="{haserror:requiredNotFilled && clientRecords.dateOfBirth == null}">
+                       [ngClass]="{haserror:requiredNotFilled && clientRecordsToSave.dateOfBirth == null}">
               </div>
             </div>
             <label for="addressFact">Адрес проживания</label>
             <div class="form-row" id="addressFact">
               <div class="form-group col-md-4">
                 <!--<label for="inputStreet">Улица</label>-->
-                <input type="text" name="streetF" [(ngModel)]="clientRecords.addressF.street" class="form-control"
+                <input type="text" name="streetF" [(ngModel)]="clientRecordsToSave.addressF.street" class="form-control"
                        id="inputStreet" placeholder="Улица"
-                       [ngClass]="{haserror:requiredNotFilled && clientRecords.addressF.street == null}">
+                       [ngClass]="{haserror:requiredNotFilled && clientRecordsToSave.addressF.street == null}">
               </div>
               <div class="form-group col-md-4">
                 <!--<label for="inputBuilding">Дом</label>-->
-                <input type="text" name="buildingF" [(ngModel)]="clientRecords.addressF.house" class="form-control"
+                <input type="text" name="buildingF" [(ngModel)]="clientRecordsToSave.addressF.house" class="form-control"
                        id="inputBuilding" placeholder="Дом"
-                       [ngClass]="{haserror:requiredNotFilled && clientRecords.addressF.house == null}">
+                       [ngClass]="{haserror:requiredNotFilled && clientRecordsToSave.addressF.house == null}">
               </div>
               <div class="form-group col-md-4">
                 <!--<label for="inputAprtm">Квартира</label>-->
-                <input type="text" name="apartmentF" [(ngModel)]="clientRecords.addressF.flat" class="form-control"
+                <input type="text" name="apartmentF" [(ngModel)]="clientRecordsToSave.addressF.flat" class="form-control"
                        id="inputAprtm" placeholder="Квартира"
-                       [ngClass]="{haserror:requiredNotFilled && clientRecords.addressF.flat == null}">
+                       [ngClass]="{haserror:requiredNotFilled && clientRecordsToSave.addressF.flat == null}">
               </div>
             </div>
             <label for="addressReg">Адрес регистрации</label>
             <div class="form-row" id="addressReg">
               <div class="form-group col-md-4">
                 <!--<label for="streetF">Улица</label>-->
-                <input type="text" name="streetR" [(ngModel)]="clientRecords.addressR.street" class="form-control"
+                <input type="text" name="streetR" [(ngModel)]="clientRecordsToSave.addressR.street" class="form-control"
                        id="streetF" placeholder="Улица"
-                       [ngClass]="{haserror:requiredNotFilled && clientRecords.addressR.street == null}">
+                       [ngClass]="{haserror:requiredNotFilled && clientRecordsToSave.addressR.street == null}">
               </div>
               <div class="form-group col-md-4">
                 <!--<label for="buildingF">Дом</label>-->
-                <input type="text" name="buildingR" [(ngModel)]="clientRecords.addressR.house" class="form-control"
+                <input type="text" name="buildingR" [(ngModel)]="clientRecordsToSave.addressR.house" class="form-control"
                        id="buildingF" placeholder="Дом"
-                       [ngClass]="{haserror:requiredNotFilled && clientRecords.addressR.house == null}">
+                       [ngClass]="{haserror:requiredNotFilled && clientRecordsToSave.addressR.house == null}">
               </div>
               <div class="form-group col-md-4">
                 <!--<label for="apartmentF">Квартира</label>-->
-                <input type="text" name="apartmentR" [(ngModel)]="clientRecords.addressR.flat" class="form-control"
+                <input type="text" name="apartmentR" [(ngModel)]="clientRecordsToSave.addressR.flat" class="form-control"
                        id="apartmentF" placeholder="Квартира"
-                       [ngClass]="{haserror:requiredNotFilled && clientRecords.addressR.flat == null}">
+                       [ngClass]="{haserror:requiredNotFilled && clientRecordsToSave.addressR.flat == null}">
               </div>
             </div>
 
             <label for="phoneNumbers">Номер телефона</label>
             <div id="phoneNumbers" class="clickable-row"
-                 *ngFor="let phoneNumber of clientRecords.phoneNumbers; let i = index">
+                 *ngFor="let phoneNumber of clientRecordsToSave.phoneNumbers; let i = index">
               <div class="entry form-group">
                 <div class=" col-md-4">
-                  <select [(ngModel)]="clientRecords.phoneNumbers[i].phoneType" name="phoneType{{i}}"
-                          [ngClass]="{haserror:requiredNotFilled && clientRecords.phoneNumbers[i].phoneType == null}"
+                  <select [(ngModel)]="clientRecordsToSave.phoneNumbers[i].phoneType" name="phoneType{{i}}"
+                          [ngClass]="{haserror:requiredNotFilled && clientRecordsToSave.phoneNumbers[i].phoneType == null}"
                           class="form-control">
                     <option *ngFor="let phoneType of phoneTypes" [ngValue]="phoneType.type">{{phoneType.name}}</option>
                   </select>
                 </div>
                 <div class="input-group col-md-8">
                   <input type="text" class="form-control" name="phoneNumber{{i}}" ngModel placeholder="Номер телефона"
-                         [(ngModel)]="clientRecords.phoneNumbers[i].number"
-                         [ngClass]="{haserror:requiredNotFilled && clientRecords.phoneNumbers[i].number == null}">
+                         [(ngModel)]="clientRecordsToSave.phoneNumbers[i].number"
+                         [ngClass]="{haserror:requiredNotFilled && clientRecordsToSave.phoneNumbers[i].number == null}">
                   <span class="input-group-btn">
                                         <button class="btn btn-success btn-add" type="button"
                                                 (click)="addPhoneNumber()">

@@ -42,44 +42,44 @@ public class ClientRegisterImpl implements ClientRegister {
   }
 
   @Override
-  public ClientInfo addOrUpdateClient(ClientRecords clientRecords) {
+  public ClientInfo addOrUpdateClient(ClientRecordsToSave clientRecordsToSave) {
 
-    if (clientRecords.id == null) {
-      clientRecords.id = idGen.get().newId();
+    if (clientRecordsToSave.id == null) {
+      clientRecordsToSave.id = idGen.get().newId();
     }
 
-    clientDao.get().insertOrUpdateClient(clientRecords.id,
-      clientRecords.surname,
-      clientRecords.name,
-      clientRecords.patronymic,
-      clientRecords.gender,
-      Date.valueOf(clientRecords.dateOfBirth),
-      clientRecords.charm.id
+    clientDao.get().insertOrUpdateClient(clientRecordsToSave.id,
+      clientRecordsToSave.surname,
+      clientRecordsToSave.name,
+      clientRecordsToSave.patronymic,
+      clientRecordsToSave.gender,
+      Date.valueOf(clientRecordsToSave.dateOfBirth),
+      clientRecordsToSave.charm.id
     );
 
-    List<PhoneNumber> phonesToSave = clientRecords.phoneNumbers;
-    List<PhoneNumber> existingPhones = clientDao.get().getPhonesByClientId(clientRecords.id);
+    List<PhoneNumber> phonesToSave = clientRecordsToSave.phoneNumbers;
+    List<PhoneNumber> existingPhones = clientDao.get().getPhonesByClientId(clientRecordsToSave.id);
 
     HashSet<String> numbersToSave = new HashSet<>();
     phonesToSave.forEach(phoneToSave -> numbersToSave.add(phoneToSave.number));
 
     for (PhoneNumber existingPhone : existingPhones) {
       if (!numbersToSave.contains(existingPhone.number)) {
-        clientDao.get().removePhoneNumber(clientRecords.id, existingPhone.number);
+        clientDao.get().removePhoneNumber(clientRecordsToSave.id, existingPhone.number);
       }
     }
 
     for (PhoneNumber phoneToSave : phonesToSave) {
-      clientDao.get().insertPhoneNumber(clientRecords.id, phoneToSave.number, phoneToSave.phoneType);
+      clientDao.get().insertPhoneNumber(clientRecordsToSave.id, phoneToSave.number, phoneToSave.phoneType);
     }
 
-    Address addressFact = clientRecords.addressF;
-    Address addressReg = clientRecords.addressR;
-    clientDao.get().insertAddress(clientRecords.id, addressFact.type, addressFact.street, addressFact.house, addressFact.flat);
-    clientDao.get().insertAddress(clientRecords.id, addressReg.type, addressReg.street, addressReg.house, addressReg.flat);
+    Address addressFact = clientRecordsToSave.addressF;
+    Address addressReg = clientRecordsToSave.addressR;
+    clientDao.get().insertAddress(clientRecordsToSave.id, addressFact.type, addressFact.street, addressFact.house, addressFact.flat);
+    clientDao.get().insertAddress(clientRecordsToSave.id, addressReg.type, addressReg.street, addressReg.house, addressReg.flat);
 
 
-    return clientDao.get().selectClientInfoById(clientRecords.id);
+    return clientDao.get().selectClientInfoById(clientRecordsToSave.id);
   }
 
   @Override

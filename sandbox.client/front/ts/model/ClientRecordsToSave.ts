@@ -2,9 +2,8 @@ import {PhoneNumber} from "./PhoneNumber";
 import {Address} from "./Address";
 import {Charm} from "./Charm";
 import {Gender} from "./Gender";
-import {AddressType} from "./AddressType";
 
-export class ClientRecords {
+export class ClientRecordsToSave {
   public id: string;
   public surname: string;
   public name: string;
@@ -30,7 +29,7 @@ export class ClientRecords {
     this.phoneNumbers = [new PhoneNumber()];
   }
 
-  public assign(o: any): ClientRecords {
+  public assign(o: any): ClientRecordsToSave {
     this.id = o.id;
     this.name = o.name;
     this.surname = o.surname;
@@ -64,8 +63,8 @@ export class ClientRecords {
     return this;
   }
 
-  public static copy(a: any): ClientRecords {
-    let ret = new ClientRecords();
+  public static copy(a: any): ClientRecordsToSave {
+    let ret = new ClientRecordsToSave();
     ret.assign(a);
     return ret;
   }

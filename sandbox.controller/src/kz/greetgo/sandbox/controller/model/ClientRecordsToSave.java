@@ -3,7 +3,7 @@ package kz.greetgo.sandbox.controller.model;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ClientRecords {
+public class ClientRecordsToSave {
   public String id;
   public String surname;
   public String name;

@@ -7,7 +7,7 @@ import {ClientDetails} from "../../model/ClientDetails";
 import {PhoneNumber} from "../../model/PhoneNumber";
 import {PhoneType} from "../../model/PhoneType";
 import {ClientInfo} from "../../model/ClientInfo";
-import {ClientRecords} from "../../model/ClientRecords";
+import {ClientRecordsToSave} from "../../model/ClientRecordsToSave";
 import {Gender} from "../../model/Gender";
 import {saveAs as importedSaveAs} from "file-saver";
 import {Charm} from "../../model/Charm";
@@ -35,7 +35,7 @@ export class ClientsListComponent {
   filterInputs: string | null;
   orderBy: string | null;
   loadClientInfoError: string | null;
-  clientRecords: ClientRecords = new ClientRecords();
+  clientRecordsToSave: ClientRecordsToSave = new ClientRecordsToSave();
   charms: Charm[];
 
   pageSizeOptions = [10, 25, 50];
@@ -97,7 +97,7 @@ export class ClientsListComponent {
   }
 
   addPhoneNumber() {
-    this.clientRecords.phoneNumbers.push(new PhoneNumber);
+    this.clientRecordsToSave.phoneNumbers.push(new PhoneNumber);
   }
 
   setPageSize(size: number) {
@@ -112,8 +112,8 @@ export class ClientsListComponent {
   }
 
   removePhoneNumber(index: number) {
-    if (this.clientRecords.phoneNumbers.length > 1) {
-      this.clientRecords.phoneNumbers.splice(index, 1);
+    if (this.clientRecordsToSave.phoneNumbers.length > 1) {
+      this.clientRecordsToSave.phoneNumbers.splice(index, 1);
     }
   }
 
@@ -151,9 +151,9 @@ export class ClientsListComponent {
     this.httpService.post("/clientsList/clientDetails", {
       clientsId: this.clientsList[this.selClientId].id
     }).toPromise().then(result => {
-      this.clientRecords = ClientRecords.copy(result.json());
+      this.clientRecordsToSave = ClientRecordsToSave.copy(result.json());
     }, error => {
-      console.log("clientRecords");
+      console.log("clientRecordsToSave");
       console.log(error);
       this.loadClientInfoError = error;
     });
@@ -171,11 +171,11 @@ export class ClientsListComponent {
       return;
     }
     this.requiredNotFilled = false;
-    this.clientRecords.addressF.type = AddressType.FACT;
-    this.clientRecords.addressR.type = AddressType.REG;
+    this.clientRecordsToSave.addressF.type = AddressType.FACT;
+    this.clientRecordsToSave.addressR.type = AddressType.REG;
     $('#id01').hide();
     this.httpService.post("/clientsList/addOrUpdateClient", {
-      clientRecords: JSON.stringify(this.clientRecords)
+      clientRecordsToSave: JSON.stringify(this.clientRecordsToSave)
     }).toPromise().then(result => {
       if (result.json()) {
         let clientInfo = ClientInfo.copy(result.json());
@@ -189,14 +189,14 @@ export class ClientsListComponent {
   }
 
   private allFieldsFilled() {
-    return this.clientRecords.addressF.street != null && this.clientRecords.addressF.house != null && this.clientRecords.addressF.flat != null &&
-      this.clientRecords.addressR.street != null && this.clientRecords.addressR.house != null && this.clientRecords.addressR.flat != null &&
-      this.clientRecords.surname != null && this.clientRecords.name != null && this.clientRecords.charm.id != null &&
-      this.clientRecords.gender != null && this.clientRecords.dateOfBirth != null && this.phoneNumbersFilled()
+    return this.clientRecordsToSave.addressF.street != null && this.clientRecordsToSave.addressF.house != null && this.clientRecordsToSave.addressF.flat != null &&
+      this.clientRecordsToSave.addressR.street != null && this.clientRecordsToSave.addressR.house != null && this.clientRecordsToSave.addressR.flat != null &&
+      this.clientRecordsToSave.surname != null && this.clientRecordsToSave.name != null && this.clientRecordsToSave.charm.id != null &&
+      this.clientRecordsToSave.gender != null && this.clientRecordsToSave.dateOfBirth != null && this.phoneNumbersFilled()
   }
 
   private phoneNumbersFilled() {
-    for (let phone of this.clientRecords.phoneNumbers) {
+    for (let phone of this.clientRecordsToSave.phoneNumbers) {
       if (phone.phoneType == null || phone.number == null) return false;
     }
     return true;
@@ -253,7 +253,7 @@ export class ClientsListComponent {
   }
 
   onAddBtnClicked() {
-    this.clientRecords = new ClientDetails();
+    this.clientRecordsToSave = new ClientDetails();
     this.formsTitle = "Добавление нового пользователя";
     this.formsBtn = "Добавить";
     $('#id01').show();
