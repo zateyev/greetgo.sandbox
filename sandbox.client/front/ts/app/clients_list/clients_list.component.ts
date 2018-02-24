@@ -177,7 +177,6 @@ export class ClientsListComponent {
       alert("Заполните все обязательные поля");
       return;
     }
-    console.log(this.clientRecords);
     this.requiredNotFilled = false;
     this.clientRecords.addressF.type = AddressType.FACT;
     this.clientRecords.addressR.type = AddressType.REG;
@@ -320,7 +319,5 @@ export class ClientsListComponent {
     this.getTotalSize();
     this.loadCharms();
     this.loadClientsList();
-    console.log(this.genderTypes);
-    console.log(this.phoneTypes);
   }
 }
