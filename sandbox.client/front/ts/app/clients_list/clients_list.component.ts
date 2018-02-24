@@ -11,6 +11,7 @@ import {ClientRecords} from "../../model/ClientRecords";
 import {Gender} from "../../model/Gender";
 import {saveAs as importedSaveAs} from "file-saver";
 import {Charm} from "../../model/Charm";
+import {AddressType} from "../../model/AddressType";
 
 @Component({
   selector: 'clients-list-component',
@@ -29,6 +30,7 @@ export class ClientsListComponent {
   totalSize: number = 0;
   pager: any = {};
   isInitialized: boolean = false;
+  requiredNotFilled: boolean = false;
   isDescending: boolean = false;
   filterBy = 'surname';
   filterInputs: string | null;
@@ -170,6 +172,15 @@ export class ClientsListComponent {
   }
 
   addOrUpdateClient() {
+    if (!this.allFieldsFilled()) {
+      this.requiredNotFilled = true;
+      alert("Заполните все обязательные поля");
+      return;
+    }
+    console.log(this.clientRecords);
+    this.requiredNotFilled = false;
+    this.clientRecords.addressF.type = AddressType.FACT;
+    this.clientRecords.addressR.type = AddressType.REG;
     $('#id01').hide();
     this.httpService.post("/clientsList/addOrUpdateClient", {
       clientRecords: JSON.stringify(this.clientRecords)
@@ -185,6 +196,25 @@ export class ClientsListComponent {
       console.log("addClient");
       console.log(error);
     });
+  }
+
+  private allFieldsFilled() {
+    return this.clientRecords.addressF.street != null && this.clientRecords.addressF.house != null && this.clientRecords.addressF.flat != null &&
+      this.clientRecords.addressR.street != null && this.clientRecords.addressR.house != null && this.clientRecords.addressR.flat != null &&
+      this.clientRecords.surname != null && this.clientRecords.name != null && this.clientRecords.charm.id != null &&
+      this.clientRecords.gender != null && this.clientRecords.dateOfBirth != null && this.phoneNumbersFilled()
+  }
+
+  private phoneNumbersFilled() {
+    for (let phone of this.clientRecords.phoneNumbers) {
+      if (phone.phoneType == null || phone.number == null) return false;
+    }
+    return true;
+  }
+
+  closeModalForm() {
+    $('#id01').hide();
+    this.requiredNotFilled = false;
   }
 
   removeClient() {
