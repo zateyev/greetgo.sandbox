@@ -2,6 +2,7 @@ package kz.greetgo.sandbox.stand.stand_register_impls;
 
 import kz.greetgo.depinject.core.Bean;
 import kz.greetgo.depinject.core.BeanGetter;
+import kz.greetgo.sandbox.controller.model.Charm;
 import kz.greetgo.sandbox.controller.model.ClientDetails;
 import kz.greetgo.sandbox.controller.model.ClientInfo;
 import kz.greetgo.sandbox.controller.model.ClientRecords;
@@ -82,6 +83,7 @@ public class ClientRegisterStand implements ClientRegister {
         if (clientRecords.id != null) {
             ClientDot clientDot = clientD.get().clientStorage.get(clientRecords.id);
             if (clientDot != null) {
+                clientRecords.charm = clientD.get().charmStorage.get(clientRecords.charm.id);
                 clientDot.saveRecords(clientRecords);
                 return clientDot.toClientInfo();
             }
@@ -91,6 +93,7 @@ public class ClientRegisterStand implements ClientRegister {
         if (clientRecords.surname == null) return null;
 
         clientRecords.id = "p" + (clientD.get().clientStorage.size() + 1);
+        clientRecords.charm = clientD.get().charmStorage.get(clientRecords.charm.id);
         ClientDot clientDot = new ClientDot(clientRecords);
         clientD.get().clientStorage.put(clientDot.getId(), clientDot);
 
