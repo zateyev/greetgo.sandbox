@@ -2,7 +2,7 @@ package kz.greetgo.sandbox.controller.register;
 
 import kz.greetgo.sandbox.controller.model.ClientDetails;
 import kz.greetgo.sandbox.controller.model.ClientInfo;
-import kz.greetgo.sandbox.controller.model.ClientRecords;
+import kz.greetgo.sandbox.controller.model.ClientRecordsToSave;
 
 import java.util.List;
 
@@ -34,10 +34,10 @@ public interface ClientRegister {
     /**
      * Добавляет нового пользователя
      *
-     * @param clientRecords  записи нового пользователя
+     * @param clientRecordsToSave  записи нового пользователя
      * @return возвращает добавленный клиент с присвоенным id
      */
-    ClientInfo addOrUpdateClient(ClientRecords clientRecords);
+    ClientInfo addOrUpdateClient(ClientRecordsToSave clientRecordsToSave);
 
     /**
      *  Удаляет клиента

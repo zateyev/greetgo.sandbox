@@ -9,11 +9,11 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.util.List;
 
-public class BigReportJdbc extends LoadClientList {
+public class LoadClientListToReport extends LoadClientList {
 
   private ReportView reportView;
 
-  public BigReportJdbc(String filterBy, String filterInput, String orderBy, boolean isDesc, int page, int pageSize, ReportView view) {
+  public LoadClientListToReport(String filterBy, String filterInput, String orderBy, boolean isDesc, int page, int pageSize, ReportView view) {
     super(filterBy, filterInput, orderBy, isDesc, page, pageSize);
     this.reportView = view;
   }

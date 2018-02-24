@@ -21,13 +21,14 @@ public interface ClientDao {
   ClientDetails selectClientDetailsById(@Param("id") String clientId);
 
   @Select("SELECT client.id, client.surname, client.name, client.patronymic, " +
-    "client.charm FROM client WHERE id = #{id}")
+    "client.charm, date_part('year', age(Client.birth_date)) as age FROM client WHERE id = #{id}")
   @Results({
     @Result(property = "id", column = "id"),
     @Result(property = "surname", column = "surname"),
     @Result(property = "name", column = "name"),
     @Result(property = "patronymic", column = "patronymic"),
-    @Result(property = "charm.id", column = "charm")
+    @Result(property = "charm.id", column = "charm"),
+    @Result(property = "age", column = "age")
   })
   ClientInfo selectClientInfoById(@Param("id") String clientId);
 

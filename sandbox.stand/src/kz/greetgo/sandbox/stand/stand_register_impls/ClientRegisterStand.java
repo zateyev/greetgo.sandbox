@@ -4,7 +4,7 @@ import kz.greetgo.depinject.core.Bean;
 import kz.greetgo.depinject.core.BeanGetter;
 import kz.greetgo.sandbox.controller.model.ClientDetails;
 import kz.greetgo.sandbox.controller.model.ClientInfo;
-import kz.greetgo.sandbox.controller.model.ClientRecords;
+import kz.greetgo.sandbox.controller.model.ClientRecordsToSave;
 import kz.greetgo.sandbox.controller.register.ClientRegister;
 import kz.greetgo.sandbox.db.stand.beans.ClientStandDb;
 import kz.greetgo.sandbox.db.stand.model.ClientDot;
@@ -60,7 +60,7 @@ public class ClientRegisterStand implements ClientRegister {
                     clientsList.add(clientDot.toClientInfo());
                 else if ("name".equals(filterBy) && clientDot.getName().toLowerCase().contains(filterInputs.toLowerCase()))
                     clientsList.add(clientDot.toClientInfo());
-                else if ("patronymic".equals(filterBy) && clientDot.getPatronymic().toLowerCase().contains(filterInputs.toLowerCase()))
+                else if ("patronymic".equals(filterBy) && clientDot.getPatronymic() != null && clientDot.getPatronymic().toLowerCase().contains(filterInputs.toLowerCase()))
                     clientsList.add(clientDot.toClientInfo());
             }
 
@@ -77,21 +77,23 @@ public class ClientRegisterStand implements ClientRegister {
     }
 
     @Override
-    public ClientInfo addOrUpdateClient(ClientRecords clientRecords) {
+    public ClientInfo addOrUpdateClient(ClientRecordsToSave clientRecordsToSave) {
 
-        if (clientRecords.id != null) {
-            ClientDot clientDot = clientD.get().clientStorage.get(clientRecords.id);
+        if (clientRecordsToSave.id != null) {
+            ClientDot clientDot = clientD.get().clientStorage.get(clientRecordsToSave.id);
             if (clientDot != null) {
-                clientDot.saveRecords(clientRecords);
+                clientRecordsToSave.charm = clientD.get().charmStorage.get(clientRecordsToSave.charm.id);
+                clientDot.saveRecords(clientRecordsToSave);
                 return clientDot.toClientInfo();
             }
             return null;
         }
 
-        if (clientRecords.surname == null) return null;
+        if (clientRecordsToSave.surname == null) return null;
 
-        clientRecords.id = "p" + (clientD.get().clientStorage.size() + 1);
-        ClientDot clientDot = new ClientDot(clientRecords);
+        clientRecordsToSave.id = "p" + (clientD.get().clientStorage.size() + 1);
+        clientRecordsToSave.charm = clientD.get().charmStorage.get(clientRecordsToSave.charm.id);
+        ClientDot clientDot = new ClientDot(clientRecordsToSave);
         clientD.get().clientStorage.put(clientDot.getId(), clientDot);
 
         return clientDot.toClientInfo();

@@ -12,6 +12,7 @@ import kz.greetgo.util.RND;
 import org.testng.annotations.Test;
 
 import java.sql.Date;
+import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.Period;
 import java.util.ArrayList;
@@ -566,25 +567,25 @@ public class ClientRegisterImplTest extends ParentTestNg {
 
     ClientDetails clientDetails = createRndClient();
     ClientInfo expectingClientInfo = toClientInfo(clientDetails);
-    ClientRecords clientRecords = toClientRecords(clientDetails);
+    ClientRecordsToSave clientRecordsToSave = toClientRecords(clientDetails);
 
-    charmTestDao.get().insertCharm(clientRecords.charm.id, clientRecords.charm.name,
-      clientRecords.charm.description, clientRecords.charm.energy);
+    charmTestDao.get().insertCharm(clientRecordsToSave.charm.id, clientRecordsToSave.charm.name,
+      clientRecordsToSave.charm.description, clientRecordsToSave.charm.energy);
 
     //
     //
-    ClientInfo result = clientRegister.get().addOrUpdateClient(clientRecords);
+    ClientInfo result = clientRegister.get().addOrUpdateClient(clientRecordsToSave);
     //
     //
 
     assertThat(result).isNotNull();
     assertThatAreEqual(result, expectingClientInfo);
 
-    ClientDetails actual = clientTestDao.get().getClientDetailsById(clientRecords.id);
+    ClientDetails actual = clientTestDao.get().getClientDetailsById(clientRecordsToSave.id);
     assertThat(actual).isNotNull();
-    actual.addressF = clientTestDao.get().getAddrByClientId(clientRecords.id, AddressType.FACT);
-    actual.addressR = clientTestDao.get().getAddrByClientId(clientRecords.id, AddressType.REG);
-    actual.phoneNumbers = clientTestDao.get().getPhonesByClientId(clientRecords.id);
+    actual.addressF = clientTestDao.get().getAddrByClientId(clientRecordsToSave.id, AddressType.FACT);
+    actual.addressR = clientTestDao.get().getAddrByClientId(clientRecordsToSave.id, AddressType.REG);
+    actual.phoneNumbers = clientTestDao.get().getPhonesByClientId(clientRecordsToSave.id);
     assertThatAreEqual(actual, clientDetails);
   }
 
@@ -606,25 +607,25 @@ public class ClientRegisterImplTest extends ParentTestNg {
     clientDetails.id = client.id;
 
     ClientInfo expectingClientInfo = toClientInfo(clientDetails);
-    ClientRecords clientRecords = toClientRecords(clientDetails);
+    ClientRecordsToSave clientRecordsToSave = toClientRecords(clientDetails);
 
-    charmTestDao.get().insertCharm(clientRecords.charm.id, clientRecords.charm.name,
-      clientRecords.charm.description, clientRecords.charm.energy);
+    charmTestDao.get().insertCharm(clientRecordsToSave.charm.id, clientRecordsToSave.charm.name,
+      clientRecordsToSave.charm.description, clientRecordsToSave.charm.energy);
 
     //
     //
-    ClientInfo result = clientRegister.get().addOrUpdateClient(clientRecords);
+    ClientInfo result = clientRegister.get().addOrUpdateClient(clientRecordsToSave);
     //
     //
 
     assertThat(result).isNotNull();
     assertThatAreEqual(result, expectingClientInfo);
 
-    ClientDetails actual = clientTestDao.get().getClientDetailsById(clientRecords.id);
+    ClientDetails actual = clientTestDao.get().getClientDetailsById(clientRecordsToSave.id);
     assertThat(actual).isNotNull();
-    actual.addressF = clientTestDao.get().getAddrByClientId(clientRecords.id, AddressType.FACT);
-    actual.addressR = clientTestDao.get().getAddrByClientId(clientRecords.id, AddressType.REG);
-    actual.phoneNumbers = clientTestDao.get().getPhonesByClientId(clientRecords.id);
+    actual.addressF = clientTestDao.get().getAddrByClientId(clientRecordsToSave.id, AddressType.FACT);
+    actual.addressR = clientTestDao.get().getAddrByClientId(clientRecordsToSave.id, AddressType.REG);
+    actual.phoneNumbers = clientTestDao.get().getPhonesByClientId(clientRecordsToSave.id);
     assertThatAreEqual(actual, clientDetails);
   }
 
@@ -725,7 +726,8 @@ public class ClientRegisterImplTest extends ParentTestNg {
     client.charm.description = RND.str(10);
     client.charm.energy = RND.plusDouble(100, 2);
     client.gender = RND.someEnum(Gender.values());
-    client.dateOfBirth = LocalDate.now().toString();
+    SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+    client.dateOfBirth = sdf.format(RND.dateDays(-20_000, 0));
     client.addressF = new Address();
     client.addressF.type = AddressType.FACT;
     client.addressF.street = RND.str(10);
@@ -773,22 +775,22 @@ public class ClientRegisterImplTest extends ParentTestNg {
     return clientInfo;
   }
 
-  private ClientRecords toClientRecords(ClientDetails clientDetails) {
-    ClientRecords clientRecords = new ClientRecords();
-    clientRecords.id = clientDetails.id;
-    clientRecords.surname = clientDetails.surname;
-    clientRecords.name = clientDetails.name;
-    clientRecords.patronymic = clientDetails.patronymic;
-    clientRecords.charm = clientDetails.charm;
-    clientRecords.gender = clientDetails.gender;
-    clientRecords.dateOfBirth = clientDetails.dateOfBirth;
-    clientRecords.addressF = clientDetails.addressF;
-    clientRecords.addressR = clientDetails.addressR;
-    clientRecords.phoneNumbers = clientDetails.phoneNumbers;
-    clientRecords.totalBalance = clientDetails.totalBalance;
-    clientRecords.minBalance = clientDetails.minBalance;
-    clientRecords.maxBalance = clientDetails.maxBalance;
-    return clientRecords;
+  private ClientRecordsToSave toClientRecords(ClientDetails clientDetails) {
+    ClientRecordsToSave clientRecordsToSave = new ClientRecordsToSave();
+    clientRecordsToSave.id = clientDetails.id;
+    clientRecordsToSave.surname = clientDetails.surname;
+    clientRecordsToSave.name = clientDetails.name;
+    clientRecordsToSave.patronymic = clientDetails.patronymic;
+    clientRecordsToSave.charm = clientDetails.charm;
+    clientRecordsToSave.gender = clientDetails.gender;
+    clientRecordsToSave.dateOfBirth = clientDetails.dateOfBirth;
+    clientRecordsToSave.addressF = clientDetails.addressF;
+    clientRecordsToSave.addressR = clientDetails.addressR;
+    clientRecordsToSave.phoneNumbers = clientDetails.phoneNumbers;
+    clientRecordsToSave.totalBalance = clientDetails.totalBalance;
+    clientRecordsToSave.minBalance = clientDetails.minBalance;
+    clientRecordsToSave.maxBalance = clientDetails.maxBalance;
+    return clientRecordsToSave;
   }
 
   private void assertThatAreEqual(ClientDetails cd1, ClientDetails cd2) {

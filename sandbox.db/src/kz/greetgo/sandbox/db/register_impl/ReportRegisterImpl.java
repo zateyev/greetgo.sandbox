@@ -5,7 +5,7 @@ import kz.greetgo.depinject.core.Bean;
 import kz.greetgo.depinject.core.BeanGetter;
 import kz.greetgo.sandbox.controller.register.ReportRegister;
 import kz.greetgo.sandbox.controller.report.ViewType;
-import kz.greetgo.sandbox.db.jdbc.BigReportJdbc;
+import kz.greetgo.sandbox.db.jdbc.LoadClientListToReport;
 import kz.greetgo.sandbox.db.report.client_list.ReportFootData;
 import kz.greetgo.sandbox.db.report.client_list.ReportHeadData;
 import kz.greetgo.sandbox.db.report.client_list.big_data.ReportView;
@@ -31,7 +31,7 @@ public class ReportRegisterImpl implements ReportRegister {
 
     view.start(head);
 
-    jdbcSandbox.get().execute(new BigReportJdbc(filterBy, filterInput, orderBy, isDesc, 0, 0, view));
+    jdbcSandbox.get().execute(new LoadClientListToReport(filterBy, filterInput, orderBy, isDesc, 0, 0, view));
 
     ReportFootData foot = new ReportFootData();
     foot.generatedAt = new Date();

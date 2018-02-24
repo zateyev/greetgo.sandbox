@@ -7,10 +7,11 @@ import {ClientDetails} from "../../model/ClientDetails";
 import {PhoneNumber} from "../../model/PhoneNumber";
 import {PhoneType} from "../../model/PhoneType";
 import {ClientInfo} from "../../model/ClientInfo";
-import {ClientRecords} from "../../model/ClientRecords";
+import {ClientRecordsToSave} from "../../model/ClientRecordsToSave";
 import {Gender} from "../../model/Gender";
-import { saveAs as importedSaveAs } from "file-saver";
+import {saveAs as importedSaveAs} from "file-saver";
 import {Charm} from "../../model/Charm";
+import {AddressType} from "../../model/AddressType";
 
 @Component({
   selector: 'clients-list-component',
@@ -28,51 +29,57 @@ export class ClientsListComponent {
   selClientId: number;
   totalSize: number = 0;
   pager: any = {};
-  isInitialized: boolean = false;
+  requiredNotFilled: boolean = false;
   isDescending: boolean = false;
-  filterBy: string | null;
+  filterBy = 'surname';
   filterInputs: string | null;
   orderBy: string | null;
   loadClientInfoError: string | null;
-  clientRecords: ClientRecords = new ClientRecords();
+  clientRecordsToSave: ClientRecordsToSave = new ClientRecordsToSave();
   charms: Charm[];
 
   pageSizeOptions = [10, 25, 50];
-  columnsId = ['fio', 'charm', 'age', 'totalBalance', 'minBalance', 'maxBalance'];
-  filterColumns = ['Фамилия', 'Имя', 'Отчество'];
-  filterColIds = ['surname', 'name', 'patronymic'];
   viewTypes = ['xlsx', 'pdf'];
 
-  columns = {
-    fio: 'ФИО', charm: 'Характер', age: 'Возраст', totalBalance: 'Общий остаток счетов',
-    minBalance: 'Минимальный остаток', maxBalance: 'Максимальный остаток'
-  };
+  columns = [
+    {key: 'fio', value: 'ФИО'},
+    {key: 'charm', value: 'Характер'},
+    {key: 'age', value: 'Возраст'},
+    {key: 'totalBalance', value: 'Общий остаток счетов'},
+    {key: 'minBalance', value: 'Минимальный остаток'},
+    {key: 'maxBalance', value: 'Максимальный остаток'}
+  ];
+
+  filterColumns = [
+    {key: 'surname', value: 'Фамилия'},
+    {key: 'name', value: 'Имя'},
+    {key: 'patronymic', value: 'Отчество'}
+  ];
+
+  genderTypes = [
+    {type: Gender.MALE, name: 'муж'},
+    {type: Gender.FEMALE, name: 'жен'}
+  ];
+
+  phoneTypes = [
+    {type: PhoneType.HOME, name: 'Домашний'},
+    {type: PhoneType.WORK, name: 'Рабочий'},
+    {type: PhoneType.MOBILE, name: 'Мобильный'}
+  ];
 
   formsTitle = "";
+
   formsBtn = "";
+
   viewType = "";
-
-  phoneType = PhoneType;
-
-  phoneTypeKeys(): Array<string> {
-    let keys = Object.keys(this.phoneType);
-    return keys.slice(keys.length / 5);
-  }
-
-  gender = Gender;
-
-  genderTypes(): Array<string> {
-    let keys = Object.keys(this.gender);
-    return keys.slice(keys.length / 5);
-  }
 
   constructor(private httpService: HttpService, private pagerService: PagerService) {
   }
 
   sort(colId: number) {
     if (colId > 1) {
-      if (this.orderBy != this.columnsId[colId]) {
-        this.orderBy = this.columnsId[colId];
+      if (this.orderBy != this.columns[colId].key) {
+        this.orderBy = this.columns[colId].key;
         this.isDescending = false;
       }
       else {
@@ -90,7 +97,7 @@ export class ClientsListComponent {
   }
 
   addPhoneNumber() {
-    this.clientRecords.phoneNumbers.push(new PhoneNumber);
+    this.clientRecordsToSave.phoneNumbers.push(new PhoneNumber);
   }
 
   setPageSize(size: number) {
@@ -105,8 +112,8 @@ export class ClientsListComponent {
   }
 
   removePhoneNumber(index: number) {
-    if (this.clientRecords.phoneNumbers.length > 1) {
-      this.clientRecords.phoneNumbers.splice(index, 1);
+    if (this.clientRecordsToSave.phoneNumbers.length > 1) {
+      this.clientRecordsToSave.phoneNumbers.splice(index, 1);
     }
   }
 
@@ -132,10 +139,6 @@ export class ClientsListComponent {
       pageSize: this.pageSize
     }).toPromise().then(result => {
       this.clientsList = this.parseClientsList(result.json());
-      if (!this.isInitialized) {
-        this.isInitialized = true;
-        this.setPage(1);
-      }
     }, error => {
       console.log("ClientsList");
       console.log(error);
@@ -148,37 +151,60 @@ export class ClientsListComponent {
     this.httpService.post("/clientsList/clientDetails", {
       clientsId: this.clientsList[this.selClientId].id
     }).toPromise().then(result => {
-      this.clientRecords = ClientRecords.copy(result.json());
+      this.clientRecordsToSave = ClientRecordsToSave.copy(result.json());
     }, error => {
-      console.log("clientRecords");
+      console.log("clientRecordsToSave");
       console.log(error);
       this.loadClientInfoError = error;
     });
   }
 
   filterList() {
+    this.currentPage = 0;
     this.getTotalSize();
-    this.isInitialized = false;
-
-    this.setPage(1);
   }
 
   addOrUpdateClient() {
+    if (!this.allFieldsFilled()) {
+      this.requiredNotFilled = true;
+      alert("Заполните все обязательные поля");
+      return;
+    }
+    this.requiredNotFilled = false;
+    this.clientRecordsToSave.addressF.type = AddressType.FACT;
+    this.clientRecordsToSave.addressR.type = AddressType.REG;
     $('#id01').hide();
     this.httpService.post("/clientsList/addOrUpdateClient", {
-      clientRecords: JSON.stringify(this.clientRecords)
+      clientRecordsToSave: JSON.stringify(this.clientRecordsToSave)
     }).toPromise().then(result => {
       if (result.json()) {
         let clientInfo = ClientInfo.copy(result.json());
         this.clientsList.push(clientInfo);
-        // this.getTotalSize();
-        if (!this.editMode) this.totalSize++;
-        this.setPage(this.currentPage + 1);
+        this.getTotalSize();
       }
     }, error => {
       console.log("addClient");
       console.log(error);
     });
+  }
+
+  private allFieldsFilled() {
+    return this.clientRecordsToSave.addressF.street != null && this.clientRecordsToSave.addressF.house != null && this.clientRecordsToSave.addressF.flat != null &&
+      this.clientRecordsToSave.addressR.street != null && this.clientRecordsToSave.addressR.house != null && this.clientRecordsToSave.addressR.flat != null &&
+      this.clientRecordsToSave.surname != null && this.clientRecordsToSave.name != null && this.clientRecordsToSave.charm.id != null &&
+      this.clientRecordsToSave.gender != null && this.clientRecordsToSave.dateOfBirth != null && this.phoneNumbersFilled()
+  }
+
+  private phoneNumbersFilled() {
+    for (let phone of this.clientRecordsToSave.phoneNumbers) {
+      if (phone.phoneType == null || phone.number == null) return false;
+    }
+    return true;
+  }
+
+  closeModalForm() {
+    $('#id01').hide();
+    this.requiredNotFilled = false;
   }
 
   removeClient() {
@@ -227,7 +253,7 @@ export class ClientsListComponent {
   }
 
   onAddBtnClicked() {
-    this.clientRecords = new ClientDetails();
+    this.clientRecordsToSave = new ClientDetails();
     this.formsTitle = "Добавление нового пользователя";
     this.formsBtn = "Добавить";
     $('#id01').show();
@@ -241,6 +267,7 @@ export class ClientsListComponent {
       filterInputs: this.filterInputs
     }).toPromise().then(result => {
       this.totalSize = result.json();
+      this.setPage(this.currentPage + 1);
     }, error => {
       console.log("totalSize");
       console.log(error);
@@ -249,7 +276,6 @@ export class ClientsListComponent {
 
   loadCharms() {
     this.httpService.get("/charm/getCharms").toPromise().then(result => {
-      // this.charms = result.json();
       this.charms = this.parseCharms(result.json());
     }, error => {
       console.log("charms");
@@ -281,8 +307,7 @@ export class ClientsListComponent {
   }
 
   public ngOnInit() {
-    this.getTotalSize();
     this.loadCharms();
-    this.loadClientsList();
+    this.getTotalSize();
   }
 }

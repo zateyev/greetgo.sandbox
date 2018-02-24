@@ -35,8 +35,8 @@ public class ClientDot {
 
   }
 
-  public ClientDot(ClientRecords clientRecords) {
-    saveRecords(clientRecords);
+  public ClientDot(ClientRecordsToSave clientRecordsToSave) {
+    saveRecords(clientRecordsToSave);
   }
 
   public String getId() {
@@ -176,26 +176,26 @@ public class ClientDot {
     return ret;
   }
 
-  public void saveRecords(ClientRecords clientRecords) {
-    this.id = clientRecords.id;
-    this.surname = clientRecords.surname != null ? clientRecords.surname : "";
-    this.name = clientRecords.name != null ? clientRecords.name : "";
-    this.patronymic = clientRecords.patronymic != null ? clientRecords.patronymic : "";
-    if (clientRecords.charm != null) {
-      this.charm = clientRecords.charm;
+  public void saveRecords(ClientRecordsToSave clientRecordsToSave) {
+    this.id = clientRecordsToSave.id;
+    this.surname = clientRecordsToSave.surname != null ? clientRecordsToSave.surname : "";
+    this.name = clientRecordsToSave.name != null ? clientRecordsToSave.name : "";
+    this.patronymic = clientRecordsToSave.patronymic != null ? clientRecordsToSave.patronymic : "";
+    if (clientRecordsToSave.charm != null) {
+      this.charm = clientRecordsToSave.charm;
     } else {
       this.charm = new Charm();
     }
-    this.gender = clientRecords.gender;
-    System.out.println(clientRecords.dateOfBirth);
-    if (clientRecords.dateOfBirth != null && !clientRecords.dateOfBirth.isEmpty()) {
-      this.dateOfBirth = LocalDate.parse(clientRecords.dateOfBirth);
+    this.gender = clientRecordsToSave.gender;
+    System.out.println(clientRecordsToSave.dateOfBirth);
+    if (clientRecordsToSave.dateOfBirth != null && !clientRecordsToSave.dateOfBirth.isEmpty()) {
+      this.dateOfBirth = LocalDate.parse(clientRecordsToSave.dateOfBirth);
     }
-    this.addressF = clientRecords.addressF;
-    this.addressR = clientRecords.addressR;
-    this.phoneNumbers = clientRecords.phoneNumbers;
-    this.totalBalance = clientRecords.totalBalance;
-    this.minBalance = clientRecords.minBalance;
-    this.maxBalance = clientRecords.maxBalance;
+    this.addressF = clientRecordsToSave.addressF;
+    this.addressR = clientRecordsToSave.addressR;
+    this.phoneNumbers = clientRecordsToSave.phoneNumbers;
+    this.totalBalance = clientRecordsToSave.totalBalance;
+    this.minBalance = clientRecordsToSave.minBalance;
+    this.maxBalance = clientRecordsToSave.maxBalance;
   }
 }
