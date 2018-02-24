@@ -29,7 +29,6 @@ export class ClientsListComponent {
   selClientId: number;
   totalSize: number = 0;
   pager: any = {};
-  isInitialized: boolean = false;
   requiredNotFilled: boolean = false;
   isDescending: boolean = false;
   filterBy = 'surname';
@@ -140,10 +139,8 @@ export class ClientsListComponent {
       pageSize: this.pageSize
     }).toPromise().then(result => {
       this.clientsList = this.parseClientsList(result.json());
-      if (!this.isInitialized) {
-        this.isInitialized = true;
-        this.setPage(1);
-      }
+      console.log(result.json());
+      console.log(this.clientsList);
     }, error => {
       console.log("ClientsList");
       console.log(error);
@@ -165,10 +162,8 @@ export class ClientsListComponent {
   }
 
   filterList() {
+    this.currentPage = 0;
     this.getTotalSize();
-    this.isInitialized = false;
-
-    this.setPage(1);
   }
 
   addOrUpdateClient() {
@@ -187,9 +182,7 @@ export class ClientsListComponent {
       if (result.json()) {
         let clientInfo = ClientInfo.copy(result.json());
         this.clientsList.push(clientInfo);
-        // this.getTotalSize();
-        if (!this.editMode) this.totalSize++;
-        this.setPage(this.currentPage + 1);
+        this.getTotalSize();
       }
     }, error => {
       console.log("addClient");
@@ -276,6 +269,7 @@ export class ClientsListComponent {
       filterInputs: this.filterInputs
     }).toPromise().then(result => {
       this.totalSize = result.json();
+      this.setPage(this.currentPage + 1);
     }, error => {
       console.log("totalSize");
       console.log(error);
@@ -284,7 +278,6 @@ export class ClientsListComponent {
 
   loadCharms() {
     this.httpService.get("/charm/getCharms").toPromise().then(result => {
-      // this.charms = result.json();
       this.charms = this.parseCharms(result.json());
     }, error => {
       console.log("charms");
@@ -316,8 +309,7 @@ export class ClientsListComponent {
   }
 
   public ngOnInit() {
-    this.getTotalSize();
     this.loadCharms();
-    this.loadClientsList();
+    this.getTotalSize();
   }
 }
