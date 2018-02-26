@@ -24,6 +24,7 @@ public class ReportController implements Controller {
 
   @ToJson
   @Mapping("/{viewType}")
+  //TODO передавать только один объект (такой же как и в ClientsListController.clientsList() )
   public void downloadReport(@Par("filterBy") String filterBy,
                              @Par("filterInputs") String filterInputs,
                              @Par("orderBy") String orderBy,
@@ -34,6 +35,7 @@ public class ReportController implements Controller {
     tunnel.setResponseHeader("Content-Disposition", "attachment; filename = report." + viewType);
     OutputStream out = tunnel.getResponseOutputStream();
 
+    //TODO убрать эти условия в скобках
     reportRegister.get().genReport(filterBy != null ? filterBy : "", filterInputs != null ? filterInputs : "", orderBy != null ? orderBy : "", isDesc, ViewType.valueOf(viewType.toUpperCase()), out);
 
     tunnel.flushBuffer();

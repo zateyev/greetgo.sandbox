@@ -19,6 +19,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static org.fest.assertions.api.Assertions.assertThat;
 
@@ -148,23 +149,22 @@ public class ClientRegisterImplTest extends ParentTestNg {
     List<ClientInfo> expectingClientList = new ArrayList<>();
     clients.forEach(clientDetails -> expectingClientList.add(toClientInfo(clientDetails)));
 
-//    expectingClientList.sort(Comparator.comparingInt(o -> o.age));
-    Collections.sort(expectingClientList, new Comparator() {
 
-      public int compare(Object o1, Object o2) {
+    //TODO и не забываем про лямбды
+    Collections.sort(expectingClientList, (Comparator) (o1, o2) -> {
 
-        Integer tb1 = ((ClientInfo) o1).age;
-        Integer tb2 = ((ClientInfo) o2).age;
-        int sComp = tb1.compareTo(tb2);
+      Integer tb1 = ((ClientInfo) o1).age;
+      Integer tb2 = ((ClientInfo) o2).age;
+      int sComp = tb1.compareTo(tb2);
 
-        if (sComp != 0) {
-          return sComp;
-        } else {
-          String sn1 = ((ClientInfo) o1).surname.toLowerCase();
-          String sn2 = ((ClientInfo) o2).surname.toLowerCase();
-          return sn1.compareTo(sn2);
-        }
-      }});
+      if (sComp != 0) {
+        return sComp;
+      } else {
+        String sn1 = ((ClientInfo) o1).surname.toLowerCase();
+        String sn2 = ((ClientInfo) o2).surname.toLowerCase();
+        return sn1.compareTo(sn2);
+      }
+    });
 
     PageUtils.cutPage(expectingClientList, page * pageSize, pageSize);
 
@@ -205,10 +205,18 @@ public class ClientRegisterImplTest extends ParentTestNg {
 //    int pageSize = 25;
 //    int page = 0;
 
+    //TODO здесь можно использовать стримы
     List<ClientInfo> expectingClientList = new ArrayList<>();
     clients.forEach(clientDetails -> expectingClientList.add(toClientInfo(clientDetails)));
 
+    //TODO ...вот так:
+    List<ClientInfo> expectingClientList1 = clients.stream()
+      .map(this::toClientInfo)
+      .collect(Collectors.toList());
+
 //    expectingClientList.sort(Comparator.comparingDouble(o -> o.totalBalance));
+
+    //TODO и не забываем про лямбды
     Collections.sort(expectingClientList, new Comparator() {
 
       public int compare(Object o1, Object o2) {
@@ -222,9 +230,10 @@ public class ClientRegisterImplTest extends ParentTestNg {
         } else {
           String sn1 = ((ClientInfo) o1).surname.toLowerCase();
           String sn2 = ((ClientInfo) o2).surname.toLowerCase();
-          return sn1.compareTo(sn2);
+          return sn1.compareTo(sn2);//TODO а если sn1 == null ?
         }
-      }});
+      }
+    });
 
     PageUtils.cutPage(expectingClientList, page * pageSize, pageSize);
 
@@ -271,7 +280,8 @@ public class ClientRegisterImplTest extends ParentTestNg {
           String sn2 = ((ClientInfo) o2).surname.toLowerCase();
           return sn1.compareTo(sn2);
         }
-      }});
+      }
+    });
 
     PageUtils.cutPage(expectingClientList, page * pageSize, pageSize);
 
@@ -316,7 +326,8 @@ public class ClientRegisterImplTest extends ParentTestNg {
           String sn2 = ((ClientInfo) o2).surname.toLowerCase();
           return sn1.compareTo(sn2);
         }
-      }});
+      }
+    });
 
     PageUtils.cutPage(expectingClientList, page * pageSize, pageSize);
 
@@ -361,7 +372,8 @@ public class ClientRegisterImplTest extends ParentTestNg {
           String sn2 = ((ClientInfo) o2).surname.toLowerCase();
           return sn1.compareTo(sn2);
         }
-      }});
+      }
+    });
 
     PageUtils.cutPage(expectingClientList, page * pageSize, pageSize);
 

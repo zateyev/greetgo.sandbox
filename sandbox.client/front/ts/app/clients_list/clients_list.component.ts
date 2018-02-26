@@ -14,6 +14,8 @@ import {Charm} from "../../model/Charm";
 import {AddressType} from "../../model/AddressType";
 import {ClientFormComponent} from "../client_form/client_form.component";
 
+//TODO разделить список от формы на разные компоненты
+
 @Component({
   selector: 'clients-list-component',
   template: require('./clients-list-component.html'),
