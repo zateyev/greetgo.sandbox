@@ -12,6 +12,7 @@ import {Gender} from "../../model/Gender";
 import {saveAs as importedSaveAs} from "file-saver";
 import {Charm} from "../../model/Charm";
 import {AddressType} from "../../model/AddressType";
+import {ClientFormComponent} from "../client_form/client_form.component";
 
 @Component({
   selector: 'clients-list-component',
@@ -23,19 +24,16 @@ export class ClientsListComponent {
 
   phoneNumbers: PhoneNumber[];
   clientsList: Array<ClientInfo> | null = null;
-  editMode: boolean = false;
   currentPage: number = 0;
   pageSize: number = 10;
-  selClientId: number;
+  selectedClientId: number;
   totalSize: number = 0;
   pager: any = {};
-  requiredNotFilled: boolean = false;
   isDescending: boolean = false;
   filterBy = 'surname';
   filterInputs: string | null;
   orderBy: string | null;
   loadClientInfoError: string | null;
-  clientRecordsToSave: ClientRecordsToSave = new ClientRecordsToSave();
   charms: Charm[];
 
   pageSizeOptions = [10, 25, 50];
@@ -67,13 +65,9 @@ export class ClientsListComponent {
     {type: PhoneType.MOBILE, name: 'Мобильный'}
   ];
 
-  formsTitle = "";
-
-  formsBtn = "";
-
   viewType = "";
 
-  constructor(private httpService: HttpService, private pagerService: PagerService) {
+  constructor(private httpService: HttpService, private pagerService: PagerService, private clientForm: ClientFormComponent) {
   }
 
   sort(colId: number) {
@@ -96,25 +90,15 @@ export class ClientsListComponent {
     }
   }
 
-  addPhoneNumber() {
-    this.clientRecordsToSave.phoneNumbers.push(new PhoneNumber);
-  }
-
   setPageSize(size: number) {
     this.pageSize = size;
     this.setPage(1);
   }
 
   selectClient(id: number) {
-    this.selClientId = id;
+    this.selectedClientId = id;
     $('#edit-button').prop("disabled", false);
     $('#btn-remove').prop("disabled", false);
-  }
-
-  removePhoneNumber(index: number) {
-    if (this.clientRecordsToSave.phoneNumbers.length > 1) {
-      this.clientRecordsToSave.phoneNumbers.splice(index, 1);
-    }
   }
 
   setPage(page: number) {
@@ -147,73 +131,18 @@ export class ClientsListComponent {
     });
   }
 
-  loadClientDetails() {
-    this.httpService.post("/clientsList/clientDetails", {
-      clientsId: this.clientsList[this.selClientId].id
-    }).toPromise().then(result => {
-      this.clientRecordsToSave = ClientRecordsToSave.copy(result.json());
-    }, error => {
-      console.log("clientRecordsToSave");
-      console.log(error);
-      this.loadClientInfoError = error;
-    });
-  }
-
   filterList() {
     this.currentPage = 0;
     this.getTotalSize();
   }
 
-  addOrUpdateClient() {
-    if (!this.allFieldsFilled()) {
-      this.requiredNotFilled = true;
-      alert("Заполните все обязательные поля");
-      return;
-    }
-    this.requiredNotFilled = false;
-    this.clientRecordsToSave.addressF.type = AddressType.FACT;
-    this.clientRecordsToSave.addressR.type = AddressType.REG;
-    $('#id01').hide();
-    this.httpService.post("/clientsList/addOrUpdateClient", {
-      clientRecordsToSave: JSON.stringify(this.clientRecordsToSave)
-    }).toPromise().then(result => {
-      if (result.json()) {
-        let clientInfo = ClientInfo.copy(result.json());
-        this.clientsList.push(clientInfo);
-        this.getTotalSize();
-      }
-    }, error => {
-      console.log("addClient");
-      console.log(error);
-    });
-  }
-
-  private allFieldsFilled() {
-    return this.clientRecordsToSave.addressF.street != null && this.clientRecordsToSave.addressF.house != null && this.clientRecordsToSave.addressF.flat != null &&
-      this.clientRecordsToSave.addressR.street != null && this.clientRecordsToSave.addressR.house != null && this.clientRecordsToSave.addressR.flat != null &&
-      this.clientRecordsToSave.surname != null && this.clientRecordsToSave.name != null && this.clientRecordsToSave.charm.id != null &&
-      this.clientRecordsToSave.gender != null && this.clientRecordsToSave.dateOfBirth != null && this.phoneNumbersFilled()
-  }
-
-  private phoneNumbersFilled() {
-    for (let phone of this.clientRecordsToSave.phoneNumbers) {
-      if (phone.phoneType == null || phone.number == null) return false;
-    }
-    return true;
-  }
-
-  closeModalForm() {
-    $('#id01').hide();
-    this.requiredNotFilled = false;
-  }
-
   removeClient() {
     this.httpService.post("/clientsList/removeClient", {
-      clientsId: this.clientsList[this.selClientId].id,
+      clientsId: this.clientsList[this.selectedClientId].id,
       page: this.currentPage,
       pageSize: this.pageSize
     }).toPromise().then(result => {
-      this.clientsList.splice(this.selClientId, 1);
+      this.clientsList.splice(this.selectedClientId, 1);
       this.totalSize--;
       this.setPage(this.currentPage + 1);
     }, error => {
@@ -245,20 +174,11 @@ export class ClientsListComponent {
   }
 
   onEditBtnClicked() {
-    this.formsTitle = "Изменение данных клиента";
-    this.formsBtn = "Изменить";
-    $('#id01').show();
-    this.editMode = true;
-    this.loadClientDetails();
+    this.clientForm.openForUpdate();
   }
 
   onAddBtnClicked() {
-    this.clientRecordsToSave = new ClientDetails();
-    this.formsTitle = "Добавление нового пользователя";
-    this.formsBtn = "Добавить";
-    $('#id01').show();
-    this.editMode = false;
-    this.phoneNumbers = [new PhoneNumber()];
+    this.clientForm.openForAdding();
   }
 
   getTotalSize() {
