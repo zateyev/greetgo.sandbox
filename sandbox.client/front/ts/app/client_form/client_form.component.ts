@@ -1,26 +1,44 @@
-import {Component, EventEmitter, Output} from "@angular/core";
+import {Component, EventEmitter, Input, OnInit, Output} from "@angular/core";
 import {HttpService} from "../HttpService";
-import {ClientInfo} from "../../model/ClientInfo";
 import {AddressType} from "../../model/AddressType";
 import {PhoneNumber} from "../../model/PhoneNumber";
 import {ClientDetails} from "../../model/ClientDetails";
 import {ClientRecordsToSave} from "../../model/ClientRecordsToSave";
+import {PhoneType} from "../../model/PhoneType";
+import {Gender} from "../../model/Gender";
+import {Charm} from "../../model/Charm";
 
 @Component({
   selector: 'client-form-component',
   template: require('./client-form-component.html'),
   styles: [require('./client-form-component.css')],
 })
-export class ClientFormComponent {
-  @Output() exit = new EventEmitter<void>();
+export class ClientFormComponent implements OnInit {
+
+  @Output() getTotalSize = new EventEmitter<void>();
 
   requiredNotFilled: boolean = false;
   editMode: boolean = false;
   clientRecordsToSave: ClientRecordsToSave = new ClientRecordsToSave();
+  phoneNumbers: PhoneNumber[];
+  clientIdToUpdate: string | null;
   formsTitle = "";
-  formsBtn = "";
+  formsBtn = "Добавить";
+  charms: Charm[];
 
-  constructor(private httpService: HttpService) {}
+  genderTypes = [
+    {type: Gender.MALE, name: 'муж'},
+    {type: Gender.FEMALE, name: 'жен'}
+  ];
+
+  phoneTypes = [
+    {type: PhoneType.HOME, name: 'Домашний'},
+    {type: PhoneType.WORK, name: 'Рабочий'},
+    {type: PhoneType.MOBILE, name: 'Мобильный'}
+  ];
+
+  constructor(private httpService: HttpService) {
+  }
 
   addOrUpdateClient() {
 
@@ -38,9 +56,7 @@ export class ClientFormComponent {
       clientRecordsToSave: JSON.stringify(this.clientRecordsToSave)
     }).toPromise().then(result => {
       if (result.json()) {
-        // let clientInfo = ClientInfo.copy(result.json());
-        // this.clientsList.push(clientInfo);
-        this.getTotalSize();
+        this.getTotalSize.emit();
       }
     }, error => {
       console.log("addOrUpdateClient");
@@ -97,12 +113,36 @@ export class ClientFormComponent {
 
   loadClientDetails() {
     this.httpService.post("/clientsList/clientDetails", {
-      clientsId: this.clientsList[this.selClientId].id
+      clientsId: this.clientIdToUpdate
     }).toPromise().then(result => {
       this.clientRecordsToSave = ClientRecordsToSave.copy(result.json());
     }, error => {
       console.log("clientDetails");
       console.log(error);
     });
+  }
+
+  loadCharms() {
+    this.httpService.get("/charm/getCharms").toPromise().then(result => {
+      this.charms = this.parseCharms(result.json());
+    }, error => {
+      console.log("charms");
+      console.log(error);
+    });
+  }
+
+  private parseCharms(charmRec: any) {
+    let charms = [];
+
+    for (let charmItem of charmRec) {
+      let charm = Charm.copy(charmItem);
+      charms.push(charm);
+    }
+
+    return charms;
+  }
+
+  public ngOnInit() {
+    this.loadCharms();
   }
 }

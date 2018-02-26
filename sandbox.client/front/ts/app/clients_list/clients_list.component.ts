@@ -1,17 +1,11 @@
-import {Component, EventEmitter, Inject, Input, OnInit, Output} from "@angular/core";
+import {Component, EventEmitter, Inject, Input, OnInit, Output, ViewChild} from "@angular/core";
 import {HttpService} from "../HttpService";
 import {PagerService} from "../PagerService";
 import * as $ from 'jquery';
 import 'datatables.net'
-import {ClientDetails} from "../../model/ClientDetails";
 import {PhoneNumber} from "../../model/PhoneNumber";
-import {PhoneType} from "../../model/PhoneType";
 import {ClientInfo} from "../../model/ClientInfo";
-import {ClientRecordsToSave} from "../../model/ClientRecordsToSave";
-import {Gender} from "../../model/Gender";
 import {saveAs as importedSaveAs} from "file-saver";
-import {Charm} from "../../model/Charm";
-import {AddressType} from "../../model/AddressType";
 import {ClientFormComponent} from "../client_form/client_form.component";
 
 //TODO разделить список от формы на разные компоненты
@@ -21,10 +15,12 @@ import {ClientFormComponent} from "../client_form/client_form.component";
   template: require('./clients-list-component.html'),
   styles: [require('./clients-list-component.css')],
 })
-export class ClientsListComponent {
+export class ClientsListComponent implements OnInit {
   @Output() exit = new EventEmitter<void>();
 
-  phoneNumbers: PhoneNumber[];
+  @ViewChild(ClientFormComponent)
+    private clientForm: ClientFormComponent;
+
   clientsList: Array<ClientInfo> | null = null;
   currentPage: number = 0;
   pageSize: number = 10;
@@ -36,7 +32,6 @@ export class ClientsListComponent {
   filterInputs: string | null;
   orderBy: string | null;
   loadClientInfoError: string | null;
-  charms: Charm[];
 
   pageSizeOptions = [10, 25, 50];
   viewTypes = ['xlsx', 'pdf'];
@@ -56,20 +51,9 @@ export class ClientsListComponent {
     {key: 'patronymic', value: 'Отчество'}
   ];
 
-  genderTypes = [
-    {type: Gender.MALE, name: 'муж'},
-    {type: Gender.FEMALE, name: 'жен'}
-  ];
-
-  phoneTypes = [
-    {type: PhoneType.HOME, name: 'Домашний'},
-    {type: PhoneType.WORK, name: 'Рабочий'},
-    {type: PhoneType.MOBILE, name: 'Мобильный'}
-  ];
-
   viewType = "";
 
-  constructor(private httpService: HttpService, private pagerService: PagerService, private clientForm: ClientFormComponent) {
+  constructor(private httpService: HttpService, private pagerService: PagerService) {
   }
 
   sort(colId: number) {
@@ -99,6 +83,7 @@ export class ClientsListComponent {
 
   selectClient(id: number) {
     this.selectedClientId = id;
+    this.clientForm.clientIdToUpdate = this.clientsList[this.selectedClientId].id;
     $('#edit-button').prop("disabled", false);
     $('#btn-remove').prop("disabled", false);
   }
@@ -196,26 +181,6 @@ export class ClientsListComponent {
     });
   }
 
-  loadCharms() {
-    this.httpService.get("/charm/getCharms").toPromise().then(result => {
-      this.charms = this.parseCharms(result.json());
-    }, error => {
-      console.log("charms");
-      console.log(error);
-    });
-  }
-
-  private parseCharms(charmRec: any) {
-    let charms = [];
-
-    for (let charmItem of charmRec) {
-      let charm = Charm.copy(charmItem);
-      charms.push(charm);
-    }
-
-    return charms;
-  }
-
   loadReport(type: string) {
     this.viewType = type;
     this.httpService.downloadFile("/report/" + this.viewType, {
@@ -229,7 +194,7 @@ export class ClientsListComponent {
   }
 
   public ngOnInit() {
-    this.loadCharms();
+    // this.loadCharms();
     this.getTotalSize();
   }
 }
