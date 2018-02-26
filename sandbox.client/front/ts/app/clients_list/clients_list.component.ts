@@ -8,8 +8,6 @@ import {ClientInfo} from "../../model/ClientInfo";
 import {saveAs as importedSaveAs} from "file-saver";
 import {ClientFormComponent} from "../client_form/client_form.component";
 
-//TODO разделить список от формы на разные компоненты
-
 @Component({
   selector: 'clients-list-component',
   template: require('./clients-list-component.html'),
