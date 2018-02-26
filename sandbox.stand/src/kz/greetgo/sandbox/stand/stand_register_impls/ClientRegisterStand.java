@@ -5,6 +5,7 @@ import kz.greetgo.depinject.core.BeanGetter;
 import kz.greetgo.sandbox.controller.model.ClientDetails;
 import kz.greetgo.sandbox.controller.model.ClientInfo;
 import kz.greetgo.sandbox.controller.model.ClientRecordsToSave;
+import kz.greetgo.sandbox.controller.model.RequestParameters;
 import kz.greetgo.sandbox.controller.register.ClientRegister;
 import kz.greetgo.sandbox.db.stand.beans.ClientStandDb;
 import kz.greetgo.sandbox.db.stand.model.ClientDot;
@@ -20,17 +21,17 @@ public class ClientRegisterStand implements ClientRegister {
     public BeanGetter<ClientStandDb> clientD;
 
     @Override
-    public long getTotalSize(String filterBy, String filterInput) {
-        return filterClientsList(filterBy, filterInput).size();
+    public long getTotalSize(RequestParameters requestParams) {
+        return filterClientsList(requestParams.filterBy, requestParams.filterInput).size();
     }
 
     @Override
-    public List<ClientInfo> getClientsList(String filterBy, String filterInputs, String orderBy, boolean isDesc, int page, int pageSize) {
-        List<ClientInfo> clientInfos = filterClientsList(filterBy, filterInputs);
+    public List<ClientInfo> getClientsList(RequestParameters requestParams) {
+        List<ClientInfo> clientInfos = filterClientsList(requestParams.filterBy, requestParams.filterInput);
         if (clientInfos.isEmpty()) return clientInfos;
 
 
-        String sortBy = orderBy != null ? orderBy.trim() : "";
+        String sortBy = requestParams.orderBy != null ? requestParams.orderBy.trim() : "";
         if ("age".equals(sortBy))
             clientInfos.sort(Comparator.comparingInt(o -> o.age));
         else if ("totalBalance".equals(sortBy))
@@ -42,25 +43,25 @@ public class ClientRegisterStand implements ClientRegister {
         else
             clientInfos.sort(Comparator.comparing(o -> o.surname));
 
-        if (isDesc) Collections.reverse(clientInfos);
+        if (requestParams.isDesc) Collections.reverse(clientInfos);
 
 
-        PageUtils.cutPage(clientInfos, page*pageSize, pageSize);
+        PageUtils.cutPage(clientInfos, requestParams.page*requestParams.pageSize, requestParams.pageSize);
 
         return clientInfos;
     }
 
-    private List<ClientInfo> filterClientsList(String filterBy, String filterInputs) {
+    private List<ClientInfo> filterClientsList(String filterBy, String filterInput) {
         List<ClientInfo> clientsList = new ArrayList<>();
         List<ClientDot> clientDots = new ArrayList<>(clientD.get().clientStorage.values());
 
-        if (filterBy != null && !filterBy.isEmpty() && filterInputs != null && !filterInputs.isEmpty()) {
+        if (filterBy != null && !filterBy.isEmpty() && filterInput != null && !filterInput.isEmpty()) {
             for (ClientDot clientDot : clientDots) {
-                if ("surname".equals(filterBy) && clientDot.getSurname().toLowerCase().contains(filterInputs.toLowerCase()))
+                if ("surname".equals(filterBy) && clientDot.getSurname().toLowerCase().contains(filterInput.toLowerCase()))
                     clientsList.add(clientDot.toClientInfo());
-                else if ("name".equals(filterBy) && clientDot.getName().toLowerCase().contains(filterInputs.toLowerCase()))
+                else if ("name".equals(filterBy) && clientDot.getName().toLowerCase().contains(filterInput.toLowerCase()))
                     clientsList.add(clientDot.toClientInfo());
-                else if ("patronymic".equals(filterBy) && clientDot.getPatronymic() != null && clientDot.getPatronymic().toLowerCase().contains(filterInputs.toLowerCase()))
+                else if ("patronymic".equals(filterBy) && clientDot.getPatronymic() != null && clientDot.getPatronymic().toLowerCase().contains(filterInput.toLowerCase()))
                     clientsList.add(clientDot.toClientInfo());
             }
 

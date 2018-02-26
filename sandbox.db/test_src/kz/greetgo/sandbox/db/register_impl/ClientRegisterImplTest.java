@@ -40,9 +40,11 @@ public class ClientRegisterImplTest extends ParentTestNg {
 
     assertThat(clients).isNotNull();
 
+    RequestParameters requestParams = new RequestParameters();
+
     //
     //
-    long result = clientRegister.get().getTotalSize("", "");
+    long result = clientRegister.get().getTotalSize(requestParams);
     //
     //
 
@@ -60,9 +62,13 @@ public class ClientRegisterImplTest extends ParentTestNg {
       if (client.surname.toLowerCase().contains(filterInput)) count++;
     }
 
+    RequestParameters requestParams = new RequestParameters();
+    requestParams.filterBy = "surname";
+    requestParams.filterInput = filterInput;
+
     //
     //
-    long result = clientRegister.get().getTotalSize("surname", filterInput);
+    long result = clientRegister.get().getTotalSize(requestParams);
     //
     //
 
@@ -80,9 +86,13 @@ public class ClientRegisterImplTest extends ParentTestNg {
       if (client.name.toLowerCase().contains(filterInput)) count++;
     }
 
+    RequestParameters requestParams = new RequestParameters();
+    requestParams.filterBy = "name";
+    requestParams.filterInput = filterInput;
+
     //
     //
-    long result = clientRegister.get().getTotalSize("name", filterInput);
+    long result = clientRegister.get().getTotalSize(requestParams);
     //
     //
 
@@ -100,9 +110,13 @@ public class ClientRegisterImplTest extends ParentTestNg {
       if (client.patronymic.toLowerCase().contains(filterInput)) count++;
     }
 
+    RequestParameters requestParams = new RequestParameters();
+    requestParams.filterBy = "patronymic";
+    requestParams.filterInput = filterInput;
+
     //
     //
-    long result = clientRegister.get().getTotalSize("patronymic", filterInput);
+    long result = clientRegister.get().getTotalSize(requestParams);
     //
     //
 
@@ -124,10 +138,11 @@ public class ClientRegisterImplTest extends ParentTestNg {
 
     PageUtils.cutPage(expectingClientList, page * pageSize, pageSize);
 
+    RequestParameters requestParams = new RequestParameters(page, pageSize);
+
     //
     //
-    List<ClientInfo> result = clientRegister.get().getClientsList("", "", "",
-      false, page, pageSize);
+    List<ClientInfo> result = clientRegister.get().getClientsList(requestParams);
     //
     //
 
@@ -168,10 +183,12 @@ public class ClientRegisterImplTest extends ParentTestNg {
 
     PageUtils.cutPage(expectingClientList, page * pageSize, pageSize);
 
+    RequestParameters requestParams = new RequestParameters(page, pageSize);
+    requestParams.orderBy = "age";
+
     //
     //
-    List<ClientInfo> result = clientRegister.get().getClientsList("", "", "age",
-      false, page, pageSize);
+    List<ClientInfo> result = clientRegister.get().getClientsList(requestParams);
     //
     //
 
@@ -206,11 +223,11 @@ public class ClientRegisterImplTest extends ParentTestNg {
 //    int page = 0;
 
     //TODO здесь можно использовать стримы
-    List<ClientInfo> expectingClientList = new ArrayList<>();
-    clients.forEach(clientDetails -> expectingClientList.add(toClientInfo(clientDetails)));
+//    List<ClientInfo> expectingClientList = new ArrayList<>();
+//    clients.forEach(clientDetails -> expectingClientList.add(toClientInfo(clientDetails)));
 
     //TODO ...вот так:
-    List<ClientInfo> expectingClientList1 = clients.stream()
+    List<ClientInfo> expectingClientList = clients.stream()
       .map(this::toClientInfo)
       .collect(Collectors.toList());
 
@@ -237,10 +254,12 @@ public class ClientRegisterImplTest extends ParentTestNg {
 
     PageUtils.cutPage(expectingClientList, page * pageSize, pageSize);
 
+    RequestParameters requestParams = new RequestParameters(page, pageSize);
+    requestParams.orderBy = "totalBalance";
+
     //
     //
-    List<ClientInfo> result = clientRegister.get().getClientsList("", "", "totalBalance",
-      false, page, pageSize);
+    List<ClientInfo> result = clientRegister.get().getClientsList(requestParams);
     //
     //
 
@@ -285,10 +304,13 @@ public class ClientRegisterImplTest extends ParentTestNg {
 
     PageUtils.cutPage(expectingClientList, page * pageSize, pageSize);
 
+    RequestParameters requestParams = new RequestParameters(page, pageSize);
+    requestParams.orderBy = "totalBalance";
+    requestParams.isDesc = true;
+
     //
     //
-    List<ClientInfo> result = clientRegister.get().getClientsList("", "", "totalBalance",
-      true, page, pageSize);
+    List<ClientInfo> result = clientRegister.get().getClientsList(requestParams);
     //
     //
 
@@ -331,10 +353,12 @@ public class ClientRegisterImplTest extends ParentTestNg {
 
     PageUtils.cutPage(expectingClientList, page * pageSize, pageSize);
 
+    RequestParameters requestParams = new RequestParameters(page, pageSize);
+    requestParams.orderBy = "minBalance";
+
     //
     //
-    List<ClientInfo> result = clientRegister.get().getClientsList("", "", "minBalance",
-      false, page, pageSize);
+    List<ClientInfo> result = clientRegister.get().getClientsList(requestParams);
     //
     //
 
@@ -377,10 +401,12 @@ public class ClientRegisterImplTest extends ParentTestNg {
 
     PageUtils.cutPage(expectingClientList, page * pageSize, pageSize);
 
+    RequestParameters requestParams = new RequestParameters(page, pageSize);
+    requestParams.orderBy = "maxBalance";
+
     //
     //
-    List<ClientInfo> result = clientRegister.get().getClientsList("", "", "maxBalance",
-      false, page, pageSize);
+    List<ClientInfo> result = clientRegister.get().getClientsList(requestParams);
     //
     //
 
@@ -415,10 +441,13 @@ public class ClientRegisterImplTest extends ParentTestNg {
 
     PageUtils.cutPage(expectingClientList, page * pageSize, pageSize);
 
+    RequestParameters requestParams = new RequestParameters(page, pageSize);
+    requestParams.filterBy = "surname";
+    requestParams.filterInput = filterInput;
+
     //
     //
-    List<ClientInfo> result = clientRegister.get().getClientsList("surname", filterInput, "",
-      false, page, pageSize);
+    List<ClientInfo> result = clientRegister.get().getClientsList(requestParams);
     //
     //
 
@@ -453,10 +482,13 @@ public class ClientRegisterImplTest extends ParentTestNg {
 
     PageUtils.cutPage(expectingClientList, page * pageSize, pageSize);
 
+    RequestParameters requestParams = new RequestParameters(page, pageSize);
+    requestParams.filterBy = "name";
+    requestParams.filterInput = filterInput;
+
     //
     //
-    List<ClientInfo> result = clientRegister.get().getClientsList("name", filterInput, "",
-      false, page, pageSize);
+    List<ClientInfo> result = clientRegister.get().getClientsList(requestParams);
     //
     //
 
@@ -491,10 +523,13 @@ public class ClientRegisterImplTest extends ParentTestNg {
 
     PageUtils.cutPage(expectingClientList, page * pageSize, pageSize);
 
+    RequestParameters requestParams = new RequestParameters(page, pageSize);
+    requestParams.filterBy = "patronymic";
+    requestParams.filterInput = filterInput;
+
     //
     //
-    List<ClientInfo> result = clientRegister.get().getClientsList("patronymic", filterInput, "",
-      false, page, pageSize);
+    List<ClientInfo> result = clientRegister.get().getClientsList(requestParams);
     //
     //
 
@@ -529,10 +564,14 @@ public class ClientRegisterImplTest extends ParentTestNg {
 
     PageUtils.cutPage(expectingClientList, page * pageSize, pageSize);
 
+    RequestParameters requestParams = new RequestParameters(page, pageSize);
+    requestParams.filterBy = "patronymic";
+    requestParams.filterInput = filterInput;
+    requestParams.orderBy = "minBalance";
+
     //
     //
-    List<ClientInfo> result = clientRegister.get().getClientsList("patronymic", filterInput, "minBalance",
-      false, page, pageSize);
+    List<ClientInfo> result = clientRegister.get().getClientsList(requestParams);
     //
     //
 

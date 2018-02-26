@@ -7,6 +7,7 @@ import kz.greetgo.mvc.annotations.Par;
 import kz.greetgo.mvc.annotations.ParPath;
 import kz.greetgo.mvc.annotations.ToJson;
 import kz.greetgo.mvc.interfaces.RequestTunnel;
+import kz.greetgo.sandbox.controller.model.RequestParameters;
 import kz.greetgo.sandbox.controller.register.ReportRegister;
 import kz.greetgo.sandbox.controller.report.ViewType;
 import kz.greetgo.sandbox.controller.util.Controller;
@@ -25,10 +26,7 @@ public class ReportController implements Controller {
   @ToJson
   @Mapping("/{viewType}")
   //TODO передавать только один объект (такой же как и в ClientsListController.clientsList() )
-  public void downloadReport(@Par("filterBy") String filterBy,
-                             @Par("filterInputs") String filterInputs,
-                             @Par("orderBy") String orderBy,
-                             @Par("isDesc") boolean isDesc,
+  public void downloadReport(@Par("requestParams") RequestParameters requestParams,
                              @ParPath("viewType") String viewType,
                              RequestTunnel tunnel) throws Exception {
 
@@ -36,7 +34,7 @@ public class ReportController implements Controller {
     OutputStream out = tunnel.getResponseOutputStream();
 
     //TODO убрать эти условия в скобках
-    reportRegister.get().genReport(filterBy != null ? filterBy : "", filterInputs != null ? filterInputs : "", orderBy != null ? orderBy : "", isDesc, ViewType.valueOf(viewType.toUpperCase()), out);
+    reportRegister.get().genReport(requestParams, ViewType.valueOf(viewType.toUpperCase()), out);
 
     tunnel.flushBuffer();
   }
