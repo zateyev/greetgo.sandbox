@@ -13,6 +13,8 @@ import {saveAs as importedSaveAs} from "file-saver";
 import {Charm} from "../../model/Charm";
 import {AddressType} from "../../model/AddressType";
 
+//TODO разделить список от формы на разные компоненты
+
 @Component({
   selector: 'clients-list-component',
   template: require('./clients-list-component.html'),
