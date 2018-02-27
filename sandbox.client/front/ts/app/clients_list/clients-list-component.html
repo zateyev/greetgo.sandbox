@@ -18,13 +18,13 @@
   <form #f="ngForm" (submit)="filterList()" id="filterForm" novalidate>
     <div class="form-row">
       <div class="form-group col-md-3">
-        <input name="filterInputs" [(ngModel)]="filterInputs" required type="text" class="form-control"
+        <input name="filterInputs" [(ngModel)]="requestParams.filterInput" required type="text" class="form-control"
                id="inputFilterVal">
       </div>
       <div class="form-group col-md-2">
         <select class="form-control"
                 required
-                [(ngModel)]="filterBy" name="charm">
+                [(ngModel)]="requestParams.filterBy" name="charm">
           <option *ngFor="let col of filterColumns" [ngValue]="col.key">{{col.value}}</option>
         </select>
       </div>
@@ -46,7 +46,8 @@
       <thead>
       <tr style="white-space:nowrap">
         <th *ngFor="let col of columns; let i = index" (click)="sort(i)"
-            [ngClass]="{sort0:orderBy === col.key && !isDescending, sort1:orderBy === col.key && isDescending}">
+            [ngClass]="{sort0:requestParams.orderBy === col.key && !requestParams.isDesc,
+            sort1:requestParams.orderBy === col.key && requestParams.isDesc}">
           {{col.value}}
         </th>
       </tr>

@@ -28,7 +28,7 @@ public class ClientsListController implements Controller {
   @ToJson
   @Mapping("/totalSize")
   //TODO передавать только один объект (такой же как и в ClientsListController.clientsList() )
-  public long getTotalSize(@Par("requestParams") RequestParameters requestParams) {
+  public long getTotalSize(@Par("requestParams") @Json RequestParameters requestParams) {
     return clientRegister.get().getTotalSize(requestParams);
   }
 

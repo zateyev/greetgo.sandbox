@@ -7,6 +7,7 @@ import {PhoneNumber} from "../../model/PhoneNumber";
 import {ClientInfo} from "../../model/ClientInfo";
 import {saveAs as importedSaveAs} from "file-saver";
 import {ClientFormComponent} from "../client_form/client_form.component";
+import {RequestParameters} from "../../model/RequestParameters";
 
 @Component({
   selector: 'clients-list-component',
@@ -25,10 +26,7 @@ export class ClientsListComponent implements OnInit {
   selectedClientId: number;
   totalSize: number = 0;
   pager: any = {};
-  isDescending: boolean = false;
-  filterBy = 'surname';
-  filterInputs: string | null;
-  orderBy: string | null;
+  requestParams: RequestParameters = new RequestParameters();
   loadClientInfoError: string | null;
 
   pageSizeOptions = [10, 25, 50];
@@ -56,17 +54,17 @@ export class ClientsListComponent implements OnInit {
 
   sort(colId: number) {
     if (colId > 1) {
-      if (this.orderBy != this.columns[colId].key) {
-        this.orderBy = this.columns[colId].key;
-        this.isDescending = false;
+      if (this.requestParams.orderBy != this.columns[colId].key) {
+        this.requestParams.orderBy = this.columns[colId].key;
+        this.requestParams.isDesc = false;
       }
       else {
-        this.isDescending = !this.isDescending;
+        this.requestParams.isDesc = !this.requestParams.isDesc;
       }
 
       this.loadClientsList();
 
-      if (this.isDescending) {
+      if (this.requestParams.isDesc) {
         $(this).find('.glyphicon').removeClass('glyphicon-arrow-down').removeClass('glyphicon-sort').addClass('glyphicon-arrow-up');
       } else {
         $(this).find('.glyphicon').removeClass('glyphicon-arrow-up').removeClass('glyphicon-sort').addClass('glyphicon-arrow-down');
@@ -99,13 +97,10 @@ export class ClientsListComponent implements OnInit {
   }
 
   loadClientsList() {
+    this.requestParams.page = this.currentPage;
+    this.requestParams.pageSize = this.pageSize;
     this.httpService.post("/clientsList/clientsList", {
-      filterBy: this.filterBy,
-      filterInputs: this.filterInputs,
-      orderBy: this.orderBy,
-      isDesc: this.isDescending.toString(),
-      page: this.currentPage,
-      pageSize: this.pageSize
+      requestParams: JSON.stringify(this.requestParams)
     }).toPromise().then(result => {
       this.clientsList = this.parseClientsList(result.json());
     }, error => {
@@ -168,8 +163,7 @@ export class ClientsListComponent implements OnInit {
 
   getTotalSize() {
     this.httpService.post("/clientsList/totalSize", {
-      filterBy: this.filterBy,
-      filterInputs: this.filterInputs
+      requestParams: JSON.stringify(this.requestParams)
     }).toPromise().then(result => {
       this.totalSize = result.json();
       this.setPage(this.currentPage + 1);
@@ -182,17 +176,13 @@ export class ClientsListComponent implements OnInit {
   loadReport(type: string) {
     this.viewType = type;
     this.httpService.downloadFile("/report/" + this.viewType, {
-      filterBy: this.filterBy,
-      filterInputs: this.filterInputs,
-      orderBy: this.orderBy,
-      isDesc: this.isDescending.toString()
+      requestParams: JSON.stringify(this.requestParams)
     }).subscribe(blob => {
       importedSaveAs(blob, "report." + this.viewType);
     });
   }
 
   public ngOnInit() {
-    // this.loadCharms();
     this.getTotalSize();
   }
 }

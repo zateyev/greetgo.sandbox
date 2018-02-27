@@ -163,7 +163,6 @@ public class ClientRegisterImplTest extends ParentTestNg {
       .map(this::toClientInfo)
       .collect(Collectors.toList());
 
-
     //TODO и не забываем про лямбды
     expectingClientList.sort((o1, o2) -> {
 
