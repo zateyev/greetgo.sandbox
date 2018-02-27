@@ -22,7 +22,6 @@ public class ReportController implements Controller {
 
   @ToJson
   @Mapping("/{viewType}")
-  //TODO передавать только один объект (такой же как и в ClientsListController.clientsList() )
   public void downloadReport(@Par("requestParams") @Json RequestParameters requestParams,
                              @ParPath("viewType") String viewType,
                              RequestTunnel tunnel) throws Exception {
@@ -30,7 +29,6 @@ public class ReportController implements Controller {
     tunnel.setResponseHeader("Content-Disposition", "attachment; filename = report." + viewType);
     OutputStream out = tunnel.getResponseOutputStream();
 
-    //TODO убрать эти условия в скобках
     reportRegister.get().genReport(requestParams, ViewType.valueOf(viewType.toUpperCase()), out);
 
     tunnel.flushBuffer();
