@@ -15,10 +15,7 @@ import java.sql.Date;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.Period;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static org.fest.assertions.api.Assertions.assertThat;
@@ -131,8 +128,9 @@ public class ClientRegisterImplTest extends ParentTestNg {
     int pageSize = RND.plusInt(clients.size());
     int page = pageSize > 0 ? RND.plusInt((int) Math.ceil(clients.size() / pageSize)) : 0;
 
-    List<ClientInfo> expectingClientList = new ArrayList<>();
-    clients.forEach(clientDetails -> expectingClientList.add(toClientInfo(clientDetails)));
+    List<ClientInfo> expectingClientList = clients.stream()
+      .map(this::toClientInfo)
+      .collect(Collectors.toList());
 
     expectingClientList.sort(Comparator.comparing(o -> o.surname.toLowerCase()));
 
@@ -161,22 +159,23 @@ public class ClientRegisterImplTest extends ParentTestNg {
     int pageSize = RND.plusInt(clients.size());
     int page = pageSize > 0 ? RND.plusInt((int) Math.ceil(clients.size() / pageSize)) : 0;
 
-    List<ClientInfo> expectingClientList = new ArrayList<>();
-    clients.forEach(clientDetails -> expectingClientList.add(toClientInfo(clientDetails)));
+    List<ClientInfo> expectingClientList = clients.stream()
+      .map(this::toClientInfo)
+      .collect(Collectors.toList());
 
 
     //TODO и не забываем про лямбды
-    Collections.sort(expectingClientList, (Comparator) (o1, o2) -> {
+    expectingClientList.sort((o1, o2) -> {
 
-      Integer tb1 = ((ClientInfo) o1).age;
-      Integer tb2 = ((ClientInfo) o2).age;
+      Integer tb1 = o1.age;
+      Integer tb2 = o2.age;
       int sComp = tb1.compareTo(tb2);
 
       if (sComp != 0) {
         return sComp;
       } else {
-        String sn1 = ((ClientInfo) o1).surname.toLowerCase();
-        String sn2 = ((ClientInfo) o2).surname.toLowerCase();
+        String sn1 = o1.surname != null ? o1.surname.toLowerCase() : "";
+        String sn2 = o2.surname != null ? o2.surname.toLowerCase() : "";
         return sn1.compareTo(sn2);
       }
     });
@@ -219,9 +218,6 @@ public class ClientRegisterImplTest extends ParentTestNg {
     int pageSize = RND.plusInt(clients.size());
     int page = pageSize > 0 ? RND.plusInt((int) Math.ceil(clients.size() / pageSize)) : 0;
 
-//    int pageSize = 25;
-//    int page = 0;
-
     //TODO здесь можно использовать стримы
 //    List<ClientInfo> expectingClientList = new ArrayList<>();
 //    clients.forEach(clientDetails -> expectingClientList.add(toClientInfo(clientDetails)));
@@ -231,24 +227,19 @@ public class ClientRegisterImplTest extends ParentTestNg {
       .map(this::toClientInfo)
       .collect(Collectors.toList());
 
-//    expectingClientList.sort(Comparator.comparingDouble(o -> o.totalBalance));
-
     //TODO и не забываем про лямбды
-    Collections.sort(expectingClientList, new Comparator() {
+    expectingClientList.sort((o1, o2) -> {
 
-      public int compare(Object o1, Object o2) {
+      Double tb1 = o1.totalBalance;
+      Double tb2 = o2.totalBalance;
+      int sComp = tb1.compareTo(tb2);
 
-        Double tb1 = ((ClientInfo) o1).totalBalance;
-        Double tb2 = ((ClientInfo) o2).totalBalance;
-        int sComp = tb1.compareTo(tb2);
-
-        if (sComp != 0) {
-          return sComp;
-        } else {
-          String sn1 = ((ClientInfo) o1).surname.toLowerCase();
-          String sn2 = ((ClientInfo) o2).surname.toLowerCase();
-          return sn1.compareTo(sn2);//TODO а если sn1 == null ?
-        }
+      if (sComp != 0) {
+        return sComp;
+      } else {
+        String sn1 = o1.surname != null ? o1.surname.toLowerCase() : "";
+        String sn2 = o2.surname != null ? o2.surname.toLowerCase() : "";
+        return sn1.compareTo(sn2);//TODO а если sn1 == null ?
       }
     });
 
@@ -277,28 +268,23 @@ public class ClientRegisterImplTest extends ParentTestNg {
 
     int pageSize = RND.plusInt(clients.size());
     int page = pageSize > 0 ? RND.plusInt((int) Math.ceil(clients.size() / pageSize)) : 0;
-//    int pageSize = 25;
-//    int page = 1;
 
-    List<ClientInfo> expectingClientList = new ArrayList<>();
-    clients.forEach(clientDetails -> expectingClientList.add(toClientInfo(clientDetails)));
+    List<ClientInfo> expectingClientList = clients.stream()
+      .map(this::toClientInfo)
+      .collect(Collectors.toList());
 
-//    expectingClientList.sort(Comparator.comparingDouble(o -> o.totalBalance));
-    Collections.sort(expectingClientList, new Comparator() {
+    expectingClientList.sort((o1, o2) -> {
 
-      public int compare(Object o1, Object o2) {
+      Double tb1 = o1.totalBalance;
+      Double tb2 = o2.totalBalance;
+      int sComp = tb2.compareTo(tb1);
 
-        Double tb1 = ((ClientInfo) o1).totalBalance;
-        Double tb2 = ((ClientInfo) o2).totalBalance;
-        int sComp = tb2.compareTo(tb1);
-
-        if (sComp != 0) {
-          return sComp;
-        } else {
-          String sn1 = ((ClientInfo) o1).surname.toLowerCase();
-          String sn2 = ((ClientInfo) o2).surname.toLowerCase();
-          return sn1.compareTo(sn2);
-        }
+      if (sComp != 0) {
+        return sComp;
+      } else {
+        String sn1 = o1.surname != null ? o1.surname.toLowerCase() : "";
+        String sn2 = o2.surname != null ? o2.surname.toLowerCase() : "";
+        return sn1.compareTo(sn2);
       }
     });
 
@@ -329,25 +315,22 @@ public class ClientRegisterImplTest extends ParentTestNg {
     int pageSize = RND.plusInt(clients.size());
     int page = pageSize > 0 ? RND.plusInt((int) Math.ceil(clients.size() / pageSize)) : 0;
 
-    List<ClientInfo> expectingClientList = new ArrayList<>();
-    clients.forEach(clientDetails -> expectingClientList.add(toClientInfo(clientDetails)));
+    List<ClientInfo> expectingClientList = clients.stream()
+      .map(this::toClientInfo)
+      .collect(Collectors.toList());
 
-//    expectingClientList.sort(Comparator.comparingDouble(o -> o.minBalance));
-    Collections.sort(expectingClientList, new Comparator() {
+    expectingClientList.sort((o1, o2) -> {
 
-      public int compare(Object o1, Object o2) {
+      Double tb1 = o1.minBalance;
+      Double tb2 = o2.minBalance;
+      int sComp = tb1.compareTo(tb2);
 
-        Double tb1 = ((ClientInfo) o1).minBalance;
-        Double tb2 = ((ClientInfo) o2).minBalance;
-        int sComp = tb1.compareTo(tb2);
-
-        if (sComp != 0) {
-          return sComp;
-        } else {
-          String sn1 = ((ClientInfo) o1).surname.toLowerCase();
-          String sn2 = ((ClientInfo) o2).surname.toLowerCase();
-          return sn1.compareTo(sn2);
-        }
+      if (sComp != 0) {
+        return sComp;
+      } else {
+        String sn1 = o1.surname != null ? o1.surname.toLowerCase() : "";
+        String sn2 = o2.surname != null ? o2.surname.toLowerCase() : "";
+        return sn1.compareTo(sn2);
       }
     });
 
@@ -377,25 +360,22 @@ public class ClientRegisterImplTest extends ParentTestNg {
     int pageSize = RND.plusInt(clients.size());
     int page = pageSize > 0 ? RND.plusInt((int) Math.ceil(clients.size() / pageSize)) : 0;
 
-    List<ClientInfo> expectingClientList = new ArrayList<>();
-    clients.forEach(clientDetails -> expectingClientList.add(toClientInfo(clientDetails)));
+    List<ClientInfo> expectingClientList = clients.stream()
+      .map(this::toClientInfo)
+      .collect(Collectors.toList());
 
-//    expectingClientList.sort(Comparator.comparingDouble(o -> o.maxBalance));
-    Collections.sort(expectingClientList, new Comparator() {
+    expectingClientList.sort((o1, o2) -> {
 
-      public int compare(Object o1, Object o2) {
+      Double tb1 = o1.maxBalance;
+      Double tb2 = o2.maxBalance;
+      int sComp = tb1.compareTo(tb2);
 
-        Double tb1 = ((ClientInfo) o1).maxBalance;
-        Double tb2 = ((ClientInfo) o2).maxBalance;
-        int sComp = tb1.compareTo(tb2);
-
-        if (sComp != 0) {
-          return sComp;
-        } else {
-          String sn1 = ((ClientInfo) o1).surname.toLowerCase();
-          String sn2 = ((ClientInfo) o2).surname.toLowerCase();
-          return sn1.compareTo(sn2);
-        }
+      if (sComp != 0) {
+        return sComp;
+      } else {
+        String sn1 = o1.surname != null ? o1.surname.toLowerCase() : "";
+        String sn2 = o2.surname != null ? o2.surname.toLowerCase() : "";
+        return sn1.compareTo(sn2);
       }
     });
 
@@ -422,8 +402,9 @@ public class ClientRegisterImplTest extends ParentTestNg {
 
     List<ClientDetails> clients = clearDbAndInsertTestData(200);
 
-    List<ClientInfo> clientInfos = new ArrayList<>();
-    clients.forEach(clientDetails -> clientInfos.add(toClientInfo(clientDetails)));
+    List<ClientInfo> clientInfos = clients.stream()
+      .map(this::toClientInfo)
+      .collect(Collectors.toList());
 
     String filterInput = clients.get(RND.plusInt(clients.size())).surname.toLowerCase().substring(7);
 
@@ -463,8 +444,9 @@ public class ClientRegisterImplTest extends ParentTestNg {
 
     List<ClientDetails> clients = clearDbAndInsertTestData(200);
 
-    List<ClientInfo> clientInfos = new ArrayList<>();
-    clients.forEach(clientDetails -> clientInfos.add(toClientInfo(clientDetails)));
+    List<ClientInfo> clientInfos = clients.stream()
+      .map(this::toClientInfo)
+      .collect(Collectors.toList());
 
     String filterInput = clients.get(RND.plusInt(clients.size())).name.toLowerCase().substring(7);
 
@@ -504,8 +486,9 @@ public class ClientRegisterImplTest extends ParentTestNg {
 
     List<ClientDetails> clients = clearDbAndInsertTestData(200);
 
-    List<ClientInfo> clientInfos = new ArrayList<>();
-    clients.forEach(clientDetails -> clientInfos.add(toClientInfo(clientDetails)));
+    List<ClientInfo> clientInfos = clients.stream()
+      .map(this::toClientInfo)
+      .collect(Collectors.toList());
 
     String filterInput = clients.get(RND.plusInt(clients.size())).patronymic.toLowerCase().substring(7);
 
@@ -545,8 +528,9 @@ public class ClientRegisterImplTest extends ParentTestNg {
 
     List<ClientDetails> clients = clearDbAndInsertTestData(200);
 
-    List<ClientInfo> clientInfos = new ArrayList<>();
-    clients.forEach(clientDetails -> clientInfos.add(toClientInfo(clientDetails)));
+    List<ClientInfo> clientInfos = clients.stream()
+      .map(this::toClientInfo)
+      .collect(Collectors.toList());
 
     String filterInput = clients.get(RND.plusInt(clients.size())).patronymic.toLowerCase().substring(7);
 

@@ -15,6 +15,7 @@ import org.testng.annotations.Test;
 import java.time.LocalDate;
 import java.time.Period;
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static org.fest.assertions.api.Assertions.assertThat;
 
@@ -56,8 +57,9 @@ public class ReportRegisterImplTest extends ParentTestNg {
   public void genReport() throws Exception {
     List<ClientDetails> clients = clearDbAndInsertTestData(50);
 
-    List<ClientInfo> expectingClientList = new ArrayList<>();
-    clients.forEach(clientDetails -> expectingClientList.add(toClientInfo(clientDetails)));
+    List<ClientInfo> expectingClientList = clients.stream()
+      .map(this::toClientInfo)
+      .collect(Collectors.toList());
 
     expectingClientList.sort(Comparator.comparing(o -> o.surname.toLowerCase()));
 
@@ -90,28 +92,26 @@ public class ReportRegisterImplTest extends ParentTestNg {
   public void genReport_orderedByMinBalance() throws Exception {
     List<ClientDetails> clients = clearDbAndInsertTestData(50);
 
-    List<ClientInfo> expectingClientList = new ArrayList<>();
-    clients.forEach(clientDetails -> expectingClientList.add(toClientInfo(clientDetails)));
+    List<ClientInfo> expectingClientList = clients.stream()
+      .map(this::toClientInfo)
+      .collect(Collectors.toList());
 
-    Collections.sort(expectingClientList, new Comparator() {
+    expectingClientList.sort((o1, o2) -> {
 
-      public int compare(Object o1, Object o2) {
+      Double tb1 = o1.minBalance;
+      Double tb2 = o2.minBalance;
+      int sComp = tb1.compareTo(tb2);
 
-        Double tb1 = ((ClientInfo) o1).minBalance;
-        Double tb2 = ((ClientInfo) o2).minBalance;
-        int sComp = tb1.compareTo(tb2);
-
-        if (sComp != 0) {
-          return sComp;
-        } else {
-          String sn1 = ((ClientInfo) o1).surname.toLowerCase();
-          String sn2 = ((ClientInfo) o2).surname.toLowerCase();
-          return sn1.compareTo(sn2);
-        }
-      }});
+      if (sComp != 0) {
+        return sComp;
+      } else {
+        String sn1 = o1.surname.toLowerCase();
+        String sn2 = o2.surname.toLowerCase();
+        return sn1.compareTo(sn2);
+      }
+    });
 
     TestReportView testReportView = new TestReportView();
-
 
     //
     //
