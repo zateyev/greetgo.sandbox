@@ -3,6 +3,7 @@ package kz.greetgo.sandbox.controller.register;
 import kz.greetgo.sandbox.controller.model.ClientDetails;
 import kz.greetgo.sandbox.controller.model.ClientInfo;
 import kz.greetgo.sandbox.controller.model.ClientRecordsToSave;
+import kz.greetgo.sandbox.controller.model.RequestParameters;
 
 import java.util.List;
 
@@ -12,16 +13,15 @@ public interface ClientRegister {
      *
      * @return общее количество клиентов в БД
      */
-    long getTotalSize(String filterBy, String filterInput);
+    long getTotalSize(RequestParameters requestParams);
 
     /**
      * Предоставляет список клиентов
      *
-     * @param page номер запрашиваемой страницы
-     * @param pageSize максимальное количество элементов на странице
+     * @param requestParams параметры запроса
      * @return список клиентов
      */
-    List<ClientInfo> getClientsList(String filterBy, String filterInputs, String orderBy, boolean isDesc, int page, int pageSize);
+    List<ClientInfo> getClientsList(RequestParameters requestParams);
 
     /**
      * Предоставляет полную информацию о клиенте

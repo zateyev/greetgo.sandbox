@@ -8,13 +8,14 @@ import {MainFormComponent} from "./main_form/main_form.component";
 import {HttpService} from "./HttpService";
 import {ClientsListComponent} from "./clients_list/clients_list.component";
 import {PagerService} from "./PagerService";
+import {ClientFormComponent} from "./client_form/client_form.component";
 
 @NgModule({
   imports: [
     BrowserModule, HttpModule, JsonpModule, FormsModule, ReactiveFormsModule
   ],
   declarations: [
-    RootComponent, LoginComponent, MainFormComponent, ClientsListComponent
+    RootComponent, LoginComponent, MainFormComponent, ClientsListComponent, ClientFormComponent
   ],
   bootstrap: [RootComponent],
   providers: [HttpService, PagerService],

@@ -22,13 +22,13 @@ public class ClientRegisterImpl implements ClientRegister {
   public BeanGetter<IdGenerator> idGen;
 
   @Override
-  public long getTotalSize(String filterBy, String filterInput) {
-    return jdbcSandbox.get().execute(new GetTotalSize(filterBy, filterInput));
+  public long getTotalSize(RequestParameters requestParams) {
+    return jdbcSandbox.get().execute(new GetTotalSize(requestParams.filterBy, requestParams.filterInput));
   }
 
   @Override
-  public List<ClientInfo> getClientsList(String filterBy, String filterInput, String orderBy, boolean isDesc, int page, int pageSize) {
-    return jdbcSandbox.get().execute(new LoadClientList(filterBy, filterInput, orderBy, isDesc, page, pageSize));
+  public List<ClientInfo> getClientsList(RequestParameters requestParams) {
+    return jdbcSandbox.get().execute(new LoadClientList(requestParams.filterBy, requestParams.filterInput, requestParams.orderBy, requestParams.isDesc, requestParams.page, requestParams.pageSize));
   }
 
   @Override

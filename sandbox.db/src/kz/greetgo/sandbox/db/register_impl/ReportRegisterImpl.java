@@ -3,6 +3,7 @@ package kz.greetgo.sandbox.db.register_impl;
 import com.itextpdf.text.DocumentException;
 import kz.greetgo.depinject.core.Bean;
 import kz.greetgo.depinject.core.BeanGetter;
+import kz.greetgo.sandbox.controller.model.RequestParameters;
 import kz.greetgo.sandbox.controller.register.ReportRegister;
 import kz.greetgo.sandbox.controller.report.ViewType;
 import kz.greetgo.sandbox.db.jdbc.LoadClientListToReport;
@@ -22,7 +23,7 @@ public class ReportRegisterImpl implements ReportRegister {
   public BeanGetter<JdbcSandbox> jdbcSandbox;
 
   @Override
-  public void genReport(String filterBy, String filterInput, String orderBy, boolean isDesc, ViewType viewType, OutputStream out) throws DocumentException {
+  public void genReport(RequestParameters requestParams, ViewType viewType, OutputStream out) throws DocumentException {
 
     ReportHeadData head = new ReportHeadData();
     head.title = "Список клиентов";
@@ -31,7 +32,14 @@ public class ReportRegisterImpl implements ReportRegister {
 
     view.start(head);
 
-    jdbcSandbox.get().execute(new LoadClientListToReport(filterBy, filterInput, orderBy, isDesc, 0, 0, view));
+    jdbcSandbox.get().execute(new LoadClientListToReport(requestParams.filterBy,
+      requestParams.filterInput,
+      requestParams.orderBy,
+      requestParams.isDesc,
+      0,
+      0,
+      view
+    ));
 
     ReportFootData foot = new ReportFootData();
     foot.generatedAt = new Date();

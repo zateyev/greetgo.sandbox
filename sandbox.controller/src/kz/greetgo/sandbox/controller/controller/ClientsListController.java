@@ -9,6 +9,7 @@ import kz.greetgo.mvc.annotations.ToJson;
 import kz.greetgo.sandbox.controller.model.ClientDetails;
 import kz.greetgo.sandbox.controller.model.ClientInfo;
 import kz.greetgo.sandbox.controller.model.ClientRecordsToSave;
+import kz.greetgo.sandbox.controller.model.RequestParameters;
 import kz.greetgo.sandbox.controller.register.ClientRegister;
 import kz.greetgo.sandbox.controller.util.Controller;
 
@@ -27,22 +28,16 @@ public class ClientsListController implements Controller {
   @ToJson
   @Mapping("/totalSize")
   //TODO передавать только один объект (такой же как и в ClientsListController.clientsList() )
-  public long getTotalSize(@Par("filterBy") String filterBy,
-                           @Par("filterInputs") String filterInputs) {
-    return clientRegister.get().getTotalSize(filterBy != null ? filterBy : "", filterInputs != null ? filterInputs : "");
+  public long getTotalSize(@Par("requestParams") @Json RequestParameters requestParams) {
+    return clientRegister.get().getTotalSize(requestParams);
   }
 
   @ToJson
   @Mapping("/clientsList")//TODO передавать только один объект
-  public List<ClientInfo> clientsList(@Par("filterBy") String filterBy,
-                                      @Par("filterInputs") String filterInputs,
-                                      @Par("orderBy") String orderBy,
-                                      @Par("isDesc") boolean isDesc,
-                                      @Par("page") int page,
-                                      @Par("pageSize") int pageSize) {
+  public List<ClientInfo> clientsList(@Par("requestParams") @Json RequestParameters requestParams) {
 
     //TODO убрать эти условия в скобках
-    return clientRegister.get().getClientsList(filterBy != null ? filterBy : "", filterInputs != null ? filterInputs : "", orderBy != null ? orderBy : "", isDesc, page, pageSize);
+    return clientRegister.get().getClientsList(requestParams);
   }
 
   @ToJson

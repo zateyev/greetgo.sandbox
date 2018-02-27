@@ -15,9 +15,9 @@ public abstract class AbstractLoader<T> implements ConnectionCallback<T> {
   private final int pageSize;
 
   AbstractLoader(String filterBy, String filterInput, String orderBy, boolean isDesc, int page, int pageSize) {
-    this.filterBy = filterBy;
-    this.filterInput = filterInput;
-    this.orderBy = orderBy;
+    this.filterBy = filterBy != null ? filterBy : "";
+    this.filterInput = filterInput != null ? filterInput : "";
+    this.orderBy = orderBy != null ? orderBy : "";
     this.isDesc = isDesc;
     this.page = page;
     this.pageSize = pageSize;

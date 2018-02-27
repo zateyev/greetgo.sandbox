@@ -2,7 +2,7 @@ export class Charm {
   public id: string;
   public name: string | null;
   public description: string | null;
-  public energy: number/*double*/;
+  public energy: number/*int*/;
 
   public assign(o: any): Charm {
     this.id = o.id;
