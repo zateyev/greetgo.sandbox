@@ -5,4 +5,8 @@ export class RequestParameters {
   public isDesc: boolean;
   public page: number/*int*/;
   public pageSize: number/*int*/;
+
+  constructor() {
+    this.filterBy = 'surname';
+  }
 }
