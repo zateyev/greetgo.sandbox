@@ -1,9 +1,6 @@
 package kz.greetgo.sandbox.db.util;
 
-import kz.greetgo.sandbox.controller.model.Charm;
-import kz.greetgo.sandbox.controller.model.ClientRecordsToSave;
-import kz.greetgo.sandbox.controller.model.PhoneNumber;
-import kz.greetgo.sandbox.controller.model.PhoneType;
+import kz.greetgo.sandbox.controller.model.*;
 import org.xml.sax.Attributes;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
@@ -39,7 +36,7 @@ public class ClientRecordParser extends SaxHandler {
   protected void startingTag(Attributes attributes) throws Exception {
     String path = path();
 
-    switch (path){
+    switch (path) {
       case "/cia/client":
         clientRecord = new ClientRecordsToSave();
         clientRecord.phoneNumbers = new ArrayList<>();
@@ -59,12 +56,16 @@ public class ClientRecordParser extends SaxHandler {
         clientRecord.patronymic = attributes.getValue("value");
         return;
 
-      case "/cia/client/charm":
-        clientRecord.charm.name = attributes.getValue("value");
+      case "/cia/client/gender":
+        clientRecord.gender = Gender.valueOf(attributes.getValue("value"));
         return;
 
       case "/cia/client/birth":
         clientRecord.dateOfBirth = attributes.getValue("value");
+        return;
+
+      case "/cia/client/charm":
+        clientRecord.charm.name = attributes.getValue("value");
         return;
     }
   }

@@ -3,13 +3,15 @@
                    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
                    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-2.0.xsd">
 
-  <changeSet author="zateyev" id="create-table-Charm">
+  <changeSet author="zateyev" id="create-table-tmpCharm">
     <sql endDelimiter=";;"><![CDATA[
-      create table charm (
+      create table tmp_charm (
         id varchar(32) not null PRIMARY KEY,
         name varchar(255),
         description varchar(255),
-        energy real
+        energy real,
+
+        actual smallint not null default 0
       )
     ]]></sql>
   </changeSet>

@@ -17,5 +17,8 @@
   <!--cia-->
   <include file="liquibase/postgres/cia/000_transition_client.xml"/>
 
+  <!--oper-->
+  <include file="liquibase/postgres/oper/000_charm.xml"/>
+  <include file="liquibase/postgres/oper/001_client.xml"/>
 
 </databaseChangeLog>
