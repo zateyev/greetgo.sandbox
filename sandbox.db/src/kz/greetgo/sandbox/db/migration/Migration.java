@@ -1,7 +1,11 @@
 package kz.greetgo.sandbox.db.migration;
 
+import kz.greetgo.depinject.core.Bean;
+import kz.greetgo.depinject.core.BeanGetter;
 import kz.greetgo.sandbox.controller.model.ClientRecordsToSave;
+import kz.greetgo.sandbox.db.dao.ClientDao;
 import kz.greetgo.sandbox.db.util.ClientRecordParser;
+import kz.greetgo.sandbox.db.util.JdbcSandbox;
 import kz.greetgo.sandbox.db.util.TimeUtils;
 import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
 import org.apache.commons.compress.archivers.tar.TarArchiveInputStream;
@@ -13,7 +17,11 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 
+@Bean
 public class Migration {
+
+  public BeanGetter<JdbcSandbox> jdbcSandbox;
+
   private String tmpClientTable;
 
   public int migrate() throws Exception {
@@ -50,6 +58,8 @@ public class Migration {
   }
 
   public static void main(String[] args) throws Exception {
+//    Migration migration = new Migration();
+//    System.out.println(migration.jdbcSandbox);
     Migration migration = new Migration();
     migration.download();
   }
@@ -79,16 +89,15 @@ public class Migration {
     clientRecordParser.parseRecordData(xmlContent);
 
     List<ClientRecordsToSave> clientRecords = clientRecordParser.getClientRecords();
-    System.out.println(clientRecords.size());
-    for (ClientRecordsToSave clientRecord : clientRecords) {
-      System.out.println("surname: " + clientRecord.surname);
-      System.out.println("name: " + clientRecord.name);
-      System.out.println("dateOfBirth: " + clientRecord.dateOfBirth);
-      System.out.println();
-    }
+//    System.out.println(clientRecords.size());
+//    for (ClientRecordsToSave clientRecord : clientRecords) {
+//      System.out.println("surname: " + clientRecord.surname);
+//      System.out.println("name: " + clientRecord.name);
+//      System.out.println("dateOfBirth: " + clientRecord.dateOfBirth);
+//      System.out.println();
+//    }
 
     // write into tmp db
-
 
     return 0;
   }

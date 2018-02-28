@@ -39,44 +39,33 @@ public class ClientRecordParser extends SaxHandler {
   protected void startingTag(Attributes attributes) throws Exception {
     String path = path();
 
-    // TODO: переписать в switch
     switch (path){
-      case "":
-        break;
+      case "/cia/client":
+        clientRecord = new ClientRecordsToSave();
+        clientRecord.phoneNumbers = new ArrayList<>();
+        clientRecord.charm = new Charm();
+        clientRecord.id = attributes.getValue("id");
+        return;
 
-    }
+      case "/cia/client/surname":
+        clientRecord.surname = attributes.getValue("value");
+        return;
 
-    if ("/cia/client".equals(path)) {
-      clientRecord = new ClientRecordsToSave();
-      clientRecord.phoneNumbers = new ArrayList<>();
-      clientRecord.charm = new Charm();
-      clientRecord.id = attributes.getValue("id");
-      return;
-    }
+      case "/cia/client/name":
+        clientRecord.name = attributes.getValue("value");
+        return;
 
-    if ("/cia/client/surname".equals(path)) {
-      clientRecord.surname = attributes.getValue("value");
-      return;
-    }
+      case "/cia/client/patronymic":
+        clientRecord.patronymic = attributes.getValue("value");
+        return;
 
-    if ("/cia/client/name".equals(path)) {
-      clientRecord.name = attributes.getValue("value");
-      return;
-    }
+      case "/cia/client/charm":
+        clientRecord.charm.name = attributes.getValue("value");
+        return;
 
-    if ("/cia/client/patronymic".equals(path)) {
-      clientRecord.patronymic = attributes.getValue("value");
-      return;
-    }
-
-    if ("/cia/client/charm".equals(path)) {
-      clientRecord.charm.name = attributes.getValue("value");
-      return;
-    }
-
-    if ("/cia/client/birth".equals(path)) {
-      clientRecord.dateOfBirth = attributes.getValue("value");
-      return;
+      case "/cia/client/birth":
+        clientRecord.dateOfBirth = attributes.getValue("value");
+        return;
     }
   }
 
@@ -84,33 +73,35 @@ public class ClientRecordParser extends SaxHandler {
   protected void endedTag(String tagName) throws Exception {
     String path = path() + "/" + tagName;
 
-    if ("/cia/client/workPhone".equals(path)) {
-      PhoneNumber phoneNumber = new PhoneNumber();
-      phoneNumber.phoneType = PhoneType.WORK;
-      phoneNumber.number = text();
-      clientRecord.phoneNumbers.add(phoneNumber);
-      return;
-    }
+    switch (path) {
+      case "/cia/client/workPhone": {
+        PhoneNumber phoneNumber = new PhoneNumber();
+        phoneNumber.phoneType = PhoneType.WORK;
+        phoneNumber.number = text();
+        clientRecord.phoneNumbers.add(phoneNumber);
+        return;
+      }
 
-    if ("/cia/client/mobilePhone".equals(path)) {
-      PhoneNumber phoneNumber = new PhoneNumber();
-      phoneNumber.phoneType = PhoneType.MOBILE;
-      phoneNumber.number = text();
-      clientRecord.phoneNumbers.add(phoneNumber);
-      return;
-    }
+      case "/cia/client/mobilePhone": {
+        PhoneNumber phoneNumber = new PhoneNumber();
+        phoneNumber.phoneType = PhoneType.MOBILE;
+        phoneNumber.number = text();
+        clientRecord.phoneNumbers.add(phoneNumber);
+        return;
+      }
 
-    if ("/cia/client/homePhone".equals(path)) {
-      PhoneNumber phoneNumber = new PhoneNumber();
-      phoneNumber.phoneType = PhoneType.HOME;
-      phoneNumber.number = text();
-      clientRecord.phoneNumbers.add(phoneNumber);
-      return;
-    }
+      case "/cia/client/homePhone": {
+        PhoneNumber phoneNumber = new PhoneNumber();
+        phoneNumber.phoneType = PhoneType.HOME;
+        phoneNumber.number = text();
+        clientRecord.phoneNumbers.add(phoneNumber);
+        return;
+      }
 
-    if ("/cia/client".equals(path)) {
-      clientRecords.add(clientRecord);
-      return;
+      case "/cia/client": {
+        clientRecords.add(clientRecord);
+        return;
+      }
     }
   }
 }
