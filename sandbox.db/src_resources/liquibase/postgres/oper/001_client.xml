@@ -14,6 +14,7 @@
         birth_date date,
         charm varchar(32),
 
+        error varchar(255),
         actual smallint not null default 0,
         cia_id varchar(100)
       )

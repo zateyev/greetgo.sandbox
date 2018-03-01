@@ -6,6 +6,6 @@ import org.apache.ibatis.annotations.Select;
 
 @Bean
 public interface TmpClientTestDaoPostgres extends TmpClientTestDao {
-  @Select("TRUNCATE tmp_client")
+  @Select("TRUNCATE tmp_client; TRUNCATE tmp_charm; TRUNCATE tmp_addr; TRUNCATE tmp_phone")
   void cleanDb();
 }

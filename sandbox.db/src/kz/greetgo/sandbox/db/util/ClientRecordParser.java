@@ -67,6 +67,22 @@ public class ClientRecordParser extends SaxHandler {
       case "/cia/client/charm":
         clientRecord.charm.name = attributes.getValue("value");
         return;
+
+      case "/cia/client/address/fact":
+        clientRecord.addressF = new Address();
+        clientRecord.addressF.type = AddressType.FACT;
+        clientRecord.addressF.street = attributes.getValue("street");
+        clientRecord.addressF.house = attributes.getValue("house");
+        clientRecord.addressF.flat = attributes.getValue("flat");
+        return;
+
+      case "/cia/client/address/register":
+        clientRecord.addressR = new Address();
+        clientRecord.addressR.type = AddressType.REG;
+        clientRecord.addressR.street = attributes.getValue("street");
+        clientRecord.addressR.house = attributes.getValue("house");
+        clientRecord.addressR.flat = attributes.getValue("flat");
+        return;
     }
   }
 

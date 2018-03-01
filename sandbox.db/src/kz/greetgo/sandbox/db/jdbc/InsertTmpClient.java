@@ -61,7 +61,7 @@
 //        batchSize++;
 //        recordsCount++;
 //
-//        if (batchSize >= downloadMaxBatchSize) {
+//        if (batchSize >= maxBatchSize) {
 //          charmPS.executeBatch();
 //
 //          ps.executeBatch();
