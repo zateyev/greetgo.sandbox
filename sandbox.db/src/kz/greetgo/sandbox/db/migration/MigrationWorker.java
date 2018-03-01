@@ -61,7 +61,7 @@ public class MigrationWorker {
       info("Downloading of portion " + recordsSize + " finished for " + showTime(now, startedAt));
     }
 
-    if (recordsSize == 0) return 0;
+//    if (recordsSize == 0) return 0;
 
     handleErrors();
 
@@ -78,60 +78,121 @@ public class MigrationWorker {
   }
 
 
-
   private void dropTmpTables() throws SQLException {
     exec("DROP TABLE IF EXISTS TMP_CLIENT, tmp_charm, tmp_addr, tmp_phone");
   }
 
   private void handleErrors() throws SQLException {
-    exec("UPDATE TMP_CLIENT SET error = 'name is not defined' " +
+    //language=PostgreSQL
+    exec("UPDATE TMP_CLIENT SET error = 'surname is not defined' " +
+      "WHERE error IS NULL AND surname IS NULL");
+    //language=PostgreSQL
+    exec("UPDATE TMP_CLIENT SET error = 'name is not defined'\n" +
       "WHERE error IS NULL AND name IS NULL");
+    //language=PostgreSQL
+    exec("UPDATE TMP_CLIENT SET error = 'birth_date is not defined'\n" +
+      "WHERE error IS NULL AND birth_date IS NULL");
+
+    uploadAndDropErrors();
+  }
+
+  private void uploadAndDropErrors() throws SQLException {
+
+    // create report about errors and send by ssh
+
+    //language=PostgreSQL
+    exec("DELETE FROM TMP_CLIENT WHERE error IS NOT NULL");
   }
 
   private void createTmpTables() throws SQLException {
-    exec("create table TMP_CLIENT (\n" +
-      "        id varchar(32) not null PRIMARY KEY,\n" +
-      "        name varchar(255),\n" +
-      "        surname varchar(255),\n" +
-      "        patronymic varchar(255),\n" +
-      "        gender varchar(12),\n" +
-      "        birth_date date,\n" +
-      "        charm varchar(32),\n" +
-      "        error varchar(255),\n" +
-      "        actual smallint not null default 0,\n" +
-      "        cia_id varchar(100)\n" +
+    //language=PostgreSQL
+    exec("CREATE TABLE TMP_CLIENT (\n" +
+      "        id VARCHAR(32),\n" +
+      "        client_id VARCHAR(32),\n" +
+      "        name VARCHAR(255),\n" +
+      "        surname VARCHAR(255),\n" +
+      "        patronymic VARCHAR(255),\n" +
+      "        gender VARCHAR(12),\n" +
+      "        birth_date DATE,\n" +
+      "        charm VARCHAR(32),\n" +
+      "        status INT NOT NULL DEFAULT 0,\n" +
+      "        error VARCHAR(255),\n" +
+      "        number BIGSERIAL PRIMARY KEY\n" +
       "      )");
 
-    exec("create table tmp_charm (\n" +
-      "        id varchar(32) not null PRIMARY KEY,\n" +
-      "        name varchar(255),\n" +
-      "        description varchar(255),\n" +
-      "        energy real,\n" +
-      "\n" +
-      "        actual smallint not null default 0\n" +
+    //language=PostgreSQL
+    exec("CREATE TABLE tmp_charm (\n" +
+      "        id VARCHAR(32) NOT NULL PRIMARY KEY,\n" +
+      "        name VARCHAR(255),\n" +
+      "        description VARCHAR(255),\n" +
+      "        energy REAL,\n" +
+      "        actual SMALLINT NOT NULL DEFAULT 0\n" +
       "      )");
 
-    exec("create table tmp_addr (\n" +
-      "        client varchar(32),\n" +
-      "        type varchar(32),\n" +
-      "        street varchar(255),\n" +
-      "        house varchar(32),\n" +
-      "        flat varchar(32),\n" +
-      "        actual smallint not null default 0,\n" +
+    //language=PostgreSQL
+    exec("CREATE TABLE tmp_addr (\n" +
+      "        client VARCHAR(32),\n" +
+      "        type VARCHAR(32),\n" +
+      "        street VARCHAR(255),\n" +
+      "        house VARCHAR(32),\n" +
+      "        flat VARCHAR(32),\n" +
+      "        actual SMALLINT NOT NULL DEFAULT 0,\n" +
       "        PRIMARY KEY (client, type)\n" +
       "      )");
 
-    exec("create table tmp_phone (\n" +
-      "        client varchar(32),\n" +
-      "        number varchar(32),\n" +
-      "        type varchar(32),\n" +
-      "        actual smallint not null default 0,\n" +
+    //language=PostgreSQL
+    exec("CREATE TABLE tmp_phone (\n" +
+      "        client VARCHAR(32),\n" +
+      "        number VARCHAR(32),\n" +
+      "        type VARCHAR(32),\n" +
+      "        actual SMALLINT NOT NULL DEFAULT 0,\n" +
       "        PRIMARY KEY (client, number)\n" +
       "      )");
   }
 
   private long migrateFromTmp() throws Exception {
 
+    //marking duplicates
+    //language=PostgreSQL
+    exec("WITH num_ord AS (\n" +
+      "  SELECT number, id, row_number() OVER(PARTITION BY id ORDER BY number DESC) AS ord \n" +
+      "  FROM TMP_CLIENT\n" +
+      ")\n" +
+      "\n" +
+      "UPDATE TMP_CLIENT SET status = 2\n" +
+      "WHERE status = 0 AND number IN (SELECT number FROM num_ord WHERE ord > 1)");
+
+    //language=PostgreSQL
+    exec("UPDATE TMP_CLIENT t SET client_id = c.id\n" +
+      "  FROM client c\n" +
+      "  WHERE c.id = t.id\n");
+
+    //language=PostgreSQL
+    exec("UPDATE TMP_CLIENT SET status = 3 WHERE client_id IS NOT NULL AND status = 0");
+
+    //language=PostgreSQL
+    exec("UPDATE TMP_CLIENT SET client_id = id WHERE status = 0");
+
+    //language=PostgreSQL
+    exec("INSERT INTO client (id, surname, \"name\", patronymic, birth_date)\n" +
+      "SELECT client_id, surname, \"name\", patronymic, birth_date\n" +
+      "FROM TMP_CLIENT WHERE status = 0");
+
+    //language=PostgreSQL
+    exec("UPDATE client c SET surname = s.surname\n" +
+      "                 , \"name\" = s.\"name\"\n" +
+      "                 , patronymic = s.patronymic\n" +
+      "                 , birth_date = s.birth_date\n" +
+      "FROM TMP_CLIENT s\n" +
+      "WHERE c.id = s.client_id\n" +
+      "AND s.status = 3");
+
+    //language=PostgreSQL
+    exec("UPDATE client SET actual = 1 WHERE id IN (\n" +
+      "  SELECT client_id FROM TMP_CLIENT WHERE status = 0\n" +
+      ")");
+
+    //send report by ssh
 
     return 0;
   }
@@ -230,9 +291,11 @@ public class MigrationWorker {
     // write into tmp db
     connection.setAutoCommit(false);
     try (PreparedStatement ps = connection.prepareStatement("INSERT INTO tmp_client " +
-      "(id, surname, name, patronymic, gender, birth_date, charm) " +
-      "VALUES (?, ?, ?, ?, ?, ?, ?) ON CONFLICT (id) " +
-      "DO UPDATE SET surname = ?, name = ?, patronymic = ?, gender = ?, birth_date = ?, charm = ?");
+        "(id, surname, name, patronymic, gender, birth_date, charm) " +
+        "VALUES (?, ?, ?, ?, ?, ?, ?) "
+//      "ON CONFLICT (id) DO NOTHING"
+//      "DO UPDATE SET surname = ?, name = ?, patronymic = ?, gender = ?, birth_date = ?, charm = ?"
+    );
 
          PreparedStatement charmPS = connection.prepareStatement("INSERT INTO tmp_charm (id, name, description, energy) " +
            "VALUES (?, ?, ?, ?) ON CONFLICT (id) DO UPDATE SET name = ?, description = ?, energy = ?");
@@ -255,12 +318,12 @@ public class MigrationWorker {
         ps.setDate(6, java.sql.Date.valueOf(clientRecord.dateOfBirth));
         ps.setString(7, clientRecord.charm.id);
 
-        ps.setString(8, clientRecord.surname);
-        ps.setString(9, clientRecord.name);
-        ps.setString(10, clientRecord.patronymic);
-        ps.setString(11, clientRecord.gender.toString());
-        ps.setDate(12, java.sql.Date.valueOf(clientRecord.dateOfBirth));
-        ps.setString(13, clientRecord.charm.id);
+//        ps.setString(8, clientRecord.surname);
+//        ps.setString(9, clientRecord.name);
+//        ps.setString(10, clientRecord.patronymic);
+//        ps.setString(11, clientRecord.gender.toString());
+//        ps.setDate(12, java.sql.Date.valueOf(clientRecord.dateOfBirth));
+//        ps.setString(13, clientRecord.charm.id);
 
         charmPS.setString(1, "" + i++);
         charmPS.setString(2, clientRecord.charm.name);
