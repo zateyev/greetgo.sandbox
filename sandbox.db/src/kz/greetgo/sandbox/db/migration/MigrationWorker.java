@@ -7,6 +7,7 @@ import kz.greetgo.sandbox.controller.model.ClientRecordsToSave;
 import kz.greetgo.sandbox.controller.model.PhoneNumber;
 import kz.greetgo.sandbox.db.configs.DbConfig;
 import kz.greetgo.sandbox.db.dao.ClientDao;
+import kz.greetgo.sandbox.db.register_impl.IdGenerator;
 import kz.greetgo.sandbox.db.util.ClientRecordParser;
 import kz.greetgo.sandbox.db.util.JdbcSandbox;
 import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
@@ -36,6 +37,7 @@ public class MigrationWorker {
 
   public BeanGetter<ClientDao> clientDao;
   public BeanGetter<DbConfig> dbConfig;
+  public BeanGetter<IdGenerator> idGen;
 
   private String tmpClientTable;
   public int portionSize = 1_000_000;
@@ -123,10 +125,14 @@ public class MigrationWorker {
     //language=PostgreSQL
     exec("CREATE TABLE tmp_charm (\n" +
       "        id VARCHAR(32) NOT NULL PRIMARY KEY,\n" +
+      "        charm_id VARCHAR(32),\n" +
       "        name VARCHAR(255),\n" +
       "        description VARCHAR(255),\n" +
       "        energy REAL,\n" +
-      "        actual SMALLINT NOT NULL DEFAULT 0\n" +
+      "        actual SMALLINT NOT NULL DEFAULT 0,\n" +
+      "        status INT NOT NULL DEFAULT 0,\n" +
+      "        error VARCHAR(255),\n" +
+      "        number BIGSERIAL PRIMARY KEY\n" +
       "      )");
 
     //language=PostgreSQL
@@ -152,6 +158,31 @@ public class MigrationWorker {
 
   private long migrateFromTmp() throws Exception {
 
+    //language=PostgreSQL
+    exec("WITH num_ord AS (\n" +
+      "  SELECT number, \"name\", row_number() OVER(PARTITION BY \"name\" ORDER BY number DESC) AS ord \n" +
+      "  FROM tmp_charm\n" +
+      ")\n" +
+      "\n" +
+      "UPDATE tmp_charm SET status = 2\n" +
+      "WHERE status = 0 AND number IN (SELECT number FROM num_ord WHERE ord > 1)");
+
+    //language=PostgreSQL
+    exec("UPDATE tmp_charm t SET charm_id = c.id\n" +
+      "  FROM charm c\n" +
+      "  WHERE c.id = t.id\n");
+
+    //language=PostgreSQL
+    exec("UPDATE tmp_charm SET status = 3 WHERE charm_id IS NOT NULL AND status = 0");
+
+    //language=PostgreSQL
+    exec("UPDATE tmp_charm SET charm_id = id WHERE status = 0");
+
+
+
+
+
+
     //marking duplicates
     //language=PostgreSQL
     exec("WITH num_ord AS (\n" +
@@ -173,10 +204,19 @@ public class MigrationWorker {
     //language=PostgreSQL
     exec("UPDATE TMP_CLIENT SET client_id = id WHERE status = 0");
 
+//    //language=PostgreSQL
+//    exec("INSERT INTO charm (id, \"name\", description, energy)\n" +
+//      "SELECT tch.id, '', tch.description, tch.energy\n" +
+//      "FROM tmp_charm tch LEFT JOIN tmp_client tcl ON tch.id = tcl.charm WHERE status = 0");
+
     //language=PostgreSQL
-    exec("INSERT INTO client (id, surname, \"name\", patronymic, birth_date)\n" +
-      "SELECT client_id, surname, \"name\", patronymic, birth_date\n" +
+    exec("INSERT INTO client (id, surname, \"name\", patronymic, gender, birth_date, charm)\n" +
+      "SELECT client_id, surname, \"name\", patronymic, gender, birth_date, charm\n" +
       "FROM TMP_CLIENT WHERE status = 0");
+
+//    //language=PostgreSQL
+//    exec("UPDATE charm ch SET \"name\" = tch.name\n" +
+//      "FROM tmp_charm tch LEFT JOIN tmp_client tcl ON tch.id = tcl.charm WHERE status = 3");
 
     //language=PostgreSQL
     exec("UPDATE client c SET surname = s.surname\n" +
@@ -308,8 +348,9 @@ public class MigrationWorker {
     ) {
       int batchSize = 0, recordsCount = 0;
       long startedAt = System.nanoTime();
-      int i = 0;
       for (ClientRecordsToSave clientRecord : clientRecords) {
+        clientRecord.charm.id = idGen.get().newId();
+
         ps.setString(1, clientRecord.id);
         ps.setString(2, clientRecord.surname);
         ps.setString(3, clientRecord.name);
@@ -325,7 +366,7 @@ public class MigrationWorker {
 //        ps.setDate(12, java.sql.Date.valueOf(clientRecord.dateOfBirth));
 //        ps.setString(13, clientRecord.charm.id);
 
-        charmPS.setString(1, "" + i++);
+        charmPS.setString(1, clientRecord.charm.id);
         charmPS.setString(2, clientRecord.charm.name);
         charmPS.setString(3, "");
         charmPS.setDouble(4, 0);
