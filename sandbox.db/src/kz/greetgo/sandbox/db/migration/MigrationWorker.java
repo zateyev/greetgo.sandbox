@@ -86,6 +86,13 @@ public class MigrationWorker {
 
   private void handleErrors() throws SQLException {
     //language=PostgreSQL
+    exec("UPDATE tmp_charm SET error = 'charm is not defined' " +
+      "WHERE error IS NULL AND name IS NULL");
+
+
+
+
+    //language=PostgreSQL
     exec("UPDATE TMP_CLIENT SET error = 'surname is not defined' " +
       "WHERE error IS NULL AND surname IS NULL");
     //language=PostgreSQL
@@ -95,6 +102,7 @@ public class MigrationWorker {
     exec("UPDATE TMP_CLIENT SET error = 'birth_date is not defined'\n" +
       "WHERE error IS NULL AND birth_date IS NULL");
 
+
     uploadAndDropErrors();
   }
 
@@ -103,20 +111,23 @@ public class MigrationWorker {
     // create report about errors and send by ssh
 
     //language=PostgreSQL
+    exec("DELETE FROM tmp_charm WHERE error IS NOT NULL");
+
+    //language=PostgreSQL
     exec("DELETE FROM TMP_CLIENT WHERE error IS NOT NULL");
   }
 
   private void createTmpTables() throws SQLException {
     //language=PostgreSQL
     exec("CREATE TABLE TMP_CLIENT (\n" +
-      "        id VARCHAR(32),\n" +
+      "        cia_id VARCHAR(32),\n" +
       "        client_id VARCHAR(32),\n" +
       "        name VARCHAR(255),\n" +
       "        surname VARCHAR(255),\n" +
       "        patronymic VARCHAR(255),\n" +
       "        gender VARCHAR(12),\n" +
       "        birth_date DATE,\n" +
-      "        charm VARCHAR(32),\n" +
+      "        charm_name VARCHAR(32),\n" +
       "        status INT NOT NULL DEFAULT 0,\n" +
       "        error VARCHAR(255),\n" +
       "        number BIGSERIAL PRIMARY KEY\n" +
@@ -124,7 +135,7 @@ public class MigrationWorker {
 
     //language=PostgreSQL
     exec("CREATE TABLE tmp_charm (\n" +
-      "        id VARCHAR(32) NOT NULL PRIMARY KEY,\n" +
+      "        cia_id VARCHAR(32),\n" +
       "        charm_id VARCHAR(32),\n" +
       "        name VARCHAR(255),\n" +
       "        description VARCHAR(255),\n" +
@@ -160,7 +171,7 @@ public class MigrationWorker {
 
     //language=PostgreSQL
     exec("WITH num_ord AS (\n" +
-      "  SELECT number, \"name\", row_number() OVER(PARTITION BY \"name\" ORDER BY number DESC) AS ord \n" +
+      "  SELECT number, cia_id, row_number() OVER(PARTITION BY cia_id ORDER BY number DESC) AS ord \n" +
       "  FROM tmp_charm\n" +
       ")\n" +
       "\n" +
@@ -170,23 +181,35 @@ public class MigrationWorker {
     //language=PostgreSQL
     exec("UPDATE tmp_charm t SET charm_id = c.id\n" +
       "  FROM charm c\n" +
-      "  WHERE c.id = t.id\n");
+      "  WHERE c.cia_id = t.cia_id\n");
 
     //language=PostgreSQL
     exec("UPDATE tmp_charm SET status = 3 WHERE charm_id IS NOT NULL AND status = 0");
 
     //language=PostgreSQL
-    exec("UPDATE tmp_charm SET charm_id = id WHERE status = 0");
+    exec("UPDATE tmp_charm SET charm_id = nextval('s_client') WHERE status = 0");
 
+    //language=PostgreSQL
+    exec("INSERT INTO charm (id, \"name\", cia_id)\n" +
+      "SELECT charm_id, \"name\", cia_id\n" +
+      "FROM tmp_charm WHERE status = 0");
 
+    //language=PostgreSQL
+    exec("UPDATE charm c SET \"name\" = s.name\n" +
+      "FROM tmp_charm s\n" +
+      "WHERE c.id = s.charm_id\n" +
+      "AND s.status = 3");
 
-
+    //language=PostgreSQL
+    exec("UPDATE charm SET actual = 1 WHERE id IN (\n" +
+      "  SELECT charm_id FROM tmp_charm WHERE status = 0\n" +
+      ")");
 
 
     //marking duplicates
     //language=PostgreSQL
     exec("WITH num_ord AS (\n" +
-      "  SELECT number, id, row_number() OVER(PARTITION BY id ORDER BY number DESC) AS ord \n" +
+      "  SELECT number, cia_id, row_number() OVER(PARTITION BY cia_id ORDER BY number DESC) AS ord \n" +
       "  FROM TMP_CLIENT\n" +
       ")\n" +
       "\n" +
@@ -196,30 +219,22 @@ public class MigrationWorker {
     //language=PostgreSQL
     exec("UPDATE TMP_CLIENT t SET client_id = c.id\n" +
       "  FROM client c\n" +
-      "  WHERE c.id = t.id\n");
+      "  WHERE c.cia_id = t.cia_id\n");
 
     //language=PostgreSQL
     exec("UPDATE TMP_CLIENT SET status = 3 WHERE client_id IS NOT NULL AND status = 0");
 
     //language=PostgreSQL
-    exec("UPDATE TMP_CLIENT SET client_id = id WHERE status = 0");
-
-//    //language=PostgreSQL
-//    exec("INSERT INTO charm (id, \"name\", description, energy)\n" +
-//      "SELECT tch.id, '', tch.description, tch.energy\n" +
-//      "FROM tmp_charm tch LEFT JOIN tmp_client tcl ON tch.id = tcl.charm WHERE status = 0");
+    exec("UPDATE TMP_CLIENT SET client_id = nextval('s_client') WHERE status = 0");
 
     //language=PostgreSQL
-    exec("INSERT INTO client (id, surname, \"name\", patronymic, gender, birth_date, charm)\n" +
-      "SELECT client_id, surname, \"name\", patronymic, gender, birth_date, charm\n" +
-      "FROM TMP_CLIENT WHERE status = 0");
-
-//    //language=PostgreSQL
-//    exec("UPDATE charm ch SET \"name\" = tch.name\n" +
-//      "FROM tmp_charm tch LEFT JOIN tmp_client tcl ON tch.id = tcl.charm WHERE status = 3");
+    exec("INSERT INTO client (id, cia_id, surname, \"name\", patronymic, gender, birth_date, charm)\n" +
+      "SELECT client_id, tcl.cia_id, surname, tcl.name, patronymic, gender, birth_date, ch.id\n" +
+      "FROM TMP_CLIENT tcl LEFT JOIN charm ch on tcl.cia_id = ch.cia_id WHERE tcl.status = 0");
 
     //language=PostgreSQL
-    exec("UPDATE client c SET surname = s.surname\n" +
+    exec("UPDATE client c SET id = s.id\n" +
+      "                 , surname = s.surname\n" +
       "                 , \"name\" = s.\"name\"\n" +
       "                 , patronymic = s.patronymic\n" +
       "                 , birth_date = s.birth_date\n" +
@@ -248,6 +263,7 @@ public class MigrationWorker {
   private String r(String sql) {
 //    sql = sql.replaceAll("TMP_CLIENT", tmpClientTable);
     sql = sql.replaceAll("TMP_CLIENT", "tmp_client");
+    sql = sql.replaceAll("NEW_ID", idGen.get().newId());
     return sql;
   }
 
@@ -313,7 +329,7 @@ public class MigrationWorker {
       currentEntry = tarInput.getNextTarEntry();
     }
     String xmlContent = sb.toString();
-//    System.out.println(xmlContent);
+    System.out.println(xmlContent);
 
     // parse xml
     ClientRecordParser clientRecordParser = new ClientRecordParser();
@@ -331,14 +347,13 @@ public class MigrationWorker {
     // write into tmp db
     connection.setAutoCommit(false);
     try (PreparedStatement ps = connection.prepareStatement("INSERT INTO tmp_client " +
-        "(id, surname, name, patronymic, gender, birth_date, charm) " +
+        "(cia_id, surname, \"name\", patronymic, gender, birth_date, charm_name) " +
         "VALUES (?, ?, ?, ?, ?, ?, ?) "
 //      "ON CONFLICT (id) DO NOTHING"
 //      "DO UPDATE SET surname = ?, name = ?, patronymic = ?, gender = ?, birth_date = ?, charm = ?"
     );
 
-         PreparedStatement charmPS = connection.prepareStatement("INSERT INTO tmp_charm (id, name, description, energy) " +
-           "VALUES (?, ?, ?, ?) ON CONFLICT (id) DO UPDATE SET name = ?, description = ?, energy = ?");
+         PreparedStatement charmPS = connection.prepareStatement("INSERT INTO tmp_charm (cia_id, name) VALUES (?, ?)");
 
          PreparedStatement phonePS = connection.prepareStatement("INSERT INTO tmp_phone (client, number, type) " +
            "VALUES (?, ?, ?) ON CONFLICT (client, number) DO UPDATE SET type = ?");
@@ -357,7 +372,7 @@ public class MigrationWorker {
         ps.setString(4, clientRecord.patronymic);
         ps.setString(5, clientRecord.gender.toString());
         ps.setDate(6, java.sql.Date.valueOf(clientRecord.dateOfBirth));
-        ps.setString(7, clientRecord.charm.id);
+        ps.setString(7, clientRecord.charm.name);
 
 //        ps.setString(8, clientRecord.surname);
 //        ps.setString(9, clientRecord.name);
@@ -366,13 +381,8 @@ public class MigrationWorker {
 //        ps.setDate(12, java.sql.Date.valueOf(clientRecord.dateOfBirth));
 //        ps.setString(13, clientRecord.charm.id);
 
-        charmPS.setString(1, clientRecord.charm.id);
+        charmPS.setString(1, clientRecord.id);
         charmPS.setString(2, clientRecord.charm.name);
-        charmPS.setString(3, "");
-        charmPS.setDouble(4, 0);
-        charmPS.setString(5, clientRecord.charm.name);
-        charmPS.setString(6, "");
-        charmPS.setDouble(7, 0);
 
         for (PhoneNumber phoneNumber : clientRecord.phoneNumbers) {
           phonePS.setString(1, clientRecord.id);

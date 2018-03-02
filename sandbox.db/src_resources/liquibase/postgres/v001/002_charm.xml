@@ -8,9 +8,12 @@
       create table charm (
         id varchar(32) not null PRIMARY KEY,
         name varchar(255) not null,
-        description varchar(255) not null,
-        energy real not null
-      )
+        description varchar(255) not null default '',
+        energy real not null default 0,
+        actual smallint not null default 0,
+        cia_id varchar(100)
+      );
+      create sequence s_client start with 1000000
     ]]></sql>
   </changeSet>
 
