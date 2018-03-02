@@ -135,7 +135,7 @@ public class MigrationWorker {
 
     //language=PostgreSQL
     exec("CREATE TABLE tmp_charm (\n" +
-      "        cia_id VARCHAR(32),\n" +
+//      "        cia_id VARCHAR(32),\n" +
       "        charm_id VARCHAR(32),\n" +
       "        name VARCHAR(255),\n" +
       "        description VARCHAR(255),\n" +
@@ -171,7 +171,7 @@ public class MigrationWorker {
 
     //language=PostgreSQL
     exec("WITH num_ord AS (\n" +
-      "  SELECT number, cia_id, row_number() OVER(PARTITION BY cia_id ORDER BY number DESC) AS ord \n" +
+      "  SELECT number, \"name\", row_number() OVER(PARTITION BY \"name\" ORDER BY number DESC) AS ord \n" +
       "  FROM tmp_charm\n" +
       ")\n" +
       "\n" +
@@ -181,7 +181,7 @@ public class MigrationWorker {
     //language=PostgreSQL
     exec("UPDATE tmp_charm t SET charm_id = c.id\n" +
       "  FROM charm c\n" +
-      "  WHERE c.cia_id = t.cia_id\n");
+      "  WHERE c.name = t.name\n");
 
     //language=PostgreSQL
     exec("UPDATE tmp_charm SET status = 3 WHERE charm_id IS NOT NULL AND status = 0");
@@ -190,15 +190,15 @@ public class MigrationWorker {
     exec("UPDATE tmp_charm SET charm_id = nextval('s_client') WHERE status = 0");
 
     //language=PostgreSQL
-    exec("INSERT INTO charm (id, \"name\", cia_id)\n" +
-      "SELECT charm_id, \"name\", cia_id\n" +
+    exec("INSERT INTO charm (id, \"name\")\n" +
+      "SELECT charm_id, \"name\"\n" +
       "FROM tmp_charm WHERE status = 0");
 
     //language=PostgreSQL
-    exec("UPDATE charm c SET \"name\" = s.name\n" +
-      "FROM tmp_charm s\n" +
-      "WHERE c.id = s.charm_id\n" +
-      "AND s.status = 3");
+//    exec("UPDATE charm c SET \"name\" = s.name\n" +
+//      "FROM tmp_charm s\n" +
+//      "WHERE c.id = s.charm_id\n" +
+//      "AND s.status = 3");
 
     //language=PostgreSQL
     exec("UPDATE charm SET actual = 1 WHERE id IN (\n" +
@@ -230,10 +230,10 @@ public class MigrationWorker {
     //language=PostgreSQL
     exec("INSERT INTO client (id, cia_id, surname, \"name\", patronymic, gender, birth_date, charm)\n" +
       "SELECT client_id, tcl.cia_id, surname, tcl.name, patronymic, gender, birth_date, ch.id\n" +
-      "FROM TMP_CLIENT tcl LEFT JOIN charm ch on tcl.cia_id = ch.cia_id WHERE tcl.status = 0");
+      "FROM TMP_CLIENT tcl LEFT JOIN charm ch on tcl.charm_name = ch.name WHERE tcl.status = 0");
 
     //language=PostgreSQL
-    exec("UPDATE client c SET id = s.id\n" +
+    exec("UPDATE client c SET id = s.client_id\n" +
       "                 , surname = s.surname\n" +
       "                 , \"name\" = s.\"name\"\n" +
       "                 , patronymic = s.patronymic\n" +
@@ -329,7 +329,7 @@ public class MigrationWorker {
       currentEntry = tarInput.getNextTarEntry();
     }
     String xmlContent = sb.toString();
-    System.out.println(xmlContent);
+//    System.out.println(xmlContent);
 
     // parse xml
     ClientRecordParser clientRecordParser = new ClientRecordParser();
@@ -353,13 +353,12 @@ public class MigrationWorker {
 //      "DO UPDATE SET surname = ?, name = ?, patronymic = ?, gender = ?, birth_date = ?, charm = ?"
     );
 
-         PreparedStatement charmPS = connection.prepareStatement("INSERT INTO tmp_charm (cia_id, name) VALUES (?, ?)");
+         PreparedStatement charmPS = connection.prepareStatement("INSERT INTO tmp_charm (\"name\") VALUES (?)");
 
          PreparedStatement phonePS = connection.prepareStatement("INSERT INTO tmp_phone (client, number, type) " +
            "VALUES (?, ?, ?) ON CONFLICT (client, number) DO UPDATE SET type = ?");
 
-         PreparedStatement addrPS = connection.prepareStatement("INSERT INTO tmp_addr (client, type, street, house, flat) VALUES (?, ?, ?, ?, ?) " +
-           "ON CONFLICT (client, type) DO UPDATE SET  street = ?, house = ?, flat = ?")
+         PreparedStatement addrPS = connection.prepareStatement("INSERT INTO tmp_addr (client, \"type\", street, house, flat) VALUES (?, ?, ?, ?, ?)")
     ) {
       int batchSize = 0, recordsCount = 0;
       long startedAt = System.nanoTime();
@@ -381,8 +380,7 @@ public class MigrationWorker {
 //        ps.setDate(12, java.sql.Date.valueOf(clientRecord.dateOfBirth));
 //        ps.setString(13, clientRecord.charm.id);
 
-        charmPS.setString(1, clientRecord.id);
-        charmPS.setString(2, clientRecord.charm.name);
+        charmPS.setString(1, clientRecord.charm.name);
 
         for (PhoneNumber phoneNumber : clientRecord.phoneNumbers) {
           phonePS.setString(1, clientRecord.id);
@@ -398,9 +396,6 @@ public class MigrationWorker {
         addrPS.setString(3, clientRecord.addressF.street);
         addrPS.setString(4, clientRecord.addressF.house);
         addrPS.setString(5, clientRecord.addressF.flat);
-        addrPS.setString(6, clientRecord.addressF.street);
-        addrPS.setString(7, clientRecord.addressF.house);
-        addrPS.setString(8, clientRecord.addressF.flat);
         addrPS.executeUpdate();
         addrPS.addBatch();
 
@@ -409,9 +404,6 @@ public class MigrationWorker {
         addrPS.setString(3, clientRecord.addressR.street);
         addrPS.setString(4, clientRecord.addressR.house);
         addrPS.setString(5, clientRecord.addressR.flat);
-        addrPS.setString(6, clientRecord.addressR.street);
-        addrPS.setString(7, clientRecord.addressR.house);
-        addrPS.setString(8, clientRecord.addressR.flat);
         addrPS.executeUpdate();
         addrPS.addBatch();
 
