@@ -148,13 +148,16 @@ public class MigrationWorker {
 
     //language=PostgreSQL
     exec("CREATE TABLE tmp_addr (\n" +
-      "        client VARCHAR(32),\n" +
+      "        cia_id VARCHAR(32),\n" +
+      "        client_id VARCHAR(32),\n" +
       "        type VARCHAR(32),\n" +
       "        street VARCHAR(255),\n" +
       "        house VARCHAR(32),\n" +
       "        flat VARCHAR(32),\n" +
       "        actual SMALLINT NOT NULL DEFAULT 0,\n" +
-      "        PRIMARY KEY (client, type)\n" +
+      "        status INT NOT NULL DEFAULT 0,\n" +
+      "        error VARCHAR(255),\n" +
+      "        number BIGSERIAL PRIMARY KEY\n" +
       "      )");
 
     //language=PostgreSQL
@@ -195,15 +198,10 @@ public class MigrationWorker {
       "FROM tmp_charm WHERE status = 0");
 
     //language=PostgreSQL
-//    exec("UPDATE charm c SET \"name\" = s.name\n" +
-//      "FROM tmp_charm s\n" +
-//      "WHERE c.id = s.charm_id\n" +
-//      "AND s.status = 3");
-
-    //language=PostgreSQL
     exec("UPDATE charm SET actual = 1 WHERE id IN (\n" +
       "  SELECT charm_id FROM tmp_charm WHERE status = 0\n" +
       ")");
+
 
 
     //marking duplicates
@@ -246,6 +244,56 @@ public class MigrationWorker {
     exec("UPDATE client SET actual = 1 WHERE id IN (\n" +
       "  SELECT client_id FROM TMP_CLIENT WHERE status = 0\n" +
       ")");
+
+
+
+
+
+    //language=PostgreSQL
+    exec("WITH num_ord AS (\n" +
+      "  SELECT number, cia_id, type, row_number() OVER(PARTITION BY cia_id, type ORDER BY number DESC) AS ord\n" +
+      "  FROM tmp_addr\n" +
+      ")\n" +
+      "\n" +
+      "UPDATE tmp_addr SET status = 2\n" +
+      "WHERE status = 0 AND number IN (SELECT number FROM num_ord WHERE ord > 1)");
+
+    //language=PostgreSQL
+    exec("UPDATE tmp_addr t SET client_id = ca.client\n" +
+      "  FROM client_addr ca\n" +
+      "  WHERE ca.cia_id = t.cia_id\n");
+
+    //language=PostgreSQL
+    exec("UPDATE tmp_addr SET status = 3 WHERE client_id IS NOT NULL AND status = 0");
+
+    //language=PostgreSQL
+    exec("UPDATE tmp_addr ta SET client_id = c.id\n" +
+      "  FROM client c\n" +
+      "  WHERE c.cia_id = ta.cia_id AND ta.status = 0\n");
+
+    //
+    //language=PostgreSQL
+    exec("UPDATE tmp_addr SET status = 1 WHERE client_id IS NULL AND status = 0");
+
+    //language=PostgreSQL
+    exec("INSERT INTO client_addr (client, type, street, house, flat, cia_id)\n" +
+      "SELECT client_id, type, street, house, flat, cia_id\n" +
+      "FROM tmp_addr WHERE status = 0");
+
+//    //language=PostgreSQL
+//    exec("UPDATE client c SET id = s.client_id\n" +
+//      "                 , surname = s.surname\n" +
+//      "                 , \"name\" = s.\"name\"\n" +
+//      "                 , patronymic = s.patronymic\n" +
+//      "                 , birth_date = s.birth_date\n" +
+//      "FROM TMP_CLIENT s\n" +
+//      "WHERE c.id = s.client_id\n" +
+//      "AND s.status = 3");
+//
+//    //language=PostgreSQL
+//    exec("UPDATE client SET actual = 1 WHERE id IN (\n" +
+//      "  SELECT client_id FROM TMP_CLIENT WHERE status = 0\n" +
+//      ")");
 
     //send report by ssh
 
@@ -329,7 +377,7 @@ public class MigrationWorker {
       currentEntry = tarInput.getNextTarEntry();
     }
     String xmlContent = sb.toString();
-//    System.out.println(xmlContent);
+    System.out.println(xmlContent);
 
     // parse xml
     ClientRecordParser clientRecordParser = new ClientRecordParser();
@@ -358,7 +406,7 @@ public class MigrationWorker {
          PreparedStatement phonePS = connection.prepareStatement("INSERT INTO tmp_phone (client, number, type) " +
            "VALUES (?, ?, ?) ON CONFLICT (client, number) DO UPDATE SET type = ?");
 
-         PreparedStatement addrPS = connection.prepareStatement("INSERT INTO tmp_addr (client, \"type\", street, house, flat) VALUES (?, ?, ?, ?, ?)")
+         PreparedStatement addrPS = connection.prepareStatement("INSERT INTO tmp_addr (cia_id, \"type\", street, house, flat) VALUES (?, ?, ?, ?, ?)")
     ) {
       int batchSize = 0, recordsCount = 0;
       long startedAt = System.nanoTime();
