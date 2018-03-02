@@ -234,14 +234,16 @@ public class MigrationWorker {
       "FROM TMP_CLIENT tcl LEFT JOIN charm ch on tcl.charm_name = ch.name WHERE tcl.status = 0");
 
     //language=PostgreSQL
-    exec("UPDATE client c SET id = s.client_id\n" +
-      "                 , surname = s.surname\n" +
-      "                 , \"name\" = s.\"name\"\n" +
-      "                 , patronymic = s.patronymic\n" +
-      "                 , birth_date = s.birth_date\n" +
-      "FROM TMP_CLIENT s\n" +
-      "WHERE c.id = s.client_id\n" +
-      "AND s.status = 3");
+    exec("UPDATE client c SET cia_id = tc.cia_id\n" +
+      "                 , surname = tc.surname\n" +
+      "                 , \"name\" = tc.\"name\"\n" +
+      "                 , patronymic = tc.patronymic\n" +
+      "                 , gender = tc.gender\n" +
+      "                 , birth_date = tc.birth_date\n" +
+      "                 , charm = ch.id\n" +
+      "FROM TMP_CLIENT tc LEFT JOIN charm ch on tc.charm_name = ch.name\n" +
+      "WHERE c.id = tc.client_id\n" +
+      "AND tc.status = 3");
 
     //language=PostgreSQL
     exec("UPDATE client SET actual = 1 WHERE id IN (\n" +
@@ -283,21 +285,20 @@ public class MigrationWorker {
       "SELECT client_id, type, street, house, flat, cia_id\n" +
       "FROM tmp_addr WHERE status = 0");
 
-    // TODO: 3/2/18 implement update
-//    //language=PostgreSQL
-//    exec("UPDATE client c SET id = s.client_id\n" +
-//      "                 , surname = s.surname\n" +
-//      "                 , \"name\" = s.\"name\"\n" +
-//      "                 , patronymic = s.patronymic\n" +
-//      "                 , birth_date = s.birth_date\n" +
-//      "FROM TMP_CLIENT s\n" +
-//      "WHERE c.id = s.client_id\n" +
-//      "AND s.status = 3");
-//
-//    //language=PostgreSQL
-//    exec("UPDATE client SET actual = 1 WHERE id IN (\n" +
-//      "  SELECT client_id FROM TMP_CLIENT WHERE status = 0\n" +
-//      ")");
+    //language=PostgreSQL
+    exec("UPDATE client_addr ca SET type = ta.type\n" +
+      "                 , street = ta.street\n" +
+      "                 , house = ta.house\n" +
+      "                 , flat = ta.flat\n" +
+      "                 , cia_id = ta.cia_id\n" +
+      "FROM tmp_addr ta\n" +
+      "WHERE ca.client = ta.client_id\n" +
+      "AND ta.status = 3");
+
+    //language=PostgreSQL
+    exec("UPDATE client_addr SET actual = 1 WHERE client IN (\n" +
+      "  SELECT client_id FROM tmp_addr WHERE status = 0\n" +
+      ")");
 
 
 
@@ -334,6 +335,19 @@ public class MigrationWorker {
     exec("INSERT INTO client_phone (client, number, type, cia_id)\n" +
       "SELECT client_id, phone_number, type, cia_id\n" +
       "FROM tmp_phone WHERE status = 0");
+
+    //language=PostgreSQL
+    exec("UPDATE client_phone cp SET number = tp.phone_number\n" +
+      "                 , type = tp.type\n" +
+      "                 , cia_id = tp.cia_id\n" +
+      "FROM tmp_phone tp\n" +
+      "WHERE cp.client = tp.client_id\n" +
+      "AND tp.status = 3");
+
+    //language=PostgreSQL
+    exec("UPDATE client_phone SET actual = 1 WHERE client IN (\n" +
+      "  SELECT client_id FROM tmp_phone WHERE status = 0\n" +
+      ")");
 
     //send report by ssh
 

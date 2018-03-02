@@ -12,6 +12,7 @@
         house varchar(32) not null,
         flat varchar(32),
         cia_id varchar(100),
+        actual smallint not null default 0,
         PRIMARY KEY (client, type)
       )
     ]]></sql>
