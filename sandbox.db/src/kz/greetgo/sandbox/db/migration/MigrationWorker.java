@@ -162,11 +162,14 @@ public class MigrationWorker {
 
     //language=PostgreSQL
     exec("CREATE TABLE tmp_phone (\n" +
-      "        client VARCHAR(32),\n" +
-      "        number VARCHAR(32),\n" +
+      "        cia_id VARCHAR(32),\n" +
+      "        client_id VARCHAR(32),\n" +
+      "        phone_number VARCHAR(32),\n" +
       "        type VARCHAR(32),\n" +
       "        actual SMALLINT NOT NULL DEFAULT 0,\n" +
-      "        PRIMARY KEY (client, number)\n" +
+      "        status INT NOT NULL DEFAULT 0,\n" +
+      "        error VARCHAR(255),\n" +
+      "        number BIGSERIAL PRIMARY KEY\n" +
       "      )");
   }
 
@@ -280,6 +283,7 @@ public class MigrationWorker {
       "SELECT client_id, type, street, house, flat, cia_id\n" +
       "FROM tmp_addr WHERE status = 0");
 
+    // TODO: 3/2/18 implement update
 //    //language=PostgreSQL
 //    exec("UPDATE client c SET id = s.client_id\n" +
 //      "                 , surname = s.surname\n" +
@@ -294,6 +298,42 @@ public class MigrationWorker {
 //    exec("UPDATE client SET actual = 1 WHERE id IN (\n" +
 //      "  SELECT client_id FROM TMP_CLIENT WHERE status = 0\n" +
 //      ")");
+
+
+
+
+    //language=PostgreSQL
+    exec("WITH num_ord AS (\n" +
+      "  SELECT number, cia_id, phone_number, row_number() OVER(PARTITION BY cia_id, phone_number ORDER BY number DESC) AS ord\n" +
+      "  FROM tmp_phone\n" +
+      ")\n" +
+      "\n" +
+      "UPDATE tmp_phone SET status = 2\n" +
+      "WHERE status = 0 AND number IN (SELECT number FROM num_ord WHERE ord > 1)");
+
+    //language=PostgreSQL
+    exec("UPDATE tmp_phone tp SET client_id = cp.client\n" +
+      "  FROM client_phone cp\n" +
+      "  WHERE cp.cia_id = tp.cia_id\n");
+
+    // marking what needs to be updated
+    //language=PostgreSQL
+    exec("UPDATE tmp_phone SET status = 3 WHERE client_id IS NOT NULL AND status = 0");
+
+    // prepare to insertion
+    //language=PostgreSQL
+    exec("UPDATE tmp_phone ta SET client_id = c.id\n" +
+      "  FROM client c\n" +
+      "  WHERE c.cia_id = ta.cia_id AND ta.status = 0\n");
+
+    //
+    //language=PostgreSQL
+    exec("UPDATE tmp_phone SET status = 1 WHERE client_id IS NULL AND status = 0");
+
+    //language=PostgreSQL
+    exec("INSERT INTO client_phone (client, number, type, cia_id)\n" +
+      "SELECT client_id, phone_number, type, cia_id\n" +
+      "FROM tmp_phone WHERE status = 0");
 
     //send report by ssh
 
@@ -403,8 +443,8 @@ public class MigrationWorker {
 
          PreparedStatement charmPS = connection.prepareStatement("INSERT INTO tmp_charm (\"name\") VALUES (?)");
 
-         PreparedStatement phonePS = connection.prepareStatement("INSERT INTO tmp_phone (client, number, type) " +
-           "VALUES (?, ?, ?) ON CONFLICT (client, number) DO UPDATE SET type = ?");
+         PreparedStatement phonePS = connection.prepareStatement("INSERT INTO tmp_phone (cia_id, phone_number, type) " +
+           "VALUES (?, ?, ?)");
 
          PreparedStatement addrPS = connection.prepareStatement("INSERT INTO tmp_addr (cia_id, \"type\", street, house, flat) VALUES (?, ?, ?, ?, ?)")
     ) {
@@ -434,7 +474,6 @@ public class MigrationWorker {
           phonePS.setString(1, clientRecord.id);
           phonePS.setString(2, phoneNumber.number);
           phonePS.setString(3, phoneNumber.phoneType.toString());
-          phonePS.setString(4, phoneNumber.phoneType.toString());
           phonePS.executeUpdate();
           phonePS.addBatch();
         }
