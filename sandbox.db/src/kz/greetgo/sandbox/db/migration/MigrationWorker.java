@@ -17,6 +17,7 @@ import org.xml.sax.SAXException;
 
 import java.io.*;
 import java.sql.*;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -383,29 +384,29 @@ public class MigrationWorker {
   }
 
   public static void main(String[] args) throws IOException {
-    MigrationWorker mw = new MigrationWorker();
-
-    String folderName = "build/files_to_send/";
-    final File folder = new File(folderName);
-    final String ext = ".xml.tar.bz2";
-    List<String> fileNames = mw.listFilesForFolder(folder);
-    String regexPattern = "^[a-zA-Z0-9-_]*.xml.tar.bz2$";
-    Pattern p = Pattern.compile(regexPattern);
-    SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-
-    for (String fileName : fileNames) {
-      if (p.matcher(fileName).matches()) {
-        File file = new File(folderName + fileName);
-        String newName = folderName + fileName.substring(0, fileName.length() - ext.length()) + "_YMD" + ext;
-        File file1 = new File(newName);
-        if (file1.exists())
-          throw new java.io.IOException("file exists");
-        boolean success = file.renameTo(file1);
-        if (!success) {
-          System.out.println("File was not successfully renamed");
-        }
-      }
-    }
+//    MigrationWorker mw = new MigrationWorker();
+//
+//    String folderName = "build/files_to_send/";
+//    final File folder = new File(folderName);
+//    final String ext = ".xml.tar.bz2";
+//    List<String> fileNames = mw.listFilesForFolder(folder);
+//    String regexPattern = "^[a-zA-Z0-9-_]*.xml.tar.bz2$";
+//    Pattern p = Pattern.compile(regexPattern);
+//    SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+//
+//    for (String fileName : fileNames) {
+//      if (p.matcher(fileName).matches()) {
+//        File file = new File(folderName + fileName);
+//        String newName = folderName + fileName.substring(0, fileName.length() - ext.length()) + "_YMD" + ext;
+//        File file1 = new File(newName);
+//        if (file1.exists())
+//          throw new java.io.IOException("file exists");
+//        boolean success = file.renameTo(file1);
+//        if (!success) {
+//          System.out.println("File was not successfully renamed");
+//        }
+//      }
+//    }
   }
 
   private List<String> listFilesForFolder(final File folder) {
@@ -448,7 +449,7 @@ public class MigrationWorker {
     List<String> fileDirToLoad = renameFiles();
 
     for (String fileName : fileDirToLoad) {
-      inputStream = new FileInputStream("build/out_files/from_cia_2018-02-27-154753-1-300.xml.tar.bz2");
+      inputStream = new FileInputStream(fileName);
       TarArchiveInputStream tarInput = new TarArchiveInputStream(new BZip2CompressorInputStream(inputStream));
       TarArchiveEntry currentEntry = tarInput.getNextTarEntry();
       BufferedReader br;
@@ -464,7 +465,7 @@ public class MigrationWorker {
         currentEntry = tarInput.getNextTarEntry();
       }
       String xmlContent = sb.toString();
-      System.out.println(xmlContent);
+//      System.out.println(xmlContent);
 
       // parse xml
       ClientRecordParser clientRecordParser = new ClientRecordParser();
@@ -499,7 +500,8 @@ public class MigrationWorker {
           clientPS.setString(3, clientRecord.name);
           clientPS.setString(4, clientRecord.patronymic);
           clientPS.setString(5, clientRecord.gender.toString());
-          clientPS.setDate(6, java.sql.Date.valueOf(clientRecord.dateOfBirth));
+          System.out.println(clientRecord.dateOfBirth);
+          clientPS.setDate(6, clientRecord.dateOfBirth != null ? java.sql.Date.valueOf(clientRecord.dateOfBirth) : null);
           clientPS.setString(7, clientRecord.charm.name);
 
           charmPS.setString(1, clientRecord.charm.name);

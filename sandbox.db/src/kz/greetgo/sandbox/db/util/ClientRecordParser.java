@@ -9,7 +9,10 @@ import org.xml.sax.helpers.XMLReaderFactory;
 
 import java.io.IOException;
 import java.io.StringReader;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 public class ClientRecordParser extends SaxHandler {
@@ -62,6 +65,14 @@ public class ClientRecordParser extends SaxHandler {
 
       case "/cia/client/birth":
         clientRecord.dateOfBirth = attributes.getValue("value");
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+        try {
+          sdf.parse(clientRecord.dateOfBirth);
+        } catch (ParseException e) {
+          // Проглатывание ошибки
+          clientRecord.dateOfBirth = null;
+          return;
+        }
         return;
 
       case "/cia/client/charm":
