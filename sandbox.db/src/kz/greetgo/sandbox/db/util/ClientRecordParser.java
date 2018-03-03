@@ -9,16 +9,14 @@ import org.xml.sax.helpers.XMLReaderFactory;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.StringReader;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 public class ClientRecordParser extends SaxHandler {
 
-  private ClientRecordsToSave clientRecord;
+  ClientRecordsToSave clientRecord;
   private List<ClientRecordsToSave> clientRecords;
 
   public List<ClientRecordsToSave> getClientRecords() {
@@ -29,14 +27,7 @@ public class ClientRecordParser extends SaxHandler {
     clientRecords = new ArrayList<>();
   }
 
-  public void parseRecordData(String recordData) throws SAXException, IOException {
-    if (recordData == null) return;
-    XMLReader reader = XMLReaderFactory.createXMLReader();
-    reader.setContentHandler(this);
-    reader.parse(new InputSource(new StringReader(recordData)));
-  }
-
-  public void parseRecordData2(InputStream inputStream) throws SAXException, IOException {
+  public void parseRecordData(InputStream inputStream) throws SAXException, IOException {
     if (inputStream == null) return;
     XMLReader reader = XMLReaderFactory.createXMLReader();
     reader.setContentHandler(this);

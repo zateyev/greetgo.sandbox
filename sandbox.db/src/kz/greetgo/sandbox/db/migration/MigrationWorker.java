@@ -113,6 +113,10 @@ public class MigrationWorker {
     uploadAndDropErrors();
   }
 
+  public static void main(String[] args) throws IOException, SAXException, InterruptedException {
+
+  }
+
   private void uploadAndDropErrors() throws SQLException {
 
     // create report about errors and send by ssh
@@ -386,32 +390,6 @@ public class MigrationWorker {
     }
   }
 
-  public static void main(String[] args) throws IOException {
-//    MigrationWorker mw = new MigrationWorker();
-//
-//    String folderName = "build/files_to_send/";
-//    final File folder = new File(folderName);
-//    final String ext = ".xml.tar.bz2";
-//    List<String> fileNames = mw.listFilesForFolder(folder);
-//    String regexPattern = "^[a-zA-Z0-9-_]*.xml.tar.bz2$";
-//    Pattern p = Pattern.compile(regexPattern);
-//    SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-//
-//    for (String fileName : fileNames) {
-//      if (p.matcher(fileName).matches()) {
-//        File file = new File(folderName + fileName);
-//        String newName = folderName + fileName.substring(0, fileName.length() - ext.length()) + "_YMD" + ext;
-//        File file1 = new File(newName);
-//        if (file1.exists())
-//          throw new java.io.IOException("file exists");
-//        boolean success = file.renameTo(file1);
-//        if (!success) {
-//          System.out.println("File was not successfully renamed");
-//        }
-//      }
-//    }
-  }
-
   private List<String> listFilesForFolder(final File folder) {
     List<String> ret = new ArrayList<>();
     for (final File fileEntry : folder.listFiles()) {
@@ -427,27 +405,6 @@ public class MigrationWorker {
 
   private int download() throws IOException, SAXException, SQLException {
 
-//    final AtomicBoolean working = new AtomicBoolean(true);
-//    final AtomicBoolean showStatus = new AtomicBoolean(false);
-//
-//    final Thread see = new Thread(() -> {
-//
-//      while (working.get()) {
-//
-//        try {
-//          Thread.sleep(showStatusPingMillis);
-//        } catch (InterruptedException e) {
-//          break;
-//        }
-//
-//        showStatus.set(true);
-//
-//      }
-//
-//    });
-//    see.start();
-
-
     // get file, read all files iteratively
     List<String> fileDirToLoad = renameFiles();
 
@@ -458,7 +415,7 @@ public class MigrationWorker {
 
       // parse xml
       ClientRecordParser clientRecordParser = new ClientRecordParser();
-      clientRecordParser.parseRecordData2(tarInput);
+      clientRecordParser.parseRecordData(tarInput);
 
       List<ClientRecordsToSave> clientRecords = clientRecordParser.getClientRecords();
 
