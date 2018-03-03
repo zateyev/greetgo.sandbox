@@ -6,7 +6,7 @@ import kz.greetgo.sandbox.controller.model.ClientRecordsToSave;
 import java.util.List;
 
 @Bean
-public class FrsMigrationWorker extends MigrationWorkerImpl {
+public class FrsMigrationWorker extends AbstractMigrationWorker {
   @Override
   protected void dropTmpTables() {
 

@@ -18,7 +18,7 @@ import java.util.List;
 
 import static kz.greetgo.sandbox.db.util.TimeUtils.showTime;
 
-public abstract class MigrationWorkerImpl implements MigrationWorker {
+public abstract class AbstractMigrationWorker implements MigrationWorker {
   public InputStream inputStream;
   public OutputStream outputStream;
   public Connection connection;

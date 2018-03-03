@@ -27,7 +27,7 @@ import static kz.greetgo.sandbox.db.util.TimeUtils.recordsPerSecond;
 import static kz.greetgo.sandbox.db.util.TimeUtils.showTime;
 
 @Bean
-public class CiaMigrationWorker extends MigrationWorkerImpl {
+public class CiaMigrationWorker extends AbstractMigrationWorker {
 
   public BeanGetter<JdbcSandbox> jdbcSandbox;
   public BeanGetter<ClientDao> clientDao;
