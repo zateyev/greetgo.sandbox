@@ -8,6 +8,7 @@ import org.xml.sax.XMLReader;
 import org.xml.sax.helpers.XMLReaderFactory;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.StringReader;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -33,6 +34,13 @@ public class ClientRecordParser extends SaxHandler {
     XMLReader reader = XMLReaderFactory.createXMLReader();
     reader.setContentHandler(this);
     reader.parse(new InputSource(new StringReader(recordData)));
+  }
+
+  public void parseRecordData2(InputStream inputStream) throws SAXException, IOException {
+    if (inputStream == null) return;
+    XMLReader reader = XMLReaderFactory.createXMLReader();
+    reader.setContentHandler(this);
+    reader.parse(new InputSource(inputStream));
   }
 
   @Override

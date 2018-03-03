@@ -1,6 +1,5 @@
 package kz.greetgo.sandbox.db.migration;
 
-import kz.greetgo.db.ConnectionCallback;
 import kz.greetgo.depinject.core.Bean;
 import kz.greetgo.depinject.core.BeanGetter;
 import kz.greetgo.sandbox.controller.model.ClientRecordsToSave;
@@ -17,13 +16,11 @@ import org.xml.sax.SAXException;
 
 import java.io.*;
 import java.sql.*;
-import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import static kz.greetgo.sandbox.db.util.TimeUtils.recordsPerSecond;
@@ -98,13 +95,19 @@ public class MigrationWorker {
 
     //language=PostgreSQL
     exec("UPDATE TMP_CLIENT SET error = 'surname is not defined' " +
-      "WHERE error IS NULL AND surname IS NULL");
+      "WHERE error IS NULL AND (surname <> '') IS NOT TRUE");
     //language=PostgreSQL
     exec("UPDATE TMP_CLIENT SET error = 'name is not defined'\n" +
-      "WHERE error IS NULL AND name IS NULL");
+      "WHERE error IS NULL AND (name <> '') IS NOT TRUE");
     //language=PostgreSQL
     exec("UPDATE TMP_CLIENT SET error = 'birth_date is not defined'\n" +
       "WHERE error IS NULL AND birth_date IS NULL");
+    //language=PostgreSQL
+    exec("UPDATE TMP_CLIENT SET error = 'charm is not defined'\n" +
+      "WHERE error IS NULL AND charm_name IS NULL");
+    //language=PostgreSQL
+    exec("UPDATE TMP_CLIENT SET error = 'client too old or too young'\n" +
+      "WHERE error IS NULL AND date_part('year', age(birth_date)) NOT BETWEEN 10 AND 200");
 
 
     uploadAndDropErrors();
@@ -454,28 +457,35 @@ public class MigrationWorker {
       TarArchiveEntry currentEntry = tarInput.getNextTarEntry();
       BufferedReader br;
       StringBuilder sb = new StringBuilder();
-      while (currentEntry != null) {
-        br = new BufferedReader(new InputStreamReader(tarInput));
-        System.out.println("For File = " + currentEntry.getName());
-        String line;
-        ClientRecordParser clientRecordParser;
-        while ((line = br.readLine()) != null) {
-          sb.append(line).append("\n");
-        }
-        currentEntry = tarInput.getNextTarEntry();
-      }
-      String xmlContent = sb.toString();
+//      while (currentEntry != null) {
+//        br = new BufferedReader(new InputStreamReader(tarInput));
+//        System.out.println("For File = " + currentEntry.getName());
+//        String line;
+//        ClientRecordParser clientRecordParser;
+//        while ((line = br.readLine()) != null) {
+//          sb.append(line).append("\n");
+//        }
+//        currentEntry = tarInput.getNextTarEntry();
+////      }
+//      String xmlContent = sb.toString();
 //      System.out.println(xmlContent);
 
       // parse xml
       ClientRecordParser clientRecordParser = new ClientRecordParser();
-      clientRecordParser.parseRecordData(xmlContent);
+      clientRecordParser.parseRecordData2(tarInput);
 
       List<ClientRecordsToSave> clientRecords = clientRecordParser.getClientRecords();
-//    System.out.println(clientRecords.size());
+    System.out.println(clientRecords.size());
 
       // write into tmp db
       connection.setAutoCommit(false);
+
+
+//      Statement statement = connection.createStatement();
+//      statement.addBatch(sql);
+//
+//      statement.executeBatch()
+
       try (
         PreparedStatement clientPS = connection.prepareStatement("INSERT INTO tmp_client " +
           "(cia_id, surname, \"name\", patronymic, gender, birth_date, charm_name) " +
@@ -500,7 +510,6 @@ public class MigrationWorker {
           clientPS.setString(3, clientRecord.name);
           clientPS.setString(4, clientRecord.patronymic);
           clientPS.setString(5, clientRecord.gender.toString());
-          System.out.println(clientRecord.dateOfBirth);
           clientPS.setDate(6, clientRecord.dateOfBirth != null ? java.sql.Date.valueOf(clientRecord.dateOfBirth) : null);
           clientPS.setString(7, clientRecord.charm.name);
 
@@ -572,6 +581,7 @@ public class MigrationWorker {
             + " : " + recordsPerSecond(recordsCount, now - startedAt));
         }
       } finally {
+        inputStream.close();
         connection.setAutoCommit(true);
         working.set(false);
         see.interrupt();
