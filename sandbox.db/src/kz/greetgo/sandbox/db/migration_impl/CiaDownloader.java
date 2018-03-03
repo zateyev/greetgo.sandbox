@@ -32,12 +32,9 @@ public class CiaDownloader extends SaxHandler implements AutoCloseable {
   private int recordsCount;
 
 
-  public CiaDownloader(InputStream inputStream) {
+  public CiaDownloader(InputStream inputStream, Connection connection) throws SQLException {
     this.inputStream = inputStream;
-  }
-
-  public int downloadCia() throws SAXException, IOException, SQLException {
-    if (inputStream == null) return 0;
+    this.connection = connection;
 
     clientPS = connection.prepareStatement("INSERT INTO tmp_client " +
       "(cia_id, surname, name, patronymic, gender, birth_date, charm_name) " +
@@ -51,6 +48,10 @@ public class CiaDownloader extends SaxHandler implements AutoCloseable {
 
     addrPS = connection.prepareStatement("INSERT INTO tmp_addr (cia_id, type, street, house, flat) " +
       "VALUES (?, ?, ?, ?, ?)");
+  }
+
+  public int downloadCia() throws SAXException, IOException, SQLException {
+    if (inputStream == null) return 0;
 
     XMLReader reader = XMLReaderFactory.createXMLReader();
     reader.setContentHandler(this);

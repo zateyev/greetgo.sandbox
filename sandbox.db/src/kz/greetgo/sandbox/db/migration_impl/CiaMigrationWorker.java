@@ -391,10 +391,9 @@ public class CiaMigrationWorker extends AbstractMigrationWorker {
       long startedAt = System.nanoTime();
 
       // parse xml and insert into tmp tables
-      try (CiaDownloader ciaDownloader = new CiaDownloader(tarInput)) {
-        connection.setAutoCommit(false);
+      connection.setAutoCommit(false);
+      try (CiaDownloader ciaDownloader = new CiaDownloader(tarInput, connection)) {
         ciaDownloader.maxBatchSize = maxBatchSize;
-        ciaDownloader.connection = connection;
         recordsCount = ciaDownloader.downloadCia();
       } finally {
         connection.setAutoCommit(true);
