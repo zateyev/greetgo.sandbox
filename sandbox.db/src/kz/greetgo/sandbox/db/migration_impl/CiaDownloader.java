@@ -25,7 +25,6 @@ public class CiaDownloader extends SaxHandler implements AutoCloseable {
   public int maxBatchSize;
 
   private PreparedStatement clientPS;
-  private PreparedStatement charmPS;
   private PreparedStatement phonePS;
   private PreparedStatement addrPS;
   private int batchSize = 0;
@@ -40,8 +39,6 @@ public class CiaDownloader extends SaxHandler implements AutoCloseable {
       "(cia_id, surname, name, patronymic, gender, birth_date, charm_name) " +
       "VALUES (?, ?, ?, ?, ?, ?, ?) "
     );
-
-    charmPS = connection.prepareStatement("INSERT INTO tmp_charm (name) VALUES (?)");
 
     phonePS = connection.prepareStatement("INSERT INTO tmp_phone (cia_id, phone_number, type) " +
       "VALUES (?, ?, ?)");
@@ -156,7 +153,6 @@ public class CiaDownloader extends SaxHandler implements AutoCloseable {
 
       case "/cia": {
         if (batchSize > 0) {
-          charmPS.executeBatch();
           addrPS.executeBatch();
           phonePS.executeBatch();
           clientPS.executeBatch();
@@ -176,8 +172,6 @@ public class CiaDownloader extends SaxHandler implements AutoCloseable {
     clientPS.setString(5, clientRecord.gender.toString());
     clientPS.setDate(6, clientRecord.dateOfBirth != null ? java.sql.Date.valueOf(clientRecord.dateOfBirth) : null);
     clientPS.setString(7, clientRecord.charm.name);
-
-    charmPS.setString(1, clientRecord.charm.name);
 
     for (PhoneNumber phoneNumber : clientRecord.phoneNumbers) {
       phonePS.setString(1, clientRecord.id);
@@ -200,14 +194,11 @@ public class CiaDownloader extends SaxHandler implements AutoCloseable {
     addrPS.setString(5, clientRecord.addressR.flat);
     addrPS.addBatch();
 
-    charmPS.addBatch();
-
     clientPS.addBatch();
     batchSize++;
     recordsCount++;
 
     if (batchSize >= maxBatchSize) {
-      charmPS.executeBatch();
       addrPS.executeBatch();
       phonePS.executeBatch();
       clientPS.executeBatch();
@@ -220,7 +211,6 @@ public class CiaDownloader extends SaxHandler implements AutoCloseable {
   @Override
   public void close() throws Exception {
     clientPS.close();
-    charmPS.close();
     phonePS.close();
     addrPS.close();
   }

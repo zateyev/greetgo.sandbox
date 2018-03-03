@@ -175,38 +175,6 @@ public class CiaMigrationWorker extends AbstractMigrationWorker {
   }
 
   protected long migrateFromTmp() throws Exception {
-
-    //language=PostgreSQL
-    exec("WITH num_ord AS (\n" +
-      "  SELECT number, \"name\", row_number() OVER(PARTITION BY \"name\" ORDER BY number DESC) AS ord \n" +
-      "  FROM tmp_charm\n" +
-      ")\n" +
-      "\n" +
-      "UPDATE tmp_charm SET status = 2\n" +
-      "WHERE status = 0 AND number IN (SELECT number FROM num_ord WHERE ord > 1)");
-
-    //language=PostgreSQL
-    exec("UPDATE tmp_charm t SET charm_id = c.id\n" +
-      "  FROM charm c\n" +
-      "  WHERE c.name = t.name\n");
-
-    //language=PostgreSQL
-    exec("UPDATE tmp_charm SET status = 3 WHERE charm_id IS NOT NULL AND status = 0");
-
-    //language=PostgreSQL
-    exec("UPDATE tmp_charm SET charm_id = nextval('s_client') WHERE status = 0");
-
-    //language=PostgreSQL
-    exec("INSERT INTO charm (id, \"name\")\n" +
-      "SELECT charm_id, \"name\"\n" +
-      "FROM tmp_charm WHERE status = 0");
-
-    //language=PostgreSQL
-    exec("UPDATE charm SET actual = 1 WHERE id IN (\n" +
-      "  SELECT charm_id FROM tmp_charm WHERE status = 0\n" +
-      ")");
-
-
     //marking duplicates
     //language=PostgreSQL
     exec("WITH num_ord AS (\n" +
@@ -227,6 +195,12 @@ public class CiaMigrationWorker extends AbstractMigrationWorker {
 
     //language=PostgreSQL
     exec("UPDATE TMP_CLIENT SET client_id = nextval('s_client') WHERE status = 0");
+
+    //inserting new charms
+    //language=PostgreSQL
+    exec("INSERT INTO charm (id, name)\n" +
+      "SELECT nextval('s_client'), charm_name\n" +
+      "FROM TMP_CLIENT tcl WHERE tcl.status = 0 ON CONFLICT (name) DO NOTHING");
 
     //language=PostgreSQL
     exec("INSERT INTO client (id, cia_id, surname, \"name\", patronymic, gender, birth_date, charm)\n" +
