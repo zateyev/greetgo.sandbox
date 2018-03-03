@@ -38,11 +38,6 @@ public class FrsMigrationWorker extends AbstractMigrationWorker {
   }
 
   @Override
-  protected void insertIntoTmpTables(List<ClientRecordsToSave> clientRecords) {
-
-  }
-
-  @Override
   protected List<String> renameFiles() {
     return null;
   }

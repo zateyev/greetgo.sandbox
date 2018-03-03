@@ -3,11 +3,9 @@ package kz.greetgo.sandbox.db.migration_impl;
 import kz.greetgo.depinject.core.Bean;
 import kz.greetgo.depinject.core.BeanGetter;
 import kz.greetgo.sandbox.controller.model.ClientRecordsToSave;
-import kz.greetgo.sandbox.controller.model.PhoneNumber;
 import kz.greetgo.sandbox.db.configs.DbConfig;
 import kz.greetgo.sandbox.db.dao.ClientDao;
 import kz.greetgo.sandbox.db.register_impl.IdGenerator;
-import kz.greetgo.sandbox.db.util.ClientRecordParser;
 import kz.greetgo.sandbox.db.util.JdbcSandbox;
 import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
 import org.apache.commons.compress.archivers.tar.TarArchiveInputStream;
@@ -35,6 +33,7 @@ public class CiaMigrationWorker extends AbstractMigrationWorker {
   public BeanGetter<IdGenerator> idGen;
 
   private String tmpClientTable;
+  private ClientRecordsToSave clientRecord;
 
   public int migrate() throws Exception {
     long startedAt = System.nanoTime();
@@ -358,7 +357,7 @@ public class CiaMigrationWorker extends AbstractMigrationWorker {
     );
   }
 
-  protected int download() throws IOException, SAXException, SQLException {
+  protected int download() throws Exception {
 
     // get file, read all files iteratively
     List<String> fileDirToLoad = renameFiles();
@@ -368,172 +367,45 @@ public class CiaMigrationWorker extends AbstractMigrationWorker {
       TarArchiveInputStream tarInput = new TarArchiveInputStream(new BZip2CompressorInputStream(inputStream));
       TarArchiveEntry currentEntry = tarInput.getNextTarEntry();
 
-      // parse xml
-      ClientRecordParser clientRecordParser = new ClientRecordParser();
-      clientRecordParser.parseRecordData(tarInput);
+      final AtomicBoolean working = new AtomicBoolean(true);
+      final AtomicBoolean showStatus = new AtomicBoolean(false);
 
-      List<ClientRecordsToSave> clientRecords = clientRecordParser.getClientRecords();
+      final Thread see = new Thread(() -> {
 
-      // write into tmp db
+        while (working.get()) {
 
-      insertIntoTmpTables(clientRecords);
-    }
+          try {
+            Thread.sleep(showStatusPingMillis);
+          } catch (InterruptedException e) {
+            break;
+          }
 
-    return 0;
-  }
+          showStatus.set(true);
 
-  protected void insertIntoTmpTables(List<ClientRecordsToSave> clientRecords) throws SQLException, IOException {
-    final AtomicBoolean working = new AtomicBoolean(true);
-    final AtomicBoolean showStatus = new AtomicBoolean(false);
-
-    final Thread see = new Thread(() -> {
-
-      while (working.get()) {
-
-        try {
-          Thread.sleep(showStatusPingMillis);
-        } catch (InterruptedException e) {
-          break;
         }
 
-        showStatus.set(true);
+      });
+      see.start();
 
-      }
-
-    });
-    see.start();
-
-
-    connection.setAutoCommit(false);
-    try (
-//      Statement statement = connection.createStatement();
-
-      PreparedStatement clientPS = connection.prepareStatement("INSERT INTO tmp_client " +
-        "(cia_id, surname, \"name\", patronymic, gender, birth_date, charm_name) " +
-        "VALUES (?, ?, ?, ?, ?, ?, ?) "
-      );
-
-      PreparedStatement charmPS = connection.prepareStatement("INSERT INTO tmp_charm (\"name\") VALUES (?)");
-
-      PreparedStatement phonePS = connection.prepareStatement("INSERT INTO tmp_phone (cia_id, phone_number, type) " +
-        "VALUES (?, ?, ?)");
-
-      PreparedStatement addrPS = connection.prepareStatement("INSERT INTO tmp_addr (cia_id, \"type\", street, house, flat) " +
-        "VALUES (?, ?, ?, ?, ?)")
-    ) {
-      int batchSize = 0, recordsCount = 0;
+      int recordsCount;
       long startedAt = System.nanoTime();
-      for (ClientRecordsToSave clientRecord : clientRecords) {
 
-//        statement.addBatch("INSERT INTO tmp_client (cia_id, surname, name, patronymic, gender, birth_date, charm_name) " +
-//          "VALUES (" + clientRecord.id +
-//          ", " + clientRecord.surname +
-//          ", " + clientRecord.name +
-//          ", " + clientRecord.patronymic +
-//          ", " + clientRecord.gender.toString() +
-//          ", " + (clientRecord.dateOfBirth != null ? java.sql.Date.valueOf(clientRecord.dateOfBirth) : null) +
-//          ", " + clientRecord.charm.name +
-//          ") ");
-//
-//        statement.addBatch("INSERT INTO tmp_charm (name) VALUES (" + clientRecord.charm.name + ") ");
-//
-//        for (PhoneNumber phoneNumber : clientRecord.phoneNumbers) {
-//          statement.addBatch("INSERT INTO tmp_phone (cia_id, phone_number, type) " +
-//            "VALUES (" + clientRecord.id +
-//            ", " + phoneNumber.number +
-//            ", " + phoneNumber.phoneType.toString() +
-//            ") ");
-//        }
-//
-//        statement.addBatch("INSERT INTO tmp_addr (cia_id, type, street, house, flat) " +
-//          "VALUES (" + clientRecord.id +
-//          ", " + clientRecord.addressF.type.toString() +
-//          ", " + clientRecord.addressF.street +
-//          ", " + clientRecord.addressF.house +
-//          ", " + clientRecord.addressF.flat +
-//          ") ");
-//
-//        statement.addBatch("INSERT INTO tmp_addr (cia_id, type, street, house, flat) " +
-//          "VALUES (" + clientRecord.id +
-//          ", " + clientRecord.addressR.type.toString() +
-//          ", " + clientRecord.addressR.street +
-//          ", " + clientRecord.addressR.house +
-//          ", " + clientRecord.addressR.flat +
-//          ") ");
-//        statement.executeBatch();
-
-        clientPS.setString(1, clientRecord.id);
-        clientPS.setString(2, clientRecord.surname);
-        clientPS.setString(3, clientRecord.name);
-        clientPS.setString(4, clientRecord.patronymic);
-        clientPS.setString(5, clientRecord.gender.toString());
-        clientPS.setDate(6, clientRecord.dateOfBirth != null ? java.sql.Date.valueOf(clientRecord.dateOfBirth) : null);
-        clientPS.setString(7, clientRecord.charm.name);
-
-        charmPS.setString(1, clientRecord.charm.name);
-
-        for (PhoneNumber phoneNumber : clientRecord.phoneNumbers) {
-          phonePS.setString(1, clientRecord.id);
-          phonePS.setString(2, phoneNumber.number);
-          phonePS.setString(3, phoneNumber.phoneType.toString());
-          phonePS.executeUpdate();
-          phonePS.addBatch();
-        }
-
-        addrPS.setString(1, clientRecord.id);
-        addrPS.setString(2, clientRecord.addressF.type.toString());
-        addrPS.setString(3, clientRecord.addressF.street);
-        addrPS.setString(4, clientRecord.addressF.house);
-        addrPS.setString(5, clientRecord.addressF.flat);
-        addrPS.executeUpdate();
-        addrPS.addBatch();
-
-        addrPS.setString(1, clientRecord.id);
-        addrPS.setString(2, clientRecord.addressR.type.toString());
-        addrPS.setString(3, clientRecord.addressR.street);
-        addrPS.setString(4, clientRecord.addressR.house);
-        addrPS.setString(5, clientRecord.addressR.flat);
-        addrPS.executeUpdate();
-        addrPS.addBatch();
-
-        charmPS.executeUpdate();
-        charmPS.addBatch();
-
-        clientPS.executeUpdate();
-        clientPS.addBatch();
-        batchSize++;
-        recordsCount++;
-
-        if (batchSize >= maxBatchSize) {
-          charmPS.executeBatch();
-          addrPS.executeBatch();
-          phonePS.executeBatch();
-
-          clientPS.executeBatch();
-
-//          statement.executeBatch();
-          connection.commit();
-          batchSize = 0;
-        }
-
-        if (showStatus.get()) {
-          showStatus.set(false);
-
-          long now = System.nanoTime();
-          info(" -- downloaded records " + recordsCount + " for " + showTime(now, startedAt)
-            + " : " + recordsPerSecond(recordsCount, now - startedAt));
-        }
+      // parse xml and insert into tmp tables
+      try (CiaDownloader ciaDownloader = new CiaDownloader(tarInput)) {
+        connection.setAutoCommit(false);
+        ciaDownloader.maxBatchSize = maxBatchSize;
+        ciaDownloader.connection = connection;
+        recordsCount = ciaDownloader.downloadCia();
+      } finally {
+        connection.setAutoCommit(true);
       }
 
-      if (batchSize > 0) {
-        charmPS.executeBatch();
-        addrPS.executeBatch();
-        phonePS.executeBatch();
+      if (showStatus.get()) {
+        showStatus.set(false);
 
-        clientPS.executeBatch();
-
-//        statement.executeBatch();
-        connection.commit();
+        long now = System.nanoTime();
+        info(" -- downloaded records " + recordsCount + " for " + showTime(now, startedAt)
+          + " : " + recordsPerSecond(recordsCount, now - startedAt));
       }
 
       {
@@ -541,12 +413,9 @@ public class CiaMigrationWorker extends AbstractMigrationWorker {
         info("TOTAL Downloaded records " + recordsCount + " for " + showTime(now, startedAt)
           + " : " + recordsPerSecond(recordsCount, now - startedAt));
       }
-    } finally {
-      inputStream.close();
-      connection.setAutoCommit(true);
-      working.set(false);
-      see.interrupt();
     }
+
+    return 0;
   }
 
   protected List<String> renameFiles() throws IOException {

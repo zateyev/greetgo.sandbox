@@ -39,9 +39,7 @@ public abstract class AbstractMigrationWorker implements MigrationWorker {
 
   protected abstract long migrateFromTmp() throws Exception;
 
-  protected abstract int download() throws IOException, SAXException, SQLException;
-
-  protected abstract void insertIntoTmpTables(List<ClientRecordsToSave> clientRecords) throws SQLException, IOException;
+  protected abstract int download() throws Exception;
 
   protected abstract List<String> renameFiles() throws IOException;
 

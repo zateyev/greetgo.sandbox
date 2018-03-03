@@ -1,6 +1,7 @@
-package kz.greetgo.sandbox.db.util;
+package kz.greetgo.sandbox.db.migration_impl;
 
 import kz.greetgo.sandbox.controller.model.*;
+import kz.greetgo.sandbox.db.util.SaxHandler;
 import org.xml.sax.Attributes;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
@@ -9,29 +10,52 @@ import org.xml.sax.helpers.XMLReaderFactory;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.List;
 
-public class ClientRecordParser extends SaxHandler {
+public class CiaDownloader extends SaxHandler implements AutoCloseable {
 
-  ClientRecordsToSave clientRecord;
-  private List<ClientRecordsToSave> clientRecords;
+  public Connection connection;
+  private ClientRecordsToSave clientRecord;
+  public InputStream inputStream;
+  public int maxBatchSize;
 
-  public List<ClientRecordsToSave> getClientRecords() {
-    return clientRecords;
+  private PreparedStatement clientPS;
+  private PreparedStatement charmPS;
+  private PreparedStatement phonePS;
+  private PreparedStatement addrPS;
+  private int batchSize = 0;
+  private int recordsCount;
+
+
+  public CiaDownloader(InputStream inputStream) {
+    this.inputStream = inputStream;
   }
 
-  public ClientRecordParser() {
-    clientRecords = new ArrayList<>();
-  }
+  public int downloadCia() throws SAXException, IOException, SQLException {
+    if (inputStream == null) return 0;
 
-  public void parseRecordData(InputStream inputStream) throws SAXException, IOException {
-    if (inputStream == null) return;
+    clientPS = connection.prepareStatement("INSERT INTO tmp_client " +
+      "(cia_id, surname, name, patronymic, gender, birth_date, charm_name) " +
+      "VALUES (?, ?, ?, ?, ?, ?, ?) "
+    );
+
+    charmPS = connection.prepareStatement("INSERT INTO tmp_charm (name) VALUES (?)");
+
+    phonePS = connection.prepareStatement("INSERT INTO tmp_phone (cia_id, phone_number, type) " +
+      "VALUES (?, ?, ?)");
+
+    addrPS = connection.prepareStatement("INSERT INTO tmp_addr (cia_id, type, street, house, flat) " +
+      "VALUES (?, ?, ?, ?, ?)");
+
     XMLReader reader = XMLReaderFactory.createXMLReader();
     reader.setContentHandler(this);
     reader.parse(new InputSource(inputStream));
+    return recordsCount;
   }
 
   @Override
@@ -92,7 +116,6 @@ public class ClientRecordParser extends SaxHandler {
         clientRecord.addressR.street = attributes.getValue("street");
         clientRecord.addressR.house = attributes.getValue("house");
         clientRecord.addressR.flat = attributes.getValue("flat");
-        return;
     }
   }
 
@@ -126,9 +149,78 @@ public class ClientRecordParser extends SaxHandler {
       }
 
       case "/cia/client": {
-        clientRecords.add(clientRecord);
+        saveClient(clientRecord);
         return;
       }
+
+      case "/cia": {
+        if (batchSize > 0) {
+          charmPS.executeBatch();
+          addrPS.executeBatch();
+          phonePS.executeBatch();
+          clientPS.executeBatch();
+
+          connection.commit();
+        }
+      }
     }
+  }
+
+  private void saveClient(ClientRecordsToSave clientRecord) throws SQLException, IOException {
+
+    clientPS.setString(1, clientRecord.id);
+    clientPS.setString(2, clientRecord.surname);
+    clientPS.setString(3, clientRecord.name);
+    clientPS.setString(4, clientRecord.patronymic);
+    clientPS.setString(5, clientRecord.gender.toString());
+    clientPS.setDate(6, clientRecord.dateOfBirth != null ? java.sql.Date.valueOf(clientRecord.dateOfBirth) : null);
+    clientPS.setString(7, clientRecord.charm.name);
+
+    charmPS.setString(1, clientRecord.charm.name);
+
+    for (PhoneNumber phoneNumber : clientRecord.phoneNumbers) {
+      phonePS.setString(1, clientRecord.id);
+      phonePS.setString(2, phoneNumber.number);
+      phonePS.setString(3, phoneNumber.phoneType.toString());
+      phonePS.addBatch();
+    }
+
+    addrPS.setString(1, clientRecord.id);
+    addrPS.setString(2, clientRecord.addressF.type.toString());
+    addrPS.setString(3, clientRecord.addressF.street);
+    addrPS.setString(4, clientRecord.addressF.house);
+    addrPS.setString(5, clientRecord.addressF.flat);
+    addrPS.addBatch();
+
+    addrPS.setString(1, clientRecord.id);
+    addrPS.setString(2, clientRecord.addressR.type.toString());
+    addrPS.setString(3, clientRecord.addressR.street);
+    addrPS.setString(4, clientRecord.addressR.house);
+    addrPS.setString(5, clientRecord.addressR.flat);
+    addrPS.addBatch();
+
+    charmPS.addBatch();
+
+    clientPS.addBatch();
+    batchSize++;
+    recordsCount++;
+
+    if (batchSize >= maxBatchSize) {
+      charmPS.executeBatch();
+      addrPS.executeBatch();
+      phonePS.executeBatch();
+      clientPS.executeBatch();
+
+      connection.commit();
+      batchSize = 0;
+    }
+  }
+
+  @Override
+  public void close() throws Exception {
+    clientPS.close();
+    charmPS.close();
+    phonePS.close();
+    addrPS.close();
   }
 }
