@@ -1,6 +1,7 @@
 package kz.greetgo.sandbox.db.migration;
 
 import kz.greetgo.depinject.core.BeanGetter;
+import kz.greetgo.sandbox.db.migration_impl.CiaMigrationWorker;
 import kz.greetgo.sandbox.db.test.dao.CharmTestDao;
 import kz.greetgo.sandbox.db.test.dao.ClientTestDao;
 import kz.greetgo.sandbox.db.test.dao.TmpClientTestDao;
@@ -10,11 +11,11 @@ import org.testng.annotations.Test;
 import static org.fest.assertions.api.Assertions.assertThat;
 
 /**
- * Набор автоматизированных тестов для тестирования методов класса {@link MigrationWorker}
+ * Набор автоматизированных тестов для тестирования методов класса {@link CiaMigrationWorker}
  */
-public class MigrationWorkerTest extends ParentTestNg {
+public class CiaMigrationWorkerTest extends ParentTestNg {
 
-  public BeanGetter<MigrationWorker> migration;
+  public BeanGetter<CiaMigrationWorker> migration;
   public BeanGetter<TmpClientTestDao> tmpClientTestDao;
   public BeanGetter<ClientTestDao> clientTestDao;
   public BeanGetter<CharmTestDao> charmTestDao;

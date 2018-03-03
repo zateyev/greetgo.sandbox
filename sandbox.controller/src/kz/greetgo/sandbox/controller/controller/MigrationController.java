@@ -3,7 +3,7 @@ package kz.greetgo.sandbox.controller.controller;
 import kz.greetgo.depinject.core.Bean;
 import kz.greetgo.depinject.core.BeanGetter;
 import kz.greetgo.mvc.annotations.Mapping;
-import kz.greetgo.sandbox.controller.migration.Migration;
+import kz.greetgo.sandbox.controller.migration.MigrationWorker;
 
 /**
  * как составлять контроллеры написано
@@ -13,7 +13,7 @@ import kz.greetgo.sandbox.controller.migration.Migration;
 @Mapping("/migration")
 public class MigrationController {
 
-  public BeanGetter<Migration> migrationRegister;
+  public BeanGetter<MigrationWorker> migrationRegister;
 
   @Mapping("/migrate")
   public int migrate() throws Exception {

@@ -1,4 +1,4 @@
-package kz.greetgo.sandbox.db.migration;
+package kz.greetgo.sandbox.db.migration_impl;
 
 import kz.greetgo.depinject.core.Bean;
 import kz.greetgo.depinject.core.BeanGetter;
@@ -27,23 +27,14 @@ import static kz.greetgo.sandbox.db.util.TimeUtils.recordsPerSecond;
 import static kz.greetgo.sandbox.db.util.TimeUtils.showTime;
 
 @Bean
-public class MigrationWorker {
-
-  public InputStream inputStream;
-  public OutputStream outputStream;
-  public Connection connection;
-  public int maxBatchSize = 50_000; // getConfig().maxBatchSize;
+public class CiaMigrationWorker extends MigrationWorkerImpl {
 
   public BeanGetter<JdbcSandbox> jdbcSandbox;
-
   public BeanGetter<ClientDao> clientDao;
   public BeanGetter<DbConfig> dbConfig;
   public BeanGetter<IdGenerator> idGen;
 
   private String tmpClientTable;
-  public int portionSize = 1_000_000;
-  public int uploadMaxBatchSize = 50_000;
-  public int showStatusPingMillis = 5000;
 
   public int migrate() throws Exception {
     long startedAt = System.nanoTime();
@@ -74,7 +65,7 @@ public class MigrationWorker {
 
     {
       long now = System.nanoTime();
-      info("MigrationWorker of portion " + recordsSize + " finished for " + showTime(now, startedAt));
+      info("CiaMigrationWorker of portion " + recordsSize + " finished for " + showTime(now, startedAt));
     }
 
     closePostgresConnection();
@@ -83,11 +74,11 @@ public class MigrationWorker {
   }
 
 
-  private void dropTmpTables() throws SQLException {
+  protected void dropTmpTables() throws SQLException {
     exec("DROP TABLE IF EXISTS TMP_CLIENT, tmp_charm, tmp_addr, tmp_phone");
   }
 
-  private void handleErrors() throws SQLException {
+  protected void handleErrors() throws SQLException {
     //language=PostgreSQL
     exec("UPDATE tmp_charm SET error = 'charm is not defined' " +
       "WHERE error IS NULL AND name IS NULL");
@@ -117,7 +108,7 @@ public class MigrationWorker {
 
   }
 
-  private void uploadAndDropErrors() throws SQLException {
+  protected void uploadAndDropErrors() throws SQLException {
 
     // create report about errors and send by ssh
 
@@ -128,7 +119,7 @@ public class MigrationWorker {
     exec("DELETE FROM TMP_CLIENT WHERE error IS NOT NULL");
   }
 
-  private void createTmpTables() throws SQLException {
+  protected void createTmpTables() throws SQLException {
     //language=PostgreSQL
     exec("CREATE TABLE TMP_CLIENT (\n" +
       "        cia_id VARCHAR(32),\n" +
@@ -184,7 +175,7 @@ public class MigrationWorker {
       "      )");
   }
 
-  private long migrateFromTmp() throws Exception {
+  protected long migrateFromTmp() throws Exception {
 
     //language=PostgreSQL
     exec("WITH num_ord AS (\n" +
@@ -367,43 +358,7 @@ public class MigrationWorker {
     );
   }
 
-  private String r(String sql) {
-//    sql = sql.replaceAll("TMP_CLIENT", tmpClientTable);
-    sql = sql.replaceAll("TMP_CLIENT", "tmp_client");
-    sql = sql.replaceAll("NEW_ID", idGen.get().newId());
-    return sql;
-  }
-
-  private void exec(String sql) throws SQLException {
-    String executingSql = r(sql);
-
-    long startedAt = System.nanoTime();
-    try (Statement statement = connection.createStatement()) {
-      int updates = statement.executeUpdate(executingSql);
-      info("Updated " + updates
-        + " records for " + showTime(System.nanoTime(), startedAt)
-        + ", EXECUTED SQL : " + executingSql);
-    } catch (SQLException e) {
-      info("ERROR EXECUTE SQL for " + showTime(System.nanoTime(), startedAt)
-        + ", message: " + e.getMessage() + ", SQL : " + executingSql);
-      throw e;
-    }
-  }
-
-  private List<String> listFilesForFolder(final File folder) {
-    List<String> ret = new ArrayList<>();
-    for (final File fileEntry : folder.listFiles()) {
-      if (fileEntry.isDirectory()) {
-        listFilesForFolder(fileEntry);
-      } else {
-        System.out.println(fileEntry.getName());
-        ret.add(fileEntry.getName());
-      }
-    }
-    return ret;
-  }
-
-  private int download() throws IOException, SAXException, SQLException {
+  protected int download() throws IOException, SAXException, SQLException {
 
     // get file, read all files iteratively
     List<String> fileDirToLoad = renameFiles();
@@ -427,7 +382,7 @@ public class MigrationWorker {
     return 0;
   }
 
-  private void insertIntoTmpTables(List<ClientRecordsToSave> clientRecords) throws SQLException, IOException {
+  protected void insertIntoTmpTables(List<ClientRecordsToSave> clientRecords) throws SQLException, IOException {
     final AtomicBoolean working = new AtomicBoolean(true);
     final AtomicBoolean showStatus = new AtomicBoolean(false);
 
@@ -594,7 +549,7 @@ public class MigrationWorker {
     }
   }
 
-  private List<String> renameFiles() throws IOException {
+  protected List<String> renameFiles() throws IOException {
     List<String> ret = new ArrayList<>();
     String folderName = "build/files_to_send/";
     final File folder = new File(folderName);
@@ -626,16 +581,5 @@ public class MigrationWorker {
   private void info(String message) {
     SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS");
     System.out.println(sdf.format(new Date()) + " [" + getClass().getSimpleName() + "] " + message);
-  }
-
-  private void closePostgresConnection() {
-    if (this.connection != null) {
-      try {
-        this.connection.close();
-      } catch (SQLException e) {
-        e.printStackTrace();
-      }
-      this.connection = null;
-    }
   }
 }
