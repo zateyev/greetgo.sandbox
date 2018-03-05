@@ -10,41 +10,24 @@ import org.xml.sax.helpers.XMLReaderFactory;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Objects;
+import java.util.function.Consumer;
 
-public class CiaDownloader extends SaxHandler implements AutoCloseable {
+public class CiaParser extends SaxHandler {
 
-  public Connection connection;
   private ClientRecordsToSave clientRecord;
+  private Address address;
   public InputStream inputStream;
-  public int maxBatchSize;
 
-  private PreparedStatement clientPS;
-  private PreparedStatement phonePS;
-  private PreparedStatement addrPS;
-  private int batchSize = 0;
-  private int recordsCount;
+  private TableWorker tableWorker;
 
-
-  public CiaDownloader(InputStream inputStream, Connection connection) throws SQLException {
+  public CiaParser(InputStream inputStream, TableWorker tableWorker) throws SQLException {
     this.inputStream = inputStream;
-    this.connection = connection;
-
-    clientPS = connection.prepareStatement("INSERT INTO tmp_client " +
-      "(cia_id, surname, name, patronymic, gender, birth_date, charm_name) " +
-      "VALUES (?, ?, ?, ?, ?, ?, ?) "
-    );
-
-    phonePS = connection.prepareStatement("INSERT INTO tmp_phone (cia_id, phone_number, type) " +
-      "VALUES (?, ?, ?)");
-
-    addrPS = connection.prepareStatement("INSERT INTO tmp_addr (cia_id, type, street, house, flat) " +
-      "VALUES (?, ?, ?, ?, ?)");
+    this.tableWorker = tableWorker;
   }
 
   public int downloadCia() throws SAXException, IOException, SQLException {
@@ -53,7 +36,7 @@ public class CiaDownloader extends SaxHandler implements AutoCloseable {
     XMLReader reader = XMLReaderFactory.createXMLReader();
     reader.setContentHandler(this);
     reader.parse(new InputSource(inputStream));
-    return recordsCount;
+    return 0;
   }
 
   @Override
@@ -106,6 +89,10 @@ public class CiaDownloader extends SaxHandler implements AutoCloseable {
         clientRecord.addressF.street = attributes.getValue("street");
         clientRecord.addressF.house = attributes.getValue("house");
         clientRecord.addressF.flat = attributes.getValue("flat");
+
+        address = clientRecord.addressF;
+        address.id = clientRecord.id;
+        sendTo(tableWorker::addToBatchAddr, address);
         return;
 
       case "/cia/client/address/register":
@@ -114,6 +101,10 @@ public class CiaDownloader extends SaxHandler implements AutoCloseable {
         clientRecord.addressR.street = attributes.getValue("street");
         clientRecord.addressR.house = attributes.getValue("house");
         clientRecord.addressR.flat = attributes.getValue("flat");
+
+        address = clientRecord.addressR;
+        address.id = clientRecord.id;
+        sendTo(tableWorker::addToBatchAddr, address);
     }
   }
 
@@ -147,71 +138,21 @@ public class CiaDownloader extends SaxHandler implements AutoCloseable {
       }
 
       case "/cia/client": {
-        saveClient(clientRecord);
+        sendTo(tableWorker::addToBatch, clientRecord);
         return;
       }
 
       case "/cia": {
-        if (batchSize > 0) {
-          addrPS.executeBatch();
-          phonePS.executeBatch();
-          clientPS.executeBatch();
-
-          connection.commit();
-        }
+        tableWorker.execBatch.run();
       }
     }
   }
 
-  private void saveClient(ClientRecordsToSave clientRecord) throws SQLException, IOException {
-
-    clientPS.setString(1, clientRecord.id);
-    clientPS.setString(2, clientRecord.surname);
-    clientPS.setString(3, clientRecord.name);
-    clientPS.setString(4, clientRecord.patronymic);
-    clientPS.setString(5, clientRecord.gender.toString());
-    clientPS.setDate(6, clientRecord.dateOfBirth != null ? java.sql.Date.valueOf(clientRecord.dateOfBirth) : null);
-    clientPS.setString(7, clientRecord.charm.name);
-
-    for (PhoneNumber phoneNumber : clientRecord.phoneNumbers) {
-      phonePS.setString(1, clientRecord.id);
-      phonePS.setString(2, phoneNumber.number);
-      phonePS.setString(3, phoneNumber.phoneType.toString());
-      phonePS.addBatch();
-    }
-
-    addrPS.setString(1, clientRecord.id);
-    addrPS.setString(2, clientRecord.addressF.type.toString());
-    addrPS.setString(3, clientRecord.addressF.street);
-    addrPS.setString(4, clientRecord.addressF.house);
-    addrPS.setString(5, clientRecord.addressF.flat);
-    addrPS.addBatch();
-
-    addrPS.setString(1, clientRecord.id);
-    addrPS.setString(2, clientRecord.addressR.type.toString());
-    addrPS.setString(3, clientRecord.addressR.street);
-    addrPS.setString(4, clientRecord.addressR.house);
-    addrPS.setString(5, clientRecord.addressR.flat);
-    addrPS.addBatch();
-
-    clientPS.addBatch();
-    batchSize++;
-    recordsCount++;
-
-    if (batchSize >= maxBatchSize) {
-      addrPS.executeBatch();
-      phonePS.executeBatch();
-      clientPS.executeBatch();
-
-      connection.commit();
-      batchSize = 0;
-    }
+  private void sendTo(final Consumer<ClientRecordsToSave> func, ClientRecordsToSave clientRecord) {
+    func.accept(clientRecord);
   }
 
-  @Override
-  public void close() throws Exception {
-    clientPS.close();
-    phonePS.close();
-    addrPS.close();
+  private void sendTo(final Consumer<Address> func, Address address) {
+    func.accept(address);
   }
 }
