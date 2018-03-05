@@ -367,12 +367,9 @@ public class CiaMigrationWorker extends AbstractMigrationWorker {
       // parse xml and insert into tmp tables
       connection.setAutoCommit(false);
 
-      try (
-        TableWorker tableWorker = new TableWorker(connection);
-        ) {
+      try (TableWorker tableWorker = new TableWorker(connection, maxBatchSize)) {
         CiaParser ciaParser = new CiaParser(tarInput, tableWorker);
-//        ciaParser.maxBatchSize = maxBatchSize;
-        recordsCount = ciaParser.downloadCia();
+        recordsCount = ciaParser.parseAndSave();
       } finally {
         connection.setAutoCommit(true);
       }

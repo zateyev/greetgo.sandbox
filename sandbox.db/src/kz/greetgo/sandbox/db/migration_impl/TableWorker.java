@@ -13,20 +13,22 @@ import java.sql.SQLException;
 public class TableWorker implements Closeable {
 
   public Connection connection;
-  public int maxBatchSize = 50_000;
+  public int maxBatchSize;
 
   private PreparedStatement clientPS;
   private PreparedStatement phonePS;
   private PreparedStatement addrPS;
-  private int batchSize = 0;
+  private int clientBatchSize = 0;
   private int recordsCount;
 
   public Runnable execBatch;
   private int addrBatchSize;
   private int phoneBatchSize;
 
-  public TableWorker(Connection connection) throws SQLException {
+  public TableWorker(Connection connection, int maxBatchSize) throws SQLException {
     this.connection = connection;
+    this.maxBatchSize = maxBatchSize;
+
     clientPS = this.connection.prepareStatement("INSERT INTO tmp_client " +
       "(cia_id, surname, name, patronymic, gender, birth_date, charm_name) " +
       "VALUES (?, ?, ?, ?, ?, ?, ?) "
@@ -39,38 +41,21 @@ public class TableWorker implements Closeable {
       "VALUES (?, ?, ?, ?, ?)");
 
     execBatch = () -> {
-      if (batchSize > 0) {
-        try {
-//          phonePS.executeBatch();
-          clientPS.executeBatch();
+      try {
+        if (clientBatchSize > 0) clientPS.executeBatch();
 
-          this.connection.commit();
-        } catch (SQLException e) {
-          e.printStackTrace();
-        }
-      }
+        if (addrBatchSize > 0) addrPS.executeBatch();
 
-      if (addrBatchSize > 0) {
-        try {
-          addrPS.executeBatch();
-          this.connection.commit();
-        } catch (SQLException e) {
-          e.printStackTrace();
-        }
-      }
+        if (phoneBatchSize > 0) phonePS.executeBatch();
 
-      if (phoneBatchSize > 0) {
-        try {
-          phonePS.executeBatch();
-          this.connection.commit();
-        } catch (SQLException e) {
-          e.printStackTrace();
-        }
+        if (clientBatchSize + addrBatchSize + phoneBatchSize > 0) this.connection.commit();
+      } catch (SQLException e) {
+        e.printStackTrace();
       }
     };
   }
 
-  public void addToBatchClient(ClientRecordsToSave clientRecord) {
+  public void addToBatch(ClientRecordsToSave clientRecord) {
 
     try {
       clientPS.setString(1, clientRecord.id);
@@ -83,22 +68,21 @@ public class TableWorker implements Closeable {
       clientPS.setString(7, clientRecord.charm.name);
 
       clientPS.addBatch();
-      batchSize++;
+      clientBatchSize++;
       recordsCount++;
 
-      if (batchSize >= maxBatchSize) {
-//        phonePS.executeBatch();
+      if (clientBatchSize >= maxBatchSize) {
         clientPS.executeBatch();
 
         connection.commit();
-        batchSize = 0;
+        clientBatchSize = 0;
       }
     } catch (SQLException e) {
       e.printStackTrace();
     }
   }
 
-  public void addToBatchAddr(Address address) {
+  public void addToBatch(Address address) {
 
     try {
       addrPS.setString(1, address.id);
@@ -121,7 +105,7 @@ public class TableWorker implements Closeable {
     }
   }
 
-  public void addToBatchPhone(PhoneNumber phoneNumber) {
+  public void addToBatch(PhoneNumber phoneNumber) {
 
     try {
 
