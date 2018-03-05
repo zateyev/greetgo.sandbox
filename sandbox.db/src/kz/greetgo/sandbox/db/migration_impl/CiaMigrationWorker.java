@@ -334,7 +334,7 @@ public class CiaMigrationWorker extends AbstractMigrationWorker {
   protected int download() throws Exception {
 
     // get file, read all files iteratively
-    List<String> fileDirToLoad = renameFiles();
+    List<String> fileDirToLoad = renameFiles(".xml.tar.bz2");
 
     for (String fileName : fileDirToLoad) {
       inputStream = new FileInputStream(fileName);
@@ -390,39 +390,5 @@ public class CiaMigrationWorker extends AbstractMigrationWorker {
     }
 
     return 0;
-  }
-
-  protected List<String> renameFiles() throws IOException {
-    List<String> ret = new ArrayList<>();
-    String folderName = "build/files_to_send/";
-    final File folder = new File(folderName);
-    final String ext = ".xml.tar.bz2";
-    List<String> fileNames = listFilesForFolder(folder);
-    String regexPattern = "^[a-zA-Z0-9-_]*.xml.tar.bz2$";
-    Pattern p = Pattern.compile(regexPattern);
-    SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-
-    for (String fileName : fileNames) {
-      if (p.matcher(fileName).matches()) {
-        File file = new File(folderName + fileName);
-        String newName = folderName + fileName.substring(0, fileName.length() - ext.length()) + "_YMD" + ext;
-        ret.add(newName);
-        File file1 = new File(newName);
-        if (file1.exists())
-          throw new java.io.IOException("file exists");
-        boolean success = file.renameTo(file1);
-        if (!success) {
-          System.out.println("File was not successfully renamed");
-          return null;
-        }
-      }
-    }
-
-    return ret;
-  }
-
-  private void info(String message) {
-    SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS");
-    System.out.println(sdf.format(new Date()) + " [" + getClass().getSimpleName() + "] " + message);
   }
 }

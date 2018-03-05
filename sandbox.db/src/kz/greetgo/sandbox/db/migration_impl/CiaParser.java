@@ -18,7 +18,6 @@ import java.util.function.Consumer;
 public class CiaParser extends SaxHandler {
 
   private ClientRecordsToSave clientRecord;
-  private Address address;
   private Address addressFact;
   private Address addressReg;
   private PhoneNumber phoneNumber;
@@ -34,7 +33,9 @@ public class CiaParser extends SaxHandler {
     clientRecord = new ClientRecordsToSave();
     clientRecord.charm = new Charm();
     addressFact = new Address();
+    addressFact.type = AddressType.FACT;
     addressReg = new Address();
+    addressReg.type = AddressType.REG;
     phoneNumber = new PhoneNumber();
   }
 
@@ -92,7 +93,6 @@ public class CiaParser extends SaxHandler {
         return;
 
       case "/cia/client/address/fact":
-        addressFact.type = AddressType.FACT;
         addressFact.street = attributes.getValue("street");
         addressFact.house = attributes.getValue("house");
         addressFact.flat = attributes.getValue("flat");
@@ -100,7 +100,6 @@ public class CiaParser extends SaxHandler {
         return;
 
       case "/cia/client/address/register":
-        addressReg.type = AddressType.REG;
         addressReg.street = attributes.getValue("street");
         addressReg.house = attributes.getValue("house");
         addressReg.flat = attributes.getValue("flat");

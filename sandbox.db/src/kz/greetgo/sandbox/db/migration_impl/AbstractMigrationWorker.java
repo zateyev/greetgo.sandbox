@@ -15,6 +15,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.regex.Pattern;
 
 import static kz.greetgo.sandbox.db.util.TimeUtils.showTime;
 
@@ -41,7 +42,33 @@ public abstract class AbstractMigrationWorker implements MigrationWorker {
 
   protected abstract int download() throws Exception;
 
-  protected abstract List<String> renameFiles() throws IOException;
+  protected List<String> renameFiles(String ext) throws IOException {
+    List<String> ret = new ArrayList<>();
+    String folderName = "build/files_to_send/";
+    final File folder = new File(folderName);
+    List<String> fileNames = listFilesForFolder(folder);
+    String regexPattern = "^[a-zA-Z0-9-_]*" + ext + "$";
+    Pattern p = Pattern.compile(regexPattern);
+    SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+
+    for (String fileName : fileNames) {
+      if (p.matcher(fileName).matches()) {
+        File file = new File(folderName + fileName);
+        String newName = folderName + fileName.substring(0, fileName.length() - ext.length()) + "_YMD" + ext;
+        ret.add(newName);
+        File file1 = new File(newName);
+        if (file1.exists())
+          throw new java.io.IOException("file exists");
+        boolean success = file.renameTo(file1);
+        if (!success) {
+          System.out.println("File was not successfully renamed");
+          return null;
+        }
+      }
+    }
+
+    return ret;
+  }
 
   private String r(String sql) {
 //    sql = sql.replaceAll("TMP_CLIENT", tmpClientTable);
@@ -78,7 +105,7 @@ public abstract class AbstractMigrationWorker implements MigrationWorker {
     return ret;
   }
 
-  private void info(String message) {
+  protected void info(String message) {
     SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS");
     System.out.println(sdf.format(new Date()) + " [" + getClass().getSimpleName() + "] " + message);
   }
