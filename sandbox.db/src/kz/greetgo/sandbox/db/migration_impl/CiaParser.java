@@ -14,7 +14,6 @@ import java.sql.SQLException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Objects;
 import java.util.function.Consumer;
 
 public class CiaParser extends SaxHandler {
@@ -117,7 +116,9 @@ public class CiaParser extends SaxHandler {
         PhoneNumber phoneNumber = new PhoneNumber();
         phoneNumber.phoneType = PhoneType.WORK;
         phoneNumber.number = text();
-        clientRecord.phoneNumbers.add(phoneNumber);
+
+        phoneNumber.id = clientRecord.id;
+        sendTo(tableWorker::addToBatchPhone, phoneNumber);
         return;
       }
 
@@ -125,7 +126,9 @@ public class CiaParser extends SaxHandler {
         PhoneNumber phoneNumber = new PhoneNumber();
         phoneNumber.phoneType = PhoneType.MOBILE;
         phoneNumber.number = text();
-        clientRecord.phoneNumbers.add(phoneNumber);
+
+        phoneNumber.id = clientRecord.id;
+        sendTo(tableWorker::addToBatchPhone, phoneNumber);
         return;
       }
 
@@ -133,12 +136,14 @@ public class CiaParser extends SaxHandler {
         PhoneNumber phoneNumber = new PhoneNumber();
         phoneNumber.phoneType = PhoneType.HOME;
         phoneNumber.number = text();
-        clientRecord.phoneNumbers.add(phoneNumber);
+
+        phoneNumber.id = clientRecord.id;
+        sendTo(tableWorker::addToBatchPhone, phoneNumber);
         return;
       }
 
       case "/cia/client": {
-        sendTo(tableWorker::addToBatch, clientRecord);
+        sendTo(tableWorker::addToBatchClient, clientRecord);
         return;
       }
 
@@ -154,5 +159,9 @@ public class CiaParser extends SaxHandler {
 
   private void sendTo(final Consumer<Address> func, Address address) {
     func.accept(address);
+  }
+
+  private void sendTo(final Consumer<PhoneNumber> func, PhoneNumber phoneNumber) {
+    func.accept(phoneNumber);
   }
 }

@@ -23,6 +23,7 @@ public class TableWorker implements Closeable {
 
   public Runnable execBatch;
   private int addrBatchSize;
+  private int phoneBatchSize;
 
   public TableWorker(Connection connection) throws SQLException {
     this.connection = connection;
@@ -40,8 +41,7 @@ public class TableWorker implements Closeable {
     execBatch = () -> {
       if (batchSize > 0) {
         try {
-//          addrPS.executeBatch();
-          phonePS.executeBatch();
+//          phonePS.executeBatch();
           clientPS.executeBatch();
 
           this.connection.commit();
@@ -58,10 +58,19 @@ public class TableWorker implements Closeable {
           e.printStackTrace();
         }
       }
+
+      if (phoneBatchSize > 0) {
+        try {
+          phonePS.executeBatch();
+          this.connection.commit();
+        } catch (SQLException e) {
+          e.printStackTrace();
+        }
+      }
     };
   }
 
-  public void addToBatch(ClientRecordsToSave clientRecord) {
+  public void addToBatchClient(ClientRecordsToSave clientRecord) {
 
     try {
       clientPS.setString(1, clientRecord.id);
@@ -73,34 +82,12 @@ public class TableWorker implements Closeable {
       clientPS.setDate(6, clientRecord.dateOfBirth != null ? java.sql.Date.valueOf(clientRecord.dateOfBirth) : null);
       clientPS.setString(7, clientRecord.charm.name);
 
-      for (PhoneNumber phoneNumber : clientRecord.phoneNumbers) {
-        phonePS.setString(1, clientRecord.id);
-        phonePS.setString(2, phoneNumber.number);
-        phonePS.setString(3, phoneNumber.phoneType.toString());
-        phonePS.addBatch();
-      }
-
-//      addrPS.setString(1, clientRecord.id);
-//      addrPS.setString(2, clientRecord.addressF.type.toString());
-//      addrPS.setString(3, clientRecord.addressF.street);
-//      addrPS.setString(4, clientRecord.addressF.house);
-//      addrPS.setString(5, clientRecord.addressF.flat);
-//      addrPS.addBatch();
-//
-//      addrPS.setString(1, clientRecord.id);
-//      addrPS.setString(2, clientRecord.addressR.type.toString());
-//      addrPS.setString(3, clientRecord.addressR.street);
-//      addrPS.setString(4, clientRecord.addressR.house);
-//      addrPS.setString(5, clientRecord.addressR.flat);
-//      addrPS.addBatch();
-
       clientPS.addBatch();
       batchSize++;
       recordsCount++;
 
       if (batchSize >= maxBatchSize) {
-//        addrPS.executeBatch();
-        phonePS.executeBatch();
+//        phonePS.executeBatch();
         clientPS.executeBatch();
 
         connection.commit();
@@ -114,7 +101,6 @@ public class TableWorker implements Closeable {
   public void addToBatchAddr(Address address) {
 
     try {
-//      addrPS.setString(1, address.cia_id);
       addrPS.setString(1, address.id);
       addrPS.setString(2, address.type.toString());
       addrPS.setString(3, address.street);
@@ -129,6 +115,28 @@ public class TableWorker implements Closeable {
 
         connection.commit();
         addrBatchSize = 0;
+      }
+    } catch (SQLException e) {
+      e.printStackTrace();
+    }
+  }
+
+  public void addToBatchPhone(PhoneNumber phoneNumber) {
+
+    try {
+
+      phonePS.setString(1, phoneNumber.id);
+      phonePS.setString(2, phoneNumber.number);
+      phonePS.setString(3, phoneNumber.phoneType.toString());
+      phonePS.addBatch();
+
+      phoneBatchSize++;
+
+      if (phoneBatchSize >= maxBatchSize) {
+        phonePS.executeBatch();
+
+        connection.commit();
+        phoneBatchSize = 0;
       }
     } catch (SQLException e) {
       e.printStackTrace();
