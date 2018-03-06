@@ -26,18 +26,45 @@ public class FrsParser {
 //  }
 
   public static void main(String[] args) throws IOException {
-    JsonParser jsonParser = new JsonFactory().createParser(
-      new File("build/files_to_send/build/out_files/from_frs_2018-02-27-154844-1-30012.json_row.txt"));
+    JsonParser jsonParser = new JsonFactory().createParser("{\"type\":\"new_account\",\"registered_at\":\"2001-03-01T10:30:22.547\",\"account_number\":\"49949KZ960-28847-33846-0544217\",\"client_id\":\"4-FPI-H3-SV-lsPFbXjtWC\"}");
 
     Account account = new Account();
 
-//    parseJSON(jsonParser, account);
+    parseJSON(jsonParser, account);
 
     System.out.println("type: " + account.type + "\nclient id: " + account.clientId);
 
     jsonParser.close();
 
 
+  }
+
+  private static void parseJSON(JsonParser jsonParser, Account account) throws IOException {
+//    System.out.println(jsonParser.nextToken());
+    //loop through the JsonTokens
+    while (jsonParser.nextToken() != JsonToken.END_OBJECT) {
+      String name = jsonParser.getCurrentName();
+      String type;
+      switch (name) {
+        case "type":
+          jsonParser.nextToken();
+          type = jsonParser.getText();
+          account.type = type;
+          break;
+        case "client_id":
+          jsonParser.nextToken();
+          account.clientId = jsonParser.getText();
+          break;
+        case "account_number":
+          jsonParser.nextToken();
+          account.accountNumber = jsonParser.getText();
+          break;
+        case "registered_at":
+          jsonParser.nextToken();
+          account.registeredAt = jsonParser.getText();
+          break;
+      }
+    }
   }
 
   public int parseAndSave() throws IOException {
@@ -49,11 +76,15 @@ public class FrsParser {
       Transaction transaction = new Transaction();
 
       JsonParser jsonParser = new JsonFactory().createParser(line);
+
+      //Skip START_OBJECT
+      jsonParser.nextToken();
+
       //loop through the JsonTokens
-      while(jsonParser.nextToken() != JsonToken.END_OBJECT){
+      String type = null;
+      while (jsonParser.nextToken() != JsonToken.END_OBJECT) {
         String name = jsonParser.getCurrentName();
-        String type = null;
-        switch (name) {
+        switch (name.trim()) {
           case "type":
             jsonParser.nextToken();
             type = jsonParser.getText();
@@ -75,6 +106,7 @@ public class FrsParser {
             break;
           case "money":
             jsonParser.nextToken();
+            System.out.println(jsonParser.getText());
             transaction.money = jsonParser.getText();
             break;
           case "finished_at":
@@ -86,12 +118,13 @@ public class FrsParser {
             transaction.transactionType = jsonParser.getText();
             break;
         }
-
-        if ("transaction".equals(type)) sendTo(frsTableWorker::addToBatch, transaction);
-        else if ("new_account".equals(type)) sendTo(frsTableWorker::addToBatch, account);
       }
+      if ("transaction".equals(type)) sendTo(frsTableWorker::addToBatch, transaction);
+      else if ("new_account".equals(type)) sendTo(frsTableWorker::addToBatch, account);
+      jsonParser.close();
       recordCount++;
     }
+    frsTableWorker.execBatch.run();
     return recordCount;
   }
 

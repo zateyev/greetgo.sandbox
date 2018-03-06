@@ -58,14 +58,15 @@ public class CiaTableWorker implements Closeable {
   public void addToBatch(ClientRecordsToSave clientRecord) {
 
     try {
-      clientPS.setString(1, clientRecord.id);
-      clientPS.setString(2, clientRecord.surname);
-      clientPS.setString(3, clientRecord.name);
+      int ind = 1;
+      clientPS.setString(ind++, clientRecord.id);
+      clientPS.setString(ind++, clientRecord.surname);
+      clientPS.setString(ind++, clientRecord.name);
 
-      clientPS.setString(4, clientRecord.patronymic);
-      clientPS.setString(5, clientRecord.gender.toString());
-      clientPS.setDate(6, clientRecord.dateOfBirth != null ? java.sql.Date.valueOf(clientRecord.dateOfBirth) : null);
-      clientPS.setString(7, clientRecord.charm.name);
+      clientPS.setString(ind++, clientRecord.patronymic);
+      clientPS.setString(ind++, clientRecord.gender.toString());
+      clientPS.setDate(ind++, clientRecord.dateOfBirth != null ? java.sql.Date.valueOf(clientRecord.dateOfBirth) : null);
+      clientPS.setString(ind, clientRecord.charm.name);
 
       clientPS.addBatch();
       clientBatchSize++;
@@ -85,11 +86,12 @@ public class CiaTableWorker implements Closeable {
   public void addToBatch(Address address) {
 
     try {
-      addrPS.setString(1, address.id);
-      addrPS.setString(2, address.type.toString());
-      addrPS.setString(3, address.street);
-      addrPS.setString(4, address.house);
-      addrPS.setString(5, address.flat);
+      int ind = 1;
+      addrPS.setString(ind++, address.id);
+      addrPS.setString(ind++, address.type.toString());
+      addrPS.setString(ind++, address.street);
+      addrPS.setString(ind++, address.house);
+      addrPS.setString(ind, address.flat);
       addrPS.addBatch();
 
       addrBatchSize++;
@@ -109,9 +111,10 @@ public class CiaTableWorker implements Closeable {
 
     try {
 
-      phonePS.setString(1, phoneNumber.id);
-      phonePS.setString(2, phoneNumber.number);
-      phonePS.setString(3, phoneNumber.phoneType.toString());
+      int ind = 1;
+      phonePS.setString(ind++, phoneNumber.id);
+      phonePS.setString(ind++, phoneNumber.number);
+      phonePS.setString(ind, phoneNumber.phoneType.toString());
       phonePS.addBatch();
 
       phoneBatchSize++;

@@ -51,7 +51,7 @@ public class FrsTableWorker implements Closeable {
     };
   }
 
-  public void addToBatch(Account account) throws ParseException {
+  public void addToBatch(Account account) {
 
     try {
       int index = 1;
@@ -69,12 +69,12 @@ public class FrsTableWorker implements Closeable {
         connection.commit();
         accountBatchSize = 0;
       }
-    } catch (SQLException e) {
+    } catch (SQLException | ParseException e) {
       e.printStackTrace();
     }
   }
 
-  public void addToBatch(Transaction transaction) throws ParseException {
+  public void addToBatch(Transaction transaction) {
 
     try {
       int index = 1;
@@ -93,13 +93,18 @@ public class FrsTableWorker implements Closeable {
         connection.commit();
         transactionBatchSize = 0;
       }
-    } catch (SQLException e) {
+    } catch (SQLException | ParseException e) {
       e.printStackTrace();
     }
   }
 
   @Override
   public void close() throws IOException {
-
+    try {
+      accountPS.close();
+      transactionPS.close();
+    } catch (SQLException e) {
+      e.printStackTrace();
+    }
   }
 }

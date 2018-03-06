@@ -18,9 +18,6 @@ import java.util.function.Consumer;
 public class CiaParser extends SaxHandler {
 
   private ClientRecordsToSave clientRecord;
-  private Address addressFact;
-  private Address addressReg;
-  private PhoneNumber phoneNumber;
 
   public InputStream inputStream;
 
@@ -29,14 +26,6 @@ public class CiaParser extends SaxHandler {
   public CiaParser(InputStream inputStream, CiaTableWorker ciaTableWorker) throws SQLException {
     this.inputStream = inputStream;
     this.ciaTableWorker = ciaTableWorker;
-
-    clientRecord = new ClientRecordsToSave();
-    clientRecord.charm = new Charm();
-    addressFact = new Address();
-    addressFact.type = AddressType.FACT;
-    addressReg = new Address();
-    addressReg.type = AddressType.REG;
-    phoneNumber = new PhoneNumber();
   }
 
   public int parseAndSave() throws SAXException, IOException, SQLException {
@@ -54,10 +43,9 @@ public class CiaParser extends SaxHandler {
 
     switch (path) {
       case "/cia/client":
+        clientRecord = new ClientRecordsToSave();
+        clientRecord.charm = new Charm();
         clientRecord.id = attributes.getValue("id");
-        addressFact.id = clientRecord.id;
-        addressReg.id = clientRecord.id;
-        phoneNumber.id = clientRecord.id;
         return;
 
       case "/cia/client/surname":
@@ -93,16 +81,22 @@ public class CiaParser extends SaxHandler {
         return;
 
       case "/cia/client/address/fact":
+        Address addressFact = new Address();
+        addressFact.type = AddressType.FACT;
         addressFact.street = attributes.getValue("street");
         addressFact.house = attributes.getValue("house");
         addressFact.flat = attributes.getValue("flat");
+        addressFact.id = clientRecord.id;
         sendTo(ciaTableWorker::addToBatch, addressFact);
         return;
 
       case "/cia/client/address/register":
+        Address addressReg = new Address();
+        addressReg.type = AddressType.REG;
         addressReg.street = attributes.getValue("street");
         addressReg.house = attributes.getValue("house");
         addressReg.flat = attributes.getValue("flat");
+        addressReg.id = clientRecord.id;
         sendTo(ciaTableWorker::addToBatch, addressReg);
     }
   }
@@ -113,6 +107,8 @@ public class CiaParser extends SaxHandler {
 
     switch (path) {
       case "/cia/client/workPhone": {
+        PhoneNumber phoneNumber = new PhoneNumber();
+        phoneNumber.id = clientRecord.id;
         phoneNumber.phoneType = PhoneType.WORK;
         phoneNumber.number = text();
         sendTo(ciaTableWorker::addToBatch, phoneNumber);
@@ -120,6 +116,8 @@ public class CiaParser extends SaxHandler {
       }
 
       case "/cia/client/mobilePhone": {
+        PhoneNumber phoneNumber = new PhoneNumber();
+        phoneNumber.id = clientRecord.id;
         phoneNumber.phoneType = PhoneType.MOBILE;
         phoneNumber.number = text();
         sendTo(ciaTableWorker::addToBatch, phoneNumber);
@@ -127,6 +125,8 @@ public class CiaParser extends SaxHandler {
       }
 
       case "/cia/client/homePhone": {
+        PhoneNumber phoneNumber = new PhoneNumber();
+        phoneNumber.id = clientRecord.id;
         phoneNumber.phoneType = PhoneType.HOME;
         phoneNumber.number = text();
         sendTo(ciaTableWorker::addToBatch, phoneNumber);
