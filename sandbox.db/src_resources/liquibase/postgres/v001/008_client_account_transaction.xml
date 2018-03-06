@@ -6,11 +6,11 @@
   <changeSet author="zateyev" id="create-table-ClientAccountTransaction">
     <sql endDelimiter=";;"><![CDATA[
       create table client_account_transaction (
-        id varchar(32) not null PRIMARY KEY,
-        account varchar(32) not null REFERENCES client_account (id),
+        id varchar(100) not null PRIMARY KEY,
+        account varchar(100) not null REFERENCES client_account (id),
         money real not null,
         finished_at timestamp with time zone not null,
-        type varchar(32) not null
+        type varchar(255) not null
       )
     ]]></sql>
   </changeSet>

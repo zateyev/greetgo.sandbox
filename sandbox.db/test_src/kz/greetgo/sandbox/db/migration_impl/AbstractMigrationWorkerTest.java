@@ -23,8 +23,8 @@ public class AbstractMigrationWorkerTest extends ParentTestNg {
 
   @Test
   public void testFrsMigration() throws Exception {
-    clientTestDao.get().removeAllData();
-    charmTestDao.get().removeAllData();
+//    clientTestDao.get().removeAllData();
+//    charmTestDao.get().removeAllData();
 
     //
     //

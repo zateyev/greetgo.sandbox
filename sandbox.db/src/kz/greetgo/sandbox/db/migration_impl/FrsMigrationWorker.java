@@ -65,7 +65,19 @@ public class FrsMigrationWorker extends AbstractMigrationWorker {
   }
 
   @Override
-  protected long migrateFromTmp() {
+  protected long migrateFromTmp() throws SQLException {
+    //language=PostgreSQL
+    exec("INSERT INTO client_account (id, client, money, number, registered_at)\n" +
+      "SELECT nextval('s_client'), c.id, tt.money, ta.account_number, ta.registered_at\n" +
+      "FROM tmp_account ta LEFT JOIN (SELECT account_number, sum(money) money FROM tmp_transaction GROUP BY account_number) tt\n" +
+      "ON tt.account_number = ta.account_number LEFT JOIN client c ON c.cia_id = ta.client_id");
+
+    //language=PostgreSQL
+    exec("INSERT INTO client_account_transaction (id, account, money, finished_at, type)\n" +
+      "SELECT nextval('s_client'), ca.id, tt.money, tt.finished_at, tt.transaction_type\n" +
+      "FROM tmp_transaction tt LEFT JOIN client_account ca ON tt.account_number = ca.number");
+
+
     return 0;
   }
 
