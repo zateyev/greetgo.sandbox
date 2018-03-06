@@ -10,7 +10,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 
-public class TableWorker implements Closeable {
+public class CiaTableWorker implements Closeable {
 
   public Connection connection;
   public int maxBatchSize;
@@ -18,14 +18,14 @@ public class TableWorker implements Closeable {
   private PreparedStatement clientPS;
   private PreparedStatement phonePS;
   private PreparedStatement addrPS;
-  private int clientBatchSize = 0;
+  private int clientBatchSize;
   private int recordsCount;
 
   public Runnable execBatch;
   private int addrBatchSize;
   private int phoneBatchSize;
 
-  public TableWorker(Connection connection, int maxBatchSize) throws SQLException {
+  public CiaTableWorker(Connection connection, int maxBatchSize) throws SQLException {
     this.connection = connection;
     this.maxBatchSize = maxBatchSize;
 

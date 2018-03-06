@@ -15,11 +15,9 @@ import org.xml.sax.SAXException;
 import java.io.*;
 import java.sql.*;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.regex.Pattern;
 
 import static kz.greetgo.sandbox.db.util.TimeUtils.recordsPerSecond;
 import static kz.greetgo.sandbox.db.util.TimeUtils.showTime;
@@ -367,8 +365,8 @@ public class CiaMigrationWorker extends AbstractMigrationWorker {
       // parse xml and insert into tmp tables
       connection.setAutoCommit(false);
 
-      try (TableWorker tableWorker = new TableWorker(connection, maxBatchSize)) {
-        CiaParser ciaParser = new CiaParser(tarInput, tableWorker);
+      try (CiaTableWorker ciaTableWorker = new CiaTableWorker(connection, maxBatchSize)) {
+        CiaParser ciaParser = new CiaParser(tarInput, ciaTableWorker);
         recordsCount = ciaParser.parseAndSave();
       } finally {
         connection.setAutoCommit(true);

@@ -24,11 +24,11 @@ public class CiaParser extends SaxHandler {
 
   public InputStream inputStream;
 
-  private TableWorker tableWorker;
+  private CiaTableWorker ciaTableWorker;
 
-  public CiaParser(InputStream inputStream, TableWorker tableWorker) throws SQLException {
+  public CiaParser(InputStream inputStream, CiaTableWorker ciaTableWorker) throws SQLException {
     this.inputStream = inputStream;
-    this.tableWorker = tableWorker;
+    this.ciaTableWorker = ciaTableWorker;
 
     clientRecord = new ClientRecordsToSave();
     clientRecord.charm = new Charm();
@@ -96,14 +96,14 @@ public class CiaParser extends SaxHandler {
         addressFact.street = attributes.getValue("street");
         addressFact.house = attributes.getValue("house");
         addressFact.flat = attributes.getValue("flat");
-        sendTo(tableWorker::addToBatch, addressFact);
+        sendTo(ciaTableWorker::addToBatch, addressFact);
         return;
 
       case "/cia/client/address/register":
         addressReg.street = attributes.getValue("street");
         addressReg.house = attributes.getValue("house");
         addressReg.flat = attributes.getValue("flat");
-        sendTo(tableWorker::addToBatch, addressReg);
+        sendTo(ciaTableWorker::addToBatch, addressReg);
     }
   }
 
@@ -115,31 +115,31 @@ public class CiaParser extends SaxHandler {
       case "/cia/client/workPhone": {
         phoneNumber.phoneType = PhoneType.WORK;
         phoneNumber.number = text();
-        sendTo(tableWorker::addToBatch, phoneNumber);
+        sendTo(ciaTableWorker::addToBatch, phoneNumber);
         return;
       }
 
       case "/cia/client/mobilePhone": {
         phoneNumber.phoneType = PhoneType.MOBILE;
         phoneNumber.number = text();
-        sendTo(tableWorker::addToBatch, phoneNumber);
+        sendTo(ciaTableWorker::addToBatch, phoneNumber);
         return;
       }
 
       case "/cia/client/homePhone": {
         phoneNumber.phoneType = PhoneType.HOME;
         phoneNumber.number = text();
-        sendTo(tableWorker::addToBatch, phoneNumber);
+        sendTo(ciaTableWorker::addToBatch, phoneNumber);
         return;
       }
 
       case "/cia/client": {
-        sendTo(tableWorker::addToBatch, clientRecord);
+        sendTo(ciaTableWorker::addToBatch, clientRecord);
         return;
       }
 
       case "/cia": {
-        tableWorker.execBatch.run();
+        ciaTableWorker.execBatch.run();
       }
     }
   }

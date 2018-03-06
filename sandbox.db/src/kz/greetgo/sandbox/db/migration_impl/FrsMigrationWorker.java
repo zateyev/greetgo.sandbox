@@ -2,22 +2,17 @@ package kz.greetgo.sandbox.db.migration_impl;
 
 import kz.greetgo.depinject.core.Bean;
 import kz.greetgo.depinject.core.BeanGetter;
-import kz.greetgo.sandbox.controller.model.ClientRecordsToSave;
 import kz.greetgo.sandbox.db.configs.DbConfig;
 import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
 import org.apache.commons.compress.archivers.tar.TarArchiveInputStream;
 import org.apache.commons.compress.compressors.bzip2.BZip2CompressorInputStream;
 
-import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.sql.DriverManager;
 import java.sql.SQLException;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.regex.Pattern;
 
 import static kz.greetgo.sandbox.db.util.TimeUtils.recordsPerSecond;
 import static kz.greetgo.sandbox.db.util.TimeUtils.showTime;
@@ -109,8 +104,8 @@ public class FrsMigrationWorker extends AbstractMigrationWorker {
       // parse xml and insert into tmp tables
       connection.setAutoCommit(false);
 
-      try (TableWorker tableWorker = new TableWorker(connection, maxBatchSize)) {
-        FrsParser frsParser = new FrsParser(tarInput, tableWorker);
+      try (FrsTableWorker frsTableWorker = new FrsTableWorker(connection, maxBatchSize)) {
+        FrsParser frsParser = new FrsParser(tarInput, frsTableWorker);
         recordsCount = frsParser.parseAndSave();
       } finally {
         connection.setAutoCommit(true);
