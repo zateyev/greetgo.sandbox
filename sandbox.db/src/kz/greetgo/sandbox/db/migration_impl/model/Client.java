@@ -8,7 +8,7 @@ public class Client {
   public String surname;
   public String name;
   public String patronymic;
-  public Gender gender;
+  public String gender;
   public String dateOfBirth;
-  public String charm_name;
+  public String charmName;
 }

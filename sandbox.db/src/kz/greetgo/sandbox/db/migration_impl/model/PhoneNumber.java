@@ -4,4 +4,8 @@ public class PhoneNumber {
   public String cia_id;
   public String type;
   public String number;
+
+  public PhoneNumber(String type) {
+    this.type = type;
+  }
 }

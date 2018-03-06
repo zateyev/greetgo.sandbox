@@ -1,8 +1,8 @@
 package kz.greetgo.sandbox.db.migration_impl;
 
-import kz.greetgo.sandbox.controller.model.Address;
-import kz.greetgo.sandbox.controller.model.ClientRecordsToSave;
-import kz.greetgo.sandbox.controller.model.PhoneNumber;
+import kz.greetgo.sandbox.db.migration_impl.model.Address;
+import kz.greetgo.sandbox.db.migration_impl.model.Client;
+import kz.greetgo.sandbox.db.migration_impl.model.PhoneNumber;
 
 import java.io.Closeable;
 import java.io.IOException;
@@ -54,18 +54,18 @@ public class CiaTableWorker implements Closeable {
     };
   }
 
-  public void addToBatch(ClientRecordsToSave clientRecord) {
+  public void addToBatch(Client client) {
 
     try {
       int ind = 1;
-      clientPS.setString(ind++, clientRecord.id);
-      clientPS.setString(ind++, clientRecord.surname);
-      clientPS.setString(ind++, clientRecord.name);
+      clientPS.setString(ind++, client.cia_id);
+      clientPS.setString(ind++, client.surname);
+      clientPS.setString(ind++, client.name);
 
-      clientPS.setString(ind++, clientRecord.patronymic);
-      clientPS.setString(ind++, clientRecord.gender.toString());
-      clientPS.setDate(ind++, clientRecord.dateOfBirth != null ? java.sql.Date.valueOf(clientRecord.dateOfBirth) : null);
-      clientPS.setString(ind, clientRecord.charm.name);
+      clientPS.setString(ind++, client.patronymic);
+      clientPS.setString(ind++, client.gender);
+      clientPS.setDate(ind++, client.dateOfBirth != null ? java.sql.Date.valueOf(client.dateOfBirth) : null);
+      clientPS.setString(ind, client.charmName);
 
       clientPS.addBatch();
       clientBatchSize++;
@@ -85,8 +85,8 @@ public class CiaTableWorker implements Closeable {
 
     try {
       int ind = 1;
-      addrPS.setString(ind++, address.id);
-      addrPS.setString(ind++, address.type.toString());
+      addrPS.setString(ind++, address.cia_id);
+      addrPS.setString(ind++, address.type);
       addrPS.setString(ind++, address.street);
       addrPS.setString(ind++, address.house);
       addrPS.setString(ind, address.flat);
@@ -110,9 +110,9 @@ public class CiaTableWorker implements Closeable {
     try {
 
       int ind = 1;
-      phonePS.setString(ind++, phoneNumber.id);
+      phonePS.setString(ind++, phoneNumber.cia_id);
       phonePS.setString(ind++, phoneNumber.number);
-      phonePS.setString(ind, phoneNumber.phoneType.toString());
+      phonePS.setString(ind, phoneNumber.type);
       phonePS.addBatch();
 
       phoneBatchSize++;

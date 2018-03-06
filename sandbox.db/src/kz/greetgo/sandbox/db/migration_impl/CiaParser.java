@@ -1,6 +1,8 @@
 package kz.greetgo.sandbox.db.migration_impl;
 
-import kz.greetgo.sandbox.controller.model.*;
+import kz.greetgo.sandbox.db.migration_impl.model.Address;
+import kz.greetgo.sandbox.db.migration_impl.model.Client;
+import kz.greetgo.sandbox.db.migration_impl.model.PhoneNumber;
 import kz.greetgo.sandbox.db.util.SaxHandler;
 import org.xml.sax.Attributes;
 import org.xml.sax.InputSource;
@@ -17,7 +19,7 @@ import java.util.function.Consumer;
 
 public class CiaParser extends SaxHandler {
 
-  private ClientRecordsToSave clientRecord;
+  private Client client;
   public InputStream inputStream;
   private CiaTableWorker ciaTableWorker;
 
@@ -43,61 +45,58 @@ public class CiaParser extends SaxHandler {
 
     switch (path) {
       case "/cia/client":
-        clientRecord = new ClientRecordsToSave();
-        clientRecord.charm = new Charm();
-        clientRecord.id = attributes.getValue("id");
+        client = new Client();
+        client.cia_id = attributes.getValue("id");
         recordsCount++;
         return;
 
       case "/cia/client/surname":
-        clientRecord.surname = attributes.getValue("value");
+        client.surname = attributes.getValue("value");
         return;
 
       case "/cia/client/name":
-        clientRecord.name = attributes.getValue("value");
+        client.name = attributes.getValue("value");
         return;
 
       case "/cia/client/patronymic":
-        clientRecord.patronymic = attributes.getValue("value");
+        client.patronymic = attributes.getValue("value");
         return;
 
       case "/cia/client/gender":
-        clientRecord.gender = Gender.valueOf(attributes.getValue("value"));
+        client.gender = attributes.getValue("value");
         return;
 
       case "/cia/client/birth":
-        clientRecord.dateOfBirth = attributes.getValue("value");
+        client.dateOfBirth = attributes.getValue("value");
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
         try {
-          sdf.parse(clientRecord.dateOfBirth);
+          sdf.parse(client.dateOfBirth);
         } catch (ParseException e) {
           // Проглатывание ошибки
-          clientRecord.dateOfBirth = null;
+          client.dateOfBirth = null;
           return;
         }
         return;
 
       case "/cia/client/charm":
-        clientRecord.charm.name = attributes.getValue("value");
+        client.charmName = attributes.getValue("value");
         return;
 
       case "/cia/client/address/fact":
-        Address addressFact = new Address();
-        addressFact.type = AddressType.FACT;
+        Address addressFact = new Address("FACT");
         addressFact.street = attributes.getValue("street");
         addressFact.house = attributes.getValue("house");
         addressFact.flat = attributes.getValue("flat");
-        addressFact.id = clientRecord.id;
+        addressFact.cia_id = client.cia_id;
         sendTo(ciaTableWorker::addToBatch, addressFact);
         return;
 
       case "/cia/client/address/register":
-        Address addressReg = new Address();
-        addressReg.type = AddressType.REG;
+        Address addressReg = new Address("REG");
         addressReg.street = attributes.getValue("street");
         addressReg.house = attributes.getValue("house");
         addressReg.flat = attributes.getValue("flat");
-        addressReg.id = clientRecord.id;
+        addressReg.cia_id = client.cia_id;
         sendTo(ciaTableWorker::addToBatch, addressReg);
     }
   }
@@ -108,34 +107,31 @@ public class CiaParser extends SaxHandler {
 
     switch (path) {
       case "/cia/client/workPhone": {
-        PhoneNumber phoneNumber = new PhoneNumber();
-        phoneNumber.id = clientRecord.id;
-        phoneNumber.phoneType = PhoneType.WORK;
+        PhoneNumber phoneNumber = new PhoneNumber("WORK");
+        phoneNumber.cia_id = client.cia_id;
         phoneNumber.number = text();
         sendTo(ciaTableWorker::addToBatch, phoneNumber);
         return;
       }
 
       case "/cia/client/mobilePhone": {
-        PhoneNumber phoneNumber = new PhoneNumber();
-        phoneNumber.id = clientRecord.id;
-        phoneNumber.phoneType = PhoneType.MOBILE;
+        PhoneNumber phoneNumber = new PhoneNumber("MOBILE");
+        phoneNumber.cia_id = client.cia_id;
         phoneNumber.number = text();
         sendTo(ciaTableWorker::addToBatch, phoneNumber);
         return;
       }
 
       case "/cia/client/homePhone": {
-        PhoneNumber phoneNumber = new PhoneNumber();
-        phoneNumber.id = clientRecord.id;
-        phoneNumber.phoneType = PhoneType.HOME;
+        PhoneNumber phoneNumber = new PhoneNumber("HOME");
+        phoneNumber.cia_id = client.cia_id;
         phoneNumber.number = text();
         sendTo(ciaTableWorker::addToBatch, phoneNumber);
         return;
       }
 
       case "/cia/client": {
-        sendTo(ciaTableWorker::addToBatch, clientRecord);
+        sendTo(ciaTableWorker::addToBatch, client);
         return;
       }
 
@@ -145,8 +141,8 @@ public class CiaParser extends SaxHandler {
     }
   }
 
-  private void sendTo(final Consumer<ClientRecordsToSave> func, ClientRecordsToSave clientRecord) {
-    func.accept(clientRecord);
+  private void sendTo(final Consumer<Client> func, Client client) {
+    func.accept(client);
   }
 
   private void sendTo(final Consumer<Address> func, Address address) {
