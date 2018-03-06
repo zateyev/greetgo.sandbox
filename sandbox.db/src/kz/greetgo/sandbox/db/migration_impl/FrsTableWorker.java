@@ -9,6 +9,9 @@ import java.io.IOException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.sql.Timestamp;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 
 public class FrsTableWorker implements Closeable {
   public Connection connection;
@@ -20,14 +23,19 @@ public class FrsTableWorker implements Closeable {
   private int accountBatchSize;
   private int transactionBatchSize;
 
+  private final static SimpleDateFormat SDF = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS");
+
   public Runnable execBatch;
 
   public FrsTableWorker(Connection connection, int maxBatchSize) throws SQLException {
     this.connection = connection;
     this.maxBatchSize = maxBatchSize;
 
-    accountPS = this.connection.prepareStatement("");
-    transactionPS = this.connection.prepareStatement("");
+    accountPS = this.connection.prepareStatement(
+      "INSERT INTO TMP_ACCOUNT (type, client_id, account_number, registered_at) VALUES (?, ?, ?, ?)");
+
+    transactionPS = this.connection.prepareStatement(
+      "INSERT INTO TMP_TRANSACTION (type, money, finished_at, transaction_type, account_number) VALUES (?, ?, ?, ?, ?)");
 
     execBatch = () -> {
       try {
@@ -43,13 +51,14 @@ public class FrsTableWorker implements Closeable {
     };
   }
 
-  public void addToBatch(Account account) {
+  public void addToBatch(Account account) throws ParseException {
 
     try {
-      accountPS.setString(1, account.type);
-      accountPS.setString(2, account.clientId);
-      accountPS.setString(3, account.accountNumber);
-      accountPS.setString(4, account.registeredAt);
+      int index = 1;
+      accountPS.setString(index++, account.type);
+      accountPS.setString(index++, account.clientId);
+      accountPS.setString(index++, account.accountNumber);
+      accountPS.setTimestamp(index, new Timestamp(SDF.parse(account.registeredAt).getTime()));
 
       accountPS.addBatch();
       accountBatchSize++;
@@ -65,14 +74,15 @@ public class FrsTableWorker implements Closeable {
     }
   }
 
-  public void addToBatch(Transaction transaction) {
+  public void addToBatch(Transaction transaction) throws ParseException {
 
     try {
-      transactionPS.setString(1, transaction.type);
-      transactionPS.setString(2, transaction.money);
-      transactionPS.setString(3, transaction.finishedAt);
-      transactionPS.setString(4, transaction.transactionType);
-      transactionPS.setString(5, transaction.accountNumber);
+      int index = 1;
+      transactionPS.setString(index++, transaction.type);
+      transactionPS.setString(index++, transaction.money);
+      transactionPS.setTimestamp(index++, new Timestamp(SDF.parse(transaction.finishedAt).getTime()));
+      transactionPS.setString(index++, transaction.transactionType);
+      transactionPS.setString(index, transaction.accountNumber);
 
       transactionPS.addBatch();
       transactionBatchSize++;

@@ -135,6 +135,9 @@ public class FrsMigrationWorker extends AbstractMigrationWorker {
     dropTmpTables();
     createTmpTables();
     int recordsSize = download();
+    handleErrors();
+    migrateFromTmp();
+    closePostgresConnection();
     return 0;
   }
 

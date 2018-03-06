@@ -40,7 +40,7 @@ public class FrsParser {
 
   }
 
-  private int parseAndSave() throws IOException {
+  public int parseAndSave() throws IOException {
     int recordCount = 0;
     BufferedReader br = new BufferedReader(new InputStreamReader(inputStream));
     String line;
