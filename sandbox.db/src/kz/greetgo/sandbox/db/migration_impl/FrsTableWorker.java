@@ -32,7 +32,7 @@ public class FrsTableWorker implements Closeable {
     this.maxBatchSize = maxBatchSize;
 
     accountPS = this.connection.prepareStatement(
-      "INSERT INTO TMP_ACCOUNT (type, client_id, account_number, registered_at) VALUES (?, ?, ?, ?)");
+      "INSERT INTO tmp_account (type, client_id, account_number, registered_at) VALUES (?, ?, ?, ?)");
 
     transactionPS = this.connection.prepareStatement(
       "INSERT INTO TMP_TRANSACTION (type, money, finished_at, transaction_type, account_number) VALUES (?, ?, ?, ?, ?)");
@@ -79,7 +79,7 @@ public class FrsTableWorker implements Closeable {
     try {
       int index = 1;
       transactionPS.setString(index++, transaction.type);
-      transactionPS.setString(index++, transaction.money);
+      transactionPS.setDouble(index++, transaction.money);
       transactionPS.setTimestamp(index++, new Timestamp(SDF.parse(transaction.finishedAt).getTime()));
       transactionPS.setString(index++, transaction.transactionType);
       transactionPS.setString(index, transaction.accountNumber);

@@ -106,8 +106,7 @@ public class FrsParser {
             break;
           case "money":
             jsonParser.nextToken();
-            System.out.println(jsonParser.getText());
-            transaction.money = jsonParser.getText();
+            transaction.money = Double.parseDouble(jsonParser.getText().replace("_", ""));
             break;
           case "finished_at":
             jsonParser.nextToken();

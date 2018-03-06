@@ -4,7 +4,7 @@ import java.util.Date;
 
 public class Transaction {
   public String type;
-  public String money;
+  public double money;
   public String finishedAt;
   public String transactionType;
   public String accountNumber;
