@@ -333,6 +333,7 @@ public class CiaMigrationWorker extends AbstractMigrationWorker {
 
     // get file, read all files iteratively
     List<String> fileDirToLoad = renameFiles(".xml.tar.bz2");
+    int recordsCount = 0;
 
     for (String fileName : fileDirToLoad) {
       inputStream = new FileInputStream(fileName);
@@ -359,7 +360,6 @@ public class CiaMigrationWorker extends AbstractMigrationWorker {
       });
       see.start();
 
-      int recordsCount;
       long startedAt = System.nanoTime();
 
       // parse xml and insert into tmp tables
@@ -367,7 +367,7 @@ public class CiaMigrationWorker extends AbstractMigrationWorker {
 
       try (CiaTableWorker ciaTableWorker = new CiaTableWorker(connection, maxBatchSize)) {
         CiaParser ciaParser = new CiaParser(tarInput, ciaTableWorker);
-        recordsCount = ciaParser.parseAndSave();
+        recordsCount += ciaParser.parseAndSave();
       } finally {
         connection.setAutoCommit(true);
       }
@@ -387,6 +387,6 @@ public class CiaMigrationWorker extends AbstractMigrationWorker {
       }
     }
 
-    return 0;
+    return recordsCount;
   }
 }

@@ -84,6 +84,7 @@ public class FrsMigrationWorker extends AbstractMigrationWorker {
   @Override
   protected int download() throws IOException, SQLException {
     List<String> fileDirToLoad = renameFiles(".json_row.txt.tar.bz2");
+    int recordsCount = 0;
 
     for (String fileName : fileDirToLoad) {
       inputStream = new FileInputStream(fileName);
@@ -110,7 +111,6 @@ public class FrsMigrationWorker extends AbstractMigrationWorker {
       });
       see.start();
 
-      int recordsCount;
       long startedAt = System.nanoTime();
 
       // parse xml and insert into tmp tables
@@ -118,7 +118,7 @@ public class FrsMigrationWorker extends AbstractMigrationWorker {
 
       try (FrsTableWorker frsTableWorker = new FrsTableWorker(connection, maxBatchSize)) {
         FrsParser frsParser = new FrsParser(tarInput, frsTableWorker);
-        recordsCount = frsParser.parseAndSave();
+        recordsCount += frsParser.parseAndSave();
       } finally {
         connection.setAutoCommit(true);
       }
@@ -138,19 +138,32 @@ public class FrsMigrationWorker extends AbstractMigrationWorker {
       }
     }
 
-    return 0;
+    return recordsCount;
   }
 
   @Override
   public int migrate() throws Exception {
+    long startedAt = System.nanoTime();
+
     createPostgresConnection();
     dropTmpTables();
     createTmpTables();
-    int recordsSize = download();
+
+    int recordsCount = download();
+    {
+      long now = System.nanoTime();
+      info("Downloading of portion " + recordsCount + " finished for " + showTime(now, startedAt));
+    }
+
     handleErrors();
     migrateFromTmp();
+    {
+      long now = System.nanoTime();
+      info("FrsMigrationWorker of portion " + recordsCount + " finished for " + showTime(now, startedAt));
+    }
+
     closePostgresConnection();
-    return 0;
+    return recordsCount;
   }
 
   private void createPostgresConnection() throws Exception {

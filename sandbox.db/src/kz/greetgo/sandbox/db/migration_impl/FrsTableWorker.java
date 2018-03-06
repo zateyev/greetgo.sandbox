@@ -54,11 +54,11 @@ public class FrsTableWorker implements Closeable {
   public void addToBatch(Account account) {
 
     try {
-      int index = 1;
-      accountPS.setString(index++, account.type);
-      accountPS.setString(index++, account.clientId);
-      accountPS.setString(index++, account.accountNumber);
-      accountPS.setTimestamp(index, new Timestamp(SDF.parse(account.registeredAt).getTime()));
+      int ind = 1;
+      accountPS.setString(ind++, account.type);
+      accountPS.setString(ind++, account.clientId);
+      accountPS.setString(ind++, account.accountNumber);
+      accountPS.setTimestamp(ind, new Timestamp(SDF.parse(account.registeredAt).getTime()));
 
       accountPS.addBatch();
       accountBatchSize++;
@@ -77,12 +77,12 @@ public class FrsTableWorker implements Closeable {
   public void addToBatch(Transaction transaction) {
 
     try {
-      int index = 1;
-      transactionPS.setString(index++, transaction.type);
-      transactionPS.setDouble(index++, transaction.money);
-      transactionPS.setTimestamp(index++, new Timestamp(SDF.parse(transaction.finishedAt).getTime()));
-      transactionPS.setString(index++, transaction.transactionType);
-      transactionPS.setString(index, transaction.accountNumber);
+      int ind = 1;
+      transactionPS.setString(ind++, transaction.type);
+      transactionPS.setDouble(ind++, transaction.money);
+      transactionPS.setTimestamp(ind++, new Timestamp(SDF.parse(transaction.finishedAt).getTime()));
+      transactionPS.setString(ind++, transaction.transactionType);
+      transactionPS.setString(ind, transaction.accountNumber);
 
       transactionPS.addBatch();
       transactionBatchSize++;

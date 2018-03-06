@@ -18,10 +18,10 @@ import java.util.function.Consumer;
 public class CiaParser extends SaxHandler {
 
   private ClientRecordsToSave clientRecord;
-
   public InputStream inputStream;
-
   private CiaTableWorker ciaTableWorker;
+
+  private int recordsCount;
 
   public CiaParser(InputStream inputStream, CiaTableWorker ciaTableWorker) throws SQLException {
     this.inputStream = inputStream;
@@ -34,7 +34,7 @@ public class CiaParser extends SaxHandler {
     XMLReader reader = XMLReaderFactory.createXMLReader();
     reader.setContentHandler(this);
     reader.parse(new InputSource(inputStream));
-    return 0;
+    return recordsCount;
   }
 
   @Override
@@ -46,6 +46,7 @@ public class CiaParser extends SaxHandler {
         clientRecord = new ClientRecordsToSave();
         clientRecord.charm = new Charm();
         clientRecord.id = attributes.getValue("id");
+        recordsCount++;
         return;
 
       case "/cia/client/surname":

@@ -19,7 +19,6 @@ public class CiaTableWorker implements Closeable {
   private PreparedStatement phonePS;
   private PreparedStatement addrPS;
   private int clientBatchSize;
-  private int recordsCount;
 
   public Runnable execBatch;
   private int addrBatchSize;
@@ -70,7 +69,6 @@ public class CiaTableWorker implements Closeable {
 
       clientPS.addBatch();
       clientBatchSize++;
-      recordsCount++;
 
       if (clientBatchSize >= maxBatchSize) {
         clientPS.executeBatch();

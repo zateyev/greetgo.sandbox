@@ -68,7 +68,7 @@ public class FrsParser {
   }
 
   public int parseAndSave() throws IOException {
-    int recordCount = 0;
+    int recordsCount = 0;
     BufferedReader br = new BufferedReader(new InputStreamReader(inputStream));
     String line;
     while ((line = br.readLine()) != null) {
@@ -121,10 +121,10 @@ public class FrsParser {
       if ("transaction".equals(type)) sendTo(frsTableWorker::addToBatch, transaction);
       else if ("new_account".equals(type)) sendTo(frsTableWorker::addToBatch, account);
       jsonParser.close();
-      recordCount++;
+      recordsCount++;
     }
     frsTableWorker.execBatch.run();
-    return recordCount;
+    return recordsCount;
   }
 
   private void sendTo(Consumer<Account> func, Account account) {

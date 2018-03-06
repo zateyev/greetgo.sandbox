@@ -22,6 +22,21 @@ public class AbstractMigrationWorkerTest extends ParentTestNg {
   public BeanGetter<CharmTestDao> charmTestDao;
 
   @Test
+  public void testCiaMigration() throws Exception {
+//    tmpClientTestDao.get().cleanDb();
+    clientTestDao.get().removeAllData();
+    charmTestDao.get().removeAllData();
+
+    //
+    //
+    int recordsSize = migration.get().migrate();
+    //
+    //
+
+    assertThat(recordsSize).isNotEqualTo(0);
+  }
+
+  @Test
   public void testFrsMigration() throws Exception {
 //    clientTestDao.get().removeAllData();
 //    charmTestDao.get().removeAllData();
@@ -32,6 +47,6 @@ public class AbstractMigrationWorkerTest extends ParentTestNg {
     //
     //
 
-    assertThat(recordsSize).isEqualTo(0);
+    assertThat(recordsSize).isNotEqualTo(0);
   }
 }

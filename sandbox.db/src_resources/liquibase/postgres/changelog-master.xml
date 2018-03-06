@@ -14,13 +14,4 @@
   <include file="liquibase/postgres/v001/007_transaction_type.xml"/>
   <include file="liquibase/postgres/v001/008_client_account_transaction.xml"/>
 
-  <!--cia-->
-  <!--<include file="liquibase/postgres/cia/000_transition_client.xml"/>-->
-
-  <!--oper-->
-  <!--<include file="liquibase/postgres/oper/000_charm.xml"/>-->
-  <!--<include file="liquibase/postgres/oper/001_client.xml"/>-->
-  <!--<include file="liquibase/postgres/oper/002_client_addr.xml"/>-->
-  <!--<include file="liquibase/postgres/oper/003_client_phone.xml"/>-->
-
 </databaseChangeLog>
