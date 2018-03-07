@@ -24,19 +24,19 @@ public class CiaTableWorker implements Closeable {
   private int addrBatchSize;
   private int phoneBatchSize;
 
-  public CiaTableWorker(Connection connection, int maxBatchSize) throws SQLException {
+  public CiaTableWorker(Connection connection, int maxBatchSize, String clientTableName, String addrTableName, String phoneTableName) throws SQLException {
     this.connection = connection;
     this.maxBatchSize = maxBatchSize;
 
-    clientPS = this.connection.prepareStatement("INSERT INTO tmp_client " +
-      "(cia_id, surname, name, patronymic, gender, birth_date, charm_name) " +
+    clientPS = this.connection.prepareStatement("INSERT INTO " + clientTableName +
+      " (cia_id, surname, name, patronymic, gender, birth_date, charm_name) " +
       "VALUES (?, ?, ?, ?, ?, ?, ?) "
     );
 
-    phonePS = this.connection.prepareStatement("INSERT INTO tmp_phone (cia_id, phone_number, type) " +
+    phonePS = this.connection.prepareStatement("INSERT INTO " + phoneTableName + " (cia_id, phone_number, type) " +
       "VALUES (?, ?, ?)");
 
-    addrPS = this.connection.prepareStatement("INSERT INTO tmp_addr (cia_id, type, street, house, flat) " +
+    addrPS = this.connection.prepareStatement("INSERT INTO " + addrTableName + " (cia_id, type, street, house, flat) " +
       "VALUES (?, ?, ?, ?, ?)");
 
     execBatch = () -> {

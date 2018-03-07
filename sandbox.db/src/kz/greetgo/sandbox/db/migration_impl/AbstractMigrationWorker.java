@@ -38,19 +38,24 @@ public abstract class AbstractMigrationWorker /*implements CiaMigrationWorker */
 
   protected abstract int download() throws Exception;
 
+  protected abstract String r(String sql);
+
   protected List<String> renameFiles(String ext) throws IOException {
+    SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd");
+    Date nowDate = new Date();
+
     List<String> ret = new ArrayList<>();
     String folderName = "build/files_to_send/";
     final File folder = new File(folderName);
     List<String> fileNames = listFilesForFolder(folder);
     String regexPattern = "^[a-zA-Z0-9-_]*" + ext + "$";
     Pattern p = Pattern.compile(regexPattern);
-    SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
 
     for (String fileName : fileNames) {
       if (p.matcher(fileName).matches()) {
         File file = new File(folderName + fileName);
-        String newName = folderName + fileName.substring(0, fileName.length() - ext.length()) + "_YMD" + ext;
+        String newName = folderName + fileName.substring(0, fileName.length() - ext.length()) +
+          "_sandbox" + sdf.format(nowDate) + ext;
         ret.add(newName);
         File file1 = new File(newName);
         if (file1.exists())
@@ -64,12 +69,6 @@ public abstract class AbstractMigrationWorker /*implements CiaMigrationWorker */
     }
 
     return ret;
-  }
-
-  private String r(String sql) {
-//    sql = sql.replaceAll("TMP_CLIENT", tmpClientTable);
-    sql = sql.replaceAll("TMP_CLIENT", "tmp_client");
-    return sql;
   }
 
   protected void exec(String sql) throws SQLException {

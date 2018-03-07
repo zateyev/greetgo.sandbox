@@ -12,6 +12,8 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.sql.DriverManager;
 import java.sql.SQLException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -21,6 +23,9 @@ import static kz.greetgo.sandbox.db.util.TimeUtils.showTime;
 @Bean
 public class FrsMigrationWorkerImpl extends AbstractMigrationWorker implements FrsMigrationWorker {
   public BeanGetter<DbConfig> dbConfig;
+
+  private String tmpAccountTable;
+  private String tmpTransactionTable;
 
   @Override
   protected void dropTmpTables() throws SQLException {
@@ -35,6 +40,13 @@ public class FrsMigrationWorkerImpl extends AbstractMigrationWorker implements F
   @Override
   protected void uploadAndDropErrors() {
 
+  }
+
+  @Override
+  protected String r(String sql) {
+    sql = sql.replaceAll("TMP_ACCOUNT", tmpAccountTable);
+    sql = sql.replaceAll("TMP_TRANSACTION", tmpTransactionTable);
+    return sql;
   }
 
   @Override
@@ -70,18 +82,18 @@ public class FrsMigrationWorkerImpl extends AbstractMigrationWorker implements F
     //language=PostgreSQL
     exec("INSERT INTO client (id, cia_id)\n" +
       "SELECT nextval('s_client'), client_id\n" +
-      "FROM tmp_account ta ON CONFLICT (cia_id) DO NOTHING");
+      "FROM TMP_ACCOUNT ta ON CONFLICT (cia_id) DO NOTHING");
 
     //language=PostgreSQL
     exec("INSERT INTO client_account (id, client, money, number, registered_at)\n" +
       "SELECT nextval('s_client'), c.id, tt.money, ta.account_number, ta.registered_at\n" +
-      "FROM tmp_account ta LEFT JOIN (SELECT account_number, sum(money) money FROM tmp_transaction GROUP BY account_number) tt\n" +
+      "FROM TMP_ACCOUNT ta LEFT JOIN (SELECT account_number, sum(money) money FROM TMP_TRANSACTION GROUP BY account_number) tt\n" +
       "ON tt.account_number = ta.account_number LEFT JOIN client c ON c.cia_id = ta.client_id");
 
     //language=PostgreSQL
     exec("INSERT INTO client_account_transaction (id, account, money, finished_at, type)\n" +
       "SELECT nextval('s_client'), ca.id, tt.money, tt.finished_at, tt.transaction_type\n" +
-      "FROM tmp_transaction tt LEFT JOIN client_account ca ON tt.account_number = ca.number");
+      "FROM TMP_TRANSACTION tt LEFT JOIN client_account ca ON tt.account_number = ca.number");
 
 
     return 0;
@@ -122,7 +134,7 @@ public class FrsMigrationWorkerImpl extends AbstractMigrationWorker implements F
       // parse xml and insert into tmp tables
       connection.setAutoCommit(false);
 
-      try (FrsTableWorker frsTableWorker = new FrsTableWorker(connection, maxBatchSize)) {
+      try (FrsTableWorker frsTableWorker = new FrsTableWorker(connection, maxBatchSize, tmpAccountTable, tmpTransactionTable)) {
         FrsParser frsParser = new FrsParser(tarInput, frsTableWorker);
         recordsCount += frsParser.parseAndSave();
       } finally {
@@ -150,6 +162,11 @@ public class FrsMigrationWorkerImpl extends AbstractMigrationWorker implements F
   @Override
   public int migrate() throws Exception {
     long startedAt = System.nanoTime();
+
+    SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd");
+    Date nowDate = new Date();
+    tmpAccountTable = "cia_migration_account_" + sdf.format(nowDate);
+    tmpTransactionTable = "cia_migration_transaction_" + sdf.format(nowDate);
 
     createPostgresConnection();
     dropTmpTables();

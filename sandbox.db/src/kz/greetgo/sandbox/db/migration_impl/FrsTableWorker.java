@@ -27,15 +27,17 @@ public class FrsTableWorker implements Closeable {
 
   public Runnable execBatch;
 
-  public FrsTableWorker(Connection connection, int maxBatchSize) throws SQLException {
+  public FrsTableWorker(Connection connection, int maxBatchSize, String accountTable, String transactionTable) throws SQLException {
     this.connection = connection;
     this.maxBatchSize = maxBatchSize;
 
     accountPS = this.connection.prepareStatement(
-      "INSERT INTO tmp_account (type, client_id, account_number, registered_at) VALUES (?, ?, ?, ?)");
+      "INSERT INTO " + accountTable + " (type, client_id, account_number, registered_at) " +
+        "VALUES (?, ?, ?, ?)");
 
     transactionPS = this.connection.prepareStatement(
-      "INSERT INTO TMP_TRANSACTION (type, money, finished_at, transaction_type, account_number) VALUES (?, ?, ?, ?, ?)");
+      "INSERT INTO " + transactionTable + " (type, money, finished_at, transaction_type, account_number) " +
+        "VALUES (?, ?, ?, ?, ?)");
 
     execBatch = () -> {
       try {
