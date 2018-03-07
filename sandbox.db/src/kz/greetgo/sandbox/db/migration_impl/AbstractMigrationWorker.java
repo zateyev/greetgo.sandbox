@@ -1,9 +1,5 @@
 package kz.greetgo.sandbox.db.migration_impl;
 
-import kz.greetgo.sandbox.controller.migration.MigrationWorker;
-import kz.greetgo.sandbox.controller.model.ClientRecordsToSave;
-import org.xml.sax.SAXException;
-
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -19,7 +15,7 @@ import java.util.regex.Pattern;
 
 import static kz.greetgo.sandbox.db.util.TimeUtils.showTime;
 
-public abstract class AbstractMigrationWorker implements MigrationWorker {
+public abstract class AbstractMigrationWorker /*implements CiaMigrationWorker */{
   public InputStream inputStream;
   public OutputStream outputStream;
   public Connection connection;

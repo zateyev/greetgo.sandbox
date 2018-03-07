@@ -2,6 +2,7 @@ package kz.greetgo.sandbox.db.migration_impl;
 
 import kz.greetgo.depinject.core.Bean;
 import kz.greetgo.depinject.core.BeanGetter;
+import kz.greetgo.sandbox.controller.migration.FrsMigrationWorker;
 import kz.greetgo.sandbox.db.configs.DbConfig;
 import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
 import org.apache.commons.compress.archivers.tar.TarArchiveInputStream;
@@ -18,7 +19,7 @@ import static kz.greetgo.sandbox.db.util.TimeUtils.recordsPerSecond;
 import static kz.greetgo.sandbox.db.util.TimeUtils.showTime;
 
 @Bean
-public class FrsMigrationWorker extends AbstractMigrationWorker {
+public class FrsMigrationWorkerImpl extends AbstractMigrationWorker implements FrsMigrationWorker {
   public BeanGetter<DbConfig> dbConfig;
 
   @Override
@@ -164,7 +165,7 @@ public class FrsMigrationWorker extends AbstractMigrationWorker {
     migrateFromTmp();
     {
       long now = System.nanoTime();
-      info("FrsMigrationWorker of portion " + recordsCount + " finished for " + showTime(now, startedAt));
+      info("FrsMigrationWorkerImpl of portion " + recordsCount + " finished for " + showTime(now, startedAt));
     }
 
     closePostgresConnection();

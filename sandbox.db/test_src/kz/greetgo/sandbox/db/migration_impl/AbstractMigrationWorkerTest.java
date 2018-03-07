@@ -8,15 +8,14 @@ import kz.greetgo.sandbox.db.test.util.ParentTestNg;
 import org.testng.annotations.Test;
 
 import static org.fest.assertions.api.Assertions.assertThat;
-import static org.testng.Assert.*;
 
 /**
  * Набор автоматизированных тестов для тестирования методов класса {@link AbstractMigrationWorker}
  */
 public class AbstractMigrationWorkerTest extends ParentTestNg {
 
-  public BeanGetter<CiaMigrationWorker> migration;
-  public BeanGetter<FrsMigrationWorker> frsMigration;
+  public BeanGetter<CiaMigrationWorkerImpl> migration;
+  public BeanGetter<FrsMigrationWorkerImpl> frsMigration;
   public BeanGetter<TmpClientTestDao> tmpClientTestDao;
   public BeanGetter<ClientTestDao> clientTestDao;
   public BeanGetter<CharmTestDao> charmTestDao;

@@ -2,6 +2,7 @@ package kz.greetgo.sandbox.db.migration_impl;
 
 import kz.greetgo.depinject.core.Bean;
 import kz.greetgo.depinject.core.BeanGetter;
+import kz.greetgo.sandbox.controller.migration.CiaMigrationWorker;
 import kz.greetgo.sandbox.controller.model.ClientRecordsToSave;
 import kz.greetgo.sandbox.db.configs.DbConfig;
 import kz.greetgo.sandbox.db.dao.ClientDao;
@@ -23,7 +24,7 @@ import static kz.greetgo.sandbox.db.util.TimeUtils.recordsPerSecond;
 import static kz.greetgo.sandbox.db.util.TimeUtils.showTime;
 
 @Bean
-public class CiaMigrationWorker extends AbstractMigrationWorker {
+public class CiaMigrationWorkerImpl extends AbstractMigrationWorker implements CiaMigrationWorker {
 
   public BeanGetter<JdbcSandbox> jdbcSandbox;
   public BeanGetter<ClientDao> clientDao;
@@ -33,6 +34,7 @@ public class CiaMigrationWorker extends AbstractMigrationWorker {
   private String tmpClientTable;
   private ClientRecordsToSave clientRecord;
 
+  @Override
   public int migrate() throws Exception {
     long startedAt = System.nanoTime();
 
@@ -62,7 +64,7 @@ public class CiaMigrationWorker extends AbstractMigrationWorker {
 
     {
       long now = System.nanoTime();
-      info("CiaMigrationWorker of portion " + recordsSize + " finished for " + showTime(now, startedAt));
+      info("CiaMigrationWorkerImpl of portion " + recordsSize + " finished for " + showTime(now, startedAt));
     }
 
     closePostgresConnection();
