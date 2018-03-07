@@ -27,16 +27,13 @@ public class ClientsListController implements Controller {
 
   @ToJson
   @Mapping("/totalSize")
-  //TODO передавать только один объект (такой же как и в ClientsListController.clientsList() )
   public long getTotalSize(@Par("requestParams") @Json RequestParameters requestParams) {
     return clientRegister.get().getTotalSize(requestParams);
   }
 
   @ToJson
-  @Mapping("/clientsList")//TODO передавать только один объект
+  @Mapping("/clientsList")
   public List<ClientInfo> clientsList(@Par("requestParams") @Json RequestParameters requestParams) {
-
-    //TODO убрать эти условия в скобках
     return clientRegister.get().getClientsList(requestParams);
   }
 

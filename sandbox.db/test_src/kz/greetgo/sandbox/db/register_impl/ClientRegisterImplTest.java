@@ -163,7 +163,6 @@ public class ClientRegisterImplTest extends ParentTestNg {
       .map(this::toClientInfo)
       .collect(Collectors.toList());
 
-    //TODO и не забываем про лямбды
     expectingClientList.sort((o1, o2) -> {
 
       Integer tb1 = o1.age;
@@ -217,16 +216,10 @@ public class ClientRegisterImplTest extends ParentTestNg {
     int pageSize = RND.plusInt(clients.size());
     int page = pageSize > 0 ? RND.plusInt((int) Math.ceil(clients.size() / pageSize)) : 0;
 
-    //TODO здесь можно использовать стримы
-//    List<ClientInfo> expectingClientList = new ArrayList<>();
-//    clients.forEach(clientDetails -> expectingClientList.add(toClientInfo(clientDetails)));
-
-    //TODO ...вот так:
     List<ClientInfo> expectingClientList = clients.stream()
       .map(this::toClientInfo)
       .collect(Collectors.toList());
 
-    //TODO и не забываем про лямбды
     expectingClientList.sort((o1, o2) -> {
 
       Double tb1 = o1.totalBalance;
@@ -238,7 +231,7 @@ public class ClientRegisterImplTest extends ParentTestNg {
       } else {
         String sn1 = o1.surname != null ? o1.surname.toLowerCase() : "";
         String sn2 = o2.surname != null ? o2.surname.toLowerCase() : "";
-        return sn1.compareTo(sn2);//TODO а если sn1 == null ?
+        return sn1.compareTo(sn2);
       }
     });
 
