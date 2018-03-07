@@ -13,9 +13,15 @@ import org.apache.commons.compress.archivers.tar.TarArchiveInputStream;
 import org.apache.commons.compress.compressors.bzip2.BZip2CompressorInputStream;
 import org.xml.sax.SAXException;
 
-import java.io.*;
-import java.sql.*;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.text.SimpleDateFormat;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -77,7 +83,7 @@ public class CiaMigrationWorkerImpl extends AbstractMigrationWorker implements C
     exec("DROP TABLE IF EXISTS TMP_CLIENT, tmp_charm, tmp_addr, tmp_phone");
   }
 
-  protected void handleErrors() throws SQLException {
+  protected void handleErrors() throws SQLException, IOException {
     //language=PostgreSQL
     exec("UPDATE tmp_charm SET error = 'charm is not defined' " +
       "WHERE error IS NULL AND name IS NULL");
@@ -96,7 +102,7 @@ public class CiaMigrationWorkerImpl extends AbstractMigrationWorker implements C
     exec("UPDATE TMP_CLIENT SET error = 'charm is not defined'\n" +
       "WHERE error IS NULL AND charm_name IS NULL");
     //language=PostgreSQL
-    exec("UPDATE TMP_CLIENT SET error = 'client too old or too young'\n" +
+    exec("UPDATE TMP_CLIENT SET error = 'age of the client must be between 10 and 200'\n" +
       "WHERE error IS NULL AND date_part('year', age(birth_date)) NOT BETWEEN 10 AND 200");
 
 
@@ -104,15 +110,33 @@ public class CiaMigrationWorkerImpl extends AbstractMigrationWorker implements C
   }
 
   public static void main(String[] args) throws IOException, SAXException, InterruptedException {
+//    Path file = Paths.get("build/files_to_send/errors.txt");
+    List<String> lines = Arrays.asList("Error in file ", "The second line");
+//    Files.write(file, lines, Charset.forName("UTF-8"));
 
+    CiaMigrationWorkerImpl cia = new CiaMigrationWorkerImpl();
+    cia.outputStream = new FileOutputStream("build/files_to_send/errors.txt");
+    cia.outputStream.write(lines.get(0).getBytes());
+    cia.outputStream.write(lines.get(1).getBytes());
+    cia.outputStream.close();
   }
 
-  protected void uploadAndDropErrors() throws SQLException {
+  protected void uploadAndDropErrors() throws SQLException, IOException {
 
     // create report about errors and send by ssh
-
-    //language=PostgreSQL
-    exec("DELETE FROM tmp_charm WHERE error IS NOT NULL");
+    try (PreparedStatement errorPs = connection.prepareStatement("SELECT cia_id, error FROM tmp_client WHERE error IS NOT NULL")) {
+      try (ResultSet errorRs = errorPs.executeQuery()) {
+        outputStream = new FileOutputStream("build/files_to_send/errors.txt");
+        while (errorRs.next()) {
+          outputStream.write("Error: ".getBytes());
+          outputStream.write(errorRs.getBytes("error"));
+          outputStream.write(". Record id: ".getBytes());
+          outputStream.write(errorRs.getBytes("cia_id"));
+          outputStream.write("\n".getBytes());
+        }
+        outputStream.close();
+      }
+    }
 
     //language=PostgreSQL
     exec("DELETE FROM TMP_CLIENT WHERE error IS NOT NULL");

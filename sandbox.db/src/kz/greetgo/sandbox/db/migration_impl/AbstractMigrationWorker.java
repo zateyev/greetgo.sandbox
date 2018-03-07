@@ -28,9 +28,9 @@ public abstract class AbstractMigrationWorker /*implements CiaMigrationWorker */
 
   protected abstract void dropTmpTables() throws SQLException;
 
-  protected abstract void handleErrors() throws SQLException;
+  protected abstract void handleErrors() throws SQLException, IOException;
 
-  protected abstract void uploadAndDropErrors() throws SQLException;
+  protected abstract void uploadAndDropErrors() throws SQLException, IOException;
 
   protected abstract void createTmpTables() throws SQLException;
 
