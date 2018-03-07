@@ -17,7 +17,8 @@ import static kz.greetgo.sandbox.db.util.TimeUtils.showTime;
 
 public abstract class AbstractMigrationWorker /*implements CiaMigrationWorker */{
   public InputStream inputStream;
-  public OutputStream outputStream;
+  public OutputStream outError;
+  public OutputStream outReport;
   public Connection connection;
   public int maxBatchSize = 50_000; // getConfig().maxBatchSize;
 

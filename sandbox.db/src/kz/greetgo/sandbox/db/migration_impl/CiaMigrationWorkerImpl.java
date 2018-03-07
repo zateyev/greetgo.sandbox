@@ -7,6 +7,7 @@ import kz.greetgo.sandbox.controller.model.ClientRecordsToSave;
 import kz.greetgo.sandbox.db.configs.DbConfig;
 import kz.greetgo.sandbox.db.dao.ClientDao;
 import kz.greetgo.sandbox.db.register_impl.IdGenerator;
+import kz.greetgo.sandbox.db.report.client_list.big_data.ReportViewXlsx;
 import kz.greetgo.sandbox.db.util.JdbcSandbox;
 import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
 import org.apache.commons.compress.archivers.tar.TarArchiveInputStream;
@@ -56,6 +57,9 @@ public class CiaMigrationWorkerImpl extends AbstractMigrationWorker implements C
     info("TMP_ADDR = " + tmpAddrTable);
     info("TMP_PHONE = " + tmpPhoneTable);
 
+    outReport = new FileOutputStream("build/files_to_send/report.xlsx");
+    ReportViewXlsx v = new ReportViewXlsx(outReport);
+
     createPostgresConnection();
     dropTmpTables();
     createTmpTables();
@@ -69,7 +73,7 @@ public class CiaMigrationWorkerImpl extends AbstractMigrationWorker implements C
 
 //    if (recordsSize == 0) return 0;
 
-    outputStream = new FileOutputStream("build/files_to_send/errors.txt");
+    outError = new FileOutputStream("build/files_to_send/errors.txt");
     handleErrors();
 
     migrateFromTmp();
@@ -81,10 +85,10 @@ public class CiaMigrationWorkerImpl extends AbstractMigrationWorker implements C
       info(message);
     }
 
-    outputStream.write(sdf.format(new Date()).getBytes());
-    outputStream.write(" [INFO] ".getBytes());
-    outputStream.write(message.getBytes());
-    outputStream.close();
+    outError.write(sdf.format(new Date()).getBytes());
+    outError.write(" [INFO] ".getBytes());
+    outError.write(message.getBytes());
+    outError.close();
 
     closePostgresConnection();
 
@@ -136,10 +140,10 @@ public class CiaMigrationWorkerImpl extends AbstractMigrationWorker implements C
 //    Files.write(file, lines, Charset.forName("UTF-8"));
 
     CiaMigrationWorkerImpl cia = new CiaMigrationWorkerImpl();
-    cia.outputStream = new FileOutputStream("build/files_to_send/errors.txt");
-    cia.outputStream.write(lines.get(0).getBytes());
-    cia.outputStream.write(lines.get(1).getBytes());
-    cia.outputStream.close();
+    cia.outError = new FileOutputStream("build/files_to_send/errors.txt");
+    cia.outError.write(lines.get(0).getBytes());
+    cia.outError.write(lines.get(1).getBytes());
+    cia.outError.close();
   }
 
   protected void uploadAndDropErrors() throws SQLException, IOException {
@@ -148,11 +152,11 @@ public class CiaMigrationWorkerImpl extends AbstractMigrationWorker implements C
     try (PreparedStatement errorPs = connection.prepareStatement(r("SELECT cia_id, error FROM TMP_CLIENT WHERE error IS NOT NULL"))) {
       try (ResultSet errorRs = errorPs.executeQuery()) {
         while (errorRs.next()) {
-          outputStream.write("Error: ".getBytes());
-          outputStream.write(errorRs.getBytes("error"));
-          outputStream.write(". Record id: ".getBytes());
-          outputStream.write(errorRs.getBytes("cia_id"));
-          outputStream.write("\n".getBytes());
+          outError.write("Error: ".getBytes());
+          outError.write(errorRs.getBytes("error"));
+          outError.write(". Record id: ".getBytes());
+          outError.write(errorRs.getBytes("cia_id"));
+          outError.write("\n".getBytes());
         }
       }
     }
@@ -176,19 +180,6 @@ public class CiaMigrationWorkerImpl extends AbstractMigrationWorker implements C
       "        error VARCHAR(255),\n" +
       "        number BIGSERIAL PRIMARY KEY\n" +
       "      )");
-
-//    //language=PostgreSQL
-//    exec("CREATE TABLE tmp_charm (\n" +
-////      "        cia_id VARCHAR(32),\n" +
-//      "        charm_id VARCHAR(32),\n" +
-//      "        name VARCHAR(255),\n" +
-//      "        description VARCHAR(255),\n" +
-//      "        energy REAL,\n" +
-//      "        actual SMALLINT NOT NULL DEFAULT 0,\n" +
-//      "        status INT NOT NULL DEFAULT 0,\n" +
-//      "        error VARCHAR(255),\n" +
-//      "        number BIGSERIAL PRIMARY KEY\n" +
-//      "      )");
 
     //language=PostgreSQL
     exec("CREATE TABLE TMP_ADDR (\n" +
