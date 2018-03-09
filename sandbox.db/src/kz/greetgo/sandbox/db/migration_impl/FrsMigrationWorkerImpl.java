@@ -134,6 +134,8 @@ public class FrsMigrationWorkerImpl extends AbstractMigrationWorker implements F
       // parse xml and insert into tmp tables
       connection.setAutoCommit(false);
 
+      maxBatchSize = migrationConfig.get().maxBatchSize();
+
       try (FrsTableWorker frsTableWorker = new FrsTableWorker(connection, maxBatchSize, tmpAccountTable, tmpTransactionTable)) {
         FrsParser frsParser = new FrsParser(tarInput, frsTableWorker);
         recordsCount += frsParser.parseAndSave();

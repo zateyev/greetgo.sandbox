@@ -5,10 +5,12 @@ import kz.greetgo.depinject.core.BeanGetter;
 import kz.greetgo.sandbox.controller.migration.CiaMigrationWorker;
 import kz.greetgo.sandbox.controller.model.ClientRecordsToSave;
 import kz.greetgo.sandbox.db.configs.DbConfig;
+import kz.greetgo.sandbox.db.configs.MigrationConfig;
 import kz.greetgo.sandbox.db.dao.ClientDao;
 import kz.greetgo.sandbox.db.migration_impl.report.ReportXlsx;
 import kz.greetgo.sandbox.db.register_impl.IdGenerator;
 import kz.greetgo.sandbox.db.util.JdbcSandbox;
+import kz.greetgo.sandbox.db.util.LocalConfigFactory;
 import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
 import org.apache.commons.compress.archivers.tar.TarArchiveInputStream;
 import org.apache.commons.compress.compressors.bzip2.BZip2CompressorInputStream;
@@ -22,7 +24,6 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.text.SimpleDateFormat;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -131,15 +132,18 @@ public class CiaMigrationWorkerImpl extends AbstractMigrationWorker implements C
   }
 
   public static void main(String[] args) throws IOException, SAXException, InterruptedException {
-//    Path file = Paths.get("build/files_to_send/errors.txt");
-    List<String> lines = Arrays.asList("Error in file ", "The second line");
-//    Files.write(file, lines, Charset.forName("UTF-8"));
-
-    CiaMigrationWorkerImpl cia = new CiaMigrationWorkerImpl();
-    cia.outError = new FileOutputStream("build/files_to_send/errors.txt");
-    cia.outError.write(lines.get(0).getBytes());
-    cia.outError.write(lines.get(1).getBytes());
-    cia.outError.close();
+//    List<String> lines = Arrays.asList("Error in file ", "The second line");
+//
+//    CiaMigrationWorkerImpl cia = new CiaMigrationWorkerImpl();
+//    cia.outError = new FileOutputStream("build/files_to_send/errors.txt");
+//    cia.outError.write(lines.get(0).getBytes());
+//    cia.outError.write(lines.get(1).getBytes());
+//    cia.outError.close();
+    LocalConfigFactory localConfigFactory = new LocalConfigFactory() {};
+    MigrationConfig config = localConfigFactory.createConfig(MigrationConfig.class);
+    System.out.println(localConfigFactory);
+    int maxBatchSize = config.maxBatchSize();
+    System.out.println("maxBatchSize " + maxBatchSize);
   }
 
   protected void uploadAndDropErrors() throws SQLException, IOException {
@@ -399,6 +403,8 @@ public class CiaMigrationWorkerImpl extends AbstractMigrationWorker implements C
 
       // parse xml and insert into tmp tables
       connection.setAutoCommit(false);
+
+      maxBatchSize = migrationConfig.get().maxBatchSize();
 
       try (CiaTableWorker ciaTableWorker = new CiaTableWorker(connection, maxBatchSize, tmpClientTable, tmpAddrTable, tmpPhoneTable)) {
         CiaParser ciaParser = new CiaParser(tarInput, ciaTableWorker);

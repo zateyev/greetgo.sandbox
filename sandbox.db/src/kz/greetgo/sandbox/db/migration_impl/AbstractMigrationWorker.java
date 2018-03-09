@@ -1,5 +1,8 @@
 package kz.greetgo.sandbox.db.migration_impl;
 
+import kz.greetgo.depinject.core.BeanGetter;
+import kz.greetgo.sandbox.db.configs.MigrationConfig;
+
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -15,12 +18,15 @@ import java.util.regex.Pattern;
 
 import static kz.greetgo.sandbox.db.util.TimeUtils.showTime;
 
-public abstract class AbstractMigrationWorker /*implements CiaMigrationWorker */{
+public abstract class AbstractMigrationWorker {
+
+  public BeanGetter<MigrationConfig> migrationConfig;
+
   public InputStream inputStream;
   public OutputStream outError;
   public OutputStream outReport;
   public Connection connection;
-  public int maxBatchSize = 50_000; // getConfig().maxBatchSize;
+  public int maxBatchSize;
 
   private String tmpClientTable;
   public int portionSize = 1_000_000;
