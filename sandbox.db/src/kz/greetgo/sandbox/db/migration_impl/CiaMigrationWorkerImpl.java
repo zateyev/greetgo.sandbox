@@ -422,6 +422,8 @@ public class CiaMigrationWorkerImpl extends AbstractMigrationWorker implements C
         reportXlsx.addRow(fileName, recordsCount, showTime(now, startedAt));
       }
 
+      inputStream.close();
+
     }
     reportXlsx.finish();
 
