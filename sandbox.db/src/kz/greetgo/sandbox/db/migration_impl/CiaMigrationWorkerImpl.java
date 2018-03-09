@@ -6,8 +6,8 @@ import kz.greetgo.sandbox.controller.migration.CiaMigrationWorker;
 import kz.greetgo.sandbox.controller.model.ClientRecordsToSave;
 import kz.greetgo.sandbox.db.configs.DbConfig;
 import kz.greetgo.sandbox.db.dao.ClientDao;
+import kz.greetgo.sandbox.db.migration_impl.report.ReportXlsx;
 import kz.greetgo.sandbox.db.register_impl.IdGenerator;
-import kz.greetgo.sandbox.db.report.client_list.big_data.ReportViewXlsx;
 import kz.greetgo.sandbox.db.util.JdbcSandbox;
 import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
 import org.apache.commons.compress.archivers.tar.TarArchiveInputStream;
@@ -57,14 +57,15 @@ public class CiaMigrationWorkerImpl extends AbstractMigrationWorker implements C
     info("TMP_ADDR = " + tmpAddrTable);
     info("TMP_PHONE = " + tmpPhoneTable);
 
-    outReport = new FileOutputStream("build/files_to_send/report.xlsx");
-    ReportViewXlsx v = new ReportViewXlsx(outReport);
 
     createPostgresConnection();
     dropTmpTables();
     createTmpTables();
 
+    outReport = new FileOutputStream("build/files_to_send/report.xlsx");
     int recordsSize = download();
+    outReport.flush();
+    outReport.close();
 
     {
       long now = System.nanoTime();
@@ -109,11 +110,6 @@ public class CiaMigrationWorkerImpl extends AbstractMigrationWorker implements C
   }
 
   protected void handleErrors() throws SQLException, IOException {
-//    //language=PostgreSQL
-//    exec("UPDATE tmp_charm SET error = 'charm is not defined' " +
-//      "WHERE error IS NULL AND name IS NULL");
-
-
     //language=PostgreSQL
     exec("UPDATE TMP_CLIENT SET error = 'surname is not defined' " +
       "WHERE error IS NULL AND (surname <> '') IS NOT TRUE");
@@ -367,6 +363,9 @@ public class CiaMigrationWorkerImpl extends AbstractMigrationWorker implements C
 
   protected int download() throws Exception {
 
+    ReportXlsx reportXlsx = new ReportXlsx(outReport);
+    reportXlsx.start();
+
     // get file, read all files iteratively
     List<String> fileDirToLoad = renameFiles(".xml.tar.bz2");
     int recordsCount = 0;
@@ -420,8 +419,11 @@ public class CiaMigrationWorkerImpl extends AbstractMigrationWorker implements C
         long now = System.nanoTime();
         info("TOTAL Downloaded records " + recordsCount + " for " + showTime(now, startedAt)
           + " : " + recordsPerSecond(recordsCount, now - startedAt));
+        reportXlsx.addRow(fileName, recordsCount, showTime(now, startedAt));
       }
+
     }
+    reportXlsx.finish();
 
     return recordsCount;
   }
