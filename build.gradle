@@ -50,6 +50,7 @@ subprojects {
     ext.jettyVersion = '9.4.0.v20161208'
     ext.guavaVersion = '23.0'
     ext.greetgoMsOfficeVersion = "0.4.22"
+    ext.greetgoSchedulingVersion = "0.0.11"
 
     testCompile 'org.testng:testng:6.5.1'
     compile 'org.easytesting:fest-assert-core:2.0M10'
