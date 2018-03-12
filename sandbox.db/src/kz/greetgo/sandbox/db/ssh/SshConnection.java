@@ -2,7 +2,7 @@ package kz.greetgo.sandbox.db.ssh;
 
 import com.jcraft.jsch.*;
 
-import java.io.BufferedReader;
+import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.util.List;
 import java.util.Vector;
@@ -44,30 +44,22 @@ public class SshConnection implements AutoCloseable {
       String password = "111";
       String host = "192.168.11.166";
       int port = 22;
-
-//      String remoteFilePath = "/home/zateyev/git/greetgo.sandbox/build/files_to_send/";
-      String fileName = "info_2018-03-05-120944.txt";
-
-      InputStream inputStream;
-      BufferedReader br;
-      String line;
-
       sshConnection.createSshConnection(user, password, host, port);
 
-      List<String> fileNames = sshConnection.getFileNames("*.xml.tar.bz2");
-      fileNames.forEach(System.out::println);
-      sshConnection.renameFile("from_cia_2018-03-05-120942-1-300_74909_20180312_85964_20180312.xml.tar.bz2", "one.xml.tar.bz2.qyzhbyzh");
-
-//      inputStream = sshConnection.download(remoteFilePath, fileName);
-//
-//      br = new BufferedReader(new InputStreamReader(inputStream));
-//      while ((line = br.readLine()) != null)
-//        System.out.println(line);
-//      br.close();
-
+      FileOutputStream outError = new FileOutputStream(sshConnection.homePath + "test.txt");
+      outError.write("Error: AAA".getBytes());
+      outError.write("Error: BBB".getBytes());
+      outError.write("Error: CCC".getBytes());
+      sshConnection.upload(outError);
+      outError.close();
     } catch (Exception e) {
       e.printStackTrace();
     }
+  }
+
+  private void upload(FileOutputStream outputStream) {
+    channelSftp.setOutputStream(outputStream);
+//    channelSftp
   }
 
   public List<String> getFileNames(String ext) throws SftpException {
