@@ -6,9 +6,9 @@
   <changeSet author="zateyev" id="create-table-TransactionType">
     <sql endDelimiter=";;"><![CDATA[
       create table transaction_type (
-        id varchar(32) not null PRIMARY KEY,
-        code varchar(255) not null,
-        name varchar(255) not null
+        id varchar(100) not null PRIMARY KEY,
+        code varchar(255),
+        name varchar(255)
       )
     ]]></sql>
   </changeSet>

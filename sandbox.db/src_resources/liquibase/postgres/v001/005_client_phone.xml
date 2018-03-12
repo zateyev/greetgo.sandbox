@@ -9,6 +9,8 @@
         client varchar(32) not null REFERENCES client (id),
         number varchar(32) NOT NULL,
         type varchar(32) NOT NULL,
+        cia_id varchar(100),
+        actual smallint not null default 0,
         PRIMARY KEY (client, number)
       )
     ]]></sql>
