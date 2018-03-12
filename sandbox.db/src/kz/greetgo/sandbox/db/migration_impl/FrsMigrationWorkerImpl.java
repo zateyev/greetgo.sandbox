@@ -15,7 +15,6 @@ import java.sql.SQLException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 import static kz.greetgo.sandbox.db.util.TimeUtils.recordsPerSecond;
 import static kz.greetgo.sandbox.db.util.TimeUtils.showTime;
@@ -78,7 +77,7 @@ public class FrsMigrationWorkerImpl extends AbstractMigrationWorker implements F
   }
 
   @Override
-  protected long migrateFromTmp() throws SQLException {
+  protected void migrateFromTmp() throws SQLException {
     //language=PostgreSQL
     exec("INSERT INTO client (id, cia_id)\n" +
       "SELECT nextval('s_client'), client_id\n" +
@@ -96,7 +95,6 @@ public class FrsMigrationWorkerImpl extends AbstractMigrationWorker implements F
       "FROM TMP_TRANSACTION tt LEFT JOIN client_account ca ON tt.account_number = ca.number");
 
 
-    return 0;
   }
 
   @Override
@@ -109,46 +107,16 @@ public class FrsMigrationWorkerImpl extends AbstractMigrationWorker implements F
       TarArchiveInputStream tarInput = new TarArchiveInputStream(new BZip2CompressorInputStream(inputStream));
       TarArchiveEntry currentEntry = tarInput.getNextTarEntry();
 
-      final AtomicBoolean working = new AtomicBoolean(true);
-      final AtomicBoolean showStatus = new AtomicBoolean(false);
-
-      final Thread see = new Thread(() -> {
-
-        while (working.get()) {
-
-          try {
-            Thread.sleep(showStatusPingMillis);
-          } catch (InterruptedException e) {
-            break;
-          }
-
-          showStatus.set(true);
-
-        }
-
-      });
-      see.start();
-
       long startedAt = System.nanoTime();
 
-      // parse xml and insert into tmp tables
-      connection.setAutoCommit(false);
-
       maxBatchSize = migrationConfig.get().maxBatchSize();
+      connection.setAutoCommit(false);
 
       try (FrsTableWorker frsTableWorker = new FrsTableWorker(connection, maxBatchSize, tmpAccountTable, tmpTransactionTable)) {
         FrsParser frsParser = new FrsParser(tarInput, frsTableWorker);
         recordsCount += frsParser.parseAndSave();
       } finally {
         connection.setAutoCommit(true);
-      }
-
-      if (showStatus.get()) {
-        showStatus.set(false);
-
-        long now = System.nanoTime();
-        info(" -- downloaded records " + recordsCount + " for " + showTime(now, startedAt)
-          + " : " + recordsPerSecond(recordsCount, now - startedAt));
       }
 
       {

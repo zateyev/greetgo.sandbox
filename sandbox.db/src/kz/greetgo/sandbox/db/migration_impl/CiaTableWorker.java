@@ -20,7 +20,6 @@ public class CiaTableWorker implements Closeable {
   private PreparedStatement addrPS;
   private int clientBatchSize;
 
-  public Runnable execBatch;
   private int addrBatchSize;
   private int phoneBatchSize;
 
@@ -38,20 +37,6 @@ public class CiaTableWorker implements Closeable {
 
     addrPS = this.connection.prepareStatement("INSERT INTO " + addrTableName + " (cia_id, type, street, house, flat) " +
       "VALUES (?, ?, ?, ?, ?)");
-
-    execBatch = () -> {
-      try {
-        if (clientBatchSize > 0) clientPS.executeBatch();
-
-        if (addrBatchSize > 0) addrPS.executeBatch();
-
-        if (phoneBatchSize > 0) phonePS.executeBatch();
-
-        if (clientBatchSize + addrBatchSize + phoneBatchSize > 0) this.connection.commit();
-      } catch (SQLException e) {
-        e.printStackTrace();
-      }
-    };
   }
 
   public void addToBatch(Client client) {
@@ -131,6 +116,11 @@ public class CiaTableWorker implements Closeable {
   @Override
   public void close() throws IOException {
     try {
+      if (clientBatchSize > 0) clientPS.executeBatch();
+      if (addrBatchSize > 0) addrPS.executeBatch();
+      if (phoneBatchSize > 0) phonePS.executeBatch();
+      if (clientBatchSize + addrBatchSize + phoneBatchSize > 0) this.connection.commit();
+
       clientPS.close();
       phonePS.close();
       addrPS.close();

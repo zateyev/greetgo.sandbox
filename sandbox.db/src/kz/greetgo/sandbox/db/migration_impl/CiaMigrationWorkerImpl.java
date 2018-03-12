@@ -21,7 +21,6 @@ import java.sql.SQLException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 import static kz.greetgo.sandbox.db.util.TimeUtils.recordsPerSecond;
 import static kz.greetgo.sandbox.db.util.TimeUtils.showTime;
@@ -39,31 +38,13 @@ public class CiaMigrationWorkerImpl extends AbstractMigrationWorker implements C
   public int migrate() throws Exception {
     long startedAt = System.nanoTime();
 
-//    SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd_HHmmss");
-    SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd");
-    Date nowDate = new Date();
-    tmpClientTable = "cia_migration_client_" + sdf.format(nowDate);
-    tmpAddrTable = "cia_migration_addr_" + sdf.format(nowDate);
-    tmpPhoneTable = "cia_migration_phone_" + sdf.format(nowDate);
-    info("TMP_CLIENT = " + tmpClientTable);
-    info("TMP_ADDR = " + tmpAddrTable);
-    info("TMP_PHONE = " + tmpPhoneTable);
-
-
     createPostgresConnection();
-    dropTmpTables();
+//    dropTmpTables();
     createTmpTables();
 
     int recordsSize = download();
 
-    {
-      long now = System.nanoTime();
-      info("Downloading of portion " + recordsSize + " finished for " + showTime(now, startedAt));
-    }
-
-//    if (recordsSize == 0) return 0;
-
-    outError = new FileOutputStream("build/files_to_send/errors.txt");
+    outError = new FileOutputStream(migrationConfig.get().outErrorFile());
     handleErrors();
 
     migrateFromTmp();
@@ -75,7 +56,7 @@ public class CiaMigrationWorkerImpl extends AbstractMigrationWorker implements C
       info(message);
     }
 
-    outError.write(sdf.format(new Date()).getBytes());
+    outError.write(new Date().toString().getBytes());
     outError.write(" [INFO] ".getBytes());
     outError.write(message.getBytes());
     outError.close();
@@ -120,14 +101,6 @@ public class CiaMigrationWorkerImpl extends AbstractMigrationWorker implements C
     uploadAndDropErrors();
   }
 
-  public static void main(String[] args) throws IOException, SAXException, InterruptedException {
-    LocalConfigFactory localConfigFactory = new LocalConfigFactory() {};
-    MigrationConfig config = localConfigFactory.createConfig(MigrationConfig.class);
-    System.out.println(localConfigFactory);
-    int maxBatchSize = config.maxBatchSize();
-    System.out.println("maxBatchSize " + maxBatchSize);
-  }
-
   protected void uploadAndDropErrors() throws SQLException, IOException {
 
     // create report about errors and send by ssh
@@ -148,6 +121,15 @@ public class CiaMigrationWorkerImpl extends AbstractMigrationWorker implements C
   }
 
   protected void createTmpTables() throws SQLException {
+    SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd_HHmmss");
+    Date nowDate = new Date();
+    tmpClientTable = "cia_migration_client_" + sdf.format(nowDate);
+    tmpAddrTable = "cia_migration_addr_" + sdf.format(nowDate);
+    tmpPhoneTable = "cia_migration_phone_" + sdf.format(nowDate);
+    info("TMP_CLIENT = " + tmpClientTable);
+    info("TMP_ADDR = " + tmpAddrTable);
+    info("TMP_PHONE = " + tmpPhoneTable);
+
     //language=PostgreSQL
     exec("CREATE TABLE TMP_CLIENT (\n" +
       "        cia_id VARCHAR(32),\n" +
@@ -190,7 +172,7 @@ public class CiaMigrationWorkerImpl extends AbstractMigrationWorker implements C
       "      )");
   }
 
-  protected long migrateFromTmp() throws Exception {
+  protected void migrateFromTmp() throws Exception {
     //marking duplicates
     //language=PostgreSQL
     exec("WITH num_ord AS (\n" +
@@ -336,7 +318,6 @@ public class CiaMigrationWorkerImpl extends AbstractMigrationWorker implements C
 
     //send report by ssh
 
-    return 0;
   }
 
   private void createPostgresConnection() throws Exception {
@@ -358,46 +339,16 @@ public class CiaMigrationWorkerImpl extends AbstractMigrationWorker implements C
       TarArchiveInputStream tarInput = new TarArchiveInputStream(new BZip2CompressorInputStream(inputStream));
       TarArchiveEntry currentEntry = tarInput.getNextTarEntry();
 
-      final AtomicBoolean working = new AtomicBoolean(true);
-      final AtomicBoolean showStatus = new AtomicBoolean(false);
-
-      final Thread see = new Thread(() -> {
-
-        while (working.get()) {
-
-          try {
-            Thread.sleep(showStatusPingMillis);
-          } catch (InterruptedException e) {
-            break;
-          }
-
-          showStatus.set(true);
-
-        }
-
-      });
-      see.start();
-
       long startedAt = System.nanoTime();
 
-      // parse xml and insert into tmp tables
-      connection.setAutoCommit(false);
-
       maxBatchSize = migrationConfig.get().maxBatchSize();
+      connection.setAutoCommit(false);
 
       try (CiaTableWorker ciaTableWorker = new CiaTableWorker(connection, maxBatchSize, tmpClientTable, tmpAddrTable, tmpPhoneTable)) {
         CiaParser ciaParser = new CiaParser(tarInput, ciaTableWorker);
         recordsCount += ciaParser.parseAndSave();
       } finally {
         connection.setAutoCommit(true);
-      }
-
-      if (showStatus.get()) {
-        showStatus.set(false);
-
-        long now = System.nanoTime();
-        info(" -- downloaded records " + recordsCount + " for " + showTime(now, startedAt)
-          + " : " + recordsPerSecond(recordsCount, now - startedAt));
       }
 
       {

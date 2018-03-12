@@ -3,6 +3,7 @@ package kz.greetgo.sandbox.db.migration_impl;
 import kz.greetgo.depinject.core.BeanGetter;
 import kz.greetgo.sandbox.db.configs.MigrationConfig;
 import kz.greetgo.sandbox.db.migration_impl.report.ReportXlsx;
+import kz.greetgo.util.RND;
 
 import java.io.*;
 import java.sql.Connection;
@@ -22,7 +23,6 @@ public abstract class AbstractMigrationWorker implements AutoCloseable {
 
   public InputStream inputStream;
   public OutputStream outError;
-  public OutputStream outReport;
   private ReportXlsx reportXlsx;
   public Connection connection;
   public int maxBatchSize;
@@ -31,8 +31,7 @@ public abstract class AbstractMigrationWorker implements AutoCloseable {
 
   protected AbstractMigrationWorker() {
     try {
-      outReport = new FileOutputStream("build/files_to_send/report.xlsx");
-      reportXlsx = new ReportXlsx(outReport);
+      reportXlsx = new ReportXlsx(new FileOutputStream("build/files_to_send/report.xlsx"));
       reportXlsx.start();
     } catch (FileNotFoundException e) {
       e.printStackTrace();
@@ -47,7 +46,7 @@ public abstract class AbstractMigrationWorker implements AutoCloseable {
 
   protected abstract void createTmpTables() throws SQLException;
 
-  protected abstract long migrateFromTmp() throws Exception;
+  protected abstract void migrateFromTmp() throws Exception;
 
   protected abstract int download() throws Exception;
 
@@ -68,15 +67,14 @@ public abstract class AbstractMigrationWorker implements AutoCloseable {
       if (p.matcher(fileName).matches()) {
         File file = new File(folderName + fileName);
         String newName = folderName + fileName.substring(0, fileName.length() - ext.length()) +
-          "_sandbox" + sdf.format(nowDate) + ext;
+          "_" + RND.str(8) + sdf.format(nowDate) + ext;
         ret.add(newName);
         File file1 = new File(newName);
         if (file1.exists())
           throw new java.io.IOException("file exists");
         boolean success = file.renameTo(file1);
         if (!success) {
-          System.out.println("File was not successfully renamed");
-          return null;
+          throw new RuntimeException("File was not successfully renamed");
         }
       }
     }
@@ -132,7 +130,5 @@ public abstract class AbstractMigrationWorker implements AutoCloseable {
   @Override
   public void close() throws Exception {
     reportXlsx.finish();
-    outReport.flush();
-    outReport.close();
   }
 }

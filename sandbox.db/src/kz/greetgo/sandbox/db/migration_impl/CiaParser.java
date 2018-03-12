@@ -132,11 +132,6 @@ public class CiaParser extends SaxHandler {
 
       case "/cia/client": {
         sendTo(ciaTableWorker::addToBatch, client);
-        return;
-      }
-
-      case "/cia": {
-        ciaTableWorker.execBatch.run();
       }
     }
   }
