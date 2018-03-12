@@ -2,11 +2,9 @@ package kz.greetgo.sandbox.db.migration_impl;
 
 import kz.greetgo.depinject.core.BeanGetter;
 import kz.greetgo.sandbox.db.configs.MigrationConfig;
+import kz.greetgo.sandbox.db.migration_impl.report.ReportXlsx;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
+import java.io.*;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -18,20 +16,28 @@ import java.util.regex.Pattern;
 
 import static kz.greetgo.sandbox.db.util.TimeUtils.showTime;
 
-public abstract class AbstractMigrationWorker {
+public abstract class AbstractMigrationWorker implements AutoCloseable {
 
   public BeanGetter<MigrationConfig> migrationConfig;
 
   public InputStream inputStream;
   public OutputStream outError;
   public OutputStream outReport;
+  private ReportXlsx reportXlsx;
   public Connection connection;
   public int maxBatchSize;
 
-  private String tmpClientTable;
-  public int portionSize = 1_000_000;
-  public int uploadMaxBatchSize = 50_000;
   public int showStatusPingMillis = 5000;
+
+  protected AbstractMigrationWorker() {
+    try {
+      outReport = new FileOutputStream("build/files_to_send/report.xlsx");
+      reportXlsx = new ReportXlsx(outReport);
+      reportXlsx.start();
+    } catch (FileNotFoundException e) {
+      e.printStackTrace();
+    }
+  }
 
   protected abstract void dropTmpTables() throws SQLException;
 
@@ -87,6 +93,7 @@ public abstract class AbstractMigrationWorker {
       info("Updated " + updates
         + " records for " + showTime(System.nanoTime(), startedAt)
         + ", EXECUTED SQL : " + executingSql);
+      reportXlsx.addRow(executingSql, showTime(System.nanoTime(), startedAt));
     } catch (SQLException e) {
       info("ERROR EXECUTE SQL for " + showTime(System.nanoTime(), startedAt)
         + ", message: " + e.getMessage() + ", SQL : " + executingSql);
@@ -100,7 +107,6 @@ public abstract class AbstractMigrationWorker {
       if (fileEntry.isDirectory()) {
         listFilesForFolder(fileEntry);
       } else {
-        System.out.println(fileEntry.getName());
         ret.add(fileEntry.getName());
       }
     }
@@ -121,5 +127,12 @@ public abstract class AbstractMigrationWorker {
       }
       this.connection = null;
     }
+  }
+
+  @Override
+  public void close() throws Exception {
+    reportXlsx.finish();
+    outReport.flush();
+    outReport.close();
   }
 }

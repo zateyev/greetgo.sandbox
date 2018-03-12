@@ -3,13 +3,8 @@ package kz.greetgo.sandbox.db.migration_impl;
 import kz.greetgo.depinject.core.Bean;
 import kz.greetgo.depinject.core.BeanGetter;
 import kz.greetgo.sandbox.controller.migration.CiaMigrationWorker;
-import kz.greetgo.sandbox.controller.model.ClientRecordsToSave;
 import kz.greetgo.sandbox.db.configs.DbConfig;
 import kz.greetgo.sandbox.db.configs.MigrationConfig;
-import kz.greetgo.sandbox.db.dao.ClientDao;
-import kz.greetgo.sandbox.db.migration_impl.report.ReportXlsx;
-import kz.greetgo.sandbox.db.register_impl.IdGenerator;
-import kz.greetgo.sandbox.db.util.JdbcSandbox;
 import kz.greetgo.sandbox.db.util.LocalConfigFactory;
 import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
 import org.apache.commons.compress.archivers.tar.TarArchiveInputStream;
@@ -34,15 +29,11 @@ import static kz.greetgo.sandbox.db.util.TimeUtils.showTime;
 @Bean
 public class CiaMigrationWorkerImpl extends AbstractMigrationWorker implements CiaMigrationWorker {
 
-  public BeanGetter<JdbcSandbox> jdbcSandbox;
-  public BeanGetter<ClientDao> clientDao;
   public BeanGetter<DbConfig> dbConfig;
-  public BeanGetter<IdGenerator> idGen;
 
   private String tmpClientTable;
   private String tmpAddrTable;
   private String tmpPhoneTable;
-  private ClientRecordsToSave clientRecord;
 
   @Override
   public int migrate() throws Exception {
@@ -63,10 +54,7 @@ public class CiaMigrationWorkerImpl extends AbstractMigrationWorker implements C
     dropTmpTables();
     createTmpTables();
 
-    outReport = new FileOutputStream("build/files_to_send/report.xlsx");
     int recordsSize = download();
-    outReport.flush();
-    outReport.close();
 
     {
       long now = System.nanoTime();
@@ -93,6 +81,7 @@ public class CiaMigrationWorkerImpl extends AbstractMigrationWorker implements C
     outError.close();
 
     closePostgresConnection();
+    super.close();
 
     return recordsSize;
   }
@@ -132,13 +121,6 @@ public class CiaMigrationWorkerImpl extends AbstractMigrationWorker implements C
   }
 
   public static void main(String[] args) throws IOException, SAXException, InterruptedException {
-//    List<String> lines = Arrays.asList("Error in file ", "The second line");
-//
-//    CiaMigrationWorkerImpl cia = new CiaMigrationWorkerImpl();
-//    cia.outError = new FileOutputStream("build/files_to_send/errors.txt");
-//    cia.outError.write(lines.get(0).getBytes());
-//    cia.outError.write(lines.get(1).getBytes());
-//    cia.outError.close();
     LocalConfigFactory localConfigFactory = new LocalConfigFactory() {};
     MigrationConfig config = localConfigFactory.createConfig(MigrationConfig.class);
     System.out.println(localConfigFactory);
@@ -367,9 +349,6 @@ public class CiaMigrationWorkerImpl extends AbstractMigrationWorker implements C
 
   protected int download() throws Exception {
 
-    ReportXlsx reportXlsx = new ReportXlsx(outReport);
-    reportXlsx.start();
-
     // get file, read all files iteratively
     List<String> fileDirToLoad = renameFiles(".xml.tar.bz2");
     int recordsCount = 0;
@@ -425,13 +404,11 @@ public class CiaMigrationWorkerImpl extends AbstractMigrationWorker implements C
         long now = System.nanoTime();
         info("TOTAL Downloaded records " + recordsCount + " for " + showTime(now, startedAt)
           + " : " + recordsPerSecond(recordsCount, now - startedAt));
-        reportXlsx.addRow(fileName, recordsCount, showTime(now, startedAt));
       }
 
       inputStream.close();
 
     }
-    reportXlsx.finish();
 
     return recordsCount;
   }

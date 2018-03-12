@@ -1,6 +1,5 @@
 package kz.greetgo.sandbox.db.migration_impl;
 
-import kz.greetgo.sandbox.controller.model.ClientRecordsToSave;
 import kz.greetgo.sandbox.db.migration_impl.model.Account;
 import kz.greetgo.sandbox.db.migration_impl.model.Transaction;
 

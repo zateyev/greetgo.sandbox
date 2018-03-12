@@ -20,11 +20,6 @@ public class FrsParser {
     this.frsTableWorker = frsTableWorker;
   }
 
-//  public int parseAndSave() {
-//
-//    return 0;
-//  }
-
   public static void main(String[] args) throws IOException {
     JsonParser jsonParser = new JsonFactory().createParser("{\"type\":\"new_account\",\"registered_at\":\"2001-03-01T10:30:22.547\",\"account_number\":\"49949KZ960-28847-33846-0544217\",\"client_id\":\"4-FPI-H3-SV-lsPFbXjtWC\"}");
 
@@ -40,7 +35,6 @@ public class FrsParser {
   }
 
   private static void parseJSON(JsonParser jsonParser, Account account) throws IOException {
-//    System.out.println(jsonParser.nextToken());
     //loop through the JsonTokens
     while (jsonParser.nextToken() != JsonToken.END_OBJECT) {
       String name = jsonParser.getCurrentName();

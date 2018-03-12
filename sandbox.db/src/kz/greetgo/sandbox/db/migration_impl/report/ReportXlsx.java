@@ -25,20 +25,18 @@ public class ReportXlsx {
 
     sheet.row().start();
     sheet.style().font().bold();
-    sheet.cellStr(1, "Имя файла");
-    sheet.cellStr(2, "Количество записей");
-    sheet.cellStr(3, "Время загрузки");
+    sheet.cellStr(1, "Запрос");
+    sheet.cellStr(2, "Время запроса");
     sheet.style().clean();
     sheet.row().finish();
   }
 
-  public void addRow(String fileName, int recordsCount, String time) {
+  public void addRow(String fileName, String time) {
     sheet.row().start();
     if (fileName == null) fileName = "";
     if (time == null) time = "";
     sheet.cellStr(1, fileName);
-    sheet.cellStr(2, String.valueOf(recordsCount));
-    sheet.cellStr(3, time);
+    sheet.cellStr(2, time);
     sheet.row().finish();
   }
 

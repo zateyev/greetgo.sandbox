@@ -188,6 +188,7 @@ public class FrsMigrationWorkerImpl extends AbstractMigrationWorker implements F
     }
 
     closePostgresConnection();
+    super.close();
     return recordsCount;
   }
 
