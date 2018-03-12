@@ -1,7 +1,14 @@
 package kz.greetgo.sandbox.db.register_impl;
 
 import kz.greetgo.depinject.core.BeanGetter;
-import kz.greetgo.sandbox.controller.model.*;
+import kz.greetgo.sandbox.controller.model.Address;
+import kz.greetgo.sandbox.controller.model.AddressType;
+import kz.greetgo.sandbox.controller.model.Charm;
+import kz.greetgo.sandbox.controller.model.ClientDetails;
+import kz.greetgo.sandbox.controller.model.ClientInfo;
+import kz.greetgo.sandbox.controller.model.Gender;
+import kz.greetgo.sandbox.controller.model.PhoneNumber;
+import kz.greetgo.sandbox.controller.model.PhoneType;
 import kz.greetgo.sandbox.db.jdbc.LoadClientListToReport;
 import kz.greetgo.sandbox.db.report.client_list.ReportFootData;
 import kz.greetgo.sandbox.db.report.client_list.ReportHeadData;
@@ -14,7 +21,10 @@ import org.testng.annotations.Test;
 
 import java.time.LocalDate;
 import java.time.Period;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.Date;
+import java.util.List;
 import java.util.stream.Collectors;
 
 import static org.fest.assertions.api.Assertions.assertThat;
@@ -164,10 +174,7 @@ public class ReportRegisterImplTest extends ParentTestNg {
       for (PhoneNumber phoneNumber : client.phoneNumbers) {
         clientTestDao.get().insertPhoneNumber(client.id, phoneNumber.number, phoneNumber.phoneType);
       }
-//      for (int j = 0; j < client.phoneNumbers.size(); j++) {
-//        clientTestDao.get().insertPhoneNumber(client.id, client.phoneNumbers.get(j).number, client.phoneNumbers.get(j).phoneType);
-//      }
-      // TODO: 2/16/18 type of registeredAt timestamp should be OffsetDateTime
+
       double total = 0.0;
       double min = 1000.0;
       double max = 0.0;

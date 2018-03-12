@@ -2,7 +2,16 @@ package kz.greetgo.sandbox.db.register_impl;
 
 import kz.greetgo.depinject.core.BeanGetter;
 import kz.greetgo.sandbox.controller.errors.NotFound;
-import kz.greetgo.sandbox.controller.model.*;
+import kz.greetgo.sandbox.controller.model.Address;
+import kz.greetgo.sandbox.controller.model.AddressType;
+import kz.greetgo.sandbox.controller.model.Charm;
+import kz.greetgo.sandbox.controller.model.ClientDetails;
+import kz.greetgo.sandbox.controller.model.ClientInfo;
+import kz.greetgo.sandbox.controller.model.ClientRecordsToSave;
+import kz.greetgo.sandbox.controller.model.Gender;
+import kz.greetgo.sandbox.controller.model.PhoneNumber;
+import kz.greetgo.sandbox.controller.model.PhoneType;
+import kz.greetgo.sandbox.controller.model.RequestParameters;
 import kz.greetgo.sandbox.controller.register.ClientRegister;
 import kz.greetgo.sandbox.db.test.dao.CharmTestDao;
 import kz.greetgo.sandbox.db.test.dao.ClientTestDao;
@@ -15,7 +24,9 @@ import java.sql.Date;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.Period;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
 import java.util.stream.Collectors;
 
 import static org.fest.assertions.api.Assertions.assertThat;
@@ -161,22 +172,20 @@ public class ClientRegisterImplTest extends ParentTestNg {
 
     List<ClientInfo> expectingClientList = clients.stream()
       .map(this::toClientInfo)
-      .collect(Collectors.toList());
+      .sorted((o1, o2) -> {
 
-    expectingClientList.sort((o1, o2) -> {
+        Integer tb1 = o1.age;
+        Integer tb2 = o2.age;
+        int sComp = tb1.compareTo(tb2);
 
-      Integer tb1 = o1.age;
-      Integer tb2 = o2.age;
-      int sComp = tb1.compareTo(tb2);
-
-      if (sComp != 0) {
-        return sComp;
-      } else {
-        String sn1 = o1.surname != null ? o1.surname.toLowerCase() : "";
-        String sn2 = o2.surname != null ? o2.surname.toLowerCase() : "";
-        return sn1.compareTo(sn2);
-      }
-    });
+        if (sComp != 0) {
+          return sComp;
+        } else {
+          String sn1 = o1.surname != null ? o1.surname.toLowerCase() : "";
+          String sn2 = o2.surname != null ? o2.surname.toLowerCase() : "";
+          return sn1.compareTo(sn2);
+        }
+      }).collect(Collectors.toList());
 
     PageUtils.cutPage(expectingClientList, page * pageSize, pageSize);
 
@@ -218,22 +227,22 @@ public class ClientRegisterImplTest extends ParentTestNg {
 
     List<ClientInfo> expectingClientList = clients.stream()
       .map(this::toClientInfo)
-      .collect(Collectors.toList());
+      .sorted((o1, o2) -> {
 
-    expectingClientList.sort((o1, o2) -> {
+        Double tb1 = o1.totalBalance;
+        Double tb2 = o2.totalBalance;
+        int sComp = tb1.compareTo(tb2);
 
-      Double tb1 = o1.totalBalance;
-      Double tb2 = o2.totalBalance;
-      int sComp = tb1.compareTo(tb2);
+        if (sComp != 0) {
+          return sComp;
+        }
 
-      if (sComp != 0) {
-        return sComp;
-      } else {
-        String sn1 = o1.surname != null ? o1.surname.toLowerCase() : "";
-        String sn2 = o2.surname != null ? o2.surname.toLowerCase() : "";
-        return sn1.compareTo(sn2);
-      }
-    });
+        {
+          String sn1 = o1.surname != null ? o1.surname.toLowerCase() : "";
+          String sn2 = o2.surname != null ? o2.surname.toLowerCase() : "";
+          return sn1.compareTo(sn2);
+        }
+      }).collect(Collectors.toList());
 
     PageUtils.cutPage(expectingClientList, page * pageSize, pageSize);
 
@@ -718,10 +727,7 @@ public class ClientRegisterImplTest extends ParentTestNg {
       for (PhoneNumber phoneNumber : client.phoneNumbers) {
         clientTestDao.get().insertPhoneNumber(client.id, phoneNumber.number, phoneNumber.phoneType);
       }
-//      for (int j = 0; j < client.phoneNumbers.size(); j++) {
-//        clientTestDao.get().insertPhoneNumber(client.id, client.phoneNumbers.get(j).number, client.phoneNumbers.get(j).phoneType);
-//      }
-      // TODO: 2/16/18 type of registeredAt timestamp should be OffsetDateTime
+
       double total = 0.0;
       double min = 1000.0;
       double max = 0.0;
