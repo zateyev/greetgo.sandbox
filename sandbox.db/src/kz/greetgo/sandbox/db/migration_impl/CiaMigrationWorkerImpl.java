@@ -1,15 +1,9 @@
 package kz.greetgo.sandbox.db.migration_impl;
 
 import kz.greetgo.depinject.core.Bean;
-import kz.greetgo.depinject.core.BeanGetter;
-import kz.greetgo.sandbox.controller.migration.CiaMigrationWorker;
-import kz.greetgo.sandbox.db.configs.DbConfig;
-import kz.greetgo.sandbox.db.configs.MigrationConfig;
-import kz.greetgo.sandbox.db.util.LocalConfigFactory;
 import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
 import org.apache.commons.compress.archivers.tar.TarArchiveInputStream;
 import org.apache.commons.compress.compressors.bzip2.BZip2CompressorInputStream;
-import org.xml.sax.SAXException;
 
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -26,46 +20,11 @@ import static kz.greetgo.sandbox.db.util.TimeUtils.recordsPerSecond;
 import static kz.greetgo.sandbox.db.util.TimeUtils.showTime;
 
 @Bean
-public class CiaMigrationWorkerImpl extends AbstractMigrationWorker implements CiaMigrationWorker {
-
-  public BeanGetter<DbConfig> dbConfig;
+public class CiaMigrationWorkerImpl extends AbstractMigrationWorker {
 
   private String tmpClientTable;
   private String tmpAddrTable;
   private String tmpPhoneTable;
-
-  @Override
-  public int migrate() throws Exception {
-    long startedAt = System.nanoTime();
-
-    createPostgresConnection();
-//    dropTmpTables();
-    createTmpTables();
-
-    int recordsSize = download();
-
-    outError = new FileOutputStream(migrationConfig.get().outErrorFile());
-    handleErrors();
-
-    migrateFromTmp();
-
-    String message;
-    {
-      long now = System.nanoTime();
-      message = "Migration of portion " + recordsSize + " finished for " + showTime(now, startedAt);
-      info(message);
-    }
-
-    outError.write(new Date().toString().getBytes());
-    outError.write(" [INFO] ".getBytes());
-    outError.write(message.getBytes());
-    outError.close();
-
-    closePostgresConnection();
-    super.close();
-
-    return recordsSize;
-  }
 
   @Override
   protected String r(String sql) {
@@ -98,10 +57,11 @@ public class CiaMigrationWorkerImpl extends AbstractMigrationWorker implements C
       "WHERE error IS NULL AND date_part('year', age(birth_date)) NOT BETWEEN 10 AND 200");
 
 
-    uploadAndDropErrors();
+    uploadErrors();
   }
 
-  protected void uploadAndDropErrors() throws SQLException, IOException {
+  protected void uploadErrors() throws SQLException, IOException {
+    outError = new FileOutputStream(migrationConfig.get().outErrorFile());
 
     // create report about errors and send by ssh
     try (PreparedStatement errorPs = connection.prepareStatement(r("SELECT cia_id, error FROM TMP_CLIENT WHERE error IS NOT NULL"))) {
@@ -114,10 +74,12 @@ public class CiaMigrationWorkerImpl extends AbstractMigrationWorker implements C
           outError.write("\n".getBytes());
         }
       }
+    } finally {
+      outError.close();
     }
 
     //language=PostgreSQL
-    exec("DELETE FROM TMP_CLIENT WHERE error IS NOT NULL");
+//    exec("DELETE FROM TMP_CLIENT WHERE error IS NOT NULL");
   }
 
   protected void createTmpTables() throws SQLException {
@@ -177,33 +139,33 @@ public class CiaMigrationWorkerImpl extends AbstractMigrationWorker implements C
     //language=PostgreSQL
     exec("WITH num_ord AS (\n" +
       "  SELECT number, cia_id, row_number() OVER(PARTITION BY cia_id ORDER BY number DESC) AS ord \n" +
-      "  FROM TMP_CLIENT\n" +
+      "  FROM TMP_CLIENT WHERE error ISNULL\n" +
       ")\n" +
       "\n" +
       "UPDATE TMP_CLIENT SET status = 2\n" +
-      "WHERE status = 0 AND number IN (SELECT number FROM num_ord WHERE ord > 1)");
+      "WHERE status = 0 AND error ISNULL AND number IN (SELECT number FROM num_ord WHERE ord > 1)");
 
     //language=PostgreSQL
     exec("UPDATE TMP_CLIENT t SET client_id = c.id\n" +
       "  FROM client c\n" +
-      "  WHERE c.cia_id = t.cia_id\n");
+      "  WHERE c.cia_id = t.cia_id AND t.error ISNULL \n");
 
     //language=PostgreSQL
-    exec("UPDATE TMP_CLIENT SET status = 3 WHERE client_id IS NOT NULL AND status = 0");
+    exec("UPDATE TMP_CLIENT SET status = 3 WHERE client_id IS NOT NULL AND status = 0 AND error ISNULL ");
 
     //language=PostgreSQL
-    exec("UPDATE TMP_CLIENT SET client_id = nextval('s_client') WHERE status = 0");
+    exec("UPDATE TMP_CLIENT SET client_id = nextval('s_client') WHERE status = 0 AND error ISNULL ");
 
     //inserting new charms
     //language=PostgreSQL
     exec("INSERT INTO charm (id, name)\n" +
       "SELECT nextval('s_client'), charm_name\n" +
-      "FROM TMP_CLIENT tcl WHERE tcl.status = 0 ON CONFLICT (name) DO NOTHING");
+      "FROM TMP_CLIENT tcl WHERE tcl.status = 0 AND tcl.error ISNULL ON CONFLICT (name) DO NOTHING");
 
     //language=PostgreSQL
     exec("INSERT INTO client (id, cia_id, surname, \"name\", patronymic, gender, birth_date, charm)\n" +
       "SELECT client_id, tcl.cia_id, surname, tcl.name, patronymic, gender, birth_date, ch.id\n" +
-      "FROM TMP_CLIENT tcl LEFT JOIN charm ch ON tcl.charm_name = ch.name WHERE tcl.status = 0");
+      "FROM TMP_CLIENT tcl LEFT JOIN charm ch ON tcl.charm_name = ch.name WHERE tcl.status = 0 AND tcl.error ISNULL");
 
     //language=PostgreSQL
     exec("UPDATE client c SET cia_id = tc.cia_id\n" +
@@ -226,33 +188,33 @@ public class CiaMigrationWorkerImpl extends AbstractMigrationWorker implements C
     //language=PostgreSQL
     exec("WITH num_ord AS (\n" +
       "  SELECT number, cia_id, type, row_number() OVER(PARTITION BY cia_id, type ORDER BY number DESC) AS ord\n" +
-      "  FROM TMP_ADDR\n" +
+      "  FROM TMP_ADDR WHERE error ISNULL \n" +
       ")\n" +
       "\n" +
       "UPDATE TMP_ADDR SET status = 2\n" +
-      "WHERE status = 0 AND number IN (SELECT number FROM num_ord WHERE ord > 1)");
+      "WHERE status = 0 AND error ISNULL AND number IN (SELECT number FROM num_ord WHERE ord > 1)");
 
     //language=PostgreSQL
     exec("UPDATE TMP_ADDR t SET client_id = ca.client\n" +
       "  FROM client_addr ca\n" +
-      "  WHERE ca.cia_id = t.cia_id\n");
+      "  WHERE ca.cia_id = t.cia_id AND t.error ISNULL \n");
 
     //language=PostgreSQL
-    exec("UPDATE TMP_ADDR SET status = 3 WHERE client_id IS NOT NULL AND status = 0");
+    exec("UPDATE TMP_ADDR SET status = 3 WHERE client_id IS NOT NULL AND status = 0 AND error ISNULL");
 
     //language=PostgreSQL
     exec("UPDATE TMP_ADDR ta SET client_id = c.id\n" +
       "  FROM client c\n" +
-      "  WHERE c.cia_id = ta.cia_id AND ta.status = 0\n");
+      "  WHERE c.cia_id = ta.cia_id AND ta.status = 0 AND ta.error ISNULL \n");
 
     //
     //language=PostgreSQL
-    exec("UPDATE TMP_ADDR SET status = 1 WHERE client_id IS NULL AND status = 0");
+    exec("UPDATE TMP_ADDR SET status = 1 WHERE client_id IS NULL AND status = 0 AND error ISNULL");
 
     //language=PostgreSQL
     exec("INSERT INTO CLIENT_ADDR (client, type, street, house, flat, cia_id)\n" +
       "SELECT client_id, type, street, house, flat, cia_id\n" +
-      "FROM TMP_ADDR WHERE status = 0");
+      "FROM TMP_ADDR WHERE status = 0 AND error ISNULL");
 
     //language=PostgreSQL
     exec("UPDATE client_addr ca SET type = ta.type\n" +
@@ -266,42 +228,42 @@ public class CiaMigrationWorkerImpl extends AbstractMigrationWorker implements C
 
     //language=PostgreSQL
     exec("UPDATE client_addr SET actual = 1 WHERE client IN (\n" +
-      "  SELECT client_id FROM TMP_ADDR WHERE status = 0\n" +
+      "  SELECT client_id FROM TMP_ADDR WHERE status = 0 AND error ISNULL\n" +
       ")");
 
 
     //language=PostgreSQL
     exec("WITH num_ord AS (\n" +
       "  SELECT number, cia_id, phone_number, row_number() OVER(PARTITION BY cia_id, phone_number ORDER BY number DESC) AS ord\n" +
-      "  FROM TMP_PHONE\n" +
+      "  FROM TMP_PHONE WHERE error ISNULL \n" +
       ")\n" +
       "\n" +
       "UPDATE TMP_PHONE SET status = 2\n" +
-      "WHERE status = 0 AND number IN (SELECT number FROM num_ord WHERE ord > 1)");
+      "WHERE status = 0 AND error ISNULL AND number IN (SELECT number FROM num_ord WHERE ord > 1)");
 
     //language=PostgreSQL
     exec("UPDATE TMP_PHONE tp SET client_id = cp.client\n" +
       "  FROM client_phone cp\n" +
-      "  WHERE cp.cia_id = tp.cia_id\n");
+      "  WHERE cp.cia_id = tp.cia_id AND tp.error ISNULL \n");
 
     // marking what needs to be updated
     //language=PostgreSQL
-    exec("UPDATE TMP_PHONE SET status = 3 WHERE client_id IS NOT NULL AND status = 0");
+    exec("UPDATE TMP_PHONE SET status = 3 WHERE client_id IS NOT NULL AND status = 0 AND error ISNULL");
 
     // prepare to insertion
     //language=PostgreSQL
     exec("UPDATE TMP_PHONE ta SET client_id = c.id\n" +
       "  FROM client c\n" +
-      "  WHERE c.cia_id = ta.cia_id AND ta.status = 0\n");
+      "  WHERE c.cia_id = ta.cia_id AND ta.status = 0 AND ta.error ISNULL\n");
 
     //
     //language=PostgreSQL
-    exec("UPDATE TMP_PHONE SET status = 1 WHERE client_id IS NULL AND status = 0");
+    exec("UPDATE TMP_PHONE SET status = 1 WHERE client_id IS NULL AND status = 0 AND error ISNULL");
 
     //language=PostgreSQL
     exec("INSERT INTO client_phone (client, number, type, cia_id)\n" +
       "SELECT client_id, phone_number, type, cia_id\n" +
-      "FROM TMP_PHONE WHERE status = 0");
+      "FROM TMP_PHONE WHERE status = 0 AND error ISNULL");
 
     //language=PostgreSQL
     exec("UPDATE client_phone cp SET number = tp.phone_number\n" +
@@ -320,7 +282,8 @@ public class CiaMigrationWorkerImpl extends AbstractMigrationWorker implements C
 
   }
 
-  private void createPostgresConnection() throws Exception {
+  @Override
+  protected void createPostgresConnection() throws Exception {
     connection = DriverManager.getConnection(
       dbConfig.get().url(),
       dbConfig.get().username(),
@@ -333,6 +296,7 @@ public class CiaMigrationWorkerImpl extends AbstractMigrationWorker implements C
     // get file, read all files iteratively
     List<String> fileDirToLoad = renameFiles(".xml.tar.bz2");
     int recordsCount = 0;
+    long downloadingStartedAt = System.nanoTime();
 
     for (String fileName : fileDirToLoad) {
       inputStream = new FileInputStream(fileName);
@@ -359,6 +323,12 @@ public class CiaMigrationWorkerImpl extends AbstractMigrationWorker implements C
 
       inputStream.close();
 
+    }
+
+    {
+      long now = System.nanoTime();
+      info("TOTAL Downloaded records " + recordsCount + " for " + showTime(now, downloadingStartedAt)
+        + " : " + recordsPerSecond(recordsCount, now - downloadingStartedAt));
     }
 
     return recordsCount;

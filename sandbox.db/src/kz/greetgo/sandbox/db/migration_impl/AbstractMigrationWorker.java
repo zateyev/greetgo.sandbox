@@ -1,6 +1,8 @@
 package kz.greetgo.sandbox.db.migration_impl;
 
 import kz.greetgo.depinject.core.BeanGetter;
+import kz.greetgo.sandbox.controller.migration.MigrationWorker;
+import kz.greetgo.sandbox.db.configs.DbConfig;
 import kz.greetgo.sandbox.db.configs.MigrationConfig;
 import kz.greetgo.sandbox.db.migration_impl.report.ReportXlsx;
 import kz.greetgo.util.RND;
@@ -17,8 +19,9 @@ import java.util.regex.Pattern;
 
 import static kz.greetgo.sandbox.db.util.TimeUtils.showTime;
 
-public abstract class AbstractMigrationWorker implements AutoCloseable {
+public abstract class AbstractMigrationWorker implements MigrationWorker, AutoCloseable {
 
+  public BeanGetter<DbConfig> dbConfig;
   public BeanGetter<MigrationConfig> migrationConfig;
 
   public InputStream inputStream;
@@ -26,8 +29,6 @@ public abstract class AbstractMigrationWorker implements AutoCloseable {
   private ReportXlsx reportXlsx;
   public Connection connection;
   public int maxBatchSize;
-
-  public int showStatusPingMillis = 5000;
 
   protected AbstractMigrationWorker() {
     try {
@@ -38,11 +39,40 @@ public abstract class AbstractMigrationWorker implements AutoCloseable {
     }
   }
 
+  @Override
+  public int migrate() throws Exception {
+    long startedAt = System.nanoTime();
+
+    createPostgresConnection();
+
+    createTmpTables();
+
+    int recordsSize = download();
+
+    handleErrors();
+
+    migrateFromTmp();
+
+    String message;
+    {
+      long now = System.nanoTime();
+      message = "Migration of portion " + recordsSize + " finished for " + showTime(now, startedAt);
+      info(message);
+    }
+
+    closePostgresConnection();
+    close();
+
+    return recordsSize;
+  }
+
+  protected abstract void createPostgresConnection() throws Exception;
+
   protected abstract void dropTmpTables() throws SQLException;
 
   protected abstract void handleErrors() throws SQLException, IOException;
 
-  protected abstract void uploadAndDropErrors() throws SQLException, IOException;
+  protected abstract void uploadErrors() throws SQLException, IOException;
 
   protected abstract void createTmpTables() throws SQLException;
 
@@ -62,12 +92,13 @@ public abstract class AbstractMigrationWorker implements AutoCloseable {
     List<String> fileNames = listFilesForFolder(folder);
     String regexPattern = "^[a-zA-Z0-9-_]*" + ext + "$";
     Pattern p = Pattern.compile(regexPattern);
+    String processId = RND.intStr(5);
 
     for (String fileName : fileNames) {
       if (p.matcher(fileName).matches()) {
         File file = new File(folderName + fileName);
         String newName = folderName + fileName.substring(0, fileName.length() - ext.length()) +
-          "_" + RND.str(8) + sdf.format(nowDate) + ext;
+          "_" + processId + "_" + sdf.format(nowDate) + ext;
         ret.add(newName);
         File file1 = new File(newName);
         if (file1.exists())
