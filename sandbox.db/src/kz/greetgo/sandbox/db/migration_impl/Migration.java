@@ -1,8 +1,6 @@
 package kz.greetgo.sandbox.db.migration_impl;
 
 import kz.greetgo.depinject.core.Bean;
-import kz.greetgo.sandbox.controller.migration.CiaMigrationWorker;
-import kz.greetgo.sandbox.controller.migration.FrsMigrationWorker;
 import kz.greetgo.sandbox.controller.migration.MigrationWorker;
 
 @Bean

@@ -1,10 +1,12 @@
 package kz.greetgo.sandbox.db.migration_impl;
 
+import com.jcraft.jsch.SftpException;
 import kz.greetgo.depinject.core.BeanGetter;
 import kz.greetgo.sandbox.controller.migration.MigrationWorker;
 import kz.greetgo.sandbox.db.configs.DbConfig;
 import kz.greetgo.sandbox.db.configs.MigrationConfig;
 import kz.greetgo.sandbox.db.migration_impl.report.ReportXlsx;
+import kz.greetgo.sandbox.db.ssh.SshConnection;
 import kz.greetgo.util.RND;
 
 import java.io.*;
@@ -29,6 +31,7 @@ public abstract class AbstractMigrationWorker implements MigrationWorker, AutoCl
   private ReportXlsx reportXlsx;
   public Connection connection;
   public int maxBatchSize;
+  protected SshConnection sshConnection;
 
   protected AbstractMigrationWorker() {
     try {
@@ -43,7 +46,7 @@ public abstract class AbstractMigrationWorker implements MigrationWorker, AutoCl
   public int migrate() throws Exception {
     long startedAt = System.nanoTime();
 
-    createPostgresConnection();
+    createConnections();
 
     createTmpTables();
 
@@ -66,7 +69,7 @@ public abstract class AbstractMigrationWorker implements MigrationWorker, AutoCl
     return recordsSize;
   }
 
-  protected abstract void createPostgresConnection() throws Exception;
+  protected abstract void createConnections() throws Exception;
 
   protected abstract void dropTmpTables() throws SQLException;
 
@@ -82,31 +85,21 @@ public abstract class AbstractMigrationWorker implements MigrationWorker, AutoCl
 
   protected abstract String r(String sql);
 
-  protected List<String> renameFiles(String ext) throws IOException {
+  protected List<String> renameFiles(String ext) throws IOException, SftpException {
     SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd");
     Date nowDate = new Date();
 
     List<String> ret = new ArrayList<>();
-    String folderName = "build/files_to_send/";
-    final File folder = new File(folderName);
-    List<String> fileNames = listFilesForFolder(folder);
+    List<String> fileNames = sshConnection.getFileNames(ext);
     String regexPattern = "^[a-zA-Z0-9-_]*" + ext + "$";
     Pattern p = Pattern.compile(regexPattern);
     String processId = RND.intStr(5);
 
     for (String fileName : fileNames) {
       if (p.matcher(fileName).matches()) {
-        File file = new File(folderName + fileName);
-        String newName = folderName + fileName.substring(0, fileName.length() - ext.length()) +
-          "_" + processId + "_" + sdf.format(nowDate) + ext;
+        String newName = fileName + "." + processId + "_" + sdf.format(nowDate);
+        sshConnection.renameFile(fileName, newName);
         ret.add(newName);
-        File file1 = new File(newName);
-        if (file1.exists())
-          throw new java.io.IOException("file exists");
-        boolean success = file.renameTo(file1);
-        if (!success) {
-          throw new RuntimeException("File was not successfully renamed");
-        }
       }
     }
 
@@ -130,17 +123,17 @@ public abstract class AbstractMigrationWorker implements MigrationWorker, AutoCl
     }
   }
 
-  protected List<String> listFilesForFolder(final File folder) {
-    List<String> ret = new ArrayList<>();
-    for (final File fileEntry : folder.listFiles()) {
-      if (fileEntry.isDirectory()) {
-        listFilesForFolder(fileEntry);
-      } else {
-        ret.add(fileEntry.getName());
-      }
-    }
-    return ret;
-  }
+//  protected List<String> listFilesForFolder(final File folder) {
+//    List<String> ret = new ArrayList<>();
+//    for (final File fileEntry : folder.listFiles()) {
+//      if (fileEntry.isDirectory()) {
+//        listFilesForFolder(fileEntry);
+//      } else {
+//        ret.add(fileEntry.getName());
+//      }
+//    }
+//    return ret;
+//  }
 
   protected void info(String message) {
     SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS");
@@ -160,6 +153,7 @@ public abstract class AbstractMigrationWorker implements MigrationWorker, AutoCl
 
   @Override
   public void close() throws Exception {
+    sshConnection.close();
     reportXlsx.finish();
   }
 }

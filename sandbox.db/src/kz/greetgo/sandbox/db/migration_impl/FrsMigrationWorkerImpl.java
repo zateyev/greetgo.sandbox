@@ -1,6 +1,8 @@
 package kz.greetgo.sandbox.db.migration_impl;
 
+import com.jcraft.jsch.SftpException;
 import kz.greetgo.depinject.core.Bean;
+import kz.greetgo.sandbox.db.ssh.SshConnection;
 import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
 import org.apache.commons.compress.archivers.tar.TarArchiveInputStream;
 import org.apache.commons.compress.compressors.bzip2.BZip2CompressorInputStream;
@@ -99,13 +101,13 @@ public class FrsMigrationWorkerImpl extends AbstractMigrationWorker {
   }
 
   @Override
-  protected int download() throws IOException, SQLException {
+  protected int download() throws IOException, SQLException, SftpException {
     List<String> fileDirToLoad = renameFiles(".json_row.txt.tar.bz2");
     int recordsCount = 0;
     long downloadingStartedAt = System.nanoTime();
 
     for (String fileName : fileDirToLoad) {
-      inputStream = new FileInputStream(fileName);
+      inputStream = sshConnection.download(fileName);
       TarArchiveInputStream tarInput = new TarArchiveInputStream(new BZip2CompressorInputStream(inputStream));
       TarArchiveEntry currentEntry = tarInput.getNextTarEntry();
 
@@ -138,7 +140,13 @@ public class FrsMigrationWorkerImpl extends AbstractMigrationWorker {
   }
 
   @Override
-  protected void createPostgresConnection() throws Exception {
+  protected void createConnections() throws Exception {
+    sshConnection = new SshConnection(migrationConfig.get().sshHomePath());
+    sshConnection.createSshConnection(migrationConfig.get().sshUser(),
+      migrationConfig.get().sshPassword(),
+      migrationConfig.get().sshHost(),
+      migrationConfig.get().sshPort());
+
     connection = DriverManager.getConnection(
       dbConfig.get().url(),
       dbConfig.get().username(),
