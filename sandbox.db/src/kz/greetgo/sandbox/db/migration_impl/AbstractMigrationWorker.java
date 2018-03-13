@@ -28,18 +28,18 @@ public abstract class AbstractMigrationWorker implements MigrationWorker, AutoCl
 
   public InputStream inputStream;
   public OutputStream outError;
-  private ReportXlsx reportXlsx;
+  protected ReportXlsx reportXlsx;
   public Connection connection;
   public int maxBatchSize;
   protected SshConnection sshConnection;
 
   protected AbstractMigrationWorker() {
-    try {
-      reportXlsx = new ReportXlsx(new FileOutputStream("build/files_to_send/report.xlsx"));
-      reportXlsx.start();
-    } catch (FileNotFoundException e) {
-      e.printStackTrace();
-    }
+//    try {
+//      reportXlsx = new ReportXlsx(new FileOutputStream("build/files_to_send/report.xlsx"));
+//      reportXlsx.start();
+//    } catch (FileNotFoundException e) {
+//      e.printStackTrace();
+//    }
   }
 
   @Override

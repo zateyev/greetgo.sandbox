@@ -2,12 +2,14 @@ package kz.greetgo.sandbox.db.migration_impl;
 
 import com.jcraft.jsch.SftpException;
 import kz.greetgo.depinject.core.Bean;
+import kz.greetgo.sandbox.db.migration_impl.report.ReportXlsx;
 import kz.greetgo.sandbox.db.ssh.SshConnection;
 import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
 import org.apache.commons.compress.archivers.tar.TarArchiveInputStream;
 import org.apache.commons.compress.compressors.bzip2.BZip2CompressorInputStream;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.sql.DriverManager;
@@ -26,6 +28,15 @@ public class CiaMigrationWorkerImpl extends AbstractMigrationWorker {
   private String tmpClientTable;
   private String tmpAddrTable;
   private String tmpPhoneTable;
+
+//  public CiaMigrationWorkerImpl() {
+//    try {
+//      reportXlsx = new ReportXlsx(new FileOutputStream(migrationConfig.get().sqlReportDir() + "sqlReportCia.xlsx"));
+//      reportXlsx.start();
+//    } catch (FileNotFoundException e) {
+//      e.printStackTrace();
+//    }
+//  }
 
   @Override
   protected String r(String sql) {
@@ -306,6 +317,13 @@ public class CiaMigrationWorkerImpl extends AbstractMigrationWorker {
 
   @Override
   protected void createConnections() throws Exception {
+    try {
+      reportXlsx = new ReportXlsx(new FileOutputStream(migrationConfig.get().sqlReportDir() + "sqlReportCia.xlsx"));
+      reportXlsx.start();
+    } catch (FileNotFoundException e) {
+      e.printStackTrace();
+    }
+
     sshConnection = new SshConnection(migrationConfig.get().sshHomePath());
     sshConnection.createSshConnection(migrationConfig.get().sshUser(),
       migrationConfig.get().sshPassword(),

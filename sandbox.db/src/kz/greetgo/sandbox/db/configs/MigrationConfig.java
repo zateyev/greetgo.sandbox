@@ -34,4 +34,7 @@ public interface MigrationConfig {
   @Description("Путь к директории где лежат файлы")
   @DefaultStrValue("/home/zateyev/git/greetgo.sandbox/build/out_files/")
   String sshHomePath();
+
+  @DefaultStrValue("build/report/")
+  String sqlReportDir();
 }

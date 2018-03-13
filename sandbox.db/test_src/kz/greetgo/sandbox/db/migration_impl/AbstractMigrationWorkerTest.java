@@ -1,14 +1,18 @@
 package kz.greetgo.sandbox.db.migration_impl;
 
 import kz.greetgo.depinject.core.BeanGetter;
+import kz.greetgo.sandbox.db.configs.MigrationConfig;
 import kz.greetgo.sandbox.db.input_file_generator.GenerateInputFiles;
 import kz.greetgo.sandbox.db.test.dao.CharmTestDao;
 import kz.greetgo.sandbox.db.test.dao.ClientTestDao;
-import kz.greetgo.sandbox.db.test.dao.TmpClientTestDao;
 import kz.greetgo.sandbox.db.test.util.ParentTestNg;
+import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
+import java.io.FileReader;
+import java.io.IOException;
+import java.io.LineNumberReader;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
@@ -22,12 +26,13 @@ public class AbstractMigrationWorkerTest extends ParentTestNg {
 
   public BeanGetter<CiaMigrationWorkerImpl> migration;
   public BeanGetter<FrsMigrationWorkerImpl> frsMigration;
-  public BeanGetter<TmpClientTestDao> tmpClientTestDao;
+  public BeanGetter<MigrationConfig> migrationConfig;
   public BeanGetter<ClientTestDao> clientTestDao;
   public BeanGetter<CharmTestDao> charmTestDao;
 
   private GenerateInputFiles fileGenerator;
 
+  @BeforeClass
   @BeforeMethod
   public void prepareInputFiles() throws Exception {
     fileGenerator = new GenerateInputFiles(500, 500);
@@ -56,7 +61,6 @@ public class AbstractMigrationWorkerTest extends ParentTestNg {
     clientTestDao.get().removeAllData();
     charmTestDao.get().removeAllData();
 
-    GenerateInputFiles fileGenerator = new GenerateInputFiles(500, 500);
     Set<String> goodClientIds = fileGenerator.getGoodClientIds();
 
     //
@@ -85,8 +89,11 @@ public class AbstractMigrationWorkerTest extends ParentTestNg {
     //
     //
 
+    int i = 0;
     for (Map.Entry<String, String> lastClientEntry : lastGoodClientSurnamesFromDuplicates.entrySet()) {
-      assertThat(Objects.equals(lastClientEntry.getValue(), clientTestDao.get().getClientSurnameByCiaId(lastClientEntry.getKey()))).isTrue();
+      String clientSurname = clientTestDao.get().getClientSurnameByCiaId(lastClientEntry.getKey());
+      assertThat(Objects.equals(lastClientEntry.getValue().trim(), clientSurname.trim())).isTrue();
+      if (++i > 10) break;
     }
   }
 
@@ -101,7 +108,8 @@ public class AbstractMigrationWorkerTest extends ParentTestNg {
     //
     //
 
-    assertThat(47/*line count of file with errors*/).isEqualTo(fileGenerator.getErrorRecordCount());
+    assertThat(getLineCountOfFile(migrationConfig.get().sshHomePath() + migrationConfig.get().outErrorFile()))
+      .isEqualTo(fileGenerator.getErrorRecordCount());
   }
 
   @Test
@@ -111,7 +119,7 @@ public class AbstractMigrationWorkerTest extends ParentTestNg {
 
     //
     //
-    int recordsSize = frsMigration.get().migrate();
+    frsMigration.get().migrate();
     //
     //
 
@@ -120,5 +128,19 @@ public class AbstractMigrationWorkerTest extends ParentTestNg {
 
     assertThat(transactionCount).isEqualTo(fileGenerator.getTransactionCount());
     assertThat(accountCount).isEqualTo(fileGenerator.getAccountCount());
+  }
+
+  private int getLineCountOfFile(String fileName) {
+    try
+      (
+        FileReader input = new FileReader(fileName);
+        LineNumberReader count = new LineNumberReader(input);
+      ) {
+      while (count.skip(Long.MAX_VALUE) > 0) {}
+      return count.getLineNumber();
+    } catch (IOException e) {
+      e.printStackTrace();
+    }
+    return 0;
   }
 }
