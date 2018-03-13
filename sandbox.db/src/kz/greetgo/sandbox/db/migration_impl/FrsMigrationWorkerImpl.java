@@ -27,15 +27,6 @@ public class FrsMigrationWorkerImpl extends AbstractMigrationWorker {
   private String tmpAccountTable;
   private String tmpTransactionTable;
 
-//  public FrsMigrationWorkerImpl() {
-//    try {
-//      reportXlsx = new ReportXlsx(new FileOutputStream(migrationConfig.get().sqlReportDir() + "sqlReportFrs.xlsx"));
-//      reportXlsx.start();
-//    } catch (FileNotFoundException e) {
-//      e.printStackTrace();
-//    }
-//  }
-
   @Override
   protected void dropTmpTables() throws SQLException {
     exec("DROP TABLE IF EXISTS TMP_ACCOUNT, TMP_TRANSACTION");

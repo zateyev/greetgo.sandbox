@@ -1,6 +1,7 @@
 package kz.greetgo.sandbox.db.input_file_generator;
 
 import kz.greetgo.sandbox.controller.model.*;
+import kz.greetgo.sandbox.db.migration_impl.model.Transaction;
 import kz.greetgo.util.RND;
 import org.apache.commons.io.FileUtils;
 
@@ -25,6 +26,8 @@ public class GenerateInputFiles {
   private final int FRS_LIMIT;
 
   private Map<String, ClientDetails> lastGoodClients;
+  private Map<String, kz.greetgo.sandbox.db.migration_impl.model.Account> clientAccounts;
+  private Map<String, Transaction> accountTransactions;
   private boolean testMode;
 
   public GenerateInputFiles(int CIA_LIMIT, int FRS_LIMIT) {
@@ -749,7 +752,7 @@ public class GenerateInputFiles {
       String type;
       BigDecimal money;
 
-      String toJson() {
+      String toJson(kz.greetgo.sandbox.db.migration_impl.model.Transaction transaction) {
 
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS");
 
@@ -759,6 +762,11 @@ public class GenerateInputFiles {
         pairs.add("'finished_at':'" + sdf.format(finishedAt) + "'");
         pairs.add("'transaction_type':'" + type + "'");
         pairs.add("'account_number':'" + number + "'");
+
+        transaction.money = money.doubleValue();
+        transaction.accountNumber = number;
+        transaction.transactionType = type;
+        transaction.finishedAt = sdf.format(finishedAt);
 
         Collections.shuffle(pairs);
 
@@ -893,13 +901,23 @@ public class GenerateInputFiles {
     records.add(account.toJson());
     info.newAccount();
 
+    kz.greetgo.sandbox.db.migration_impl.model.Account newAccount = new kz.greetgo.sandbox.db.migration_impl.model.Account();
+    newAccount.accountNumber = account.number;
+    newAccount.clientId = account.clientId;
+    newAccount.registeredAt = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS").format(account.registeredAt);
+    clientAccounts.put(clientId, newAccount);
+
+
+    Transaction transaction = new Transaction();
+
     int count = 2 + random.nextInt(10);
     for (int i = 0; i < count; i++) {
-      records.add(account.addTransaction(rowIndex, false).toJson());
+      records.add(account.addTransaction(rowIndex, false).toJson(transaction));
       info.newTransaction();
     }
-    records.add(account.addTransaction(rowIndex, true).toJson());
+    records.add(account.addTransaction(rowIndex, true).toJson(transaction));
     info.newTransaction();
+    accountTransactions.put(clientId, transaction);
 
     Collections.shuffle(records);
 
