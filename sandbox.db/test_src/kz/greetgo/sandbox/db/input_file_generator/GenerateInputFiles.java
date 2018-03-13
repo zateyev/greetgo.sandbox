@@ -1,5 +1,6 @@
 package kz.greetgo.sandbox.db.input_file_generator;
 
+import kz.greetgo.sandbox.controller.model.ClientInfo;
 import kz.greetgo.util.RND;
 
 import java.io.File;
@@ -10,15 +11,7 @@ import java.math.RoundingMode;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Collections;
-import java.util.Date;
-import java.util.GregorianCalendar;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Random;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
@@ -27,11 +20,16 @@ import java.util.stream.Collectors;
 
 public class GenerateInputFiles {
 
-  public static final int CIA_LIMIT = 1_000_000;
-  public static final int FRS_LIMIT = 10_000_000;
+  private final int CIA_LIMIT; // = 1_000_000;
+  private final int FRS_LIMIT; // = 10_000_000;
+
+  public GenerateInputFiles(int CIA_LIMIT, int FRS_LIMIT) {
+    this.CIA_LIMIT = CIA_LIMIT;
+    this.FRS_LIMIT = FRS_LIMIT;
+  }
 
   public static void main(String[] args) throws Exception {
-    new GenerateInputFiles().execute();
+    new GenerateInputFiles(1_000_000, 10_000_000).execute();
   }
 
   private static final String ENG = "abcdefghijklmnopqrstuvwxyz";
@@ -41,6 +39,30 @@ public class GenerateInputFiles {
   private static final char[] BIG = (ENG.toUpperCase() + DEG).toCharArray();
 
   private static final Random random = new Random();
+
+  public Set<String> getGoodClientIds() {
+    return info.goodClientIds;
+  }
+
+  public Map<String, ClientInfo> getLastGoodClientsFromDuplicates() {
+    return null;
+  }
+
+  public long getGoodClientCount() {
+    return info.goodClientIds.size();
+  }
+
+  public long getTransactionCount() {
+    return info.transactionCount;
+  }
+
+  public long getAccountCount() {
+    return info.accountCount;
+  }
+
+  public int getErrorRecordCount() {
+    return info.clientErrorRecordCount;
+  }
 
   private static class Info {
 
@@ -231,7 +253,7 @@ public class GenerateInputFiles {
   String outFileName;
   File outFile;
 
-  private void execute() throws Exception {
+  public void execute() throws Exception {
 
     rowTypeRnd.showInfo();
     errorTypeRnd.showInfo();

@@ -12,7 +12,7 @@ public interface MigrationConfig {
   int maxBatchSize();
 
   @Description("Имя файла с ошибками")
-  @DefaultStrValue("build/files_to_send/errors.txt")
+  @DefaultStrValue("errors.txt")
   String outErrorFile();
 
   @Description("Имя ssh сервера")

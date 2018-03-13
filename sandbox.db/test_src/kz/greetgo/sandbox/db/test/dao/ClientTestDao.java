@@ -6,6 +6,7 @@ import org.apache.ibatis.annotations.*;
 import java.time.OffsetDateTime;
 import java.util.Date;
 import java.util.List;
+import java.util.Set;
 
 public interface ClientTestDao {
   //  @Select("TRUNCATE Charm; TRUNCATE Client; TRUNCATE ClientAddr; TRUNCATE ClientPhone; TRUNCATE ClientAccount; " +
@@ -29,16 +30,6 @@ public interface ClientTestDao {
   @Select("select count(1) from Client")
   long countOfClients(@Param("filterBy") String filterBy,
                       @Param("filterInputs") String filterInputs);
-
-//  @Insert("insert into Client (id, surname, name, patronymic, gender, birth_date, charm) " +
-//    "values (#{id}, #{surname}, #{name}, #{patronymic}, #{gender}, #{birth_date}, 'charm')")
-//  void insertClient(@Param("id") String clientId,
-//                    @Param("surname") String surname,
-//                    @Param("name") String name,
-//                    @Param("patronymic") String patronymic,
-//                    @Param("gender") Gender gender,
-//                    @Param("birth_date") Date birth_date,
-//                    @Param("charm") String charm);
 
   @Insert("insert into client (id, surname, name, patronymic, gender, birth_date, charm) " +
     "values (#{id}, #{surname}, #{name}, #{patronymic}, #{gender}, #{birth_date}, #{charm})")
@@ -98,4 +89,15 @@ public interface ClientTestDao {
     @Result(property = "number", column = "number")
   })
   List<PhoneNumber> getPhonesByClientId(@Param("client") String clientId);
+
+  @Select("SELECT count(1) FROM client_account_transaction")
+  long getTransactionCount();
+
+  @Select("SELECT count(1) FROM client_account")
+  long getAccountCount();
+
+  @Select("SELECT cia_id FROM client")
+  Set<String> getClientCiaIdsSet();
+
+  ClientInfo getClientInfoByCiaId(String key);
 }

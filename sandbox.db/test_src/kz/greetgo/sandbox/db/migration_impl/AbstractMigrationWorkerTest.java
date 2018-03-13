@@ -1,11 +1,19 @@
 package kz.greetgo.sandbox.db.migration_impl;
 
 import kz.greetgo.depinject.core.BeanGetter;
+import kz.greetgo.sandbox.controller.model.ClientInfo;
+import kz.greetgo.sandbox.db.input_file_generator.GenerateInputFiles;
 import kz.greetgo.sandbox.db.test.dao.CharmTestDao;
 import kz.greetgo.sandbox.db.test.dao.ClientTestDao;
 import kz.greetgo.sandbox.db.test.dao.TmpClientTestDao;
 import kz.greetgo.sandbox.db.test.util.ParentTestNg;
+import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
+
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
 
 import static org.fest.assertions.api.Assertions.assertThat;
 
@@ -20,6 +28,14 @@ public class AbstractMigrationWorkerTest extends ParentTestNg {
   public BeanGetter<ClientTestDao> clientTestDao;
   public BeanGetter<CharmTestDao> charmTestDao;
 
+  private GenerateInputFiles fileGenerator;
+
+  @BeforeMethod
+  public void prepareInputFiles() throws Exception {
+    fileGenerator = new GenerateInputFiles(500, 500);
+    fileGenerator.execute();
+  }
+
   @Test
   public void testCiaMigration() throws Exception {
 //    tmpClientTestDao.get().cleanDb();
@@ -32,13 +48,67 @@ public class AbstractMigrationWorkerTest extends ParentTestNg {
     //
     //
 
-    assertThat(recordsSize).isNotEqualTo(0);
+    long clientCount = clientTestDao.get().countOfClients(null, null);
+
+    assertThat(clientCount).isEqualTo(fileGenerator.getGoodClientCount());
+  }
+
+  @Test
+  public void testAllGoodClientsInserted() throws Exception {
+    clientTestDao.get().removeAllData();
+    charmTestDao.get().removeAllData();
+
+    GenerateInputFiles fileGenerator = new GenerateInputFiles(500, 500);
+    Set<String> goodClientIds = fileGenerator.getGoodClientIds();
+
+    //
+    //
+    migration.get().migrate();
+    //
+    //
+
+    Set<String> clientCiaIds = clientTestDao.get().getClientCiaIdsSet();
+
+    assertThat(Objects.equals(goodClientIds, clientCiaIds)).isTrue();
+  }
+
+  @Test
+  public void testHandlingDuplicates() throws Exception {
+    clientTestDao.get().removeAllData();
+    charmTestDao.get().removeAllData();
+
+    Map<String, ClientInfo> lastGoodClientsFromDuplicates = fileGenerator.getLastGoodClientsFromDuplicates();
+
+
+    //
+    //
+    migration.get().migrate();
+    //
+    //
+
+    for (Map.Entry<String, ClientInfo> lastClientEntry : lastGoodClientsFromDuplicates.entrySet()) {
+      assertThat(lastClientEntry.getValue().equals(clientTestDao.get().getClientInfoByCiaId(lastClientEntry.getKey())));
+    }
+  }
+
+  @Test
+  public void testErrorHandling() throws Exception {
+    clientTestDao.get().removeAllData();
+    charmTestDao.get().removeAllData();
+
+    //
+    //
+    migration.get().migrate();
+    //
+    //
+
+    assertThat(47/*line count of file with errors*/).isEqualTo(fileGenerator.getErrorRecordCount());
   }
 
   @Test
   public void testFrsMigration() throws Exception {
-//    clientTestDao.get().removeAllData();
-//    charmTestDao.get().removeAllData();
+    clientTestDao.get().removeAllData();
+    charmTestDao.get().removeAllData();
 
     //
     //
@@ -46,6 +116,10 @@ public class AbstractMigrationWorkerTest extends ParentTestNg {
     //
     //
 
-    assertThat(recordsSize).isNotEqualTo(0);
+    long transactionCount = clientTestDao.get().getTransactionCount();
+    long accountCount = clientTestDao.get().getAccountCount();
+
+    assertThat(transactionCount).isEqualTo(fileGenerator.getTransactionCount());
+    assertThat(accountCount).isEqualTo(fileGenerator.getAccountCount());
   }
 }

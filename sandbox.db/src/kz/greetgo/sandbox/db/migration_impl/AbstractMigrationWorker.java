@@ -56,14 +56,13 @@ public abstract class AbstractMigrationWorker implements MigrationWorker, AutoCl
 
     migrateFromTmp();
 
-    String message;
     {
       long now = System.nanoTime();
-      message = "Migration of portion " + recordsSize + " finished for " + showTime(now, startedAt);
-      info(message);
+      info("Migration of portion " + recordsSize + " finished for " + showTime(now, startedAt));
     }
 
     closePostgresConnection();
+
     close();
 
     return recordsSize;
@@ -73,9 +72,9 @@ public abstract class AbstractMigrationWorker implements MigrationWorker, AutoCl
 
   protected abstract void dropTmpTables() throws SQLException;
 
-  protected abstract void handleErrors() throws SQLException, IOException;
+  protected abstract void handleErrors() throws SQLException, IOException, SftpException;
 
-  protected abstract void uploadErrors() throws SQLException, IOException;
+  protected abstract void uploadErrors() throws SQLException, IOException, SftpException;
 
   protected abstract void createTmpTables() throws SQLException;
 

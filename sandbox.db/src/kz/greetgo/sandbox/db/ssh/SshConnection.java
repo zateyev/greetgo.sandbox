@@ -2,8 +2,7 @@ package kz.greetgo.sandbox.db.ssh;
 
 import com.jcraft.jsch.*;
 
-import java.io.FileOutputStream;
-import java.io.InputStream;
+import java.io.*;
 import java.util.List;
 import java.util.Vector;
 import java.util.stream.Collectors;
@@ -46,20 +45,26 @@ public class SshConnection implements AutoCloseable {
       int port = 22;
       sshConnection.createSshConnection(user, password, host, port);
 
-      FileOutputStream outError = new FileOutputStream(sshConnection.homePath + "test.txt");
-      outError.write("Error: AAA".getBytes());
-      outError.write("Error: BBB".getBytes());
-      outError.write("Error: CCC".getBytes());
-      sshConnection.upload(outError);
-      outError.close();
+      File file = new File("test.txt");
+      OutputStream out = new FileOutputStream(file);
+      out.write("Exexe, aaa\n".getBytes());
+      out.write("Exexe, bbb\n".getBytes());
+      out.write("Exexe, ccc\n".getBytes());
+      sshConnection.upload(file);
+      out.close();
     } catch (Exception e) {
       e.printStackTrace();
     }
   }
 
-  private void upload(FileOutputStream outputStream) {
-    channelSftp.setOutputStream(outputStream);
-//    channelSftp
+  private OutputStream getOutputStream() throws IOException, SftpException {
+    channelSftp.cd(homePath);
+    return channelSftp.getOutputStream();
+  }
+
+  public void upload(File file) throws FileNotFoundException, SftpException {
+    channelSftp.cd(homePath);
+    channelSftp.put(new FileInputStream(file), file.getName());
   }
 
   public List<String> getFileNames(String ext) throws SftpException {

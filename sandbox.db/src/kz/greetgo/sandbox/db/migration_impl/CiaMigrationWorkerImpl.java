@@ -1,11 +1,13 @@
 package kz.greetgo.sandbox.db.migration_impl;
 
+import com.jcraft.jsch.SftpException;
 import kz.greetgo.depinject.core.Bean;
 import kz.greetgo.sandbox.db.ssh.SshConnection;
 import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
 import org.apache.commons.compress.archivers.tar.TarArchiveInputStream;
 import org.apache.commons.compress.compressors.bzip2.BZip2CompressorInputStream;
 
+import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.sql.DriverManager;
@@ -13,8 +15,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 import static kz.greetgo.sandbox.db.util.TimeUtils.recordsPerSecond;
 import static kz.greetgo.sandbox.db.util.TimeUtils.showTime;
@@ -39,7 +40,7 @@ public class CiaMigrationWorkerImpl extends AbstractMigrationWorker {
     exec("DROP TABLE IF EXISTS TMP_CLIENT, TMP_ADDR, TMP_PHONE");
   }
 
-  protected void handleErrors() throws SQLException, IOException {
+  protected void handleErrors() throws SQLException, IOException, SftpException {
     //language=PostgreSQL
     exec("UPDATE TMP_CLIENT SET error = 'surname is not defined' " +
       "WHERE error IS NULL AND (surname <> '') IS NOT TRUE");
@@ -60,8 +61,10 @@ public class CiaMigrationWorkerImpl extends AbstractMigrationWorker {
     uploadErrors();
   }
 
-  protected void uploadErrors() throws SQLException, IOException {
-    outError = new FileOutputStream(migrationConfig.get().outErrorFile());
+  protected void uploadErrors() throws SQLException, IOException, SftpException {
+
+    File errFile = new File(migrationConfig.get().outErrorFile());
+    outError = new FileOutputStream(errFile);
 
     // create report about errors and send by ssh
     try (PreparedStatement errorPs = connection.prepareStatement(r("SELECT cia_id, error FROM TMP_CLIENT WHERE error IS NOT NULL"))) {
@@ -76,6 +79,7 @@ public class CiaMigrationWorkerImpl extends AbstractMigrationWorker {
       }
     } finally {
       outError.close();
+      sshConnection.upload(errFile);
     }
 
     //language=PostgreSQL
@@ -280,6 +284,24 @@ public class CiaMigrationWorkerImpl extends AbstractMigrationWorker {
 
     //send report by ssh
 
+  }
+
+  public static void main(String[] args) {
+    Set<String> set1 = new HashSet<>();
+    Set<String> set2 = new HashSet<>();
+    set1.add("asd7asd");
+    set1.add("asdTasd");
+    set1.add("asdRasd");
+    set1.add("asd3asd");
+
+    set2.add("asd3asd");
+    set2.add("asdTasd");
+    set2.add("asdRasd");
+    StringBuilder sb = new StringBuilder();
+    sb.append("asd").append(7).append("asd");
+    set2.add(sb.toString());
+
+    System.out.println(Objects.equals(set1, set2));
   }
 
   @Override
