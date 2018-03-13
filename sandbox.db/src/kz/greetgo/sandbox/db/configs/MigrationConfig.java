@@ -32,6 +32,6 @@ public interface MigrationConfig {
   int sshPort();
 
   @Description("Путь к директории где лежат файлы")
-  @DefaultStrValue("/home/zateyev/git/greetgo.sandbox/build/files_to_send/")
+  @DefaultStrValue("/home/zateyev/git/greetgo.sandbox/build/out_files/")
   String sshHomePath();
 }

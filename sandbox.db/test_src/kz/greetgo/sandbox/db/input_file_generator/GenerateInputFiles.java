@@ -1,7 +1,7 @@
 package kz.greetgo.sandbox.db.input_file_generator;
 
-import kz.greetgo.sandbox.controller.model.ClientInfo;
 import kz.greetgo.util.RND;
+import org.apache.commons.io.FileUtils;
 
 import java.io.File;
 import java.io.IOException;
@@ -23,9 +23,14 @@ public class GenerateInputFiles {
   private final int CIA_LIMIT; // = 1_000_000;
   private final int FRS_LIMIT; // = 10_000_000;
 
+  private Map<String, String> lastGoodClientSurnames;
+  private boolean testMode;
+
   public GenerateInputFiles(int CIA_LIMIT, int FRS_LIMIT) {
     this.CIA_LIMIT = CIA_LIMIT;
     this.FRS_LIMIT = FRS_LIMIT;
+
+    lastGoodClientSurnames = new HashMap<>();
   }
 
   public static void main(String[] args) throws Exception {
@@ -44,8 +49,8 @@ public class GenerateInputFiles {
     return info.goodClientIds;
   }
 
-  public Map<String, ClientInfo> getLastGoodClientsFromDuplicates() {
-    return null;
+  public Map<String, String> getLastGoodClientSurnames() {
+    return lastGoodClientSurnames;
   }
 
   public long getGoodClientCount() {
@@ -62,6 +67,10 @@ public class GenerateInputFiles {
 
   public int getErrorRecordCount() {
     return info.clientErrorRecordCount;
+  }
+
+  public void setTestMode() {
+    this.testMode = true;
   }
 
   private static class Info {
@@ -254,6 +263,7 @@ public class GenerateInputFiles {
   File outFile;
 
   public void execute() throws Exception {
+    FileUtils.cleanDirectory(new File(DIR));
 
     rowTypeRnd.showInfo();
     errorTypeRnd.showInfo();
@@ -496,6 +506,7 @@ public class GenerateInputFiles {
   private void printClient(int clientIndex, RowType rowType) throws Exception {
 
     List<String> tags = new ArrayList<>();
+    String goodSurname = null;
 
     ErrorType errorType = null;
 
@@ -506,7 +517,8 @@ public class GenerateInputFiles {
       if (errorType == ErrorType.EMPTY_SURNAME) {
         tags.add("    <surname value=\"\"/>");
       } else {
-        tags.add("    <surname value=\"" + nextSurname() + "\"/>");
+        goodSurname = nextSurname();
+        tags.add("    <surname value=\"" + goodSurname + "\"/>");
       }
 
     }
@@ -615,6 +627,7 @@ public class GenerateInputFiles {
       if (rowType == RowType.ERROR) {
         info.newErrorClient();
       } else {
+        if (testMode && info.goodClientIds.contains(clientId)) lastGoodClientSurnames.put(clientId, goodSurname);
         info.appendGoodClientId(clientId);
       }
 

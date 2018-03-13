@@ -99,5 +99,6 @@ public interface ClientTestDao {
   @Select("SELECT cia_id FROM client")
   Set<String> getClientCiaIdsSet();
 
-  ClientInfo getClientInfoByCiaId(String key);
+  @Select("SELECT surname FROM client WHERE cia_id = #{cia_id}")
+  String getClientSurnameByCiaId(@Param("cia_id") String key);
 }

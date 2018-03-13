@@ -1,7 +1,6 @@
 package kz.greetgo.sandbox.db.migration_impl;
 
 import kz.greetgo.depinject.core.BeanGetter;
-import kz.greetgo.sandbox.controller.model.ClientInfo;
 import kz.greetgo.sandbox.db.input_file_generator.GenerateInputFiles;
 import kz.greetgo.sandbox.db.test.dao.CharmTestDao;
 import kz.greetgo.sandbox.db.test.dao.ClientTestDao;
@@ -10,7 +9,6 @@ import kz.greetgo.sandbox.db.test.util.ParentTestNg;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
@@ -33,18 +31,18 @@ public class AbstractMigrationWorkerTest extends ParentTestNg {
   @BeforeMethod
   public void prepareInputFiles() throws Exception {
     fileGenerator = new GenerateInputFiles(500, 500);
+    fileGenerator.setTestMode();
     fileGenerator.execute();
   }
 
   @Test
   public void testCiaMigration() throws Exception {
-//    tmpClientTestDao.get().cleanDb();
     clientTestDao.get().removeAllData();
     charmTestDao.get().removeAllData();
 
     //
     //
-    int recordsSize = migration.get().migrate();
+    migration.get().migrate();
     //
     //
 
@@ -69,7 +67,8 @@ public class AbstractMigrationWorkerTest extends ParentTestNg {
 
     Set<String> clientCiaIds = clientTestDao.get().getClientCiaIdsSet();
 
-    assertThat(Objects.equals(goodClientIds, clientCiaIds)).isTrue();
+
+    assertThat(Objects.equals(clientCiaIds, goodClientIds)).isTrue();
   }
 
   @Test
@@ -77,7 +76,7 @@ public class AbstractMigrationWorkerTest extends ParentTestNg {
     clientTestDao.get().removeAllData();
     charmTestDao.get().removeAllData();
 
-    Map<String, ClientInfo> lastGoodClientsFromDuplicates = fileGenerator.getLastGoodClientsFromDuplicates();
+    Map<String, String> lastGoodClientSurnamesFromDuplicates = fileGenerator.getLastGoodClientSurnames();
 
 
     //
@@ -86,8 +85,8 @@ public class AbstractMigrationWorkerTest extends ParentTestNg {
     //
     //
 
-    for (Map.Entry<String, ClientInfo> lastClientEntry : lastGoodClientsFromDuplicates.entrySet()) {
-      assertThat(lastClientEntry.getValue().equals(clientTestDao.get().getClientInfoByCiaId(lastClientEntry.getKey())));
+    for (Map.Entry<String, String> lastClientEntry : lastGoodClientSurnamesFromDuplicates.entrySet()) {
+      assertThat(Objects.equals(lastClientEntry.getValue(), clientTestDao.get().getClientSurnameByCiaId(lastClientEntry.getKey()))).isTrue();
     }
   }
 
