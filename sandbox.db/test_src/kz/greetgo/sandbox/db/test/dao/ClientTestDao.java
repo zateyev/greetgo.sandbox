@@ -9,8 +9,6 @@ import java.util.List;
 import java.util.Set;
 
 public interface ClientTestDao {
-  //  @Select("TRUNCATE Charm; TRUNCATE Client; TRUNCATE ClientAddr; TRUNCATE ClientPhone; TRUNCATE ClientAccount; " +
-//  "TRUNCATE TransactionType; TRUNCATE ClientAccountTransaction")
   @Select("TRUNCATE client CASCADE; TRUNCATE client_phone")
   void removeAllData();
 
@@ -27,9 +25,21 @@ public interface ClientTestDao {
   })
   ClientDetails getClientDetailsById(@Param("id") String clientId);
 
+  @Select("SELECT c.id, c.surname, c.name, c.patronymic, c.gender, c.birth_date, ch.name as charm" +
+    " FROM client c LEFT JOIN charm ch ON c.charm = ch.id WHERE cia_id = #{cia_id}")
+  @Results({
+    @Result(property = "id", column = "id"),
+    @Result(property = "surname", column = "surname"),
+    @Result(property = "name", column = "name"),
+    @Result(property = "patronymic", column = "patronymic"),
+    @Result(property = "gender", column = "gender"),
+    @Result(property = "dateOfBirth", column = "birth_date"),
+    @Result(property = "charm.name", column = "charm")
+  })
+  ClientDetails getClientDetailsByCiaId(@Param("cia_id") String ciaId);
+
   @Select("select count(1) from Client")
-  long countOfClients(@Param("filterBy") String filterBy,
-                      @Param("filterInputs") String filterInputs);
+  long getClientCount();
 
   @Insert("insert into client (id, surname, name, patronymic, gender, birth_date, charm) " +
     "values (#{id}, #{surname}, #{name}, #{patronymic}, #{gender}, #{birth_date}, #{charm})")
@@ -101,4 +111,16 @@ public interface ClientTestDao {
 
   @Select("SELECT surname FROM client WHERE cia_id = #{cia_id}")
   String getClientSurnameByCiaId(@Param("cia_id") String key);
+
+  @Select("SELECT client, type, street, house, flat " +
+    "FROM client_addr WHERE client = #{client} and type = #{type}")
+  @Results({
+    @Result(property = "id", column = "client"),
+    @Result(property = "type", column = "type"),
+    @Result(property = "street", column = "street"),
+    @Result(property = "house", column = "house"),
+    @Result(property = "flat", column = "flat")
+  })
+  Address selectAddrByClientId(@Param("client") String clientId,
+                               @Param("type") AddressType type);
 }

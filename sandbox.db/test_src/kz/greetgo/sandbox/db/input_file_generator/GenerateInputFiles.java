@@ -1,5 +1,6 @@
 package kz.greetgo.sandbox.db.input_file_generator;
 
+import kz.greetgo.sandbox.controller.model.*;
 import kz.greetgo.util.RND;
 import org.apache.commons.io.FileUtils;
 
@@ -20,17 +21,17 @@ import java.util.stream.Collectors;
 
 public class GenerateInputFiles {
 
-  private final int CIA_LIMIT; // = 1_000_000;
-  private final int FRS_LIMIT; // = 10_000_000;
+  private final int CIA_LIMIT;
+  private final int FRS_LIMIT;
 
-  private Map<String, String> lastGoodClientSurnames;
+  private Map<String, ClientDetails> lastGoodClients;
   private boolean testMode;
 
   public GenerateInputFiles(int CIA_LIMIT, int FRS_LIMIT) {
     this.CIA_LIMIT = CIA_LIMIT;
     this.FRS_LIMIT = FRS_LIMIT;
 
-    lastGoodClientSurnames = new HashMap<>();
+    lastGoodClients = new HashMap<>();
   }
 
   public static void main(String[] args) throws Exception {
@@ -49,8 +50,8 @@ public class GenerateInputFiles {
     return info.goodClientIds;
   }
 
-  public Map<String, String> getLastGoodClientSurnames() {
-    return lastGoodClientSurnames;
+  public Map<String, ClientDetails> getLastGoodClients() {
+    return lastGoodClients;
   }
 
   public long getGoodClientCount() {
@@ -469,8 +470,21 @@ public class GenerateInputFiles {
       }
     }
 
-    String tag(PhoneType type) {
+    String tag(PhoneType type, ClientDetails goodClient) {
       if (type == null || number == null) return null;
+      PhoneNumber phoneNumber = new PhoneNumber();
+      switch (type) {
+        case homePhone:
+          phoneNumber.phoneType = kz.greetgo.sandbox.controller.model.PhoneType.HOME;
+          break;
+        case workPhone:
+          phoneNumber.phoneType = kz.greetgo.sandbox.controller.model.PhoneType.WORK;
+          break;
+        case mobilePhone:
+          phoneNumber.phoneType = kz.greetgo.sandbox.controller.model.PhoneType.MOBILE;
+      }
+      phoneNumber.number = number;
+      goodClient.phoneNumbers.add(phoneNumber);
       return "<" + type.name() + ">" + number + "</" + type.name() + ">";
     }
   }
@@ -486,7 +500,18 @@ public class GenerateInputFiles {
       return ret;
     }
 
-    String toTag(String tagName) {
+    String toTag(String tagName, ClientDetails goodClient) {
+      if ("fact".equals(tagName)) {
+        goodClient.addressF.type = AddressType.FACT;
+        goodClient.addressF.street = street;
+        goodClient.addressF.house = house;
+        goodClient.addressF.flat = flat;
+      } else {
+        goodClient.addressR.type = AddressType.REG;
+        goodClient.addressR.street = street;
+        goodClient.addressR.house = house;
+        goodClient.addressR.flat = flat;
+      }
       return "<" + tagName + " street=\"" + street + "\" house=\"" + house + "\" flat=\"" + flat + "\"/>";
     }
   }
@@ -506,7 +531,11 @@ public class GenerateInputFiles {
   private void printClient(int clientIndex, RowType rowType) throws Exception {
 
     List<String> tags = new ArrayList<>();
-    String goodSurname = null;
+    ClientDetails goodClient = new ClientDetails();
+    goodClient.addressF = new kz.greetgo.sandbox.controller.model.Address();
+    goodClient.addressR = new kz.greetgo.sandbox.controller.model.Address();
+    goodClient.charm = new Charm();
+    goodClient.phoneNumbers = new ArrayList<>();
 
     ErrorType errorType = null;
 
@@ -517,8 +546,8 @@ public class GenerateInputFiles {
       if (errorType == ErrorType.EMPTY_SURNAME) {
         tags.add("    <surname value=\"\"/>");
       } else {
-        goodSurname = nextSurname();
-        tags.add("    <surname value=\"" + goodSurname + "\"/>");
+        goodClient.surname = nextSurname();
+        tags.add("    <surname value=\"" + goodClient.surname + "\"/>");
       }
 
     }
@@ -528,7 +557,8 @@ public class GenerateInputFiles {
       if (errorType == ErrorType.EMPTY_NAME) {
         tags.add("    <name value=\"\"/>");
       } else {
-        tags.add("    <name value=\"" + nextName() + "\"/>");
+        goodClient.name = nextName();
+        tags.add("    <name value=\"" + goodClient.name + "\"/>");
       }
 
     }
@@ -549,11 +579,13 @@ public class GenerateInputFiles {
           date = RND.dateYears(-10, 0);
         }
 
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+
         if (date == null) {
           date = RND.dateYears(-100, -18);
+          goodClient.dateOfBirth = sdf.format(date);
         }
 
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
         tags.add("    <birth value=\"" + sdf.format(date) + "\"/>");
 
       }
@@ -565,30 +597,34 @@ public class GenerateInputFiles {
         break;
 
       case 2:
-        tags.add("    <patronymic value=\"" + spaces(random.nextInt(3)) + "\"/>");
+        goodClient.patronymic = spaces(random.nextInt(3));
+        tags.add("    <patronymic value=\"" + goodClient.patronymic + "\"/>");
         break;
 
       default:
-        tags.add("    <patronymic value=\"" + nextPatronymic() + "\"/>");
+        goodClient.patronymic = nextPatronymic();
+        tags.add("    <patronymic value=\"" + goodClient.patronymic + "\"/>");
         break;
     }
 
     tags.add("    <address>\n" +
-      "      " + Address.next().toTag("fact") + "\n" +
-      "      " + Address.next().toTag("register") + "\n" +
+      "      " + Address.next().toTag("fact", goodClient) + "\n" +
+      "      " + Address.next().toTag("register", goodClient) + "\n" +
       "    </address>"
     );
 
     if (errorType != ErrorType.NO_CHARM) {
-      tags.add("    <charm value=\"" + nextCharm() + "\"/>");
+      goodClient.charm.name = nextCharm();
+      tags.add("    <charm value=\"" + goodClient.charm.name + "\"/>");
     }
 
-    tags.add("    <gender value=\"" + (random.nextBoolean() ? "MALE" : "FEMALE") + "\"/>");
+    goodClient.gender = Gender.valueOf(random.nextBoolean() ? "MALE" : "FEMALE");
+    tags.add("    <gender value=\"" + goodClient.gender.toString() + "\"/>");
 
     {
       int phoneCount = 2 + random.nextInt(5);
       for (int i = 0; i < phoneCount; i++) {
-        tags.add("    " + Phone.next().tag(PhoneType.values()[random.nextInt(PhoneType.values().length)]));
+        tags.add("    " + Phone.next().tag(PhoneType.values()[random.nextInt(PhoneType.values().length)], goodClient));
       }
     }
 
@@ -627,7 +663,7 @@ public class GenerateInputFiles {
       if (rowType == RowType.ERROR) {
         info.newErrorClient();
       } else {
-        if (testMode && info.goodClientIds.contains(clientId)) lastGoodClientSurnames.put(clientId, goodSurname);
+        if (testMode && info.goodClientIds.contains(clientId)) lastGoodClients.put(clientId, goodClient);
         info.appendGoodClientId(clientId);
       }
 

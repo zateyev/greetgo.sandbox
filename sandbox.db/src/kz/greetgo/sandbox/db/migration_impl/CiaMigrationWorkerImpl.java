@@ -29,15 +29,6 @@ public class CiaMigrationWorkerImpl extends AbstractMigrationWorker {
   private String tmpAddrTable;
   private String tmpPhoneTable;
 
-//  public CiaMigrationWorkerImpl() {
-//    try {
-//      reportXlsx = new ReportXlsx(new FileOutputStream(migrationConfig.get().sqlReportDir() + "sqlReportCia.xlsx"));
-//      reportXlsx.start();
-//    } catch (FileNotFoundException e) {
-//      e.printStackTrace();
-//    }
-//  }
-
   @Override
   protected String r(String sql) {
     sql = sql.replaceAll("TMP_CLIENT", tmpClientTable);
@@ -67,6 +58,9 @@ public class CiaMigrationWorkerImpl extends AbstractMigrationWorker {
     //language=PostgreSQL
     exec("UPDATE TMP_CLIENT SET error = 'age of the client must be between 10 and 200'\n" +
       "WHERE error IS NULL AND date_part('year', age(birth_date)) NOT BETWEEN 10 AND 200");
+
+    //language=PostgreSQL
+    exec("UPDATE TMP_CLIENT SET status = 4 WHERE error IS NOT NULL");
 
 
     uploadErrors();
@@ -248,37 +242,17 @@ public class CiaMigrationWorkerImpl extends AbstractMigrationWorker {
 
 
     //language=PostgreSQL
-    exec("WITH num_ord AS (\n" +
-      "  SELECT number, cia_id, phone_number, row_number() OVER(PARTITION BY cia_id, phone_number ORDER BY number DESC) AS ord\n" +
-      "  FROM TMP_PHONE WHERE error ISNULL \n" +
-      ")\n" +
-      "\n" +
-      "UPDATE TMP_PHONE SET status = 2\n" +
-      "WHERE status = 0 AND error ISNULL AND number IN (SELECT number FROM num_ord WHERE ord > 1)");
+    exec("UPDATE TMP_PHONE tp SET status = tc.status FROM TMP_CLIENT tc WHERE \n" +
+      " tp.cia_id = cast(tc.number AS VARCHAR(32))");
 
     //language=PostgreSQL
-    exec("UPDATE TMP_PHONE tp SET client_id = cp.client\n" +
-      "  FROM client_phone cp\n" +
-      "  WHERE cp.cia_id = tp.cia_id AND tp.error ISNULL \n");
-
-    // marking what needs to be updated
-    //language=PostgreSQL
-    exec("UPDATE TMP_PHONE SET status = 3 WHERE client_id IS NOT NULL AND status = 0 AND error ISNULL");
-
-    // prepare to insertion
-    //language=PostgreSQL
-    exec("UPDATE TMP_PHONE ta SET client_id = c.id\n" +
-      "  FROM client c\n" +
-      "  WHERE c.cia_id = ta.cia_id AND ta.status = 0 AND ta.error ISNULL\n");
-
-    //
-    //language=PostgreSQL
-    exec("UPDATE TMP_PHONE SET status = 1 WHERE client_id IS NULL AND status = 0 AND error ISNULL");
+    exec("UPDATE TMP_PHONE tp SET client_id = tc.client_id FROM TMP_CLIENT tc WHERE \n" +
+      " tp.cia_id = cast(tc.number AS VARCHAR(32)) AND tc.status <> 4 AND tc.status <> 2");
 
     //language=PostgreSQL
     exec("INSERT INTO client_phone (client, number, type, cia_id)\n" +
       "SELECT client_id, phone_number, type, cia_id\n" +
-      "FROM TMP_PHONE WHERE status = 0 AND error ISNULL");
+      "FROM TMP_PHONE WHERE status = 0");
 
     //language=PostgreSQL
     exec("UPDATE client_phone cp SET number = tp.phone_number\n" +
@@ -292,9 +266,6 @@ public class CiaMigrationWorkerImpl extends AbstractMigrationWorker {
     exec("UPDATE client_phone SET actual = 1 WHERE client IN (\n" +
       "  SELECT client_id FROM TMP_PHONE WHERE status = 0\n" +
       ")");
-
-    //send report by ssh
-
   }
 
   public static void main(String[] args) {
@@ -355,8 +326,8 @@ public class CiaMigrationWorkerImpl extends AbstractMigrationWorker {
       connection.setAutoCommit(false);
 
       try (CiaTableWorker ciaTableWorker = new CiaTableWorker(connection, maxBatchSize, tmpClientTable, tmpAddrTable, tmpPhoneTable)) {
-        CiaParser ciaParser = new CiaParser(tarInput, ciaTableWorker);
-        recordsCount += ciaParser.parseAndSave();
+        CiaParser ciaParser = new CiaParser(tarInput, ciaTableWorker, recordsCount);
+        recordsCount = ciaParser.parseAndSave();
       } finally {
         connection.setAutoCommit(true);
       }

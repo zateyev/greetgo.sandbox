@@ -25,9 +25,10 @@ public class CiaParser extends SaxHandler {
 
   private int recordsCount;
 
-  public CiaParser(InputStream inputStream, CiaTableWorker ciaTableWorker) throws SQLException {
+  public CiaParser(InputStream inputStream, CiaTableWorker ciaTableWorker, int recordsCount) throws SQLException {
     this.inputStream = inputStream;
     this.ciaTableWorker = ciaTableWorker;
+    this.recordsCount = recordsCount;
   }
 
   public int parseAndSave() throws SAXException, IOException, SQLException {
@@ -108,7 +109,7 @@ public class CiaParser extends SaxHandler {
     switch (path) {
       case "/cia/client/workPhone": {
         PhoneNumber phoneNumber = new PhoneNumber("WORK");
-        phoneNumber.cia_id = client.cia_id;
+        phoneNumber.cia_id = String.valueOf(recordsCount);
         phoneNumber.number = text();
         sendTo(ciaTableWorker::addToBatch, phoneNumber);
         return;
@@ -116,7 +117,7 @@ public class CiaParser extends SaxHandler {
 
       case "/cia/client/mobilePhone": {
         PhoneNumber phoneNumber = new PhoneNumber("MOBILE");
-        phoneNumber.cia_id = client.cia_id;
+        phoneNumber.cia_id = String.valueOf(recordsCount);
         phoneNumber.number = text();
         sendTo(ciaTableWorker::addToBatch, phoneNumber);
         return;
@@ -124,7 +125,7 @@ public class CiaParser extends SaxHandler {
 
       case "/cia/client/homePhone": {
         PhoneNumber phoneNumber = new PhoneNumber("HOME");
-        phoneNumber.cia_id = client.cia_id;
+        phoneNumber.cia_id = String.valueOf(recordsCount);
         phoneNumber.number = text();
         sendTo(ciaTableWorker::addToBatch, phoneNumber);
         return;

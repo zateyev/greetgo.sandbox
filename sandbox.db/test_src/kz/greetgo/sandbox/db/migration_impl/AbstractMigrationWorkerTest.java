@@ -1,6 +1,8 @@
 package kz.greetgo.sandbox.db.migration_impl;
 
 import kz.greetgo.depinject.core.BeanGetter;
+import kz.greetgo.sandbox.controller.model.AddressType;
+import kz.greetgo.sandbox.controller.model.ClientDetails;
 import kz.greetgo.sandbox.db.configs.MigrationConfig;
 import kz.greetgo.sandbox.db.input_file_generator.GenerateInputFiles;
 import kz.greetgo.sandbox.db.test.dao.CharmTestDao;
@@ -13,6 +15,7 @@ import org.testng.annotations.Test;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.LineNumberReader;
+import java.util.Comparator;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
@@ -51,7 +54,7 @@ public class AbstractMigrationWorkerTest extends ParentTestNg {
     //
     //
 
-    long clientCount = clientTestDao.get().countOfClients(null, null);
+    long clientCount = clientTestDao.get().getClientCount();
 
     assertThat(clientCount).isEqualTo(fileGenerator.getGoodClientCount());
   }
@@ -80,7 +83,7 @@ public class AbstractMigrationWorkerTest extends ParentTestNg {
     clientTestDao.get().removeAllData();
     charmTestDao.get().removeAllData();
 
-    Map<String, String> lastGoodClientSurnamesFromDuplicates = fileGenerator.getLastGoodClientSurnames();
+    Map<String, ClientDetails> lastGoodClientsFromDuplicates = fileGenerator.getLastGoodClients();
 
 
     //
@@ -90,9 +93,13 @@ public class AbstractMigrationWorkerTest extends ParentTestNg {
     //
 
     int i = 0;
-    for (Map.Entry<String, String> lastClientEntry : lastGoodClientSurnamesFromDuplicates.entrySet()) {
-      String clientSurname = clientTestDao.get().getClientSurnameByCiaId(lastClientEntry.getKey());
-      assertThat(Objects.equals(lastClientEntry.getValue().trim(), clientSurname.trim())).isTrue();
+    for (Map.Entry<String, ClientDetails> lastClientEntry : lastGoodClientsFromDuplicates.entrySet()) {
+      ClientDetails actualClientDetails = clientTestDao.get().getClientDetailsByCiaId(lastClientEntry.getKey());
+      actualClientDetails.addressF = clientTestDao.get().selectAddrByClientId(actualClientDetails.id, AddressType.FACT);
+      actualClientDetails.addressR = clientTestDao.get().selectAddrByClientId(actualClientDetails.id, AddressType.REG);
+      actualClientDetails.phoneNumbers = clientTestDao.get().getPhonesByClientId(actualClientDetails.id);
+
+      assertThatAreEqual(actualClientDetails, lastClientEntry.getValue());
       if (++i > 10) break;
     }
   }
@@ -142,5 +149,27 @@ public class AbstractMigrationWorkerTest extends ParentTestNg {
       e.printStackTrace();
     }
     return 0;
+  }
+
+  private void assertThatAreEqual(ClientDetails actual, ClientDetails expected) {
+    assertThat(actual.surname).isEqualTo(expected.surname);
+    assertThat(actual.name).isEqualTo(expected.name);
+    assertThat(actual.patronymic).isEqualTo(expected.patronymic);
+    assertThat(actual.gender).isEqualTo(expected.gender);
+    assertThat(actual.dateOfBirth).isEqualTo(expected.dateOfBirth);
+    assertThat(actual.charm.name).isEqualTo(expected.charm.name);
+    assertThat(actual.addressF.street).isEqualTo(expected.addressF.street);
+    assertThat(actual.addressF.house).isEqualTo(expected.addressF.house);
+    assertThat(actual.addressF.flat).isEqualTo(expected.addressF.flat);
+    assertThat(actual.addressR.street).isEqualTo(expected.addressR.street);
+    assertThat(actual.addressR.house).isEqualTo(expected.addressR.house);
+    assertThat(actual.addressR.flat).isEqualTo(expected.addressR.flat);
+    actual.phoneNumbers.sort(Comparator.comparing(phoneNumber -> phoneNumber.number.toLowerCase()));
+    expected.phoneNumbers.sort(Comparator.comparing(phoneNumber -> phoneNumber.number.toLowerCase()));
+    assertThat(actual.phoneNumbers).hasSize(expected.phoneNumbers.size());
+    for (int i = 0; i < actual.phoneNumbers.size(); i++) {
+      assertThat(actual.phoneNumbers.get(i).number).isEqualTo(expected.phoneNumbers.get(i).number);
+      assertThat(actual.phoneNumbers.get(i).phoneType).isEqualTo(expected.phoneNumbers.get(i).phoneType);
+    }
   }
 }
