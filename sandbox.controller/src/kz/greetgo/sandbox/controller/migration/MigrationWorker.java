@@ -1,5 +1,5 @@
 package kz.greetgo.sandbox.controller.migration;
 
-public interface CiaMigrationWorker {
+public interface MigrationWorker {
   int migrate() throws Exception;
 }

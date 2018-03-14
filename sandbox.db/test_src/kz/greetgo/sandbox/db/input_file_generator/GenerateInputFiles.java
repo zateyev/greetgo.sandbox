@@ -1,6 +1,10 @@
 package kz.greetgo.sandbox.db.input_file_generator;
 
+import kz.greetgo.sandbox.controller.model.*;
+import kz.greetgo.sandbox.db.migration_impl.model.Account;
+import kz.greetgo.sandbox.db.migration_impl.model.Transaction;
 import kz.greetgo.util.RND;
+import org.apache.commons.io.FileUtils;
 
 import java.io.File;
 import java.io.IOException;
@@ -10,15 +14,7 @@ import java.math.RoundingMode;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Collections;
-import java.util.Date;
-import java.util.GregorianCalendar;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Random;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
@@ -27,11 +23,25 @@ import java.util.stream.Collectors;
 
 public class GenerateInputFiles {
 
-  public static final int CIA_LIMIT = 1_000_000;
-  public static final int FRS_LIMIT = 10_000_000;
+  private final int CIA_LIMIT;
+  private final int FRS_LIMIT;
+
+  private Map<String, ClientDetails> lastGoodClients;
+  private Map<String, kz.greetgo.sandbox.db.migration_impl.model.Account> clientAccounts;
+  private Map<String, Transaction> accountTransactions;
+  private boolean testMode;
+
+  public GenerateInputFiles(int CIA_LIMIT, int FRS_LIMIT) {
+    this.CIA_LIMIT = CIA_LIMIT;
+    this.FRS_LIMIT = FRS_LIMIT;
+
+    lastGoodClients = new HashMap<>();
+    clientAccounts = new HashMap<>();
+    accountTransactions = new HashMap<>();
+  }
 
   public static void main(String[] args) throws Exception {
-    new GenerateInputFiles().execute();
+    new GenerateInputFiles(1_000_000, 10_000_000).execute();
   }
 
   private static final String ENG = "abcdefghijklmnopqrstuvwxyz";
@@ -41,6 +51,42 @@ public class GenerateInputFiles {
   private static final char[] BIG = (ENG.toUpperCase() + DEG).toCharArray();
 
   private static final Random random = new Random();
+
+  public Set<String> getGoodClientIds() {
+    return info.goodClientIds;
+  }
+
+  public Map<String, ClientDetails> getLastGoodClients() {
+    return lastGoodClients;
+  }
+
+  public long getGoodClientCount() {
+    return info.goodClientIds.size();
+  }
+
+  public long getTransactionCount() {
+    return info.transactionCount;
+  }
+
+  public long getAccountCount() {
+    return info.accountCount;
+  }
+
+  public int getErrorRecordCount() {
+    return info.clientErrorRecordCount;
+  }
+
+  public void setTestMode() {
+    this.testMode = true;
+  }
+
+  public Map<String, kz.greetgo.sandbox.db.migration_impl.model.Account> getClientAccounts() {
+    return clientAccounts;
+  }
+
+  public Map<String, Transaction> getAccountTransactions() {
+    return accountTransactions;
+  }
 
   private static class Info {
 
@@ -231,7 +277,8 @@ public class GenerateInputFiles {
   String outFileName;
   File outFile;
 
-  private void execute() throws Exception {
+  public void execute() throws Exception {
+    FileUtils.cleanDirectory(new File(DIR));
 
     rowTypeRnd.showInfo();
     errorTypeRnd.showInfo();
@@ -437,8 +484,21 @@ public class GenerateInputFiles {
       }
     }
 
-    String tag(PhoneType type) {
+    String tag(PhoneType type, ClientDetails goodClient) {
       if (type == null || number == null) return null;
+      PhoneNumber phoneNumber = new PhoneNumber();
+      switch (type) {
+        case homePhone:
+          phoneNumber.phoneType = kz.greetgo.sandbox.controller.model.PhoneType.HOME;
+          break;
+        case workPhone:
+          phoneNumber.phoneType = kz.greetgo.sandbox.controller.model.PhoneType.WORK;
+          break;
+        case mobilePhone:
+          phoneNumber.phoneType = kz.greetgo.sandbox.controller.model.PhoneType.MOBILE;
+      }
+      phoneNumber.number = number;
+      goodClient.phoneNumbers.add(phoneNumber);
       return "<" + type.name() + ">" + number + "</" + type.name() + ">";
     }
   }
@@ -454,7 +514,18 @@ public class GenerateInputFiles {
       return ret;
     }
 
-    String toTag(String tagName) {
+    String toTag(String tagName, ClientDetails goodClient) {
+      if ("fact".equals(tagName)) {
+        goodClient.addressF.type = AddressType.FACT;
+        goodClient.addressF.street = street;
+        goodClient.addressF.house = house;
+        goodClient.addressF.flat = flat;
+      } else {
+        goodClient.addressR.type = AddressType.REG;
+        goodClient.addressR.street = street;
+        goodClient.addressR.house = house;
+        goodClient.addressR.flat = flat;
+      }
       return "<" + tagName + " street=\"" + street + "\" house=\"" + house + "\" flat=\"" + flat + "\"/>";
     }
   }
@@ -474,6 +545,11 @@ public class GenerateInputFiles {
   private void printClient(int clientIndex, RowType rowType) throws Exception {
 
     List<String> tags = new ArrayList<>();
+    ClientDetails goodClient = new ClientDetails();
+    goodClient.addressF = new kz.greetgo.sandbox.controller.model.Address();
+    goodClient.addressR = new kz.greetgo.sandbox.controller.model.Address();
+    goodClient.charm = new Charm();
+    goodClient.phoneNumbers = new ArrayList<>();
 
     ErrorType errorType = null;
 
@@ -484,7 +560,8 @@ public class GenerateInputFiles {
       if (errorType == ErrorType.EMPTY_SURNAME) {
         tags.add("    <surname value=\"\"/>");
       } else {
-        tags.add("    <surname value=\"" + nextSurname() + "\"/>");
+        goodClient.surname = nextSurname();
+        tags.add("    <surname value=\"" + goodClient.surname + "\"/>");
       }
 
     }
@@ -494,7 +571,8 @@ public class GenerateInputFiles {
       if (errorType == ErrorType.EMPTY_NAME) {
         tags.add("    <name value=\"\"/>");
       } else {
-        tags.add("    <name value=\"" + nextName() + "\"/>");
+        goodClient.name = nextName();
+        tags.add("    <name value=\"" + goodClient.name + "\"/>");
       }
 
     }
@@ -515,11 +593,13 @@ public class GenerateInputFiles {
           date = RND.dateYears(-10, 0);
         }
 
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+
         if (date == null) {
           date = RND.dateYears(-100, -18);
+          goodClient.dateOfBirth = sdf.format(date);
         }
 
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
         tags.add("    <birth value=\"" + sdf.format(date) + "\"/>");
 
       }
@@ -531,30 +611,34 @@ public class GenerateInputFiles {
         break;
 
       case 2:
-        tags.add("    <patronymic value=\"" + spaces(random.nextInt(3)) + "\"/>");
+        goodClient.patronymic = spaces(random.nextInt(3));
+        tags.add("    <patronymic value=\"" + goodClient.patronymic + "\"/>");
         break;
 
       default:
-        tags.add("    <patronymic value=\"" + nextPatronymic() + "\"/>");
+        goodClient.patronymic = nextPatronymic();
+        tags.add("    <patronymic value=\"" + goodClient.patronymic + "\"/>");
         break;
     }
 
     tags.add("    <address>\n" +
-      "      " + Address.next().toTag("fact") + "\n" +
-      "      " + Address.next().toTag("register") + "\n" +
+      "      " + Address.next().toTag("fact", goodClient) + "\n" +
+      "      " + Address.next().toTag("register", goodClient) + "\n" +
       "    </address>"
     );
 
     if (errorType != ErrorType.NO_CHARM) {
-      tags.add("    <charm value=\"" + nextCharm() + "\"/>");
+      goodClient.charm.name = nextCharm();
+      tags.add("    <charm value=\"" + goodClient.charm.name + "\"/>");
     }
 
-    tags.add("    <gender value=\"" + (random.nextBoolean() ? "MALE" : "FEMALE") + "\"/>");
+    goodClient.gender = Gender.valueOf(random.nextBoolean() ? "MALE" : "FEMALE");
+    tags.add("    <gender value=\"" + goodClient.gender.toString() + "\"/>");
 
     {
       int phoneCount = 2 + random.nextInt(5);
       for (int i = 0; i < phoneCount; i++) {
-        tags.add("    " + Phone.next().tag(PhoneType.values()[random.nextInt(PhoneType.values().length)]));
+        tags.add("    " + Phone.next().tag(PhoneType.values()[random.nextInt(PhoneType.values().length)], goodClient));
       }
     }
 
@@ -593,6 +677,7 @@ public class GenerateInputFiles {
       if (rowType == RowType.ERROR) {
         info.newErrorClient();
       } else {
+        if (testMode && info.goodClientIds.contains(clientId)) lastGoodClients.put(clientId, goodClient);
         info.appendGoodClientId(clientId);
       }
 
@@ -678,7 +763,7 @@ public class GenerateInputFiles {
       String type;
       BigDecimal money;
 
-      String toJson() {
+      String toJson(kz.greetgo.sandbox.db.migration_impl.model.Transaction transaction) {
 
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS");
 
@@ -688,6 +773,11 @@ public class GenerateInputFiles {
         pairs.add("'finished_at':'" + sdf.format(finishedAt) + "'");
         pairs.add("'transaction_type':'" + type + "'");
         pairs.add("'account_number':'" + number + "'");
+
+        transaction.money = money;
+        transaction.accountNumber = number;
+        transaction.transactionType = type;
+        transaction.finishedAt = sdf.format(finishedAt);
 
         Collections.shuffle(pairs);
 
@@ -822,13 +912,22 @@ public class GenerateInputFiles {
     records.add(account.toJson());
     info.newAccount();
 
+    kz.greetgo.sandbox.db.migration_impl.model.Account newAccount = new kz.greetgo.sandbox.db.migration_impl.model.Account();
+    newAccount.accountNumber = account.number;
+    newAccount.registeredAt = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS").format(account.registeredAt);
+    clientAccounts.put(clientId, newAccount);
+
+
+    Transaction transaction = new Transaction();
+
     int count = 2 + random.nextInt(10);
     for (int i = 0; i < count; i++) {
-      records.add(account.addTransaction(rowIndex, false).toJson());
+      records.add(account.addTransaction(rowIndex, false).toJson(transaction));
       info.newTransaction();
     }
-    records.add(account.addTransaction(rowIndex, true).toJson());
+    records.add(account.addTransaction(rowIndex, true).toJson(transaction));
     info.newTransaction();
+    accountTransactions.put(clientId, transaction);
 
     Collections.shuffle(records);
 

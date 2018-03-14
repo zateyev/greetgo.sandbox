@@ -1,17 +1,15 @@
 package kz.greetgo.sandbox.db.migration_impl;
 
+import com.jcraft.jsch.SftpException;
 import kz.greetgo.depinject.core.Bean;
-import kz.greetgo.depinject.core.BeanGetter;
-import kz.greetgo.sandbox.controller.migration.CiaMigrationWorker;
-import kz.greetgo.sandbox.db.configs.DbConfig;
-import kz.greetgo.sandbox.db.configs.MigrationConfig;
-import kz.greetgo.sandbox.db.util.LocalConfigFactory;
+import kz.greetgo.sandbox.db.migration_impl.report.ReportXlsx;
+import kz.greetgo.sandbox.db.ssh.SshConnection;
 import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
 import org.apache.commons.compress.archivers.tar.TarArchiveInputStream;
 import org.apache.commons.compress.compressors.bzip2.BZip2CompressorInputStream;
-import org.xml.sax.SAXException;
 
-import java.io.FileInputStream;
+import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.sql.DriverManager;
@@ -19,72 +17,17 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.List;
-import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.*;
 
 import static kz.greetgo.sandbox.db.util.TimeUtils.recordsPerSecond;
 import static kz.greetgo.sandbox.db.util.TimeUtils.showTime;
 
 @Bean
-public class CiaMigrationWorkerImpl extends AbstractMigrationWorker implements CiaMigrationWorker {
-
-  public BeanGetter<DbConfig> dbConfig;
+public class CiaMigrationWorkerImpl extends AbstractMigrationWorker {
 
   private String tmpClientTable;
   private String tmpAddrTable;
   private String tmpPhoneTable;
-
-  @Override
-  public int migrate() throws Exception {
-    long startedAt = System.nanoTime();
-
-//    SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd_HHmmss");
-    SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd");
-    Date nowDate = new Date();
-    tmpClientTable = "cia_migration_client_" + sdf.format(nowDate);
-    tmpAddrTable = "cia_migration_addr_" + sdf.format(nowDate);
-    tmpPhoneTable = "cia_migration_phone_" + sdf.format(nowDate);
-    info("TMP_CLIENT = " + tmpClientTable);
-    info("TMP_ADDR = " + tmpAddrTable);
-    info("TMP_PHONE = " + tmpPhoneTable);
-
-
-    createPostgresConnection();
-    dropTmpTables();
-    createTmpTables();
-
-    int recordsSize = download();
-
-    {
-      long now = System.nanoTime();
-      info("Downloading of portion " + recordsSize + " finished for " + showTime(now, startedAt));
-    }
-
-//    if (recordsSize == 0) return 0;
-
-    outError = new FileOutputStream("build/files_to_send/errors.txt");
-    handleErrors();
-
-    migrateFromTmp();
-
-    String message;
-    {
-      long now = System.nanoTime();
-      message = "Migration of portion " + recordsSize + " finished for " + showTime(now, startedAt);
-      info(message);
-    }
-
-    outError.write(sdf.format(new Date()).getBytes());
-    outError.write(" [INFO] ".getBytes());
-    outError.write(message.getBytes());
-    outError.close();
-
-    closePostgresConnection();
-    super.close();
-
-    return recordsSize;
-  }
 
   @Override
   protected String r(String sql) {
@@ -99,7 +42,7 @@ public class CiaMigrationWorkerImpl extends AbstractMigrationWorker implements C
     exec("DROP TABLE IF EXISTS TMP_CLIENT, TMP_ADDR, TMP_PHONE");
   }
 
-  protected void handleErrors() throws SQLException, IOException {
+  protected void handleErrors() throws SQLException, IOException, SftpException {
     //language=PostgreSQL
     exec("UPDATE TMP_CLIENT SET error = 'surname is not defined' " +
       "WHERE error IS NULL AND (surname <> '') IS NOT TRUE");
@@ -116,19 +59,17 @@ public class CiaMigrationWorkerImpl extends AbstractMigrationWorker implements C
     exec("UPDATE TMP_CLIENT SET error = 'age of the client must be between 10 and 200'\n" +
       "WHERE error IS NULL AND date_part('year', age(birth_date)) NOT BETWEEN 10 AND 200");
 
+    //language=PostgreSQL
+    exec("UPDATE TMP_CLIENT SET status = 4 WHERE error IS NOT NULL");
 
-    uploadAndDropErrors();
+
+    uploadErrors();
   }
 
-  public static void main(String[] args) throws IOException, SAXException, InterruptedException {
-    LocalConfigFactory localConfigFactory = new LocalConfigFactory() {};
-    MigrationConfig config = localConfigFactory.createConfig(MigrationConfig.class);
-    System.out.println(localConfigFactory);
-    int maxBatchSize = config.maxBatchSize();
-    System.out.println("maxBatchSize " + maxBatchSize);
-  }
+  protected void uploadErrors() throws SQLException, IOException, SftpException {
 
-  protected void uploadAndDropErrors() throws SQLException, IOException {
+    File errFile = new File(migrationConfig.get().outErrorFile());
+    outError = new FileOutputStream(errFile);
 
     // create report about errors and send by ssh
     try (PreparedStatement errorPs = connection.prepareStatement(r("SELECT cia_id, error FROM TMP_CLIENT WHERE error IS NOT NULL"))) {
@@ -141,13 +82,25 @@ public class CiaMigrationWorkerImpl extends AbstractMigrationWorker implements C
           outError.write("\n".getBytes());
         }
       }
+    } finally {
+      outError.close();
+      sshConnection.upload(errFile);
     }
 
     //language=PostgreSQL
-    exec("DELETE FROM TMP_CLIENT WHERE error IS NOT NULL");
+//    exec("DELETE FROM TMP_CLIENT WHERE error IS NOT NULL");
   }
 
   protected void createTmpTables() throws SQLException {
+    SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd_HHmmss");
+    Date nowDate = new Date();
+    tmpClientTable = "cia_migration_client_" + sdf.format(nowDate);
+    tmpAddrTable = "cia_migration_addr_" + sdf.format(nowDate);
+    tmpPhoneTable = "cia_migration_phone_" + sdf.format(nowDate);
+    info("TMP_CLIENT = " + tmpClientTable);
+    info("TMP_ADDR = " + tmpAddrTable);
+    info("TMP_PHONE = " + tmpPhoneTable);
+
     //language=PostgreSQL
     exec("CREATE TABLE TMP_CLIENT (\n" +
       "        cia_id VARCHAR(32),\n" +
@@ -190,38 +143,38 @@ public class CiaMigrationWorkerImpl extends AbstractMigrationWorker implements C
       "      )");
   }
 
-  protected long migrateFromTmp() throws Exception {
+  protected void migrateFromTmp() throws Exception {
     //marking duplicates
     //language=PostgreSQL
     exec("WITH num_ord AS (\n" +
       "  SELECT number, cia_id, row_number() OVER(PARTITION BY cia_id ORDER BY number DESC) AS ord \n" +
-      "  FROM TMP_CLIENT\n" +
+      "  FROM TMP_CLIENT WHERE error ISNULL\n" +
       ")\n" +
       "\n" +
       "UPDATE TMP_CLIENT SET status = 2\n" +
-      "WHERE status = 0 AND number IN (SELECT number FROM num_ord WHERE ord > 1)");
+      "WHERE status = 0 AND error ISNULL AND number IN (SELECT number FROM num_ord WHERE ord > 1)");
 
     //language=PostgreSQL
     exec("UPDATE TMP_CLIENT t SET client_id = c.id\n" +
       "  FROM client c\n" +
-      "  WHERE c.cia_id = t.cia_id\n");
+      "  WHERE c.cia_id = t.cia_id AND t.error ISNULL \n");
 
     //language=PostgreSQL
-    exec("UPDATE TMP_CLIENT SET status = 3 WHERE client_id IS NOT NULL AND status = 0");
+    exec("UPDATE TMP_CLIENT SET status = 3 WHERE client_id IS NOT NULL AND status = 0 AND error ISNULL ");
 
     //language=PostgreSQL
-    exec("UPDATE TMP_CLIENT SET client_id = nextval('s_client') WHERE status = 0");
+    exec("UPDATE TMP_CLIENT SET client_id = nextval('s_client') WHERE status = 0 AND error ISNULL ");
 
     //inserting new charms
     //language=PostgreSQL
     exec("INSERT INTO charm (id, name)\n" +
       "SELECT nextval('s_client'), charm_name\n" +
-      "FROM TMP_CLIENT tcl WHERE tcl.status = 0 ON CONFLICT (name) DO NOTHING");
+      "FROM TMP_CLIENT tcl WHERE tcl.status = 0 AND tcl.error ISNULL ON CONFLICT (name) DO NOTHING");
 
     //language=PostgreSQL
     exec("INSERT INTO client (id, cia_id, surname, \"name\", patronymic, gender, birth_date, charm)\n" +
       "SELECT client_id, tcl.cia_id, surname, tcl.name, patronymic, gender, birth_date, ch.id\n" +
-      "FROM TMP_CLIENT tcl LEFT JOIN charm ch ON tcl.charm_name = ch.name WHERE tcl.status = 0");
+      "FROM TMP_CLIENT tcl LEFT JOIN charm ch ON tcl.charm_name = ch.name WHERE tcl.status = 0 AND tcl.error ISNULL");
 
     //language=PostgreSQL
     exec("UPDATE client c SET cia_id = tc.cia_id\n" +
@@ -244,33 +197,33 @@ public class CiaMigrationWorkerImpl extends AbstractMigrationWorker implements C
     //language=PostgreSQL
     exec("WITH num_ord AS (\n" +
       "  SELECT number, cia_id, type, row_number() OVER(PARTITION BY cia_id, type ORDER BY number DESC) AS ord\n" +
-      "  FROM TMP_ADDR\n" +
+      "  FROM TMP_ADDR WHERE error ISNULL \n" +
       ")\n" +
       "\n" +
       "UPDATE TMP_ADDR SET status = 2\n" +
-      "WHERE status = 0 AND number IN (SELECT number FROM num_ord WHERE ord > 1)");
+      "WHERE status = 0 AND error ISNULL AND number IN (SELECT number FROM num_ord WHERE ord > 1)");
 
     //language=PostgreSQL
     exec("UPDATE TMP_ADDR t SET client_id = ca.client\n" +
       "  FROM client_addr ca\n" +
-      "  WHERE ca.cia_id = t.cia_id\n");
+      "  WHERE ca.cia_id = t.cia_id AND t.error ISNULL \n");
 
     //language=PostgreSQL
-    exec("UPDATE TMP_ADDR SET status = 3 WHERE client_id IS NOT NULL AND status = 0");
+    exec("UPDATE TMP_ADDR SET status = 3 WHERE client_id IS NOT NULL AND status = 0 AND error ISNULL");
 
     //language=PostgreSQL
     exec("UPDATE TMP_ADDR ta SET client_id = c.id\n" +
       "  FROM client c\n" +
-      "  WHERE c.cia_id = ta.cia_id AND ta.status = 0\n");
+      "  WHERE c.cia_id = ta.cia_id AND ta.status = 0 AND ta.error ISNULL \n");
 
     //
     //language=PostgreSQL
-    exec("UPDATE TMP_ADDR SET status = 1 WHERE client_id IS NULL AND status = 0");
+    exec("UPDATE TMP_ADDR SET status = 1 WHERE client_id IS NULL AND status = 0 AND error ISNULL");
 
     //language=PostgreSQL
     exec("INSERT INTO CLIENT_ADDR (client, type, street, house, flat, cia_id)\n" +
       "SELECT client_id, type, street, house, flat, cia_id\n" +
-      "FROM TMP_ADDR WHERE status = 0");
+      "FROM TMP_ADDR WHERE status = 0 AND error ISNULL");
 
     //language=PostgreSQL
     exec("UPDATE client_addr ca SET type = ta.type\n" +
@@ -284,37 +237,17 @@ public class CiaMigrationWorkerImpl extends AbstractMigrationWorker implements C
 
     //language=PostgreSQL
     exec("UPDATE client_addr SET actual = 1 WHERE client IN (\n" +
-      "  SELECT client_id FROM TMP_ADDR WHERE status = 0\n" +
+      "  SELECT client_id FROM TMP_ADDR WHERE status = 0 AND error ISNULL\n" +
       ")");
 
 
     //language=PostgreSQL
-    exec("WITH num_ord AS (\n" +
-      "  SELECT number, cia_id, phone_number, row_number() OVER(PARTITION BY cia_id, phone_number ORDER BY number DESC) AS ord\n" +
-      "  FROM TMP_PHONE\n" +
-      ")\n" +
-      "\n" +
-      "UPDATE TMP_PHONE SET status = 2\n" +
-      "WHERE status = 0 AND number IN (SELECT number FROM num_ord WHERE ord > 1)");
+    exec("UPDATE TMP_PHONE tp SET status = tc.status FROM TMP_CLIENT tc WHERE \n" +
+      " tp.cia_id = cast(tc.number AS VARCHAR(32))");
 
     //language=PostgreSQL
-    exec("UPDATE TMP_PHONE tp SET client_id = cp.client\n" +
-      "  FROM client_phone cp\n" +
-      "  WHERE cp.cia_id = tp.cia_id\n");
-
-    // marking what needs to be updated
-    //language=PostgreSQL
-    exec("UPDATE TMP_PHONE SET status = 3 WHERE client_id IS NOT NULL AND status = 0");
-
-    // prepare to insertion
-    //language=PostgreSQL
-    exec("UPDATE TMP_PHONE ta SET client_id = c.id\n" +
-      "  FROM client c\n" +
-      "  WHERE c.cia_id = ta.cia_id AND ta.status = 0\n");
-
-    //
-    //language=PostgreSQL
-    exec("UPDATE TMP_PHONE SET status = 1 WHERE client_id IS NULL AND status = 0");
+    exec("UPDATE TMP_PHONE tp SET client_id = tc.client_id FROM TMP_CLIENT tc WHERE \n" +
+      " tp.cia_id = cast(tc.number AS VARCHAR(32)) AND tc.status <> 4 AND tc.status <> 2");
 
     //language=PostgreSQL
     exec("INSERT INTO client_phone (client, number, type, cia_id)\n" +
@@ -333,13 +266,41 @@ public class CiaMigrationWorkerImpl extends AbstractMigrationWorker implements C
     exec("UPDATE client_phone SET actual = 1 WHERE client IN (\n" +
       "  SELECT client_id FROM TMP_PHONE WHERE status = 0\n" +
       ")");
-
-    //send report by ssh
-
-    return 0;
   }
 
-  private void createPostgresConnection() throws Exception {
+  public static void main(String[] args) {
+    Set<String> set1 = new HashSet<>();
+    Set<String> set2 = new HashSet<>();
+    set1.add("asd7asd");
+    set1.add("asdTasd");
+    set1.add("asdRasd");
+    set1.add("asd3asd");
+
+    set2.add("asd3asd");
+    set2.add("asdTasd");
+    set2.add("asdRasd");
+    StringBuilder sb = new StringBuilder();
+    sb.append("asd").append(7).append("asd");
+    set2.add(sb.toString());
+
+    System.out.println(Objects.equals(set1, set2));
+  }
+
+  @Override
+  protected void createConnections() throws Exception {
+    try {
+      reportXlsx = new ReportXlsx(new FileOutputStream(migrationConfig.get().sqlReportDir() + "sqlReportCia.xlsx"));
+      reportXlsx.start();
+    } catch (FileNotFoundException e) {
+      e.printStackTrace();
+    }
+
+    sshConnection = new SshConnection(migrationConfig.get().sshHomePath());
+    sshConnection.createSshConnection(migrationConfig.get().sshUser(),
+      migrationConfig.get().sshPassword(),
+      migrationConfig.get().sshHost(),
+      migrationConfig.get().sshPort());
+
     connection = DriverManager.getConnection(
       dbConfig.get().url(),
       dbConfig.get().username(),
@@ -352,52 +313,23 @@ public class CiaMigrationWorkerImpl extends AbstractMigrationWorker implements C
     // get file, read all files iteratively
     List<String> fileDirToLoad = renameFiles(".xml.tar.bz2");
     int recordsCount = 0;
+    long downloadingStartedAt = System.nanoTime();
 
     for (String fileName : fileDirToLoad) {
-      inputStream = new FileInputStream(fileName);
+      inputStream = sshConnection.download(fileName);
       TarArchiveInputStream tarInput = new TarArchiveInputStream(new BZip2CompressorInputStream(inputStream));
       TarArchiveEntry currentEntry = tarInput.getNextTarEntry();
 
-      final AtomicBoolean working = new AtomicBoolean(true);
-      final AtomicBoolean showStatus = new AtomicBoolean(false);
-
-      final Thread see = new Thread(() -> {
-
-        while (working.get()) {
-
-          try {
-            Thread.sleep(showStatusPingMillis);
-          } catch (InterruptedException e) {
-            break;
-          }
-
-          showStatus.set(true);
-
-        }
-
-      });
-      see.start();
-
       long startedAt = System.nanoTime();
 
-      // parse xml and insert into tmp tables
+      maxBatchSize = migrationConfig.get().maxBatchSize();
       connection.setAutoCommit(false);
 
-      maxBatchSize = migrationConfig.get().maxBatchSize();
-
       try (CiaTableWorker ciaTableWorker = new CiaTableWorker(connection, maxBatchSize, tmpClientTable, tmpAddrTable, tmpPhoneTable)) {
-        CiaParser ciaParser = new CiaParser(tarInput, ciaTableWorker);
-        recordsCount += ciaParser.parseAndSave();
+        CiaParser ciaParser = new CiaParser(tarInput, ciaTableWorker, recordsCount);
+        recordsCount = ciaParser.parseAndSave();
       } finally {
         connection.setAutoCommit(true);
-      }
-
-      if (showStatus.get()) {
-        showStatus.set(false);
-
-        long now = System.nanoTime();
-        info(" -- downloaded records " + recordsCount + " for " + showTime(now, startedAt)
-          + " : " + recordsPerSecond(recordsCount, now - startedAt));
       }
 
       {
@@ -408,6 +340,12 @@ public class CiaMigrationWorkerImpl extends AbstractMigrationWorker implements C
 
       inputStream.close();
 
+    }
+
+    {
+      long now = System.nanoTime();
+      info("TOTAL Downloaded records " + recordsCount + " for " + showTime(now, downloadingStartedAt)
+        + " : " + recordsPerSecond(recordsCount, now - downloadingStartedAt));
     }
 
     return recordsCount;

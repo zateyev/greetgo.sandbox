@@ -1,15 +1,16 @@
 package kz.greetgo.sandbox.db.test.dao;
 
 import kz.greetgo.sandbox.controller.model.*;
+import kz.greetgo.sandbox.db.migration_impl.model.Account;
+import kz.greetgo.sandbox.db.migration_impl.model.Transaction;
 import org.apache.ibatis.annotations.*;
 
 import java.time.OffsetDateTime;
 import java.util.Date;
 import java.util.List;
+import java.util.Set;
 
 public interface ClientTestDao {
-  //  @Select("TRUNCATE Charm; TRUNCATE Client; TRUNCATE ClientAddr; TRUNCATE ClientPhone; TRUNCATE ClientAccount; " +
-//  "TRUNCATE TransactionType; TRUNCATE ClientAccountTransaction")
   @Select("TRUNCATE client CASCADE; TRUNCATE client_phone")
   void removeAllData();
 
@@ -26,19 +27,21 @@ public interface ClientTestDao {
   })
   ClientDetails getClientDetailsById(@Param("id") String clientId);
 
-  @Select("select count(1) from Client")
-  long countOfClients(@Param("filterBy") String filterBy,
-                      @Param("filterInputs") String filterInputs);
+  @Select("SELECT c.id, c.surname, c.name, c.patronymic, c.gender, c.birth_date, ch.name as charm" +
+    " FROM client c LEFT JOIN charm ch ON c.charm = ch.id WHERE cia_id = #{cia_id}")
+  @Results({
+    @Result(property = "id", column = "id"),
+    @Result(property = "surname", column = "surname"),
+    @Result(property = "name", column = "name"),
+    @Result(property = "patronymic", column = "patronymic"),
+    @Result(property = "gender", column = "gender"),
+    @Result(property = "dateOfBirth", column = "birth_date"),
+    @Result(property = "charm.name", column = "charm")
+  })
+  ClientDetails getClientDetailsByCiaId(@Param("cia_id") String ciaId);
 
-//  @Insert("insert into Client (id, surname, name, patronymic, gender, birth_date, charm) " +
-//    "values (#{id}, #{surname}, #{name}, #{patronymic}, #{gender}, #{birth_date}, 'charm')")
-//  void insertClient(@Param("id") String clientId,
-//                    @Param("surname") String surname,
-//                    @Param("name") String name,
-//                    @Param("patronymic") String patronymic,
-//                    @Param("gender") Gender gender,
-//                    @Param("birth_date") Date birth_date,
-//                    @Param("charm") String charm);
+  @Select("select count(1) from Client")
+  long getClientCount();
 
   @Insert("insert into client (id, surname, name, patronymic, gender, birth_date, charm) " +
     "values (#{id}, #{surname}, #{name}, #{patronymic}, #{gender}, #{birth_date}, #{charm})")
@@ -98,4 +101,38 @@ public interface ClientTestDao {
     @Result(property = "number", column = "number")
   })
   List<PhoneNumber> getPhonesByClientId(@Param("client") String clientId);
+
+  @Select("SELECT count(1) FROM client_account_transaction")
+  long getTransactionCount();
+
+  @Select("SELECT count(1) FROM client_account")
+  long getAccountCount();
+
+  @Select("SELECT cia_id FROM client")
+  Set<String> getClientCiaIdsSet();
+
+  @Select("SELECT surname FROM client WHERE cia_id = #{cia_id}")
+  String getClientSurnameByCiaId(@Param("cia_id") String key);
+
+  @Select("SELECT client, type, street, house, flat " +
+    "FROM client_addr WHERE client = #{client} and type = #{type}")
+  @Results({
+    @Result(property = "id", column = "client"),
+    @Result(property = "type", column = "type"),
+    @Result(property = "street", column = "street"),
+    @Result(property = "house", column = "house"),
+    @Result(property = "flat", column = "flat")
+  })
+  Address selectAddrByClientId(@Param("client") String clientId,
+                               @Param("type") AddressType type);
+
+  @Select("SELECT number as accountNumber, registered_at as registeredAtD " +
+    "FROM client_account WHERE client = (SELECT id FROM client WHERE cia_id = #{cia_id})")
+  Account getClientAccountByCiaId(@Param("cia_id") String ciaId);
+
+  @Select("SELECT account as accountNumber, money, type as transactionType " +
+    "FROM client_account_transaction WHERE account = " +
+    "(SELECT id FROM client_account WHERE number = #{account_number}) AND finished_at = #{finished_at}")
+  Transaction getTransactionByAccountNumber(@Param("account_number") String accountNumber,
+                                            @Param("finished_at") Date finishedAt);
 }

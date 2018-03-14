@@ -3,8 +3,7 @@ package kz.greetgo.sandbox.controller.controller;
 import kz.greetgo.depinject.core.Bean;
 import kz.greetgo.depinject.core.BeanGetter;
 import kz.greetgo.mvc.annotations.Mapping;
-import kz.greetgo.sandbox.controller.migration.CiaMigrationWorker;
-import kz.greetgo.sandbox.controller.migration.FrsMigrationWorker;
+import kz.greetgo.sandbox.controller.migration.MigrationWorker;
 
 /**
  * как составлять контроллеры написано
@@ -14,16 +13,10 @@ import kz.greetgo.sandbox.controller.migration.FrsMigrationWorker;
 @Mapping("/migration")
 public class MigrationController {
 
-  public BeanGetter<CiaMigrationWorker> ciaMigrationRegister;
-  public BeanGetter<FrsMigrationWorker> frsMigrationRegister;
+  public BeanGetter<MigrationWorker> migrationRegister;
 
-  @Mapping("/migrateCia")
+  @Mapping("/migrate")
   public int migrateCia() throws Exception {
-    return ciaMigrationRegister.get().migrate();
-  }
-
-  @Mapping("/migrateFrs")
-  public int migrateFrs() throws Exception {
-    return frsMigrationRegister.get().migrate();
+    return migrationRegister.get().migrate();
   }
 }

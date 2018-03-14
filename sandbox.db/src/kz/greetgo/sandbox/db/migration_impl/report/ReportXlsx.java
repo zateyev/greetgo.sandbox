@@ -3,6 +3,7 @@ package kz.greetgo.sandbox.db.migration_impl.report;
 import kz.greetgo.msoffice.xlsx.gen.Sheet;
 import kz.greetgo.msoffice.xlsx.gen.Xlsx;
 
+import java.io.IOException;
 import java.io.OutputStream;
 
 public class ReportXlsx {
@@ -40,7 +41,9 @@ public class ReportXlsx {
     sheet.row().finish();
   }
 
-  public void finish() {
+  public void finish() throws IOException {
     xlsx.complete(out);
+    out.flush();
+    out.close();
   }
 }

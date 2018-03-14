@@ -1,28 +1,28 @@
 package kz.greetgo.sandbox.db.migration_impl;
 
+import com.jcraft.jsch.SftpException;
 import kz.greetgo.depinject.core.Bean;
-import kz.greetgo.depinject.core.BeanGetter;
-import kz.greetgo.sandbox.controller.migration.FrsMigrationWorker;
-import kz.greetgo.sandbox.db.configs.DbConfig;
+import kz.greetgo.sandbox.db.migration_impl.report.ReportXlsx;
+import kz.greetgo.sandbox.db.ssh.SshConnection;
 import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
 import org.apache.commons.compress.archivers.tar.TarArchiveInputStream;
 import org.apache.commons.compress.compressors.bzip2.BZip2CompressorInputStream;
 
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 import static kz.greetgo.sandbox.db.util.TimeUtils.recordsPerSecond;
 import static kz.greetgo.sandbox.db.util.TimeUtils.showTime;
 
 @Bean
-public class FrsMigrationWorkerImpl extends AbstractMigrationWorker implements FrsMigrationWorker {
-  public BeanGetter<DbConfig> dbConfig;
+public class FrsMigrationWorkerImpl extends AbstractMigrationWorker {
 
   private String tmpAccountTable;
   private String tmpTransactionTable;
@@ -38,7 +38,7 @@ public class FrsMigrationWorkerImpl extends AbstractMigrationWorker implements F
   }
 
   @Override
-  protected void uploadAndDropErrors() {
+  protected void uploadErrors() {
 
   }
 
@@ -51,6 +51,11 @@ public class FrsMigrationWorkerImpl extends AbstractMigrationWorker implements F
 
   @Override
   protected void createTmpTables() throws SQLException {
+    SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd_HHmmss");
+    Date nowDate = new Date();
+    tmpAccountTable = "cia_migration_account_" + sdf.format(nowDate);
+    tmpTransactionTable = "cia_migration_transaction_" + sdf.format(nowDate);
+
     //language=PostgreSQL
     exec("CREATE TABLE TMP_ACCOUNT (\n" +
       "  type           VARCHAR(32),\n" +
@@ -66,7 +71,7 @@ public class FrsMigrationWorkerImpl extends AbstractMigrationWorker implements F
     //language=PostgreSQL
     exec("CREATE TABLE TMP_TRANSACTION (\n" +
       "  type             VARCHAR(32),\n" +
-      "  money            REAL,\n" +
+      "  money            DECIMAL,\n" +
       "  finished_at      TIMESTAMP WITH TIME ZONE,\n" +
       "  transaction_type VARCHAR(255),\n" +
       "  account_number   VARCHAR(100),\n" +
@@ -78,7 +83,7 @@ public class FrsMigrationWorkerImpl extends AbstractMigrationWorker implements F
   }
 
   @Override
-  protected long migrateFromTmp() throws SQLException {
+  protected void migrateFromTmp() throws SQLException {
     //language=PostgreSQL
     exec("INSERT INTO client (id, cia_id)\n" +
       "SELECT nextval('s_client'), client_id\n" +
@@ -96,59 +101,29 @@ public class FrsMigrationWorkerImpl extends AbstractMigrationWorker implements F
       "FROM TMP_TRANSACTION tt LEFT JOIN client_account ca ON tt.account_number = ca.number");
 
 
-    return 0;
   }
 
   @Override
-  protected int download() throws IOException, SQLException {
+  protected int download() throws IOException, SQLException, SftpException {
     List<String> fileDirToLoad = renameFiles(".json_row.txt.tar.bz2");
     int recordsCount = 0;
+    long downloadingStartedAt = System.nanoTime();
 
     for (String fileName : fileDirToLoad) {
-      inputStream = new FileInputStream(fileName);
+      inputStream = sshConnection.download(fileName);
       TarArchiveInputStream tarInput = new TarArchiveInputStream(new BZip2CompressorInputStream(inputStream));
       TarArchiveEntry currentEntry = tarInput.getNextTarEntry();
 
-      final AtomicBoolean working = new AtomicBoolean(true);
-      final AtomicBoolean showStatus = new AtomicBoolean(false);
-
-      final Thread see = new Thread(() -> {
-
-        while (working.get()) {
-
-          try {
-            Thread.sleep(showStatusPingMillis);
-          } catch (InterruptedException e) {
-            break;
-          }
-
-          showStatus.set(true);
-
-        }
-
-      });
-      see.start();
-
       long startedAt = System.nanoTime();
 
-      // parse xml and insert into tmp tables
-      connection.setAutoCommit(false);
-
       maxBatchSize = migrationConfig.get().maxBatchSize();
+      connection.setAutoCommit(false);
 
       try (FrsTableWorker frsTableWorker = new FrsTableWorker(connection, maxBatchSize, tmpAccountTable, tmpTransactionTable)) {
         FrsParser frsParser = new FrsParser(tarInput, frsTableWorker);
         recordsCount += frsParser.parseAndSave();
       } finally {
         connection.setAutoCommit(true);
-      }
-
-      if (showStatus.get()) {
-        showStatus.set(false);
-
-        long now = System.nanoTime();
-        info(" -- downloaded records " + recordsCount + " for " + showTime(now, startedAt)
-          + " : " + recordsPerSecond(recordsCount, now - startedAt));
       }
 
       {
@@ -158,41 +133,30 @@ public class FrsMigrationWorkerImpl extends AbstractMigrationWorker implements F
       }
     }
 
+    {
+      long now = System.nanoTime();
+      info("TOTAL Downloaded records " + recordsCount + " for " + showTime(now, downloadingStartedAt)
+        + " : " + recordsPerSecond(recordsCount, now - downloadingStartedAt));
+    }
+
     return recordsCount;
   }
 
   @Override
-  public int migrate() throws Exception {
-    long startedAt = System.nanoTime();
-
-    SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd");
-    Date nowDate = new Date();
-    tmpAccountTable = "cia_migration_account_" + sdf.format(nowDate);
-    tmpTransactionTable = "cia_migration_transaction_" + sdf.format(nowDate);
-
-    createPostgresConnection();
-    dropTmpTables();
-    createTmpTables();
-
-    int recordsCount = download();
-    {
-      long now = System.nanoTime();
-      info("Downloading of portion " + recordsCount + " finished for " + showTime(now, startedAt));
+  protected void createConnections() throws Exception {
+    try {
+      reportXlsx = new ReportXlsx(new FileOutputStream(migrationConfig.get().sqlReportDir() + "sqlReportFrs.xlsx"));
+      reportXlsx.start();
+    } catch (FileNotFoundException e) {
+      e.printStackTrace();
     }
 
-    handleErrors();
-    migrateFromTmp();
-    {
-      long now = System.nanoTime();
-      info("FrsMigrationWorkerImpl of portion " + recordsCount + " finished for " + showTime(now, startedAt));
-    }
+    sshConnection = new SshConnection(migrationConfig.get().sshHomePath());
+    sshConnection.createSshConnection(migrationConfig.get().sshUser(),
+      migrationConfig.get().sshPassword(),
+      migrationConfig.get().sshHost(),
+      migrationConfig.get().sshPort());
 
-    closePostgresConnection();
-    super.close();
-    return recordsCount;
-  }
-
-  private void createPostgresConnection() throws Exception {
     connection = DriverManager.getConnection(
       dbConfig.get().url(),
       dbConfig.get().username(),
