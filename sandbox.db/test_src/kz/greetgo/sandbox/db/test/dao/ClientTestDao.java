@@ -1,6 +1,8 @@
 package kz.greetgo.sandbox.db.test.dao;
 
 import kz.greetgo.sandbox.controller.model.*;
+import kz.greetgo.sandbox.db.migration_impl.model.Account;
+import kz.greetgo.sandbox.db.migration_impl.model.Transaction;
 import org.apache.ibatis.annotations.*;
 
 import java.time.OffsetDateTime;
@@ -123,4 +125,14 @@ public interface ClientTestDao {
   })
   Address selectAddrByClientId(@Param("client") String clientId,
                                @Param("type") AddressType type);
+
+  @Select("SELECT number as accountNumber, registered_at as registeredAtD " +
+    "FROM client_account WHERE client = (SELECT id FROM client WHERE cia_id = #{cia_id})")
+  Account getClientAccountByCiaId(@Param("cia_id") String ciaId);
+
+  @Select("SELECT account as accountNumber, money, type as transactionType " +
+    "FROM client_account_transaction WHERE account = " +
+    "(SELECT id FROM client_account WHERE number = #{account_number}) AND finished_at = #{finished_at}")
+  Transaction getTransactionByAccountNumber(@Param("account_number") String accountNumber,
+                                            @Param("finished_at") Date finishedAt);
 }

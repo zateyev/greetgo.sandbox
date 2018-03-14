@@ -71,7 +71,7 @@ public class FrsMigrationWorkerImpl extends AbstractMigrationWorker {
     //language=PostgreSQL
     exec("CREATE TABLE TMP_TRANSACTION (\n" +
       "  type             VARCHAR(32),\n" +
-      "  money            REAL,\n" +
+      "  money            DECIMAL,\n" +
       "  finished_at      TIMESTAMP WITH TIME ZONE,\n" +
       "  transaction_type VARCHAR(255),\n" +
       "  account_number   VARCHAR(100),\n" +

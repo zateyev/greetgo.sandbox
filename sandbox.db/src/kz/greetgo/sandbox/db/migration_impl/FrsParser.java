@@ -8,6 +8,7 @@ import kz.greetgo.sandbox.db.migration_impl.model.Transaction;
 import org.apache.commons.compress.archivers.tar.TarArchiveInputStream;
 
 import java.io.*;
+import java.math.BigDecimal;
 import java.util.function.Consumer;
 
 public class FrsParser {
@@ -100,7 +101,8 @@ public class FrsParser {
             break;
           case "money":
             jsonParser.nextToken();
-            transaction.money = Double.parseDouble(jsonParser.getText().replace("_", ""));
+//            transaction.money = Double.parseDouble(jsonParser.getText().replace("_", ""));
+            transaction.money = new BigDecimal(jsonParser.getText().replace("_", ""));
             break;
           case "finished_at":
             jsonParser.nextToken();

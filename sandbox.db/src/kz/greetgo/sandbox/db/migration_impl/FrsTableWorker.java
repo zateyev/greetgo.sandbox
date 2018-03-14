@@ -80,7 +80,7 @@ public class FrsTableWorker implements Closeable {
     try {
       int ind = 1;
       transactionPS.setString(ind++, transaction.type);
-      transactionPS.setDouble(ind++, transaction.money);
+      transactionPS.setBigDecimal(ind++, transaction.money);
       transactionPS.setTimestamp(ind++, new Timestamp(SDF.parse(transaction.finishedAt).getTime()));
       transactionPS.setString(ind++, transaction.transactionType);
       transactionPS.setString(ind, transaction.accountNumber);

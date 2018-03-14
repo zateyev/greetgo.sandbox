@@ -5,6 +5,8 @@ import kz.greetgo.sandbox.controller.model.AddressType;
 import kz.greetgo.sandbox.controller.model.ClientDetails;
 import kz.greetgo.sandbox.db.configs.MigrationConfig;
 import kz.greetgo.sandbox.db.input_file_generator.GenerateInputFiles;
+import kz.greetgo.sandbox.db.migration_impl.model.Account;
+import kz.greetgo.sandbox.db.migration_impl.model.Transaction;
 import kz.greetgo.sandbox.db.test.dao.CharmTestDao;
 import kz.greetgo.sandbox.db.test.dao.ClientTestDao;
 import kz.greetgo.sandbox.db.test.util.ParentTestNg;
@@ -15,10 +17,9 @@ import org.testng.annotations.Test;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.LineNumberReader;
-import java.util.Comparator;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.*;
 
 import static org.fest.assertions.api.Assertions.assertThat;
 
@@ -135,6 +136,67 @@ public class AbstractMigrationWorkerTest extends ParentTestNg {
 
     assertThat(transactionCount).isEqualTo(fileGenerator.getTransactionCount());
     assertThat(accountCount).isEqualTo(fileGenerator.getAccountCount());
+  }
+
+  @Test
+  public void testAccountInsertion() throws Exception {
+    clientTestDao.get().removeAllData();
+    charmTestDao.get().removeAllData();
+
+    Map<String, Account> clientAccounts = fileGenerator.getClientAccounts();
+
+    //
+    //
+    frsMigration.get().migrate();
+    //
+    //
+
+
+    int i = 0;
+    for (Map.Entry<String, Account> accountEntry : clientAccounts.entrySet()) {
+      Account clientAccountActual = clientTestDao.get().getClientAccountByCiaId(accountEntry.getKey());
+
+      assertThatAreEqual(clientAccountActual, accountEntry.getValue());
+      if (++i > 10) break;
+    }
+  }
+
+  @Test
+  public void testTransactionInsertion() throws Exception {
+    clientTestDao.get().removeAllData();
+    charmTestDao.get().removeAllData();
+
+    Map<String, Transaction> accountTransactions = fileGenerator.getAccountTransactions();
+
+    //
+    //
+    frsMigration.get().migrate();
+    //
+    //
+
+
+    int i = 0;
+    for (Map.Entry<String, Transaction> transactionEntry : accountTransactions.entrySet()) {
+      Transaction accountTransactionActual = clientTestDao.get().getTransactionByAccountNumber(
+        transactionEntry.getValue().accountNumber,
+        new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS").parse(transactionEntry.getValue().finishedAt));
+
+      assertThat(accountTransactionActual).isNotNull();
+      assertThatAreEqual(accountTransactionActual, transactionEntry.getValue());
+      if (++i > 10) break;
+    }
+  }
+
+  private void assertThatAreEqual(Transaction actual, Transaction expected) throws ParseException {
+//    assertThat(actual.money).isEqualTo(expected.money.stripTrailingZeros());
+    assertThat(actual.money.compareTo(expected.money)).isEqualTo(0);
+    assertThat(actual.transactionType).isEqualTo(String.valueOf(expected.transactionType));
+  }
+
+  private void assertThatAreEqual(Account actual, Account expected) throws ParseException {
+    assertThat(actual.accountNumber).isEqualTo(expected.accountNumber);
+    Date registeredAtExpected = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS").parse(expected.registeredAt);
+    assertThat(actual.registeredAtD).isEqualTo(registeredAtExpected);
   }
 
   private int getLineCountOfFile(String fileName) {

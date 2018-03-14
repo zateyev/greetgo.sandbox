@@ -1,6 +1,7 @@
 package kz.greetgo.sandbox.db.input_file_generator;
 
 import kz.greetgo.sandbox.controller.model.*;
+import kz.greetgo.sandbox.db.migration_impl.model.Account;
 import kz.greetgo.sandbox.db.migration_impl.model.Transaction;
 import kz.greetgo.util.RND;
 import org.apache.commons.io.FileUtils;
@@ -35,6 +36,8 @@ public class GenerateInputFiles {
     this.FRS_LIMIT = FRS_LIMIT;
 
     lastGoodClients = new HashMap<>();
+    clientAccounts = new HashMap<>();
+    accountTransactions = new HashMap<>();
   }
 
   public static void main(String[] args) throws Exception {
@@ -75,6 +78,14 @@ public class GenerateInputFiles {
 
   public void setTestMode() {
     this.testMode = true;
+  }
+
+  public Map<String, kz.greetgo.sandbox.db.migration_impl.model.Account> getClientAccounts() {
+    return clientAccounts;
+  }
+
+  public Map<String, Transaction> getAccountTransactions() {
+    return accountTransactions;
   }
 
   private static class Info {
@@ -763,7 +774,7 @@ public class GenerateInputFiles {
         pairs.add("'transaction_type':'" + type + "'");
         pairs.add("'account_number':'" + number + "'");
 
-        transaction.money = money.doubleValue();
+        transaction.money = money;
         transaction.accountNumber = number;
         transaction.transactionType = type;
         transaction.finishedAt = sdf.format(finishedAt);
@@ -903,7 +914,6 @@ public class GenerateInputFiles {
 
     kz.greetgo.sandbox.db.migration_impl.model.Account newAccount = new kz.greetgo.sandbox.db.migration_impl.model.Account();
     newAccount.accountNumber = account.number;
-    newAccount.clientId = account.clientId;
     newAccount.registeredAt = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS").format(account.registeredAt);
     clientAccounts.put(clientId, newAccount);
 
