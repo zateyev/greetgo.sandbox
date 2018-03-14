@@ -107,7 +107,7 @@ public class CiaMigrationWorker extends AbstractMigrationWorker {
       "        charm_name VARCHAR(32),\n" +
       "        status INT NOT NULL DEFAULT 0,\n" +
       "        error VARCHAR(255),\n" +
-      "        number BIGSERIAL PRIMARY KEY\n" +
+      "        number INTEGER PRIMARY KEY\n" +
       "      )");
 
     //language=PostgreSQL
@@ -262,7 +262,7 @@ public class CiaMigrationWorker extends AbstractMigrationWorker {
       ")");
   }
 
-  protected int download() throws Exception {
+  protected int parseDataAndSaveInTmpDb() throws Exception {
 
     List<String> fileDirToLoad = renameFiles(".xml.tar.bz2");
     int recordsCount = 0;

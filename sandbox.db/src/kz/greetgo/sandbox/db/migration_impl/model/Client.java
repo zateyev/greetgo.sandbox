@@ -1,9 +1,7 @@
 package kz.greetgo.sandbox.db.migration_impl.model;
 
-import kz.greetgo.sandbox.controller.model.Charm;
-import kz.greetgo.sandbox.controller.model.Gender;
-
 public class Client {
+  public int id;
   public String cia_id;
   public String surname;
   public String name;

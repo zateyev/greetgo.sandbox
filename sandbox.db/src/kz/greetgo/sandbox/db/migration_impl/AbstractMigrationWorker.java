@@ -20,11 +20,11 @@ import static kz.greetgo.sandbox.db.util.TimeUtils.showTime;
 
 public abstract class AbstractMigrationWorker {
 
-  public File outErrorFile;
-  public ReportXlsx reportXlsx;
   public Connection connection;
   public SshConnection sshConnection;
   public int maxBatchSize;
+  public File outErrorFile;
+  public ReportXlsx reportXlsx;
 
   public AbstractMigrationWorker(Connection connection, SshConnection sshConnection) {
     this.connection = connection;
@@ -36,7 +36,7 @@ public abstract class AbstractMigrationWorker {
 
     createTmpTables();
 
-    int recordsSize = download();
+    int recordsSize = parseDataAndSaveInTmpDb();
 
     handleErrors();
 
@@ -56,7 +56,7 @@ public abstract class AbstractMigrationWorker {
 
   protected abstract void migrateFromTmp() throws Exception;
 
-  protected abstract int download() throws Exception;
+  protected abstract int parseDataAndSaveInTmpDb() throws Exception;
 
   protected abstract String r(String sql);
 
@@ -101,16 +101,5 @@ public abstract class AbstractMigrationWorker {
   protected void info(String message) {
     SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS");
     System.out.println(sdf.format(new Date()) + " [" + getClass().getSimpleName() + "] " + message);
-  }
-
-  protected void closePostgresConnection() {
-    if (this.connection != null) {
-      try {
-        this.connection.close();
-      } catch (SQLException e) {
-        e.printStackTrace();
-      }
-      this.connection = null;
-    }
   }
 }

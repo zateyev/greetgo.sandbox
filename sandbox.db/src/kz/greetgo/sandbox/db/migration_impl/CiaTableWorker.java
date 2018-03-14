@@ -28,8 +28,8 @@ public class CiaTableWorker implements Closeable {
     this.maxBatchSize = maxBatchSize;
 
     clientPS = this.connection.prepareStatement("INSERT INTO " + clientTableName +
-      " (cia_id, surname, name, patronymic, gender, birth_date, charm_name) " +
-      "VALUES (?, ?, ?, ?, ?, ?, ?) "
+      " (number, cia_id, surname, name, patronymic, gender, birth_date, charm_name) " +
+      "VALUES (?, ?, ?, ?, ?, ?, ?, ?) "
     );
 
     phonePS = this.connection.prepareStatement("INSERT INTO " + phoneTableName + " (cia_id, phone_number, type) " +
@@ -43,6 +43,7 @@ public class CiaTableWorker implements Closeable {
 
     try {
       int ind = 1;
+      clientPS.setInt(ind++, client.id);
       clientPS.setString(ind++, client.cia_id);
       clientPS.setString(ind++, client.surname);
       clientPS.setString(ind++, client.name);

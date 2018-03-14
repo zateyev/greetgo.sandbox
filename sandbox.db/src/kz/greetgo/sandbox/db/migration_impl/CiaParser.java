@@ -15,20 +15,19 @@ import java.io.InputStream;
 import java.sql.SQLException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.function.Consumer;
 
 public class CiaParser extends SaxHandler {
 
   private Client client;
-  public InputStream inputStream;
+  private InputStream inputStream;
   private CiaTableWorker ciaTableWorker;
 
-  private int recordsCount;
+  private int recordsNum;
 
-  public CiaParser(InputStream inputStream, CiaTableWorker ciaTableWorker, int recordsCount) throws SQLException {
+  public CiaParser(InputStream inputStream, CiaTableWorker ciaTableWorker, int recordsNum) throws SQLException {
     this.inputStream = inputStream;
     this.ciaTableWorker = ciaTableWorker;
-    this.recordsCount = recordsCount;
+    this.recordsNum = recordsNum;
   }
 
   public int parseAndSave() throws SAXException, IOException, SQLException {
@@ -37,7 +36,7 @@ public class CiaParser extends SaxHandler {
     XMLReader reader = XMLReaderFactory.createXMLReader();
     reader.setContentHandler(this);
     reader.parse(new InputSource(inputStream));
-    return recordsCount;
+    return recordsNum;
   }
 
   @Override
@@ -48,7 +47,7 @@ public class CiaParser extends SaxHandler {
       case "/cia/client":
         client = new Client();
         client.cia_id = attributes.getValue("id");
-        recordsCount++;
+        client.id = ++recordsNum;
         return;
 
       case "/cia/client/surname":
@@ -89,7 +88,7 @@ public class CiaParser extends SaxHandler {
         addressFact.house = attributes.getValue("house");
         addressFact.flat = attributes.getValue("flat");
         addressFact.cia_id = client.cia_id;
-        sendTo(ciaTableWorker::addToBatch, addressFact);
+        ciaTableWorker.addToBatch(addressFact);
         return;
 
       case "/cia/client/address/register":
@@ -98,7 +97,7 @@ public class CiaParser extends SaxHandler {
         addressReg.house = attributes.getValue("house");
         addressReg.flat = attributes.getValue("flat");
         addressReg.cia_id = client.cia_id;
-        sendTo(ciaTableWorker::addToBatch, addressReg);
+        ciaTableWorker.addToBatch(addressReg);
     }
   }
 
@@ -109,43 +108,31 @@ public class CiaParser extends SaxHandler {
     switch (path) {
       case "/cia/client/workPhone": {
         PhoneNumber phoneNumber = new PhoneNumber("WORK");
-        phoneNumber.cia_id = String.valueOf(recordsCount);
+        phoneNumber.cia_id = String.valueOf(recordsNum);
         phoneNumber.number = text();
-        sendTo(ciaTableWorker::addToBatch, phoneNumber);
+        ciaTableWorker.addToBatch(phoneNumber);
         return;
       }
 
       case "/cia/client/mobilePhone": {
         PhoneNumber phoneNumber = new PhoneNumber("MOBILE");
-        phoneNumber.cia_id = String.valueOf(recordsCount);
+        phoneNumber.cia_id = String.valueOf(recordsNum);
         phoneNumber.number = text();
-        sendTo(ciaTableWorker::addToBatch, phoneNumber);
+        ciaTableWorker.addToBatch(phoneNumber);
         return;
       }
 
       case "/cia/client/homePhone": {
         PhoneNumber phoneNumber = new PhoneNumber("HOME");
-        phoneNumber.cia_id = String.valueOf(recordsCount);
+        phoneNumber.cia_id = String.valueOf(recordsNum);
         phoneNumber.number = text();
-        sendTo(ciaTableWorker::addToBatch, phoneNumber);
+        ciaTableWorker.addToBatch(phoneNumber);
         return;
       }
 
       case "/cia/client": {
-        sendTo(ciaTableWorker::addToBatch, client);
+        ciaTableWorker.addToBatch(client);
       }
     }
-  }
-
-  private void sendTo(final Consumer<Client> func, Client client) {
-    func.accept(client);
-  }
-
-  private void sendTo(final Consumer<Address> func, Address address) {
-    func.accept(address);
-  }
-
-  private void sendTo(final Consumer<PhoneNumber> func, PhoneNumber phoneNumber) {
-    func.accept(phoneNumber);
   }
 }

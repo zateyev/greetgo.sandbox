@@ -44,7 +44,7 @@ public class AbstractMigrationWorkerTest extends ParentTestNg {
   }
 
   @Test
-  public void testCiaMigration() throws Exception {
+  public void testCiaMigrationByGoodClientsCount() throws Exception {
     clientTestDao.get().removeAllData();
     charmTestDao.get().removeAllData();
 
@@ -120,7 +120,7 @@ public class AbstractMigrationWorkerTest extends ParentTestNg {
   }
 
   @Test
-  public void testFrsMigration() throws Exception {
+  public void testFrsMigrationByRecordsCount() throws Exception {
     clientTestDao.get().removeAllData();
     charmTestDao.get().removeAllData();
 
@@ -158,7 +158,6 @@ public class AbstractMigrationWorkerTest extends ParentTestNg {
         accountEntry.getValue().registeredAtD
       );
 
-//      assertThatAreEqual(clientAccountNumber, accountEntry.getValue());
       assertThat(clientAccountNumber).isEqualTo(accountEntry.getValue().accountNumber);
       if (++i > 10) break;
     }
@@ -194,12 +193,6 @@ public class AbstractMigrationWorkerTest extends ParentTestNg {
     assertThat(actual.money.compareTo(expected.money)).isEqualTo(0);
     assertThat(actual.transactionType).isEqualTo(String.valueOf(expected.transactionType));
   }
-
-//  private void assertThatAreEqual(Account actual, Account expected) throws ParseException {
-//    assertThat(actual.accountNumber).isEqualTo(expected.accountNumber);
-//    Date registeredAtExpected = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS").parse(expected.registeredAt);
-//    assertThat(actual.registeredAtD).isEqualTo(registeredAtExpected);
-//  }
 
   private int getLineCountOfFile(String fileName) {
     try

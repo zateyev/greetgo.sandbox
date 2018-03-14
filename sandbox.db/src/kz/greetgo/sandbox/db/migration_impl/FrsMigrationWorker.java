@@ -100,7 +100,7 @@ public class FrsMigrationWorker extends AbstractMigrationWorker {
   }
 
   @Override
-  protected int download() throws IOException, SQLException, SftpException {
+  protected int parseDataAndSaveInTmpDb() throws IOException, SQLException, SftpException {
     List<String> fileDirToLoad = renameFiles(".json_row.txt.tar.bz2");
     int recordsCount = 0;
     long downloadingStartedAt = System.nanoTime();
