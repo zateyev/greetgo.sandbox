@@ -13,7 +13,7 @@ public interface MigrationConfig {
 
   @Description("Имя файла с ошибками")
   @DefaultStrValue("errors.txt")
-  String outErrorFile();
+  String outErrorFileName();
 
   @Description("Имя ssh сервера")
   @DefaultStrValue("zateyev")

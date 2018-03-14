@@ -2,32 +2,35 @@ package kz.greetgo.sandbox.db.migration_impl;
 
 import com.jcraft.jsch.SftpException;
 import kz.greetgo.depinject.core.Bean;
-import kz.greetgo.sandbox.db.migration_impl.report.ReportXlsx;
 import kz.greetgo.sandbox.db.ssh.SshConnection;
-import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
+import kz.greetgo.util.RND;
 import org.apache.commons.compress.archivers.tar.TarArchiveInputStream;
 import org.apache.commons.compress.compressors.bzip2.BZip2CompressorInputStream;
 
-import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.sql.DriverManager;
+import java.io.OutputStream;
+import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.Date;
+import java.util.List;
 
 import static kz.greetgo.sandbox.db.util.TimeUtils.recordsPerSecond;
 import static kz.greetgo.sandbox.db.util.TimeUtils.showTime;
 
 @Bean
-public class CiaMigrationWorkerImpl extends AbstractMigrationWorker {
+public class CiaMigrationWorker extends AbstractMigrationWorker {
 
   private String tmpClientTable;
   private String tmpAddrTable;
   private String tmpPhoneTable;
+
+  public CiaMigrationWorker(Connection connection, SshConnection sshConnection) {
+    super(connection, sshConnection);
+  }
 
   @Override
   protected String r(String sql) {
@@ -35,11 +38,6 @@ public class CiaMigrationWorkerImpl extends AbstractMigrationWorker {
     sql = sql.replaceAll("TMP_ADDR", tmpAddrTable);
     sql = sql.replaceAll("TMP_PHONE", tmpPhoneTable);
     return sql;
-  }
-
-  protected void dropTmpTables() throws SQLException {
-    //language=PostgreSQL
-    exec("DROP TABLE IF EXISTS TMP_CLIENT, TMP_ADDR, TMP_PHONE");
   }
 
   protected void handleErrors() throws SQLException, IOException, SftpException {
@@ -68,10 +66,8 @@ public class CiaMigrationWorkerImpl extends AbstractMigrationWorker {
 
   protected void uploadErrors() throws SQLException, IOException, SftpException {
 
-    File errFile = new File(migrationConfig.get().outErrorFile());
-    outError = new FileOutputStream(errFile);
+    OutputStream outError = new FileOutputStream(outErrorFile);
 
-    // create report about errors and send by ssh
     try (PreparedStatement errorPs = connection.prepareStatement(r("SELECT cia_id, error FROM TMP_CLIENT WHERE error IS NOT NULL"))) {
       try (ResultSet errorRs = errorPs.executeQuery()) {
         while (errorRs.next()) {
@@ -84,19 +80,17 @@ public class CiaMigrationWorkerImpl extends AbstractMigrationWorker {
       }
     } finally {
       outError.close();
-      sshConnection.upload(errFile);
+      sshConnection.upload(outErrorFile);
     }
-
-    //language=PostgreSQL
-//    exec("DELETE FROM TMP_CLIENT WHERE error IS NOT NULL");
   }
 
   protected void createTmpTables() throws SQLException {
     SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd_HHmmss");
     Date nowDate = new Date();
-    tmpClientTable = "cia_migration_client_" + sdf.format(nowDate);
-    tmpAddrTable = "cia_migration_addr_" + sdf.format(nowDate);
-    tmpPhoneTable = "cia_migration_phone_" + sdf.format(nowDate);
+    String processId = "_" + RND.intStr(5);
+    tmpClientTable = "cia_migration_client_" + sdf.format(nowDate) + processId;
+    tmpAddrTable = "cia_migration_addr_" + sdf.format(nowDate) + processId;
+    tmpPhoneTable = "cia_migration_phone_" + sdf.format(nowDate) + processId;
     info("TMP_CLIENT = " + tmpClientTable);
     info("TMP_ADDR = " + tmpAddrTable);
     info("TMP_PHONE = " + tmpPhoneTable);
@@ -268,61 +262,18 @@ public class CiaMigrationWorkerImpl extends AbstractMigrationWorker {
       ")");
   }
 
-  public static void main(String[] args) {
-    Set<String> set1 = new HashSet<>();
-    Set<String> set2 = new HashSet<>();
-    set1.add("asd7asd");
-    set1.add("asdTasd");
-    set1.add("asdRasd");
-    set1.add("asd3asd");
-
-    set2.add("asd3asd");
-    set2.add("asdTasd");
-    set2.add("asdRasd");
-    StringBuilder sb = new StringBuilder();
-    sb.append("asd").append(7).append("asd");
-    set2.add(sb.toString());
-
-    System.out.println(Objects.equals(set1, set2));
-  }
-
-  @Override
-  protected void createConnections() throws Exception {
-    try {
-      reportXlsx = new ReportXlsx(new FileOutputStream(migrationConfig.get().sqlReportDir() + "sqlReportCia.xlsx"));
-      reportXlsx.start();
-    } catch (FileNotFoundException e) {
-      e.printStackTrace();
-    }
-
-    sshConnection = new SshConnection(migrationConfig.get().sshHomePath());
-    sshConnection.createSshConnection(migrationConfig.get().sshUser(),
-      migrationConfig.get().sshPassword(),
-      migrationConfig.get().sshHost(),
-      migrationConfig.get().sshPort());
-
-    connection = DriverManager.getConnection(
-      dbConfig.get().url(),
-      dbConfig.get().username(),
-      dbConfig.get().password()
-    );
-  }
-
   protected int download() throws Exception {
 
-    // get file, read all files iteratively
     List<String> fileDirToLoad = renameFiles(".xml.tar.bz2");
     int recordsCount = 0;
     long downloadingStartedAt = System.nanoTime();
 
     for (String fileName : fileDirToLoad) {
-      inputStream = sshConnection.download(fileName);
-      TarArchiveInputStream tarInput = new TarArchiveInputStream(new BZip2CompressorInputStream(inputStream));
-      TarArchiveEntry currentEntry = tarInput.getNextTarEntry();
+      TarArchiveInputStream tarInput = new TarArchiveInputStream(new BZip2CompressorInputStream(sshConnection.download(fileName)));
+      tarInput.getNextTarEntry();
 
       long startedAt = System.nanoTime();
 
-      maxBatchSize = migrationConfig.get().maxBatchSize();
       connection.setAutoCommit(false);
 
       try (CiaTableWorker ciaTableWorker = new CiaTableWorker(connection, maxBatchSize, tmpClientTable, tmpAddrTable, tmpPhoneTable)) {
@@ -337,9 +288,6 @@ public class CiaMigrationWorkerImpl extends AbstractMigrationWorker {
         info("TOTAL Downloaded records " + recordsCount + " for " + showTime(now, startedAt)
           + " : " + recordsPerSecond(recordsCount, now - startedAt));
       }
-
-      inputStream.close();
-
     }
 
     {

@@ -1,15 +1,12 @@
 package kz.greetgo.sandbox.db.migration_impl;
 
 import com.jcraft.jsch.SftpException;
-import kz.greetgo.depinject.core.BeanGetter;
-import kz.greetgo.sandbox.controller.migration.MigrationWorker;
-import kz.greetgo.sandbox.db.configs.DbConfig;
-import kz.greetgo.sandbox.db.configs.MigrationConfig;
 import kz.greetgo.sandbox.db.migration_impl.report.ReportXlsx;
 import kz.greetgo.sandbox.db.ssh.SshConnection;
 import kz.greetgo.util.RND;
 
-import java.io.*;
+import java.io.File;
+import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -21,32 +18,21 @@ import java.util.regex.Pattern;
 
 import static kz.greetgo.sandbox.db.util.TimeUtils.showTime;
 
-public abstract class AbstractMigrationWorker implements MigrationWorker, AutoCloseable {
+public abstract class AbstractMigrationWorker {
 
-  public BeanGetter<DbConfig> dbConfig;
-  public BeanGetter<MigrationConfig> migrationConfig;
-
-  public InputStream inputStream;
-  public OutputStream outError;
-  protected ReportXlsx reportXlsx;
+  public File outErrorFile;
+  public ReportXlsx reportXlsx;
   public Connection connection;
+  public SshConnection sshConnection;
   public int maxBatchSize;
-  protected SshConnection sshConnection;
 
-  protected AbstractMigrationWorker() {
-//    try {
-//      reportXlsx = new ReportXlsx(new FileOutputStream("build/files_to_send/report.xlsx"));
-//      reportXlsx.start();
-//    } catch (FileNotFoundException e) {
-//      e.printStackTrace();
-//    }
+  public AbstractMigrationWorker(Connection connection, SshConnection sshConnection) {
+    this.connection = connection;
+    this.sshConnection = sshConnection;
   }
 
-  @Override
-  public int migrate() throws Exception {
+  public void migrate() throws Exception {
     long startedAt = System.nanoTime();
-
-    createConnections();
 
     createTmpTables();
 
@@ -60,17 +46,7 @@ public abstract class AbstractMigrationWorker implements MigrationWorker, AutoCl
       long now = System.nanoTime();
       info("Migration of portion " + recordsSize + " finished for " + showTime(now, startedAt));
     }
-
-    closePostgresConnection();
-
-    close();
-
-    return recordsSize;
   }
-
-  protected abstract void createConnections() throws Exception;
-
-  protected abstract void dropTmpTables() throws SQLException;
 
   protected abstract void handleErrors() throws SQLException, IOException, SftpException;
 
@@ -122,18 +98,6 @@ public abstract class AbstractMigrationWorker implements MigrationWorker, AutoCl
     }
   }
 
-//  protected List<String> listFilesForFolder(final File folder) {
-//    List<String> ret = new ArrayList<>();
-//    for (final File fileEntry : folder.listFiles()) {
-//      if (fileEntry.isDirectory()) {
-//        listFilesForFolder(fileEntry);
-//      } else {
-//        ret.add(fileEntry.getName());
-//      }
-//    }
-//    return ret;
-//  }
-
   protected void info(String message) {
     SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS");
     System.out.println(sdf.format(new Date()) + " [" + getClass().getSimpleName() + "] " + message);
@@ -148,11 +112,5 @@ public abstract class AbstractMigrationWorker implements MigrationWorker, AutoCl
       }
       this.connection = null;
     }
-  }
-
-  @Override
-  public void close() throws Exception {
-    sshConnection.close();
-    reportXlsx.finish();
   }
 }

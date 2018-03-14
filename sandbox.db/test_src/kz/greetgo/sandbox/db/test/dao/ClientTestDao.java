@@ -1,7 +1,6 @@
 package kz.greetgo.sandbox.db.test.dao;
 
 import kz.greetgo.sandbox.controller.model.*;
-import kz.greetgo.sandbox.db.migration_impl.model.Account;
 import kz.greetgo.sandbox.db.migration_impl.model.Transaction;
 import org.apache.ibatis.annotations.*;
 
@@ -126,9 +125,9 @@ public interface ClientTestDao {
   Address selectAddrByClientId(@Param("client") String clientId,
                                @Param("type") AddressType type);
 
-  @Select("SELECT number as accountNumber, registered_at as registeredAtD " +
-    "FROM client_account WHERE client = (SELECT id FROM client WHERE cia_id = #{cia_id})")
-  Account getClientAccountByCiaId(@Param("cia_id") String ciaId);
+  @Select("SELECT number FROM client_account WHERE" +
+    " client = (SELECT id FROM client WHERE cia_id = #{cia_id}) AND registered_at = #{registered_at}")
+  String getClientAccountByCiaId(@Param("cia_id") String ciaId, @Param("registered_at") Date registeredAtD);
 
   @Select("SELECT account as accountNumber, money, type as transactionType " +
     "FROM client_account_transaction WHERE account = " +

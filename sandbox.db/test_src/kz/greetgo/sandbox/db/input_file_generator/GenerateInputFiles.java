@@ -914,7 +914,8 @@ public class GenerateInputFiles {
 
     kz.greetgo.sandbox.db.migration_impl.model.Account newAccount = new kz.greetgo.sandbox.db.migration_impl.model.Account();
     newAccount.accountNumber = account.number;
-    newAccount.registeredAt = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS").format(account.registeredAt);
+//    newAccount.registeredAt = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS").format(account.registeredAt);
+    newAccount.registeredAtD = account.registeredAt;
     clientAccounts.put(clientId, newAccount);
 
 
