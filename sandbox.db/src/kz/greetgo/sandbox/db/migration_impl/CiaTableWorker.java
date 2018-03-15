@@ -3,12 +3,16 @@ package kz.greetgo.sandbox.db.migration_impl;
 import kz.greetgo.sandbox.db.migration_impl.model.Address;
 import kz.greetgo.sandbox.db.migration_impl.model.Client;
 import kz.greetgo.sandbox.db.migration_impl.model.PhoneNumber;
+import kz.greetgo.sandbox.db.util.TimeUtils;
 
 import java.io.Closeable;
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public class CiaTableWorker implements Closeable {
 
@@ -20,10 +24,16 @@ public class CiaTableWorker implements Closeable {
   private PreparedStatement addrPS;
   private int clientBatchSize;
 
+  public long startedAt;
+  final AtomicBoolean working;
+  final AtomicBoolean showStatus;
+
   private int addrBatchSize;
   private int phoneBatchSize;
 
-  public CiaTableWorker(Connection connection, int maxBatchSize, String clientTableName, String addrTableName, String phoneTableName) throws SQLException {
+  public CiaTableWorker(Connection connection, int maxBatchSize, String clientTableName, String addrTableName, String phoneTableName)
+    throws SQLException {
+
     this.connection = connection;
     this.maxBatchSize = maxBatchSize;
 
@@ -37,6 +47,25 @@ public class CiaTableWorker implements Closeable {
 
     addrPS = this.connection.prepareStatement("INSERT INTO " + addrTableName + " (cia_id, client_num, type, street, house, flat) " +
       "VALUES (?, ?, ?, ?, ?, ?)");
+
+    working = new AtomicBoolean(true);
+    showStatus = new AtomicBoolean(false);
+    final Thread see = new Thread(() -> {
+
+      while (working.get()) {
+
+        try {
+          Thread.sleep(3000);
+        } catch (InterruptedException e) {
+          break;
+        }
+
+        showStatus.set(true);
+
+      }
+
+    });
+    see.start();
   }
 
   public void addToBatch(Client client) {
@@ -62,9 +91,23 @@ public class CiaTableWorker implements Closeable {
         connection.commit();
         clientBatchSize = 0;
       }
+
+      if (showStatus.get()) {
+        showStatus.set(false);
+
+        long now = System.nanoTime();
+        info(" -- downloaded records " + client.id + " for " + TimeUtils.showTime(now, startedAt)
+          + " : " + TimeUtils.recordsPerSecond(client.id, now - startedAt));
+      }
+
     } catch (SQLException e) {
       e.printStackTrace();
     }
+  }
+
+  private void info(String message) {
+    SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS");
+    System.out.println(sdf.format(new Date()) + " [" + getClass().getSimpleName() + "] " + message);
   }
 
   public void addToBatch(Address address) {

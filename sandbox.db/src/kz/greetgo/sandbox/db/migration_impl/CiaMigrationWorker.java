@@ -9,6 +9,7 @@ import org.apache.commons.compress.compressors.bzip2.BZip2CompressorInputStream;
 
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -274,18 +275,20 @@ public class CiaMigrationWorker extends AbstractMigrationWorker {
     long downloadingStartedAt = System.nanoTime();
 
     for (String fileName : fileDirToLoad) {
-      TarArchiveInputStream tarInput = new TarArchiveInputStream(new BZip2CompressorInputStream(inputFileWorker.downloadFile(fileName)));
-      tarInput.getNextTarEntry();
-
       long startedAt = System.nanoTime();
-
       connection.setAutoCommit(false);
-
       try (
+        InputStream inputStream = inputFileWorker.downloadFile(fileName);
+        BZip2CompressorInputStream bZip2Inp = new BZip2CompressorInputStream(inputStream);
+        TarArchiveInputStream tarInput = new TarArchiveInputStream(bZip2Inp);
         CiaTableWorker ciaTableWorker = new CiaTableWorker(connection, maxBatchSize, tmpClientTable, tmpAddrTable, tmpPhoneTable)
-      ) {
+        ) {
+
+        tarInput.getNextTarEntry();
+        ciaTableWorker.startedAt = startedAt;
         CiaParser ciaParser = new CiaParser(tarInput, ciaTableWorker, recordsCount);
         recordsCount = ciaParser.parseAndSave();
+
       } finally {
         connection.setAutoCommit(true);
       }
