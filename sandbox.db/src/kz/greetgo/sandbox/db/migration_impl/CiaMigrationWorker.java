@@ -164,46 +164,44 @@ public class CiaMigrationWorker extends AbstractMigrationWorker {
 
     upsertClientAddress();
 
+    markDuplicatePhoneNumbers();
+
     upsertPhoneNumbers();
   }
 
-  private void upsertPhoneNumbers() throws SQLException {
+  /**
+   * Cтатус = 2, если дубликат
+   */
+  private void markDuplicateClientRecords() throws SQLException {
     //language=PostgreSQL
-    exec("UPDATE TMP_PHONE tp SET status = tc.status FROM TMP_CLIENT tc WHERE \n" +
-      " tp.client_num = tc.number");
-
-    //language=PostgreSQL
-    exec("UPDATE TMP_PHONE tp SET client_id = tc.client_id FROM TMP_CLIENT tc WHERE \n" +
-      " tp.client_num = tc.number AND tc.status IN (0,3)");
-
-    //language=PostgreSQL
-    exec("INSERT INTO client_phone (client, number, type, cia_id)\n" +
-      "SELECT client_id, phone_number, type, client_num\n" +
-      "FROM TMP_PHONE WHERE status = 0");
-
-    //language=PostgreSQL
-    exec("UPDATE client_phone cp SET number = tp.phone_number\n" +
-      "                 , type = tp.type\n" +
-      "                 , cia_id = tp.client_num\n" +
-      "FROM TMP_PHONE tp\n" +
-      "WHERE cp.client = tp.client_id\n" +
-      "AND tp.status = 3");
+    exec("WITH num_ord AS (\n" +
+      "  SELECT number, cia_id, row_number() OVER(PARTITION BY cia_id ORDER BY number DESC) AS ord \n" +
+      "  FROM TMP_CLIENT WHERE status = 0 AND error IS NULL\n" +
+      ")\n" +
+      "\n" +
+      "UPDATE TMP_CLIENT SET status = 2\n" +
+      "WHERE status = 0 AND error ISNULL AND number IN (SELECT number FROM num_ord WHERE ord > 1)");
   }
 
   /**
-   * Статус = 3, если cia_id присутствует в постоянной таблице client_addr (update)
-   * Статус = 0, если отсутствует в постоянной таблице client_addr (insert)
+   * Статус = 3, если cia_id присутствует в постоянной таблице client (update)
+   * Статус = 0, если отсутствует в постоянной таблице client (insert)
    */
-  private void upsertClientAddress() throws SQLException {
+  private void checkForClientExistence() throws SQLException {
     //language=PostgreSQL
-    exec("INSERT INTO client_addr(client, type, street, house, flat) " +
-      "SELECT tc.client_id, ta.type, ta.street, ta.house, ta.flat " +
-      "FROM TMP_CLIENT AS tc " +
-      "LEFT JOIN TMP_ADDR AS ta ON tc.number = ta.client_num " +
-      "WHERE tc.status = 0 " +
-      "ON CONFLICT(client, type) DO UPDATE " +
-      "SET street = EXCLUDED.street, house = EXCLUDED.flat, flat = EXCLUDED.flat"
-    );
+    exec("UPDATE TMP_CLIENT tc SET client_id = c.id, status = 3\n" +
+      "  FROM client c\n" +
+      "  WHERE c.cia_id = tc.cia_id AND tc.status = 0");
+
+    //language=PostgreSQL
+    exec("UPDATE TMP_CLIENT SET client_id = nextval('s_client') WHERE status = 0");
+  }
+
+  private void insertCharms() throws SQLException {
+    //language=PostgreSQL
+    exec("INSERT INTO charm (id, name)\n" +
+      "SELECT nextval('s_client'), charm_name\n" +
+      "FROM TMP_CLIENT tcl WHERE tcl.status = 0 ON CONFLICT (name) DO NOTHING");
   }
 
   private void upsertClients() throws SQLException {
@@ -230,39 +228,43 @@ public class CiaMigrationWorker extends AbstractMigrationWorker {
       ")");
   }
 
-  private void insertCharms() throws SQLException {
+  /**
+   * Статус = 3, если cia_id присутствует в постоянной таблице client_addr (update)
+   * Статус = 0, если отсутствует в постоянной таблице client_addr (insert)
+   */
+  private void upsertClientAddress() throws SQLException {
     //language=PostgreSQL
-    exec("INSERT INTO charm (id, name)\n" +
-      "SELECT nextval('s_client'), charm_name\n" +
-      "FROM TMP_CLIENT tcl WHERE tcl.status = 0 ON CONFLICT (name) DO NOTHING");
+    exec("INSERT INTO client_addr(client, type, street, house, flat) " +
+      "SELECT tc.client_id, ta.type, ta.street, ta.house, ta.flat " +
+      "FROM TMP_CLIENT AS tc " +
+      "LEFT JOIN TMP_ADDR AS ta ON tc.number = ta.client_num " +
+      "WHERE tc.status = 0 " +
+      "ON CONFLICT(client, type) DO UPDATE " +
+      "SET street = EXCLUDED.street, house = EXCLUDED.flat, flat = EXCLUDED.flat"
+    );
   }
 
-  /**
-   * Статус = 3, если cia_id присутствует в постоянной таблице client (update)
-   * Статус = 0, если отсутствует в постоянной таблице client (insert)
-   */
-  private void checkForClientExistence() throws SQLException {
-    //language=PostgreSQL
-    exec("UPDATE TMP_CLIENT tc SET client_id = c.id, status = 3\n" +
-      "  FROM client c\n" +
-      "  WHERE c.cia_id = tc.cia_id AND tc.status = 0");
-
-    //language=PostgreSQL
-    exec("UPDATE TMP_CLIENT SET client_id = nextval('s_client') WHERE status = 0");
-  }
-
-  /**
-   * Cтатус = 2, если дубликат
-   */
-  private void markDuplicateClientRecords() throws SQLException {
+  private void markDuplicatePhoneNumbers() throws SQLException {
     //language=PostgreSQL
     exec("WITH num_ord AS (\n" +
-      "  SELECT number, cia_id, row_number() OVER(PARTITION BY cia_id ORDER BY number DESC) AS ord \n" +
-      "  FROM TMP_CLIENT WHERE status = 0 AND error IS NULL\n" +
+      "  SELECT number, row_number() OVER(PARTITION BY client_num, phone_number ORDER BY number DESC) AS ord \n" +
+      "  FROM TMP_PHONE WHERE status = 0\n" +
       ")\n" +
       "\n" +
-      "UPDATE TMP_CLIENT SET status = 2\n" +
-      "WHERE status = 0 AND error ISNULL AND number IN (SELECT number FROM num_ord WHERE ord > 1)");
+      "UPDATE TMP_PHONE tp SET status = 2 FROM num_ord\n" +
+      "WHERE num_ord.ord > 1 AND num_ord.number = tp.number");
+  }
+
+  private void upsertPhoneNumbers() throws SQLException {
+    //language=PostgreSQL
+    exec("INSERT INTO client_phone(client, number, type) " +
+      "SELECT tc.client_id, tp.phone_number, tp.type " +
+      "FROM TMP_CLIENT tc " +
+      "JOIN TMP_PHONE tp ON tc.number = tp.client_num " +
+      "WHERE tc.status = 0 AND tp.status = 0 " +
+      "ON CONFLICT(client, number) DO UPDATE " +
+      "SET actual = 1"
+    );
   }
 
   protected int parseDataAndSaveInTmpDb() throws Exception {
