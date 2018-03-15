@@ -2,7 +2,7 @@ package kz.greetgo.sandbox.db.migration_impl;
 
 import com.jcraft.jsch.SftpException;
 import kz.greetgo.sandbox.db.migration_impl.report.ReportXlsx;
-import kz.greetgo.sandbox.db.ssh.SshConnection;
+import kz.greetgo.sandbox.db.ssh.InputFileWorker;
 import kz.greetgo.util.RND;
 
 import java.io.File;
@@ -21,14 +21,14 @@ import static kz.greetgo.sandbox.db.util.TimeUtils.showTime;
 public abstract class AbstractMigrationWorker {
 
   public Connection connection;
-  public SshConnection sshConnection;
+  public InputFileWorker inputFileWorker;
   public int maxBatchSize;
   public File outErrorFile;
   public ReportXlsx reportXlsx;
 
-  public AbstractMigrationWorker(Connection connection, SshConnection sshConnection) {
+  public AbstractMigrationWorker(Connection connection, InputFileWorker inputFileWorker) {
     this.connection = connection;
-    this.sshConnection = sshConnection;
+    this.inputFileWorker = inputFileWorker;
   }
 
   public void migrate() throws Exception {
@@ -65,7 +65,7 @@ public abstract class AbstractMigrationWorker {
     Date nowDate = new Date();
 
     List<String> ret = new ArrayList<>();
-    List<String> fileNames = sshConnection.getFileNames(ext);
+    List<String> fileNames = inputFileWorker.getFileNames(ext);
     String regexPattern = "^[a-zA-Z0-9-_]*" + ext + "$";
     Pattern p = Pattern.compile(regexPattern);
     String processId = RND.intStr(5);
@@ -73,7 +73,7 @@ public abstract class AbstractMigrationWorker {
     for (String fileName : fileNames) {
       if (p.matcher(fileName).matches()) {
         String newName = fileName + "." + processId + "_" + sdf.format(nowDate);
-        sshConnection.renameFile(fileName, newName);
+        inputFileWorker.renameFile(fileName, newName);
         ret.add(newName);
       }
     }

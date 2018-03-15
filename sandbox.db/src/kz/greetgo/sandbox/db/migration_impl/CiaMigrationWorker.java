@@ -2,7 +2,7 @@ package kz.greetgo.sandbox.db.migration_impl;
 
 import com.jcraft.jsch.SftpException;
 import kz.greetgo.depinject.core.Bean;
-import kz.greetgo.sandbox.db.ssh.SshConnection;
+import kz.greetgo.sandbox.db.ssh.InputFileWorker;
 import kz.greetgo.util.RND;
 import org.apache.commons.compress.archivers.tar.TarArchiveInputStream;
 import org.apache.commons.compress.compressors.bzip2.BZip2CompressorInputStream;
@@ -28,8 +28,8 @@ public class CiaMigrationWorker extends AbstractMigrationWorker {
   private String tmpAddrTable;
   private String tmpPhoneTable;
 
-  public CiaMigrationWorker(Connection connection, SshConnection sshConnection) {
-    super(connection, sshConnection);
+  public CiaMigrationWorker(Connection connection, InputFileWorker inputFileWorker) {
+    super(connection, inputFileWorker);
   }
 
   @Override
@@ -80,7 +80,7 @@ public class CiaMigrationWorker extends AbstractMigrationWorker {
       }
     } finally {
       outError.close();
-      sshConnection.upload(outErrorFile);
+      inputFileWorker.upload(outErrorFile);
     }
   }
 
@@ -269,7 +269,7 @@ public class CiaMigrationWorker extends AbstractMigrationWorker {
     long downloadingStartedAt = System.nanoTime();
 
     for (String fileName : fileDirToLoad) {
-      TarArchiveInputStream tarInput = new TarArchiveInputStream(new BZip2CompressorInputStream(sshConnection.download(fileName)));
+      TarArchiveInputStream tarInput = new TarArchiveInputStream(new BZip2CompressorInputStream(inputFileWorker.downloadFile(fileName)));
       tarInput.getNextTarEntry();
 
       long startedAt = System.nanoTime();

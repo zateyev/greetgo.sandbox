@@ -41,6 +41,7 @@ public class AbstractMigrationWorkerTest extends ParentTestNg {
     fileGenerator = new GenerateInputFiles(500, 500);
     fileGenerator.setTestMode();
     fileGenerator.execute();
+    migration.get().setSshMode(false);
   }
 
   @Test
@@ -115,7 +116,7 @@ public class AbstractMigrationWorkerTest extends ParentTestNg {
     //
     //
 
-    assertThat(getLineCountOfFile(migrationConfig.get().sshHomePath() + migrationConfig.get().outErrorFileName()))
+    assertThat(getLineCountOfFile(migrationConfig.get().inFilesHomePath() + migrationConfig.get().outErrorFileName()))
       .isEqualTo(fileGenerator.getErrorRecordCount());
   }
 

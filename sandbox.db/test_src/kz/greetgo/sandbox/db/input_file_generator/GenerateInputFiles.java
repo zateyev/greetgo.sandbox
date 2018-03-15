@@ -278,7 +278,9 @@ public class GenerateInputFiles {
   File outFile;
 
   public void execute() throws Exception {
-    FileUtils.cleanDirectory(new File(DIR));
+    File file = new File(DIR);
+    file.mkdirs();
+    FileUtils.cleanDirectory(file);
 
     rowTypeRnd.showInfo();
     errorTypeRnd.showInfo();
