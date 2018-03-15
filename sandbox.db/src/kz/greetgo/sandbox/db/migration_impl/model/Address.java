@@ -6,6 +6,7 @@ public class Address {
   public String street;
   public String house;
   public String flat;
+  public int client_num;
 
   public Address(String type) {
     this.type = type;

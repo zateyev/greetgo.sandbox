@@ -918,7 +918,7 @@ public class GenerateInputFiles {
     newAccount.accountNumber = account.number;
 //    newAccount.registeredAt = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS").format(account.registeredAt);
     newAccount.registeredAtD = account.registeredAt;
-    clientAccounts.put(clientId, newAccount);
+    if (testMode) clientAccounts.put(clientId, newAccount);
 
 
     Transaction transaction = new Transaction();
@@ -930,7 +930,7 @@ public class GenerateInputFiles {
     }
     records.add(account.addTransaction(rowIndex, true).toJson(transaction));
     info.newTransaction();
-    accountTransactions.put(clientId, transaction);
+    if (testMode) accountTransactions.put(clientId, transaction);
 
     Collections.shuffle(records);
 

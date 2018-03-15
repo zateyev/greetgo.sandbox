@@ -8,7 +8,8 @@ public class TimeUtils {
   public static final double GIG = 1_000_000_000.0;
 
   public static String showTime(long nowNano, long pastNano) {
-    return formatDecimal((double) (nowNano - pastNano) / GIG) + " s";
+//    return formatDecimal((double) (nowNano - pastNano) / GIG) + " s";
+    return formatDecimal((double) (nowNano - pastNano) / GIG);
   }
 
   public static String recordsPerSecond(long recordCount, long periodInNano) {

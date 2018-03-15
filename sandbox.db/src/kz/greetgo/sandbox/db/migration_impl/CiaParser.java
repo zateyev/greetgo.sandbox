@@ -88,6 +88,7 @@ public class CiaParser extends SaxHandler {
         addressFact.house = attributes.getValue("house");
         addressFact.flat = attributes.getValue("flat");
         addressFact.cia_id = client.cia_id;
+        addressFact.client_num = recordsNum;
         ciaTableWorker.addToBatch(addressFact);
         return;
 
@@ -97,6 +98,7 @@ public class CiaParser extends SaxHandler {
         addressReg.house = attributes.getValue("house");
         addressReg.flat = attributes.getValue("flat");
         addressReg.cia_id = client.cia_id;
+        addressReg.client_num = recordsNum;
         ciaTableWorker.addToBatch(addressReg);
     }
   }
@@ -108,7 +110,7 @@ public class CiaParser extends SaxHandler {
     switch (path) {
       case "/cia/client/workPhone": {
         PhoneNumber phoneNumber = new PhoneNumber("WORK");
-        phoneNumber.cia_id = String.valueOf(recordsNum);
+        phoneNumber.client_num = recordsNum;
         phoneNumber.number = text();
         ciaTableWorker.addToBatch(phoneNumber);
         return;
@@ -116,7 +118,7 @@ public class CiaParser extends SaxHandler {
 
       case "/cia/client/mobilePhone": {
         PhoneNumber phoneNumber = new PhoneNumber("MOBILE");
-        phoneNumber.cia_id = String.valueOf(recordsNum);
+        phoneNumber.client_num = recordsNum;
         phoneNumber.number = text();
         ciaTableWorker.addToBatch(phoneNumber);
         return;
@@ -124,7 +126,7 @@ public class CiaParser extends SaxHandler {
 
       case "/cia/client/homePhone": {
         PhoneNumber phoneNumber = new PhoneNumber("HOME");
-        phoneNumber.cia_id = String.valueOf(recordsNum);
+        phoneNumber.client_num = recordsNum;
         phoneNumber.number = text();
         ciaTableWorker.addToBatch(phoneNumber);
         return;

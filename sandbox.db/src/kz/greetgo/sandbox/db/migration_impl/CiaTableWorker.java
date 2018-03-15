@@ -32,11 +32,11 @@ public class CiaTableWorker implements Closeable {
       "VALUES (?, ?, ?, ?, ?, ?, ?, ?) "
     );
 
-    phonePS = this.connection.prepareStatement("INSERT INTO " + phoneTableName + " (cia_id, phone_number, type) " +
+    phonePS = this.connection.prepareStatement("INSERT INTO " + phoneTableName + " (client_num, phone_number, type) " +
       "VALUES (?, ?, ?)");
 
-    addrPS = this.connection.prepareStatement("INSERT INTO " + addrTableName + " (cia_id, type, street, house, flat) " +
-      "VALUES (?, ?, ?, ?, ?)");
+    addrPS = this.connection.prepareStatement("INSERT INTO " + addrTableName + " (cia_id, client_num, type, street, house, flat) " +
+      "VALUES (?, ?, ?, ?, ?, ?)");
   }
 
   public void addToBatch(Client client) {
@@ -72,6 +72,7 @@ public class CiaTableWorker implements Closeable {
     try {
       int ind = 1;
       addrPS.setString(ind++, address.cia_id);
+      addrPS.setInt(ind++, address.client_num);
       addrPS.setString(ind++, address.type);
       addrPS.setString(ind++, address.street);
       addrPS.setString(ind++, address.house);
@@ -96,7 +97,7 @@ public class CiaTableWorker implements Closeable {
     try {
 
       int ind = 1;
-      phonePS.setString(ind++, phoneNumber.cia_id);
+      phonePS.setInt(ind++, phoneNumber.client_num);
       phonePS.setString(ind++, phoneNumber.number);
       phonePS.setString(ind, phoneNumber.type);
       phonePS.addBatch();
