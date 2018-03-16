@@ -66,7 +66,7 @@ public class AbstractMigrationWorkerTest extends ParentTestNg {
   }
 
   @Test
-  public void testCiaAndFrsMigrationConcurrently() throws Exception {
+  public void testCiaAndFrsConcurrentlyMigration() throws Exception {
     clientTestDao.get().removeAllData();
     charmTestDao.get().removeAllData();
 

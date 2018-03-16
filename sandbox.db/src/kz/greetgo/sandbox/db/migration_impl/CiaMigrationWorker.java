@@ -176,12 +176,12 @@ public class CiaMigrationWorker extends AbstractMigrationWorker {
   private void markDuplicateClientRecords() throws SQLException {
     //language=PostgreSQL
     exec("WITH num_ord AS (\n" +
-      "  SELECT number, cia_id, row_number() OVER(PARTITION BY cia_id ORDER BY number DESC) AS ord \n" +
-      "  FROM TMP_CLIENT WHERE status = 0 AND error IS NULL\n" +
+      "  SELECT number, row_number() OVER(PARTITION BY cia_id ORDER BY number DESC) AS ord \n" +
+      "  FROM TMP_CLIENT WHERE status = 0\n" +
       ")\n" +
       "\n" +
-      "UPDATE TMP_CLIENT SET status = 2\n" +
-      "WHERE status = 0 AND error ISNULL AND number IN (SELECT number FROM num_ord WHERE ord > 1)");
+      "UPDATE TMP_CLIENT tc SET status = 2 FROM num_ord\n" +
+      "WHERE tc.number = num_ord.number AND num_ord.ord > 1");
   }
 
   /**

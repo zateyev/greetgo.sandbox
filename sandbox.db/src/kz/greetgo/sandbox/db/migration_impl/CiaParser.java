@@ -3,6 +3,7 @@ package kz.greetgo.sandbox.db.migration_impl;
 import kz.greetgo.sandbox.db.migration_impl.model.Address;
 import kz.greetgo.sandbox.db.migration_impl.model.Client;
 import kz.greetgo.sandbox.db.migration_impl.model.PhoneNumber;
+import kz.greetgo.sandbox.db.migration_impl.model.PhoneType;
 import kz.greetgo.sandbox.db.util.SaxHandler;
 import org.xml.sax.Attributes;
 import org.xml.sax.InputSource;
@@ -109,7 +110,8 @@ public class CiaParser extends SaxHandler {
 
     switch (path) {
       case "/cia/client/workPhone": {
-        PhoneNumber phoneNumber = new PhoneNumber("WORK");
+        PhoneNumber phoneNumber = new PhoneNumber();
+        phoneNumber.type = PhoneType.WORK;
         phoneNumber.client_num = recordsNum;
         phoneNumber.number = text();
         ciaTableWorker.addToBatch(phoneNumber);
@@ -117,7 +119,8 @@ public class CiaParser extends SaxHandler {
       }
 
       case "/cia/client/mobilePhone": {
-        PhoneNumber phoneNumber = new PhoneNumber("MOBILE");
+        PhoneNumber phoneNumber = new PhoneNumber();
+        phoneNumber.type = PhoneType.MOBILE;
         phoneNumber.client_num = recordsNum;
         phoneNumber.number = text();
         ciaTableWorker.addToBatch(phoneNumber);
@@ -125,7 +128,8 @@ public class CiaParser extends SaxHandler {
       }
 
       case "/cia/client/homePhone": {
-        PhoneNumber phoneNumber = new PhoneNumber("HOME");
+        PhoneNumber phoneNumber = new PhoneNumber();
+        phoneNumber.type = PhoneType.HOME;
         phoneNumber.client_num = recordsNum;
         phoneNumber.number = text();
         ciaTableWorker.addToBatch(phoneNumber);

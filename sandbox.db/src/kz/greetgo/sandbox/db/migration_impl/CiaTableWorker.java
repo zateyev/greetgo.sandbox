@@ -142,7 +142,7 @@ public class CiaTableWorker implements Closeable {
       int ind = 1;
       phonePS.setInt(ind++, phoneNumber.client_num);
       phonePS.setString(ind++, phoneNumber.number);
-      phonePS.setString(ind, phoneNumber.type);
+      phonePS.setString(ind, phoneNumber.type.toString());
       phonePS.addBatch();
 
       phoneBatchSize++;
