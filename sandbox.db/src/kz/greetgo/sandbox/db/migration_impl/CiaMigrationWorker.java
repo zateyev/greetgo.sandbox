@@ -287,6 +287,10 @@ public class CiaMigrationWorker extends AbstractMigrationWorker {
         tarInput.getNextTarEntry();
         ciaTableWorker.startedAt = startedAt;
         CiaParser ciaParser = new CiaParser(tarInput, ciaTableWorker, recordsCount);
+        {
+          long now = System.nanoTime();
+          info("FILE Extracted for " + showTime(now, startedAt) + " sec");
+        }
         recordsCount = ciaParser.parseAndSave();
 
       } finally {

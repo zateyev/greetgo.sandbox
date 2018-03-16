@@ -590,9 +590,9 @@ public class GenerateInputFiles {
         Date date = null;
 
         if (errorType == ErrorType.BIRTH_DATE_TOO_OLD) {
-          date = RND.dateYears(-10_000, -200);
+          date = RND.dateYears(-10_000, -202);
         } else if (errorType == ErrorType.BIRTH_DATE_TOO_YOUNG) {
-          date = RND.dateYears(-10, 0);
+          date = RND.dateYears(-8, 0);
         }
 
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");

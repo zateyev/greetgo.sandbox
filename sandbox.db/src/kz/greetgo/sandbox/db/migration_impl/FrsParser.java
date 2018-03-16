@@ -23,33 +23,6 @@ public class FrsParser {
     this.frsTableWorker = frsTableWorker;
   }
 
-  private static void parseJSON(JsonParser jsonParser, Account account) throws IOException {
-    //loop through the JsonTokens
-    while (jsonParser.nextToken() != JsonToken.END_OBJECT) {
-      String name = jsonParser.getCurrentName();
-      String type;
-      switch (name) {
-        case "type":
-          jsonParser.nextToken();
-          type = jsonParser.getText();
-          account.type = type;
-          break;
-        case "client_id":
-          jsonParser.nextToken();
-          account.clientId = jsonParser.getText();
-          break;
-        case "account_number":
-          jsonParser.nextToken();
-          account.accountNumber = jsonParser.getText();
-          break;
-        case "registered_at":
-          jsonParser.nextToken();
-          account.registeredAt = jsonParser.getText();
-          break;
-      }
-    }
-  }
-
   public int parseAndSave() throws IOException {
     int recordsCount = 0;
     BufferedReader br = new BufferedReader(new InputStreamReader(inputStream));

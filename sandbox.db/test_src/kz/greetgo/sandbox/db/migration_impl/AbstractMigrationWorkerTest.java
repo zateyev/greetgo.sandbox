@@ -63,7 +63,22 @@ public class AbstractMigrationWorkerTest extends ParentTestNg {
     long clientCount = clientTestDao.get().getClientCount();
 
     assertThat(clientCount).isEqualTo(fileGenerator.getGoodClientCount());
-//    assertThat(clientCount).isEqualTo(699_683);
+  }
+
+  @Test
+  public void testCiaAndFrsMigrationConcurrently() throws Exception {
+    clientTestDao.get().removeAllData();
+    charmTestDao.get().removeAllData();
+
+    //
+    //
+    migration.get().executeMigration();
+    //
+    //
+
+    long clientCount = clientTestDao.get().getClientCount();
+
+    assertThat(clientCount).isEqualTo(fileGenerator.getGoodClientCount());
   }
 
   @Test
