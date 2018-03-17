@@ -43,9 +43,8 @@ public class AbstractMigrationWorkerTest extends ParentTestNg {
 //    fileGenerator = new GenerateInputFiles(50_000, 50);
 //    fileGenerator = new GenerateInputFiles(500, 50);
 //    fileGenerator.setTestMode();
-
-
 //    fileGenerator.execute();
+
     migration.get().setSshMode(false);
   }
 

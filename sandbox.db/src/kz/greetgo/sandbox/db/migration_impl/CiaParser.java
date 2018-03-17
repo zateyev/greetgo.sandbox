@@ -90,8 +90,7 @@ public class CiaParser extends SaxHandler {
         addressFact.flat = attributes.getValue("flat");
         addressFact.cia_id = client.cia_id;
         addressFact.client_num = recordsNum;
-//        ciaTableWorker.addToBatch(addressFact);
-        ciaTableWorker.addressesQueue.offer(addressFact);
+        ciaTableWorker.addToBatch(addressFact);
         return;
 
       case "/cia/client/address/register":
@@ -101,8 +100,7 @@ public class CiaParser extends SaxHandler {
         addressReg.flat = attributes.getValue("flat");
         addressReg.cia_id = client.cia_id;
         addressReg.client_num = recordsNum;
-//        ciaTableWorker.addToBatch(addressReg);
-        ciaTableWorker.addressesQueue.offer(addressReg);
+        ciaTableWorker.addToBatch(addressReg);
     }
   }
 
@@ -129,44 +127,13 @@ public class CiaParser extends SaxHandler {
           phoneNumber.type = PhoneType.HOME;
           break;
         }
+
+        default:
+          throw new RuntimeException("Unexpected phone type");
       }
-//      ciaTableWorker.addToBatch(phoneNumber);
       ciaTableWorker.phonesQueue.offer(phoneNumber);
     } else if ("/cia/client".equals(path)) {
       ciaTableWorker.addToBatch(client);
     }
-
-//    switch (path) {
-//      case "/cia/client/workPhone": {
-//        PhoneNumber phoneNumber = new PhoneNumber();
-//        phoneNumber.type = PhoneType.WORK;
-//        phoneNumber.client_num = recordsNum;
-//        phoneNumber.number = text();
-//        ciaTableWorker.addToBatch(phoneNumber);
-//        return;
-//      }
-//
-//      case "/cia/client/mobilePhone": {
-//        PhoneNumber phoneNumber = new PhoneNumber();
-//        phoneNumber.type = PhoneType.MOBILE;
-//        phoneNumber.client_num = recordsNum;
-//        phoneNumber.number = text();
-//        ciaTableWorker.addToBatch(phoneNumber);
-//        return;
-//      }
-//
-//      case "/cia/client/homePhone": {
-//        PhoneNumber phoneNumber = new PhoneNumber();
-//        phoneNumber.type = PhoneType.HOME;
-//        phoneNumber.client_num = recordsNum;
-//        phoneNumber.number = text();
-//        ciaTableWorker.addToBatch(phoneNumber);
-//        return;
-//      }
-//
-//      case "/cia/client": {
-//        ciaTableWorker.addToBatch(client);
-//      }
-//    }
   }
 }
