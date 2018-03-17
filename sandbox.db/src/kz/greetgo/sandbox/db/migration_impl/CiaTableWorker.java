@@ -1,8 +1,10 @@
 package kz.greetgo.sandbox.db.migration_impl;
 
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import kz.greetgo.sandbox.db.migration_impl.model.Address;
 import kz.greetgo.sandbox.db.migration_impl.model.Client;
 import kz.greetgo.sandbox.db.migration_impl.model.PhoneNumber;
+import kz.greetgo.sandbox.db.migration_impl.model.PhoneType;
 import kz.greetgo.sandbox.db.util.TimeUtils;
 
 import java.io.Closeable;
@@ -12,6 +14,8 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public class CiaTableWorker implements Closeable {
@@ -30,6 +34,12 @@ public class CiaTableWorker implements Closeable {
 
   private int addrBatchSize;
   private int phoneBatchSize;
+
+  public final BlockingQueue<PhoneNumber> phonesQueue = new LinkedBlockingQueue<>();
+  private final Thread phoneThread;
+
+  public final BlockingQueue<Address> addressesQueue = new LinkedBlockingQueue<>();
+  private final Thread addressThread;
 
   public CiaTableWorker(Connection connection, int maxBatchSize, String clientTableName, String addrTableName, String phoneTableName)
     throws SQLException {
@@ -66,6 +76,31 @@ public class CiaTableWorker implements Closeable {
 
     });
     see.start();
+
+
+    phoneThread = new Thread(() -> {
+      while (true) {
+        try {
+          PhoneNumber phoneNumber = phonesQueue.take();
+          addToBatch(phoneNumber);
+        } catch (InterruptedException e) {
+          e.printStackTrace();
+        }
+      }
+    });
+    phoneThread.start();
+
+    addressThread = new Thread(() -> {
+      while (true) {
+        try {
+          Address address = addressesQueue.take();
+          addToBatch(address);
+        } catch (InterruptedException e) {
+          e.printStackTrace();
+        }
+      }
+    });
+    addressThread.start();
   }
 
   public void addToBatch(Client client) {
@@ -79,7 +114,8 @@ public class CiaTableWorker implements Closeable {
 
       clientPS.setString(ind++, client.patronymic);
       clientPS.setString(ind++, client.gender);
-      clientPS.setDate(ind++, client.dateOfBirth != null ? java.sql.Date.valueOf(client.dateOfBirth) : null);
+//      clientPS.setDate(ind++, client.dateOfBirth != null ? java.sql.Date.valueOf(client.dateOfBirth) : null);
+      clientPS.setDate(ind++, client.dateOfBirth != null ? new java.sql.Date(client.dateOfBirth.getTime()) : null);
       clientPS.setString(ind, client.charmName);
 
       clientPS.addBatch();
@@ -161,15 +197,49 @@ public class CiaTableWorker implements Closeable {
   @Override
   public void close() throws IOException {
     try {
-      if (clientBatchSize > 0) clientPS.executeBatch();
-      if (addrBatchSize > 0) addrPS.executeBatch();
+//      if (clientBatchSize > 0) clientPS.executeBatch();
+//      if (addrBatchSize > 0) addrPS.executeBatch();
+//      if (phoneBatchSize > 0) phonePS.executeBatch();
+//      if (clientBatchSize + addrBatchSize + phoneBatchSize > 0) this.connection.commit();
+
+//      if (clientBatchSize > 0) clientPS.executeBatch();
+//      if (addrBatchSize > 0) addrPS.executeBatch();
+//      if (clientBatchSize + addrBatchSize > 0) this.connection.commit();
+
+      if (clientBatchSize > 0) {
+        clientPS.executeBatch();
+        this.connection.commit();
+      }
+
+//      synchronized (phonesQueue) {
+//        while (!phonesQueue.isEmpty()) {
+////          phonesQueue.wait();
+//          Thread.sleep(500);
+//        }
+//        if (phoneBatchSize > 0) phonePS.executeBatch();
+//        this.connection.commit();
+//      }
+//      phoneThread.interrupt();
+
+      while (!phonesQueue.isEmpty() || !addressesQueue.isEmpty()) {
+        Thread.sleep(500);
+      }
       if (phoneBatchSize > 0) phonePS.executeBatch();
+      if (addrBatchSize > 0) addrPS.executeBatch();
       if (clientBatchSize + addrBatchSize + phoneBatchSize > 0) this.connection.commit();
+
+//      synchronized (addressesQueue) {
+//        while (!addressesQueue.isEmpty()) {
+//          addressesQueue.wait();
+//        }
+//        if (addrBatchSize > 0) addrPS.executeBatch();
+//        this.connection.commit();
+//      }
 
       clientPS.close();
       phonePS.close();
       addrPS.close();
-    } catch (SQLException e) {
+    } catch (SQLException | InterruptedException e) {
       e.printStackTrace();
     }
   }

@@ -14,6 +14,9 @@ import java.math.RoundingMode;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.Year;
+import java.time.ZoneId;
 import java.util.*;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -21,10 +24,14 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import static kz.greetgo.util.RND.plusLong;
+
 public class GenerateInputFiles {
 
   private final int CIA_LIMIT;
   private final int FRS_LIMIT;
+
+  private final int CURRENT_YEAR = Calendar.getInstance().get(Calendar.YEAR);
 
   private Map<String, ClientDetails> lastGoodClients;
   private Map<String, kz.greetgo.sandbox.db.migration_impl.model.Account> clientAccounts;
@@ -41,7 +48,28 @@ public class GenerateInputFiles {
   }
 
   public static void main(String[] args) throws Exception {
-    new GenerateInputFiles(1_000_000, 10_000_000).execute();
+//    new GenerateInputFiles(1_000_000, 10_000_000).execute();
+
+    SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+    for (int i = 0; i < 100; i++) {
+      Calendar cal = new GregorianCalendar();
+      int yearFrom = -10;
+      int yearTo = -9;
+      cal.add(Calendar.YEAR, yearFrom);
+      long from = cal.getTimeInMillis();
+      cal.add(Calendar.YEAR, yearTo - yearFrom);
+      long to = cal.getTimeInMillis();
+      if (from > to) {
+        long tmp = from;
+        from = to;
+        to = tmp;
+      }
+      final long time = from + plusLong(to - from);
+      Date date = new Date(time);
+
+      System.out.println(sdf.format(date));
+    }
+
   }
 
   private static final String ENG = "abcdefghijklmnopqrstuvwxyz";
@@ -590,9 +618,9 @@ public class GenerateInputFiles {
         Date date = null;
 
         if (errorType == ErrorType.BIRTH_DATE_TOO_OLD) {
-          date = RND.dateYears(-10_000, -202);
+          date = RND.dateYears(-CURRENT_YEAR + 1, -200);
         } else if (errorType == ErrorType.BIRTH_DATE_TOO_YOUNG) {
-          date = RND.dateYears(-8, 0);
+          date = RND.dateYears(-10, 0);
         }
 
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
@@ -601,6 +629,8 @@ public class GenerateInputFiles {
           date = RND.dateYears(-100, -18);
           goodClient.dateOfBirth = sdf.format(date);
         }
+
+
 
         tags.add("    <birth value=\"" + sdf.format(date) + "\"/>");
 

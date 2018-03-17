@@ -38,13 +38,14 @@ public class AbstractMigrationWorkerTest extends ParentTestNg {
   @BeforeClass
   @BeforeMethod
   public void prepareInputFiles() throws Exception {
-//    fileGenerator = new GenerateInputFiles(10_000, 50);
-    fileGenerator = new GenerateInputFiles(500, 50);
-    fileGenerator.setTestMode();
-
 //    fileGenerator = new GenerateInputFiles(1_000_000, 10_000_000);
 
-    fileGenerator.execute();
+//    fileGenerator = new GenerateInputFiles(50_000, 50);
+//    fileGenerator = new GenerateInputFiles(500, 50);
+//    fileGenerator.setTestMode();
+
+
+//    fileGenerator.execute();
     migration.get().setSshMode(false);
   }
 
@@ -63,6 +64,7 @@ public class AbstractMigrationWorkerTest extends ParentTestNg {
     long clientCount = clientTestDao.get().getClientCount();
 
     assertThat(clientCount).isEqualTo(fileGenerator.getGoodClientCount());
+//    assertThat(clientCount).isEqualTo(699_633);
   }
 
   @Test
@@ -78,7 +80,8 @@ public class AbstractMigrationWorkerTest extends ParentTestNg {
 
     long clientCount = clientTestDao.get().getClientCount();
 
-    assertThat(clientCount).isEqualTo(fileGenerator.getGoodClientCount());
+//    assertThat(clientCount).isEqualTo(fileGenerator.getGoodClientCount());
+    assertThat(clientCount).isEqualTo(699_633);
   }
 
   @Test
