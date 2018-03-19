@@ -79,7 +79,6 @@ public class FrsParser {
       jsonParser.close();
       recordsCount++;
     }
-    frsTableWorker.execBatch.run();
     return recordsCount;
   }
 }

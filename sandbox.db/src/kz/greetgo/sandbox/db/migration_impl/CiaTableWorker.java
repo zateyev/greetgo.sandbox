@@ -12,6 +12,8 @@ import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public class CiaTableWorker implements Closeable {
@@ -30,6 +32,9 @@ public class CiaTableWorker implements Closeable {
 
   private int addrBatchSize;
   private int phoneBatchSize;
+
+  public final BlockingQueue<PhoneNumber> phonesQueue = new LinkedBlockingQueue<>();
+  private final Thread phoneThread;
 
   public CiaTableWorker(Connection connection, int maxBatchSize, String clientTableName, String addrTableName, String phoneTableName)
     throws SQLException {
@@ -66,6 +71,20 @@ public class CiaTableWorker implements Closeable {
 
     });
     see.start();
+
+
+    phoneThread = new Thread(() -> {
+      while (working.get()) {
+        try {
+          PhoneNumber phoneNumber = phonesQueue.take();
+          if (phoneNumber.type == null) break;
+          addToBatch(phoneNumber);
+        } catch (InterruptedException e) {
+          e.printStackTrace();
+        }
+      }
+    });
+    phoneThread.start();
   }
 
   public void addToBatch(Client client) {
@@ -79,7 +98,7 @@ public class CiaTableWorker implements Closeable {
 
       clientPS.setString(ind++, client.patronymic);
       clientPS.setString(ind++, client.gender);
-      clientPS.setDate(ind++, client.dateOfBirth != null ? java.sql.Date.valueOf(client.dateOfBirth) : null);
+      clientPS.setDate(ind++, client.dateOfBirth != null ? new java.sql.Date(client.dateOfBirth.getTime()) : null);
       clientPS.setString(ind, client.charmName);
 
       clientPS.addBatch();
@@ -161,15 +180,22 @@ public class CiaTableWorker implements Closeable {
   @Override
   public void close() throws IOException {
     try {
+
       if (clientBatchSize > 0) clientPS.executeBatch();
       if (addrBatchSize > 0) addrPS.executeBatch();
+
+      // idle PhoneNumber object to indicate that no more numbers will be added
+      phonesQueue.offer(new PhoneNumber());
+      working.set(false);
+      phoneThread.join();
       if (phoneBatchSize > 0) phonePS.executeBatch();
+
       if (clientBatchSize + addrBatchSize + phoneBatchSize > 0) this.connection.commit();
 
       clientPS.close();
       phonePS.close();
       addrPS.close();
-    } catch (SQLException e) {
+    } catch (SQLException | InterruptedException e) {
       e.printStackTrace();
     }
   }

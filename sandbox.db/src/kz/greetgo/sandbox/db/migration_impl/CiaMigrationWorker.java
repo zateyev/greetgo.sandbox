@@ -56,7 +56,7 @@ public class CiaMigrationWorker extends AbstractMigrationWorker {
       "WHERE error IS NULL AND charm_name IS NULL");
     //language=PostgreSQL
     exec("UPDATE TMP_CLIENT SET error = 'age of the client must be between 10 and 200'\n" +
-      "WHERE error IS NULL AND date_part('year', age(birth_date)) NOT BETWEEN 10 AND 200");
+      "WHERE error IS NULL AND date_part('year', age(birth_date)) NOT BETWEEN 11 AND 199"); // equivalent to age <=10 or age >=200
 
     //language=PostgreSQL
     exec("UPDATE TMP_CLIENT SET status = 4 WHERE error IS NOT NULL");
@@ -271,6 +271,7 @@ public class CiaMigrationWorker extends AbstractMigrationWorker {
   protected int parseDataAndSaveInTmpDb() throws Exception {
 
     List<String> fileDirToLoad = renameFiles(".xml.tar.bz2");
+    fileDirToLoad.sort(String::compareTo);
     int recordsCount = 0;
     long downloadingStartedAt = System.nanoTime();
 
@@ -285,7 +286,7 @@ public class CiaMigrationWorker extends AbstractMigrationWorker {
         ) {
 
         tarInput.getNextTarEntry();
-        ciaTableWorker.startedAt = startedAt;
+        ciaTableWorker.startedAt = downloadingStartedAt;
         CiaParser ciaParser = new CiaParser(tarInput, ciaTableWorker, recordsCount);
         {
           long now = System.nanoTime();
