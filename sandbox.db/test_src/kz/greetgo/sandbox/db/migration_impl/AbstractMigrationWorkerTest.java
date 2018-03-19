@@ -41,9 +41,9 @@ public class AbstractMigrationWorkerTest extends ParentTestNg {
 //    fileGenerator = new GenerateInputFiles(1_000_000, 10_000_000);
 
 //    fileGenerator = new GenerateInputFiles(50_000, 50);
-//    fileGenerator = new GenerateInputFiles(500, 50);
-//    fileGenerator.setTestMode();
-//    fileGenerator.execute();
+    fileGenerator = new GenerateInputFiles(500, 500);
+    fileGenerator.setTestMode();
+    fileGenerator.execute();
 
     migration.get().setSshMode(false);
   }
@@ -79,8 +79,8 @@ public class AbstractMigrationWorkerTest extends ParentTestNg {
 
     long clientCount = clientTestDao.get().getClientCount();
 
-//    assertThat(clientCount).isEqualTo(fileGenerator.getGoodClientCount());
-    assertThat(clientCount).isEqualTo(699_633);
+    assertThat(clientCount).isEqualTo(fileGenerator.getGoodClientCount());
+//    assertThat(clientCount).isEqualTo(699_633);
   }
 
   @Test

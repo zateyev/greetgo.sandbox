@@ -24,8 +24,6 @@ public class FrsTableWorker implements Closeable {
 
   private final static SimpleDateFormat SDF = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS");
 
-  public Runnable execBatch;
-
   public FrsTableWorker(Connection connection, int maxBatchSize, String accountTable, String transactionTable) throws SQLException {
     this.connection = connection;
     this.maxBatchSize = maxBatchSize;
@@ -37,19 +35,6 @@ public class FrsTableWorker implements Closeable {
     transactionPS = this.connection.prepareStatement(
       "INSERT INTO " + transactionTable + " (type, money, finished_at, transaction_type, account_number) " +
         "VALUES (?, ?, ?, ?, ?)");
-
-    execBatch = () -> {
-      try {
-        if (accountBatchSize > 0) accountPS.executeBatch();
-
-        if (transactionBatchSize > 0) transactionPS.executeBatch();
-
-
-        if (accountBatchSize + transactionBatchSize > 0) this.connection.commit();
-      } catch (SQLException e) {
-        e.printStackTrace();
-      }
-    };
   }
 
   public void addToBatch(Account account) {
@@ -102,6 +87,10 @@ public class FrsTableWorker implements Closeable {
   @Override
   public void close() throws IOException {
     try {
+      if (accountBatchSize > 0) accountPS.executeBatch();
+      if (transactionBatchSize > 0) transactionPS.executeBatch();
+      if (accountBatchSize + transactionBatchSize > 0) this.connection.commit();
+
       accountPS.close();
       transactionPS.close();
     } catch (SQLException e) {
