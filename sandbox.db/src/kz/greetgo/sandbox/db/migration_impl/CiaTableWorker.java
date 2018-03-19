@@ -36,6 +36,8 @@ public class CiaTableWorker implements Closeable {
   public final BlockingQueue<PhoneNumber> phonesQueue = new LinkedBlockingQueue<>();
   private final Thread phoneThread;
 
+  private final static SimpleDateFormat SDF = new SimpleDateFormat("yyyy-MM-dd");
+
   public CiaTableWorker(Connection connection, int maxBatchSize, String clientTableName, String addrTableName, String phoneTableName)
     throws SQLException {
 
@@ -98,7 +100,7 @@ public class CiaTableWorker implements Closeable {
 
       clientPS.setString(ind++, client.patronymic);
       clientPS.setString(ind++, client.gender);
-      clientPS.setDate(ind++, client.dateOfBirth != null ? new java.sql.Date(client.dateOfBirth.getTime()) : null);
+      clientPS.setDate(ind++, client.dateOfBirth != null ? java.sql.Date.valueOf(client.dateOfBirth) : null);
       clientPS.setString(ind, client.charmName);
 
       clientPS.addBatch();

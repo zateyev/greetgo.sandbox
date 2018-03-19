@@ -1,8 +1,8 @@
 package kz.greetgo.sandbox.db.input_file_generator;
 
 import kz.greetgo.sandbox.controller.model.*;
-import kz.greetgo.sandbox.db.migration_impl.model.Account;
-import kz.greetgo.sandbox.db.migration_impl.model.Transaction;
+import kz.greetgo.sandbox.controller.model.PhoneNumber;
+import kz.greetgo.sandbox.db.migration_impl.model.*;
 import kz.greetgo.util.RND;
 import org.apache.commons.io.FileUtils;
 
@@ -14,9 +14,6 @@ import java.math.RoundingMode;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.text.SimpleDateFormat;
-import java.time.LocalDate;
-import java.time.Year;
-import java.time.ZoneId;
 import java.util.*;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -34,6 +31,10 @@ public class GenerateInputFiles {
   private final int CURRENT_YEAR = Calendar.getInstance().get(Calendar.YEAR);
 
   private Map<String, ClientDetails> lastGoodClients;
+  private List<ClientDetails> goodClients;
+  private List<Client> generatedClients;
+  private List<kz.greetgo.sandbox.db.migration_impl.model.Address> generatedAddresses;
+  private List<kz.greetgo.sandbox.db.migration_impl.model.PhoneNumber> generatedPhoneNumbers;
   private Map<String, kz.greetgo.sandbox.db.migration_impl.model.Account> clientAccounts;
   private Map<String, Transaction> accountTransactions;
   private boolean testMode;
@@ -43,8 +44,13 @@ public class GenerateInputFiles {
     this.FRS_LIMIT = FRS_LIMIT;
 
     lastGoodClients = new HashMap<>();
+    goodClients = new ArrayList<>();
     clientAccounts = new HashMap<>();
     accountTransactions = new HashMap<>();
+
+    generatedClients = new ArrayList<>();
+    generatedAddresses = new ArrayList<>();
+    generatedPhoneNumbers = new ArrayList<>();
   }
 
   public static void main(String[] args) throws Exception {
@@ -114,6 +120,22 @@ public class GenerateInputFiles {
 
   public Map<String, Transaction> getAccountTransactions() {
     return accountTransactions;
+  }
+
+  public List<ClientDetails> getGoodClients() {
+    return goodClients;
+  }
+
+  public List<Client> getGeneratedClients() {
+    return generatedClients;
+  }
+
+  public List<kz.greetgo.sandbox.db.migration_impl.model.Address> getGeneratedAddresses() {
+    return generatedAddresses;
+  }
+
+  public List<kz.greetgo.sandbox.db.migration_impl.model.PhoneNumber> getGeneratedPhoneNumbers() {
+    return generatedPhoneNumbers;
   }
 
   private static class Info {
@@ -581,6 +603,8 @@ public class GenerateInputFiles {
     goodClient.charm = new Charm();
     goodClient.phoneNumbers = new ArrayList<>();
 
+    Client client = new Client();
+
     ErrorType errorType = null;
 
     if (rowType == RowType.ERROR) errorType = errorTypeRnd.next();
@@ -588,9 +612,11 @@ public class GenerateInputFiles {
     if (errorType != ErrorType.NO_SURNAME) {
 
       if (errorType == ErrorType.EMPTY_SURNAME) {
+        client.surname = "";
         tags.add("    <surname value=\"\"/>");
       } else {
         goodClient.surname = nextSurname();
+        client.surname = goodClient.surname;
         tags.add("    <surname value=\"" + goodClient.surname + "\"/>");
       }
 
@@ -599,9 +625,11 @@ public class GenerateInputFiles {
     if (errorType != ErrorType.NO_NAME) {
 
       if (errorType == ErrorType.EMPTY_NAME) {
+        client.name = "";
         tags.add("    <name value=\"\"/>");
       } else {
         goodClient.name = nextName();
+        client.name = goodClient.name;
         tags.add("    <name value=\"" + goodClient.name + "\"/>");
       }
 
@@ -615,6 +643,7 @@ public class GenerateInputFiles {
 
       } else {
 
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
         Date date = null;
 
         if (errorType == ErrorType.BIRTH_DATE_TOO_OLD) {
@@ -623,11 +652,12 @@ public class GenerateInputFiles {
           date = RND.dateYears(-10, 0);
         }
 
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-
         if (date == null) {
           date = RND.dateYears(-100, -18);
           goodClient.dateOfBirth = sdf.format(date);
+          client.dateOfBirth = goodClient.dateOfBirth;
+        } else {
+          client.dateOfBirth = sdf.format(date);
         }
 
 
@@ -644,11 +674,13 @@ public class GenerateInputFiles {
 
       case 2:
         goodClient.patronymic = spaces(random.nextInt(3));
+        client.patronymic = goodClient.patronymic;
         tags.add("    <patronymic value=\"" + goodClient.patronymic + "\"/>");
         break;
 
       default:
         goodClient.patronymic = nextPatronymic();
+        client.patronymic = goodClient.patronymic;
         tags.add("    <patronymic value=\"" + goodClient.patronymic + "\"/>");
         break;
     }
@@ -659,12 +691,30 @@ public class GenerateInputFiles {
       "    </address>"
     );
 
+    if (testMode) {
+      kz.greetgo.sandbox.db.migration_impl.model.Address address = new kz.greetgo.sandbox.db.migration_impl.model.Address();
+      address.type = goodClient.addressF.type.toString();
+      address.street = goodClient.addressF.street;
+      address.house = goodClient.addressF.house;
+      address.flat = goodClient.addressF.flat;
+      generatedAddresses.add(address);
+
+      address = new kz.greetgo.sandbox.db.migration_impl.model.Address();
+      address.type = goodClient.addressR.type.toString();
+      address.street = goodClient.addressR.street;
+      address.house = goodClient.addressR.house;
+      address.flat = goodClient.addressR.flat;
+      generatedAddresses.add(address);
+    }
+
     if (errorType != ErrorType.NO_CHARM) {
       goodClient.charm.name = nextCharm();
+      client.charmName = goodClient.charm.name;
       tags.add("    <charm value=\"" + goodClient.charm.name + "\"/>");
     }
 
     goodClient.gender = Gender.valueOf(random.nextBoolean() ? "MALE" : "FEMALE");
+    client.gender = goodClient.gender.toString();
     tags.add("    <gender value=\"" + goodClient.gender.toString() + "\"/>");
 
     {
@@ -672,6 +722,8 @@ public class GenerateInputFiles {
       for (int i = 0; i < phoneCount; i++) {
         tags.add("    " + Phone.next().tag(PhoneType.values()[random.nextInt(PhoneType.values().length)], goodClient));
       }
+
+      if (testMode) addToGeneratedPhoneNumbers(goodClient.phoneNumbers);
     }
 
     {
@@ -709,13 +761,30 @@ public class GenerateInputFiles {
       if (rowType == RowType.ERROR) {
         info.newErrorClient();
       } else {
-        if (testMode && info.goodClientIds.contains(clientId)) lastGoodClients.put(clientId, goodClient);
+        if (testMode) {
+          goodClients.add(goodClient);
+          if (info.goodClientIds.contains(clientId)) lastGoodClients.put(clientId, goodClient);
+        }
         info.appendGoodClientId(clientId);
+      }
+
+      if (testMode) {
+        client.cia_id = clientId;
+        generatedClients.add(client);
       }
 
       pr.println("  <client id=\"" + clientId + "\"> <!-- " + clientIndex + " -->");
       tags.forEach(pr::println);
       pr.println("  </client>");
+    }
+  }
+
+  private void addToGeneratedPhoneNumbers(List<PhoneNumber> phoneNumbers) {
+    for (int i = 0; i < phoneNumbers.size(); i++) {
+      kz.greetgo.sandbox.db.migration_impl.model.PhoneNumber pn = new kz.greetgo.sandbox.db.migration_impl.model.PhoneNumber();
+      pn.type = kz.greetgo.sandbox.db.migration_impl.model.PhoneType.valueOf(phoneNumbers.get(i).phoneType.toString());
+      pn.number = phoneNumbers.get(i).number;
+      generatedPhoneNumbers.add(pn);
     }
   }
 

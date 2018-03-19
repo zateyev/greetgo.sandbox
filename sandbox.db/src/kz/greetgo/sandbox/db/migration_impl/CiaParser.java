@@ -68,13 +68,13 @@ public class CiaParser extends SaxHandler {
         return;
 
       case "/cia/client/birth":
-//        client.dateOfBirth = attributes.getValue("value");
+        client.dateOfBirth = attributes.getValue("value");
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
         try {
-          client.dateOfBirth = sdf.parse(attributes.getValue("value"));
+          sdf.parse(client.dateOfBirth);
         } catch (ParseException e) {
           // Проглатывание ошибки
-//          client.dateOfBirth = null;
+          client.dateOfBirth = null;
           return;
         }
         return;

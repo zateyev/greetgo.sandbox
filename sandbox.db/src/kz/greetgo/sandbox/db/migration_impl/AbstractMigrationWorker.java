@@ -36,7 +36,9 @@ public abstract class AbstractMigrationWorker {
 
     createTmpTables();
 
-    int recordsSize = parseDataAndSaveInTmpDb();
+    List<String> fileNamesToLoad = prepareInFiles();
+
+    int recordsSize = parseDataAndSaveInTmpDb(fileNamesToLoad);
 
     handleErrors();
 
@@ -48,6 +50,8 @@ public abstract class AbstractMigrationWorker {
     }
   }
 
+  protected abstract List<String> prepareInFiles() throws IOException, SftpException;
+
   protected abstract void handleErrors() throws SQLException, IOException, SftpException;
 
   protected abstract void uploadErrors() throws SQLException, IOException, SftpException;
@@ -56,7 +60,7 @@ public abstract class AbstractMigrationWorker {
 
   protected abstract void migrateFromTmp() throws Exception;
 
-  protected abstract int parseDataAndSaveInTmpDb() throws Exception;
+  protected abstract int parseDataAndSaveInTmpDb(List<String> fileDirsToLoad) throws Exception;
 
   protected abstract String r(String sql);
 
