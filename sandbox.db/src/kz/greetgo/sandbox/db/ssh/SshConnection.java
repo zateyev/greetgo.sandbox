@@ -7,7 +7,7 @@ import java.util.List;
 import java.util.Vector;
 import java.util.stream.Collectors;
 
-public class SshConnection implements AutoCloseable {
+public class SshConnection implements InputFileWorker {
   private Session session;
   private ChannelSftp channelSftp;
   private String homePath;
@@ -27,51 +27,30 @@ public class SshConnection implements AutoCloseable {
 
   }
 
-  public void connect() throws JSchException {
+  private void connect() throws JSchException {
     session.connect();
     channelSftp = (ChannelSftp) session.openChannel("sftp");
     channelSftp.connect();
   }
 
-  public InputStream download(String fileName) throws SftpException {
+  @Override
+  public InputStream downloadFile(String fileName) throws SftpException {
     return channelSftp.get(homePath + fileName);
   }
 
-  public static void main(String args[]) {
-    try (SshConnection sshConnection = new SshConnection("/home/zateyev/git/greetgo.sandbox/build/files_to_send/")) {
-      String user = "zateyev";
-      String password = "111";
-      String host = "192.168.11.166";
-      int port = 22;
-      sshConnection.createSshConnection(user, password, host, port);
-
-      File file = new File("test.txt");
-      OutputStream out = new FileOutputStream(file);
-      out.write("Exexe, aaa\n".getBytes());
-      out.write("Exexe, bbb\n".getBytes());
-      out.write("Exexe, ccc\n".getBytes());
-      sshConnection.upload(file);
-      out.close();
-    } catch (Exception e) {
-      e.printStackTrace();
-    }
-  }
-
-  private OutputStream getOutputStream() throws IOException, SftpException {
-    channelSftp.cd(homePath);
-    return channelSftp.getOutputStream();
-  }
-
+  @Override
   public void upload(File file) throws FileNotFoundException, SftpException {
     channelSftp.cd(homePath);
     channelSftp.put(new FileInputStream(file), file.getName());
   }
 
+  @Override
   public List<String> getFileNames(String ext) throws SftpException {
     Vector<ChannelSftp.LsEntry> list = channelSftp.ls(homePath + "*" + ext);
     return list.stream().map(ChannelSftp.LsEntry::getFilename).collect(Collectors.toList());
   }
 
+  @Override
   public void renameFile(String oldName, String newName) throws SftpException {
     channelSftp.rename(homePath + oldName, homePath + newName);
   }

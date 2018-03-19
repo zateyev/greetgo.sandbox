@@ -28,8 +28,7 @@ import static org.fest.assertions.api.Assertions.assertThat;
  */
 public class AbstractMigrationWorkerTest extends ParentTestNg {
 
-  public BeanGetter<CiaMigrationWorkerImpl> migration;
-  public BeanGetter<FrsMigrationWorkerImpl> frsMigration;
+  public BeanGetter<Migration> migration;
   public BeanGetter<MigrationConfig> migrationConfig;
   public BeanGetter<ClientTestDao> clientTestDao;
   public BeanGetter<CharmTestDao> charmTestDao;
@@ -39,19 +38,41 @@ public class AbstractMigrationWorkerTest extends ParentTestNg {
   @BeforeClass
   @BeforeMethod
   public void prepareInputFiles() throws Exception {
-    fileGenerator = new GenerateInputFiles(500, 500);
+//    fileGenerator = new GenerateInputFiles(10_000, 50);
+    fileGenerator = new GenerateInputFiles(500, 50);
     fileGenerator.setTestMode();
+
+//    fileGenerator = new GenerateInputFiles(1_000_000, 10_000_000);
+
     fileGenerator.execute();
+    migration.get().setSshMode(false);
   }
 
   @Test
-  public void testCiaMigration() throws Exception {
+  public void testCiaMigrationByGoodClientsCount() throws Exception {
     clientTestDao.get().removeAllData();
     charmTestDao.get().removeAllData();
 
     //
     //
-    migration.get().migrate();
+    migration.get().executeCiaMigration();
+//    migration.get().executeFrsMigration();
+    //
+    //
+
+    long clientCount = clientTestDao.get().getClientCount();
+
+    assertThat(clientCount).isEqualTo(fileGenerator.getGoodClientCount());
+  }
+
+  @Test
+  public void testCiaAndFrsConcurrentlyMigration() throws Exception {
+    clientTestDao.get().removeAllData();
+    charmTestDao.get().removeAllData();
+
+    //
+    //
+    migration.get().executeMigration();
     //
     //
 
@@ -69,7 +90,7 @@ public class AbstractMigrationWorkerTest extends ParentTestNg {
 
     //
     //
-    migration.get().migrate();
+    migration.get().executeCiaMigration();
     //
     //
 
@@ -89,7 +110,7 @@ public class AbstractMigrationWorkerTest extends ParentTestNg {
 
     //
     //
-    migration.get().migrate();
+    migration.get().executeCiaMigration();
     //
     //
 
@@ -112,22 +133,22 @@ public class AbstractMigrationWorkerTest extends ParentTestNg {
 
     //
     //
-    migration.get().migrate();
+    migration.get().executeCiaMigration();
     //
     //
 
-    assertThat(getLineCountOfFile(migrationConfig.get().sshHomePath() + migrationConfig.get().outErrorFile()))
+    assertThat(getLineCountOfFile(migrationConfig.get().inFilesHomePath() + migrationConfig.get().outErrorFileName()))
       .isEqualTo(fileGenerator.getErrorRecordCount());
   }
 
   @Test
-  public void testFrsMigration() throws Exception {
+  public void testFrsMigrationByRecordsCount() throws Exception {
     clientTestDao.get().removeAllData();
     charmTestDao.get().removeAllData();
 
     //
     //
-    frsMigration.get().migrate();
+    migration.get().executeFrsMigration();
     //
     //
 
@@ -147,16 +168,19 @@ public class AbstractMigrationWorkerTest extends ParentTestNg {
 
     //
     //
-    frsMigration.get().migrate();
+    migration.get().executeFrsMigration();
     //
     //
 
 
     int i = 0;
     for (Map.Entry<String, Account> accountEntry : clientAccounts.entrySet()) {
-      Account clientAccountActual = clientTestDao.get().getClientAccountByCiaId(accountEntry.getKey());
+      String clientAccountNumber = clientTestDao.get().getClientAccountByCiaId(
+        accountEntry.getKey(),
+        accountEntry.getValue().registeredAtD
+      );
 
-      assertThatAreEqual(clientAccountActual, accountEntry.getValue());
+      assertThat(clientAccountNumber).isEqualTo(accountEntry.getValue().accountNumber);
       if (++i > 10) break;
     }
   }
@@ -170,7 +194,7 @@ public class AbstractMigrationWorkerTest extends ParentTestNg {
 
     //
     //
-    frsMigration.get().migrate();
+    migration.get().executeFrsMigration();
     //
     //
 
@@ -188,15 +212,8 @@ public class AbstractMigrationWorkerTest extends ParentTestNg {
   }
 
   private void assertThatAreEqual(Transaction actual, Transaction expected) throws ParseException {
-//    assertThat(actual.money).isEqualTo(expected.money.stripTrailingZeros());
     assertThat(actual.money.compareTo(expected.money)).isEqualTo(0);
     assertThat(actual.transactionType).isEqualTo(String.valueOf(expected.transactionType));
-  }
-
-  private void assertThatAreEqual(Account actual, Account expected) throws ParseException {
-    assertThat(actual.accountNumber).isEqualTo(expected.accountNumber);
-    Date registeredAtExpected = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS").parse(expected.registeredAt);
-    assertThat(actual.registeredAtD).isEqualTo(registeredAtExpected);
   }
 
   private int getLineCountOfFile(String fileName) {

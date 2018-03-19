@@ -13,18 +13,15 @@ public interface MigrationConfig {
 
   @Description("Имя файла с ошибками")
   @DefaultStrValue("errors.txt")
-  String outErrorFile();
+  String outErrorFileName();
 
   @Description("Имя ssh сервера")
-  @DefaultStrValue("zateyev")
   String sshUser();
 
   @Description("Пароль ssh сервера")
-  @DefaultStrValue("111")
   String sshPassword();
 
   @Description("IP адрес ssh сервера")
-  @DefaultStrValue("192.168.11.166")
   String sshHost();
 
   @Description("Номер порта ssh сервера")
@@ -33,7 +30,7 @@ public interface MigrationConfig {
 
   @Description("Путь к директории где лежат файлы")
   @DefaultStrValue("/home/zateyev/git/greetgo.sandbox/build/out_files/")
-  String sshHomePath();
+  String inFilesHomePath();
 
   @DefaultStrValue("build/report/")
   String sqlReportDir();

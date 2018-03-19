@@ -2,17 +2,13 @@ package kz.greetgo.sandbox.db.migration_impl;
 
 import com.jcraft.jsch.SftpException;
 import kz.greetgo.depinject.core.Bean;
-import kz.greetgo.sandbox.db.migration_impl.report.ReportXlsx;
-import kz.greetgo.sandbox.db.ssh.SshConnection;
-import org.apache.commons.compress.archivers.tar.TarArchiveEntry;
+import kz.greetgo.sandbox.db.ssh.InputFileWorker;
+import kz.greetgo.util.RND;
 import org.apache.commons.compress.archivers.tar.TarArchiveInputStream;
 import org.apache.commons.compress.compressors.bzip2.BZip2CompressorInputStream;
 
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.sql.DriverManager;
+import java.sql.Connection;
 import java.sql.SQLException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -22,14 +18,13 @@ import static kz.greetgo.sandbox.db.util.TimeUtils.recordsPerSecond;
 import static kz.greetgo.sandbox.db.util.TimeUtils.showTime;
 
 @Bean
-public class FrsMigrationWorkerImpl extends AbstractMigrationWorker {
+public class FrsMigrationWorker extends AbstractMigrationWorker {
 
   private String tmpAccountTable;
   private String tmpTransactionTable;
 
-  @Override
-  protected void dropTmpTables() throws SQLException {
-    exec("DROP TABLE IF EXISTS TMP_ACCOUNT, TMP_TRANSACTION");
+  public FrsMigrationWorker(Connection connection, InputFileWorker sshConnection) {
+    super(connection, sshConnection);
   }
 
   @Override
@@ -53,8 +48,9 @@ public class FrsMigrationWorkerImpl extends AbstractMigrationWorker {
   protected void createTmpTables() throws SQLException {
     SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd_HHmmss");
     Date nowDate = new Date();
-    tmpAccountTable = "cia_migration_account_" + sdf.format(nowDate);
-    tmpTransactionTable = "cia_migration_transaction_" + sdf.format(nowDate);
+    String processId = "_" + RND.intStr(5);
+    tmpAccountTable = "cia_migration_account_" + sdf.format(nowDate) + processId;
+    tmpTransactionTable = "cia_migration_transaction_" + sdf.format(nowDate) + processId;
 
     //language=PostgreSQL
     exec("CREATE TABLE TMP_ACCOUNT (\n" +
@@ -104,19 +100,17 @@ public class FrsMigrationWorkerImpl extends AbstractMigrationWorker {
   }
 
   @Override
-  protected int download() throws IOException, SQLException, SftpException {
+  protected int parseDataAndSaveInTmpDb() throws IOException, SQLException, SftpException {
     List<String> fileDirToLoad = renameFiles(".json_row.txt.tar.bz2");
     int recordsCount = 0;
     long downloadingStartedAt = System.nanoTime();
 
     for (String fileName : fileDirToLoad) {
-      inputStream = sshConnection.download(fileName);
-      TarArchiveInputStream tarInput = new TarArchiveInputStream(new BZip2CompressorInputStream(inputStream));
-      TarArchiveEntry currentEntry = tarInput.getNextTarEntry();
+      TarArchiveInputStream tarInput = new TarArchiveInputStream(new BZip2CompressorInputStream(inputFileWorker.downloadFile(fileName)));
+      tarInput.getNextTarEntry();
 
       long startedAt = System.nanoTime();
 
-      maxBatchSize = migrationConfig.get().maxBatchSize();
       connection.setAutoCommit(false);
 
       try (FrsTableWorker frsTableWorker = new FrsTableWorker(connection, maxBatchSize, tmpAccountTable, tmpTransactionTable)) {
@@ -140,27 +134,5 @@ public class FrsMigrationWorkerImpl extends AbstractMigrationWorker {
     }
 
     return recordsCount;
-  }
-
-  @Override
-  protected void createConnections() throws Exception {
-    try {
-      reportXlsx = new ReportXlsx(new FileOutputStream(migrationConfig.get().sqlReportDir() + "sqlReportFrs.xlsx"));
-      reportXlsx.start();
-    } catch (FileNotFoundException e) {
-      e.printStackTrace();
-    }
-
-    sshConnection = new SshConnection(migrationConfig.get().sshHomePath());
-    sshConnection.createSshConnection(migrationConfig.get().sshUser(),
-      migrationConfig.get().sshPassword(),
-      migrationConfig.get().sshHost(),
-      migrationConfig.get().sshPort());
-
-    connection = DriverManager.getConnection(
-      dbConfig.get().url(),
-      dbConfig.get().username(),
-      dbConfig.get().password()
-    );
   }
 }

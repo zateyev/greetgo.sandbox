@@ -7,9 +7,11 @@ import kz.greetgo.sandbox.db.migration_impl.model.Account;
 import kz.greetgo.sandbox.db.migration_impl.model.Transaction;
 import org.apache.commons.compress.archivers.tar.TarArchiveInputStream;
 
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.math.BigDecimal;
-import java.util.function.Consumer;
 
 public class FrsParser {
 
@@ -19,47 +21,6 @@ public class FrsParser {
   public FrsParser(TarArchiveInputStream inputStream, FrsTableWorker frsTableWorker) {
     this.inputStream = inputStream;
     this.frsTableWorker = frsTableWorker;
-  }
-
-  public static void main(String[] args) throws IOException {
-    JsonParser jsonParser = new JsonFactory().createParser("{\"type\":\"new_account\",\"registered_at\":\"2001-03-01T10:30:22.547\",\"account_number\":\"49949KZ960-28847-33846-0544217\",\"client_id\":\"4-FPI-H3-SV-lsPFbXjtWC\"}");
-
-    Account account = new Account();
-
-    parseJSON(jsonParser, account);
-
-    System.out.println("type: " + account.type + "\nclient id: " + account.clientId);
-
-    jsonParser.close();
-
-
-  }
-
-  private static void parseJSON(JsonParser jsonParser, Account account) throws IOException {
-    //loop through the JsonTokens
-    while (jsonParser.nextToken() != JsonToken.END_OBJECT) {
-      String name = jsonParser.getCurrentName();
-      String type;
-      switch (name) {
-        case "type":
-          jsonParser.nextToken();
-          type = jsonParser.getText();
-          account.type = type;
-          break;
-        case "client_id":
-          jsonParser.nextToken();
-          account.clientId = jsonParser.getText();
-          break;
-        case "account_number":
-          jsonParser.nextToken();
-          account.accountNumber = jsonParser.getText();
-          break;
-        case "registered_at":
-          jsonParser.nextToken();
-          account.registeredAt = jsonParser.getText();
-          break;
-      }
-    }
   }
 
   public int parseAndSave() throws IOException {
@@ -101,7 +62,6 @@ public class FrsParser {
             break;
           case "money":
             jsonParser.nextToken();
-//            transaction.money = Double.parseDouble(jsonParser.getText().replace("_", ""));
             transaction.money = new BigDecimal(jsonParser.getText().replace("_", ""));
             break;
           case "finished_at":
@@ -114,21 +74,12 @@ public class FrsParser {
             break;
         }
       }
-      if ("transaction".equals(type)) sendTo(frsTableWorker::addToBatch, transaction);
-      else if ("new_account".equals(type)) sendTo(frsTableWorker::addToBatch, account);
+      if ("transaction".equals(type)) frsTableWorker.addToBatch(transaction);
+      else if ("new_account".equals(type)) frsTableWorker.addToBatch(account);
       jsonParser.close();
       recordsCount++;
     }
     frsTableWorker.execBatch.run();
     return recordsCount;
   }
-
-  private void sendTo(Consumer<Account> func, Account account) {
-    func.accept(account);
-  }
-
-  private void sendTo(Consumer<Transaction> func, Transaction transaction) {
-    func.accept(transaction);
-  }
-
 }

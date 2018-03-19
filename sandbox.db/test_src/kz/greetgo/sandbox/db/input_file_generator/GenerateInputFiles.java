@@ -278,7 +278,9 @@ public class GenerateInputFiles {
   File outFile;
 
   public void execute() throws Exception {
-    FileUtils.cleanDirectory(new File(DIR));
+    File file = new File(DIR);
+    file.mkdirs();
+    FileUtils.cleanDirectory(file);
 
     rowTypeRnd.showInfo();
     errorTypeRnd.showInfo();
@@ -588,9 +590,9 @@ public class GenerateInputFiles {
         Date date = null;
 
         if (errorType == ErrorType.BIRTH_DATE_TOO_OLD) {
-          date = RND.dateYears(-10_000, -200);
+          date = RND.dateYears(-10_000, -202);
         } else if (errorType == ErrorType.BIRTH_DATE_TOO_YOUNG) {
-          date = RND.dateYears(-10, 0);
+          date = RND.dateYears(-8, 0);
         }
 
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
@@ -914,8 +916,9 @@ public class GenerateInputFiles {
 
     kz.greetgo.sandbox.db.migration_impl.model.Account newAccount = new kz.greetgo.sandbox.db.migration_impl.model.Account();
     newAccount.accountNumber = account.number;
-    newAccount.registeredAt = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS").format(account.registeredAt);
-    clientAccounts.put(clientId, newAccount);
+//    newAccount.registeredAt = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS").format(account.registeredAt);
+    newAccount.registeredAtD = account.registeredAt;
+    if (testMode) clientAccounts.put(clientId, newAccount);
 
 
     Transaction transaction = new Transaction();
@@ -927,7 +930,7 @@ public class GenerateInputFiles {
     }
     records.add(account.addTransaction(rowIndex, true).toJson(transaction));
     info.newTransaction();
-    accountTransactions.put(clientId, transaction);
+    if (testMode) accountTransactions.put(clientId, transaction);
 
     Collections.shuffle(records);
 

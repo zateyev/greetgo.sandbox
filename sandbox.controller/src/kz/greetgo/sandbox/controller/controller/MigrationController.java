@@ -15,8 +15,8 @@ public class MigrationController {
 
   public BeanGetter<MigrationWorker> migrationRegister;
 
-  @Mapping("/migrate")
+  @Mapping("/migrateCia")
   public int migrateCia() throws Exception {
-    return migrationRegister.get().migrate();
+    return migrationRegister.get().migrateCia();
   }
 }

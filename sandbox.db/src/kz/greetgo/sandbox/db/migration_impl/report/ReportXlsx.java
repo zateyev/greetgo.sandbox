@@ -19,25 +19,25 @@ public class ReportXlsx {
     sheet = xlsx.newSheet(true);
 
     sheet.setWidth(1, 30.71);
-    sheet.setWidth(2, 30.71);
-    sheet.setWidth(3, 13.86);
+    sheet.setWidth(2, 60.71);
 
     sheet.skipRow();
 
     sheet.row().start();
     sheet.style().font().bold();
-    sheet.cellStr(1, "Запрос");
-    sheet.cellStr(2, "Время запроса");
+    sheet.cellStr(1, "Время запроса");
+    sheet.cellStr(2, "Запрос");
     sheet.style().clean();
     sheet.row().finish();
   }
 
-  public void addRow(String fileName, String time) {
+  public void addRow(String executingSql, String time_str) {
     sheet.row().start();
-    if (fileName == null) fileName = "";
-    if (time == null) time = "";
-    sheet.cellStr(1, fileName);
-    sheet.cellStr(2, time);
+    double time = 0;
+    if (executingSql == null) executingSql = "";
+    if (time_str != null) time = Double.valueOf(time_str);
+    sheet.cellDouble(1, time);
+    sheet.cellStr(2, executingSql);
     sheet.row().finish();
   }
 
