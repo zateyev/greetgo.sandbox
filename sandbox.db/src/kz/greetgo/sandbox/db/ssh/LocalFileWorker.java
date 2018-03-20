@@ -6,7 +6,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 public class LocalFileWorker implements InputFileWorker {
-  private String homePath;
+  public String homePath;
 
   public LocalFileWorker(String homePath) {
     this.homePath = homePath;

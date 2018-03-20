@@ -178,7 +178,8 @@ public class ReportRegisterImplTest extends ParentTestNg {
       double total = 0.0;
       double min = 1000.0;
       double max = 0.0;
-      for (int j = 0; j < RND.plusInt(4); j++) {
+      int m = RND.plusInt(4);
+      for (int j = 0; j < m; j++) {
         double money = RND.plusDouble(1000, 2);
         total += money;
         if (money < min) min = money;

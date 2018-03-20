@@ -63,7 +63,7 @@ public class Migration {
       final Thread frsDownloading = new Thread(() -> {
         try {
           frsMigrationWorker.createTmpTables();
-          frsMigrationWorker.parseDataAndSaveInTmpDb();
+          frsMigrationWorker.parseDataAndSaveInTmpDb(frsMigrationWorker.prepareInFiles());
           frsMigrationWorker.handleErrors();
         } catch (SQLException | SftpException | IOException e) {
           e.printStackTrace();
@@ -131,7 +131,7 @@ public class Migration {
     }
   }
 
-  private InputFileWorker getInputFileWorker() throws JSchException {
+  public InputFileWorker getInputFileWorker() throws JSchException {
     if (sshMode) {
       SshConnection sshConnection = new SshConnection(migrationConfig.get().inFilesHomePath());
       sshConnection.createSshConnection(migrationConfig.get().sshUser(),
@@ -144,7 +144,7 @@ public class Migration {
     }
   }
 
-  private Connection getConnection() throws SQLException {
+  public Connection getConnection() throws SQLException {
     return DriverManager.getConnection(
       dbConfig.get().url(),
       dbConfig.get().username(),

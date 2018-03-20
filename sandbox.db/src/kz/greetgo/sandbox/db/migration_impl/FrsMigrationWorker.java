@@ -28,6 +28,13 @@ public class FrsMigrationWorker extends AbstractMigrationWorker {
   }
 
   @Override
+  protected List<String> prepareInFiles() throws IOException, SftpException {
+    List<String> fileDirsToLoad = renameFiles(".json_row.txt.tar.bz2");
+    fileDirsToLoad.sort(String::compareTo);
+    return fileDirsToLoad;
+  }
+
+  @Override
   protected void handleErrors() {
 
   }
@@ -100,12 +107,12 @@ public class FrsMigrationWorker extends AbstractMigrationWorker {
   }
 
   @Override
-  protected int parseDataAndSaveInTmpDb() throws IOException, SQLException, SftpException {
-    List<String> fileDirToLoad = renameFiles(".json_row.txt.tar.bz2");
+  protected int parseDataAndSaveInTmpDb(List<String> fileDirsToLoad) throws IOException, SQLException, SftpException {
+
     int recordsCount = 0;
     long downloadingStartedAt = System.nanoTime();
 
-    for (String fileName : fileDirToLoad) {
+    for (String fileName : fileDirsToLoad) {
       TarArchiveInputStream tarInput = new TarArchiveInputStream(new BZip2CompressorInputStream(inputFileWorker.downloadFile(fileName)));
       tarInput.getNextTarEntry();
 

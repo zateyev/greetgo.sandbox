@@ -25,12 +25,19 @@ import static kz.greetgo.sandbox.db.util.TimeUtils.showTime;
 @Bean
 public class CiaMigrationWorker extends AbstractMigrationWorker {
 
-  private String tmpClientTable;
-  private String tmpAddrTable;
-  private String tmpPhoneTable;
+  public String tmpClientTable;
+  public String tmpAddrTable;
+  public String tmpPhoneTable;
 
   public CiaMigrationWorker(Connection connection, InputFileWorker inputFileWorker) {
     super(connection, inputFileWorker);
+  }
+
+  @Override
+  protected List<String> prepareInFiles() throws IOException, SftpException {
+    List<String> fileNamesToLoad = renameFiles(".xml.tar.bz2");
+    fileNamesToLoad.sort(String::compareTo);
+    return fileNamesToLoad;
   }
 
   @Override
@@ -268,19 +275,17 @@ public class CiaMigrationWorker extends AbstractMigrationWorker {
     );
   }
 
-  protected int parseDataAndSaveInTmpDb() throws Exception {
+  protected int parseDataAndSaveInTmpDb(List<String> fileNamesToLoad) throws Exception {
 
-    List<String> fileDirToLoad = renameFiles(".xml.tar.bz2");
-    fileDirToLoad.sort(String::compareTo);
     int recordsCount = 0;
     long downloadingStartedAt = System.nanoTime();
 
-    for (String fileName : fileDirToLoad) {
+    for (String fileName : fileNamesToLoad) {
       long startedAt = System.nanoTime();
       connection.setAutoCommit(false);
       try (
-        InputStream inputStream = inputFileWorker.downloadFile(fileName);
-        BZip2CompressorInputStream bZip2Inp = new BZip2CompressorInputStream(inputStream);
+        InputStream xmlTarIS = inputFileWorker.downloadFile(fileName);
+        BZip2CompressorInputStream bZip2Inp = new BZip2CompressorInputStream(xmlTarIS);
         TarArchiveInputStream tarInput = new TarArchiveInputStream(bZip2Inp);
         CiaTableWorker ciaTableWorker = new CiaTableWorker(connection, maxBatchSize, tmpClientTable, tmpAddrTable, tmpPhoneTable)
         ) {

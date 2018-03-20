@@ -11,4 +11,8 @@ public class Address {
   public Address(String type) {
     this.type = type;
   }
+
+  public Address() {
+
+  }
 }
