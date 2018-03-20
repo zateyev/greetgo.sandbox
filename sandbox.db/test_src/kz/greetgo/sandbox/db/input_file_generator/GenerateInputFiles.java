@@ -14,6 +14,7 @@ import java.math.RoundingMode;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.text.SimpleDateFormat;
+import java.time.ZoneId;
 import java.util.*;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -21,12 +22,10 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import static kz.greetgo.util.RND.plusLong;
-
 public class GenerateInputFiles {
 
-  private final int CIA_LIMIT;
-  private final int FRS_LIMIT;
+  private int ciaLimit;
+  private int frsLimit;
 
   private final int CURRENT_YEAR = Calendar.getInstance().get(Calendar.YEAR);
 
@@ -39,13 +38,15 @@ public class GenerateInputFiles {
   private Map<String, Transaction> accountTransactions;
   private boolean testMode;
   private String outCiaFileName;
+  private List<Client> errorClients;
 
-  public GenerateInputFiles(int CIA_LIMIT, int FRS_LIMIT) {
-    this.CIA_LIMIT = CIA_LIMIT;
-    this.FRS_LIMIT = FRS_LIMIT;
+  public GenerateInputFiles(int ciaLimit, int frsLimit) {
+    this.ciaLimit = ciaLimit;
+    this.frsLimit = frsLimit;
 
     lastGoodClients = new HashMap<>();
     goodClients = new ArrayList<>();
+    errorClients = new ArrayList<>();
     clientAccounts = new HashMap<>();
     accountTransactions = new HashMap<>();
 
@@ -55,10 +56,10 @@ public class GenerateInputFiles {
   }
 
   public static void main(String[] args) throws Exception {
-    GenerateInputFiles generateInputFiles = new GenerateInputFiles(100, 100);
+    GenerateInputFiles generateInputFiles = new GenerateInputFiles(50, 0);
     generateInputFiles.setTestMode();
     generateInputFiles.execute();
-    System.out.println("Out file name " + generateInputFiles.outFileName);
+    System.out.println("Out file name " + generateInputFiles.outCiaFileName);
   }
 
   private static final String ENG = "abcdefghijklmnopqrstuvwxyz";
@@ -94,6 +95,8 @@ public class GenerateInputFiles {
   }
 
   public void setTestMode() {
+    if (this.ciaLimit > 100) this.ciaLimit = 100;
+    if (this.frsLimit > 100) this.frsLimit = 100;
     this.testMode = true;
   }
 
@@ -123,6 +126,10 @@ public class GenerateInputFiles {
 
   public String getOutCiaFileName() {
     return outCiaFileName;
+  }
+
+  public List<Client> getErrorClients() {
+    return errorClients;
   }
 
   private static class Info {
@@ -385,7 +392,7 @@ public class GenerateInputFiles {
       currentFileRecords = 0;
 
       int fileIndex = 1;
-      for (; currentFileRecords < CIA_LIMIT && working.get(); i++) {
+      for (; currentFileRecords < ciaLimit && working.get(); i++) {
 
         printClient(i, rowTypeRnd.next());
         currentFileRecords++;
@@ -430,7 +437,7 @@ public class GenerateInputFiles {
       currentFileRecords = 0;
 
       int i = 1, fileIndex = 1;
-      for (; currentFileRecords < FRS_LIMIT && working.get(); i++) {
+      for (; currentFileRecords < frsLimit && working.get(); i++) {
 
         printAccountWithTransactions(i);
         currentFileRecords++;
@@ -643,9 +650,9 @@ public class GenerateInputFiles {
         if (date == null) {
           date = RND.dateYears(-100, -18);
           goodClient.dateOfBirth = sdf.format(date);
-          client.dateOfBirth = goodClient.dateOfBirth;
+          client.birth_date = date;
         } else {
-          client.dateOfBirth = sdf.format(date);
+          client.birth_date = date;
         }
 
 
@@ -697,7 +704,7 @@ public class GenerateInputFiles {
 
     if (errorType != ErrorType.NO_CHARM) {
       goodClient.charm.name = nextCharm();
-      client.charmName = goodClient.charm.name;
+      client.charm_name = goodClient.charm.name;
       tags.add("    <charm value=\"" + goodClient.charm.name + "\"/>");
     }
 
@@ -747,6 +754,7 @@ public class GenerateInputFiles {
       }
 
       if (rowType == RowType.ERROR) {
+        if (testMode) errorClients.add(client);
         info.newErrorClient();
       } else {
         if (testMode) {

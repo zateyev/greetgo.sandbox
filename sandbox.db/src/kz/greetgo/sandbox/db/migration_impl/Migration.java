@@ -66,7 +66,7 @@ public class Migration {
         try {
           frsMigrationWorker.createTmpTables();
           frsMigrationWorker.parseDataAndSaveInTmpDb();
-          frsMigrationWorker.handleErrors();
+          frsMigrationWorker.validateErrors();
         } catch (SQLException | SftpException | IOException e) {
           e.printStackTrace();
         }

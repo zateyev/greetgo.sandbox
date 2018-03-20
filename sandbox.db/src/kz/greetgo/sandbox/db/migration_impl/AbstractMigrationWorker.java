@@ -43,7 +43,7 @@ public abstract class AbstractMigrationWorker {
 
     int recordsSize = parseDataAndSaveInTmpDb();
 
-    handleErrors();
+//    validateErrors();
 
     migrateFromTmp();
 
@@ -55,7 +55,7 @@ public abstract class AbstractMigrationWorker {
 
 //  protected abstract List<String> prepareInFiles() throws IOException, SftpException;
 
-  protected abstract void handleErrors() throws SQLException, IOException, SftpException;
+  protected abstract void validateErrors() throws SQLException, IOException, SftpException;
 
   protected abstract void uploadErrors() throws SQLException, IOException, SftpException;
 

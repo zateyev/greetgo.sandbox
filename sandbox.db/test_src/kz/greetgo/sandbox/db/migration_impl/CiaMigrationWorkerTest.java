@@ -6,7 +6,6 @@ import kz.greetgo.sandbox.db.input_file_generator.GenerateInputFiles;
 import kz.greetgo.sandbox.db.migration_impl.model.Address;
 import kz.greetgo.sandbox.db.migration_impl.model.Client;
 import kz.greetgo.sandbox.db.migration_impl.model.PhoneNumber;
-import kz.greetgo.sandbox.db.migration_impl.model.Transaction;
 import kz.greetgo.sandbox.db.migration_impl.report.ReportXlsx;
 import kz.greetgo.sandbox.db.ssh.LocalFileWorker;
 import kz.greetgo.sandbox.db.test.dao.CharmTestDao;
@@ -22,12 +21,11 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.OutputStream;
 import java.sql.Connection;
-import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.Comparator;
 import java.util.List;
 
 import static org.fest.assertions.api.Assertions.assertThat;
-import static org.testng.Assert.*;
 
 /**
  * Набор автоматизированных тестов для тестирования методов класса {@link CiaMigrationWorker}
@@ -120,25 +118,87 @@ public class CiaMigrationWorkerTest extends ParentTestNg {
     List<PhoneNumber> actualPhoneNumbers = migrationTestDao.get().loadPhoneNumbersList(ciaMigrationWorker.tmpPhoneTable);
 
     assertThat(actualClients).isNotNull();
-    assertThat(actualClients.size()).isEqualTo(expectedClients.size());
+    assertThat(actualClients).hasSameSizeAs(expectedClients);
     for (int i = 0; i < actualClients.size(); i++) {
       assertThatAreEqual(actualClients.get(i), expectedClients.get(i));
     }
 
     assertThat(actualAddresses).isNotNull();
-    assertThat(actualAddresses.size()).isEqualTo(expectedAddresses.size());
+    assertThat(actualAddresses).hasSameSizeAs(expectedAddresses);
     for (int i = 0; i < actualAddresses.size(); i++) {
       assertThatAreEqual(actualAddresses.get(i), expectedAddresses.get(i));
     }
 
     assertThat(actualPhoneNumbers).isNotNull();
-    assertThat(actualPhoneNumbers.size()).isEqualTo(expectedPhoneNumbers.size());
+    assertThat(actualPhoneNumbers).hasSameSizeAs(expectedPhoneNumbers);
     // sorting because generator shuffles tags
     actualPhoneNumbers.sort(Comparator.comparing(phoneNumber -> phoneNumber.number));
     expectedPhoneNumbers.sort(Comparator.comparing(phoneNumber -> phoneNumber.number));
     for (int i = 0; i < actualPhoneNumbers.size(); i++) {
       assertThatAreEqual(actualPhoneNumbers.get(i), expectedPhoneNumbers.get(i));
     }
+  }
+
+  @Test
+  public void testValidation() throws Exception {
+    CiaMigrationWorker ciaMigrationWorker = getCiaMigrationWorker();
+
+    GenerateInputFiles fileGenerator = prepareInputFiles(100, 0);
+
+    List<Client> generatedClients = fileGenerator.getGeneratedClients();
+    List<Client> expectedErrorClients = fileGenerator.getErrorClients();
+
+    ciaMigrationWorker.createTmpTables();
+
+    for (int i = 0; i < generatedClients.size(); i++) {
+      generatedClients.get(i).id = i;
+      migrationTestDao.get().insertClient(ciaMigrationWorker.tmpClientTable, generatedClients.get(i));
+    }
+
+    //
+    //
+    ciaMigrationWorker.validateErrors();
+    //
+    //
+
+    List<Client> actualErrorClients = migrationTestDao.get().loadErrorClientsList(ciaMigrationWorker.tmpClientTable);
+
+    assertThat(actualErrorClients).isNotNull();
+    assertThat(actualErrorClients).hasSameSizeAs(expectedErrorClients);
+    for (int i = 0; i < actualErrorClients.size(); i++) {
+      assertThatAreEqual(actualErrorClients.get(i), expectedErrorClients.get(i));
+    }
+  }
+
+  @Test
+  public void test_markingOfDuplicateClientRecords() throws Exception {
+//    CiaMigrationWorker ciaMigrationWorker = getCiaMigrationWorker();
+//
+//    GenerateInputFiles fileGenerator = prepareInputFiles(100, 0);
+//
+//    List<Client> generatedClients = fileGenerator.getGeneratedClients();
+//    List<Client> expectedErrorClients = fileGenerator.getErrorClients();
+//
+//    ciaMigrationWorker.createTmpTables();
+//
+//    for (int i = 0; i < generatedClients.size(); i++) {
+//      generatedClients.get(i).id = i;
+//      migrationTestDao.get().insertClient(ciaMigrationWorker.tmpClientTable, generatedClients.get(i));
+//    }
+//
+//    //
+//    //
+//    ciaMigrationWorker.markDuplicateClientRecords();
+//    //
+//    //
+//
+//    List<Client> actualErrorClients = migrationTestDao.get().loadErrorClientsList(ciaMigrationWorker.tmpClientTable);
+//
+//    assertThat(actualErrorClients).isNotNull();
+//    assertThat(actualErrorClients).hasSameSizeAs(expectedErrorClients);
+//    for (int i = 0; i < actualErrorClients.size(); i++) {
+//      assertThatAreEqual(actualErrorClients.get(i), expectedErrorClients.get(i));
+//    }
   }
 
   private void assertThatAreEqual(PhoneNumber actualPhoneNumber, PhoneNumber expectedPhoneNumber) {
@@ -159,8 +219,11 @@ public class CiaMigrationWorkerTest extends ParentTestNg {
     assertThat(actualClient.surname).isEqualTo(expectedClient.surname);
     assertThat(actualClient.patronymic).isEqualTo(expectedClient.patronymic);
     assertThat(actualClient.gender).isEqualTo(expectedClient.gender);
-    assertThat(actualClient.dateOfBirth).isEqualTo(expectedClient.dateOfBirth);
-    assertThat(actualClient.charmName).isEqualTo(expectedClient.charmName);
+    assertThat(actualClient.charm_name).isEqualTo(expectedClient.charm_name);
+
+    SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+    assertThat(actualClient.birth_date != null ? sdf.format(actualClient.birth_date) : null)
+      .isEqualTo(expectedClient.birth_date != null ? sdf.format(expectedClient.birth_date) : null);
   }
 
   private GenerateInputFiles prepareInputFiles(int ciaLimit, int frsLimit) throws Exception {
@@ -168,15 +231,6 @@ public class CiaMigrationWorkerTest extends ParentTestNg {
     fileGenerator.setTestMode();
     fileGenerator.execute();
     return fileGenerator;
-//    fileGenerator = new GenerateInputFiles(1_000_000, 10_000_000);
-
-//    fileGenerator = new GenerateInputFiles(50_000, 50);
-
-//    fileGenerator = new GenerateInputFiles(500, 500);
-//    fileGenerator.setTestMode();
-//    fileGenerator.execute();
-//
-//    migration.get().setSshMode(false);
   }
 
   private void markTmpTablesToDrop(CiaMigrationWorker ciaMigrationWorker) {

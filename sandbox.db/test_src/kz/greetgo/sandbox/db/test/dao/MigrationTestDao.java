@@ -13,7 +13,7 @@ import java.util.List;
 public interface MigrationTestDao {
   void cleanDb();
 
-  @Select("SELECT cia_id, surname, name, patronymic, gender, birth_date as dateOfBirth, charm_name as charmName FROM ${tableName}")
+  @Select("SELECT cia_id, surname, name, patronymic, gender, birth_date, charm_name FROM ${tableName} ORDER BY number")
   List<Client> loadClientsList(@Param("tableName") String tableName);
 
   @Select("SELECT type, street, house, flat FROM ${tableName}")
@@ -26,4 +26,10 @@ public interface MigrationTestDao {
   void dropTmpTables(@Param("tmpClientTableName") String tmpClientTableName,
                      @Param("tmpAddrTableName") String tmpAddrTableName,
                      @Param("tmpPhoneTableName") String tmpPhoneTableName);
+
+  void insertClient(String tableName, Client client);
+
+  @Select("SELECT cia_id, surname, name, patronymic, gender, birth_date, charm_name FROM ${tableName}" +
+    " WHERE error IS NOT NULL ORDER BY number")
+  List<Client> loadErrorClientsList(@Param("tableName") String tableName);
 }

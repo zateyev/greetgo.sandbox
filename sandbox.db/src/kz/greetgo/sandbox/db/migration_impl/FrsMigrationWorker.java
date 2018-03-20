@@ -34,7 +34,7 @@ public class FrsMigrationWorker extends AbstractMigrationWorker {
 //  }
 
   @Override
-  protected void handleErrors() {
+  protected void validateErrors() {
 
   }
 

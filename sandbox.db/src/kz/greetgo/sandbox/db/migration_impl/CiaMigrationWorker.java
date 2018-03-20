@@ -1,23 +1,15 @@
 package kz.greetgo.sandbox.db.migration_impl;
 
 import com.jcraft.jsch.SftpException;
-import kz.greetgo.depinject.core.Bean;
-import kz.greetgo.sandbox.db.ssh.InputFileWorker;
 import kz.greetgo.util.RND;
-import org.apache.commons.compress.archivers.tar.TarArchiveInputStream;
-import org.apache.commons.compress.compressors.bzip2.BZip2CompressorInputStream;
 
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.List;
 
 import static kz.greetgo.sandbox.db.util.TimeUtils.recordsPerSecond;
 import static kz.greetgo.sandbox.db.util.TimeUtils.showTime;
@@ -47,7 +39,7 @@ public class CiaMigrationWorker extends AbstractMigrationWorker {
     return sql;
   }
 
-  protected void handleErrors() throws SQLException, IOException, SftpException {
+  protected void validateErrors() throws SQLException, IOException, SftpException {
     //language=PostgreSQL
     exec("UPDATE TMP_CLIENT SET error = 'surname is not defined' " +
       "WHERE error IS NULL AND (surname <> '') IS NOT TRUE");
@@ -161,6 +153,8 @@ public class CiaMigrationWorker extends AbstractMigrationWorker {
 
   protected void migrateFromTmp() throws Exception {
 
+    validateErrors();
+
     markDuplicateClientRecords();
 
     checkForClientExistence();
@@ -179,7 +173,7 @@ public class CiaMigrationWorker extends AbstractMigrationWorker {
   /**
    * Cтатус = 2, если дубликат
    */
-  private void markDuplicateClientRecords() throws SQLException {
+  void markDuplicateClientRecords() throws SQLException {
     //language=PostgreSQL
     exec("WITH num_ord AS (\n" +
       "  SELECT number, row_number() OVER(PARTITION BY cia_id ORDER BY number DESC) AS ord \n" +
