@@ -38,6 +38,7 @@ public class GenerateInputFiles {
   private Map<String, kz.greetgo.sandbox.db.migration_impl.model.Account> clientAccounts;
   private Map<String, Transaction> accountTransactions;
   private boolean testMode;
+  private String outCiaFileName;
 
   public GenerateInputFiles(int CIA_LIMIT, int FRS_LIMIT) {
     this.CIA_LIMIT = CIA_LIMIT;
@@ -54,28 +55,10 @@ public class GenerateInputFiles {
   }
 
   public static void main(String[] args) throws Exception {
-//    new GenerateInputFiles(1_000_000, 10_000_000).execute();
-
-    SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-    for (int i = 0; i < 100; i++) {
-      Calendar cal = new GregorianCalendar();
-      int yearFrom = -10;
-      int yearTo = -9;
-      cal.add(Calendar.YEAR, yearFrom);
-      long from = cal.getTimeInMillis();
-      cal.add(Calendar.YEAR, yearTo - yearFrom);
-      long to = cal.getTimeInMillis();
-      if (from > to) {
-        long tmp = from;
-        from = to;
-        to = tmp;
-      }
-      final long time = from + plusLong(to - from);
-      Date date = new Date(time);
-
-      System.out.println(sdf.format(date));
-    }
-
+    GenerateInputFiles generateInputFiles = new GenerateInputFiles(100, 100);
+    generateInputFiles.setTestMode();
+    generateInputFiles.execute();
+    System.out.println("Out file name " + generateInputFiles.outFileName);
   }
 
   private static final String ENG = "abcdefghijklmnopqrstuvwxyz";
@@ -136,6 +119,10 @@ public class GenerateInputFiles {
 
   public List<kz.greetgo.sandbox.db.migration_impl.model.PhoneNumber> getGeneratedPhoneNumbers() {
     return generatedPhoneNumbers;
+  }
+
+  public String getOutCiaFileName() {
+    return outCiaFileName;
   }
 
   private static class Info {
@@ -432,6 +419,7 @@ public class GenerateInputFiles {
     }
 
     finishPrinter("</cia>", ".xml");
+    outCiaFileName = outFileName + '-' + currentFileRecords + ".xml";
 
     System.out.println("Файлы CIA сформированы: приступаем к формированию файлов FRS...");
 
@@ -471,7 +459,7 @@ public class GenerateInputFiles {
 
     working.set(false);
 
-    archive();
+    if (!testMode) archive();
 
     workingFile.delete();
     newCiaFile.delete();

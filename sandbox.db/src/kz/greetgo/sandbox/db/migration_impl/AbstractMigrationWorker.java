@@ -7,6 +7,8 @@ import kz.greetgo.util.RND;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -21,14 +23,15 @@ import static kz.greetgo.sandbox.db.util.TimeUtils.showTime;
 public abstract class AbstractMigrationWorker {
 
   public Connection connection;
-  public InputFileWorker inputFileWorker;
+//  public InputFileWorker inputFileWorker;
+  public InputStream inputStream;
+  public OutputStream outError;
   public int maxBatchSize;
   public File outErrorFile;
   public ReportXlsx reportXlsx;
 
-  public AbstractMigrationWorker(Connection connection, InputFileWorker inputFileWorker) {
+  public AbstractMigrationWorker(Connection connection) {
     this.connection = connection;
-    this.inputFileWorker = inputFileWorker;
   }
 
   public void migrate() throws Exception {
@@ -36,9 +39,9 @@ public abstract class AbstractMigrationWorker {
 
     createTmpTables();
 
-    List<String> fileNamesToLoad = prepareInFiles();
+//    List<String> fileNamesToLoad = prepareInFiles();
 
-    int recordsSize = parseDataAndSaveInTmpDb(fileNamesToLoad);
+    int recordsSize = parseDataAndSaveInTmpDb();
 
     handleErrors();
 
@@ -50,7 +53,7 @@ public abstract class AbstractMigrationWorker {
     }
   }
 
-  protected abstract List<String> prepareInFiles() throws IOException, SftpException;
+//  protected abstract List<String> prepareInFiles() throws IOException, SftpException;
 
   protected abstract void handleErrors() throws SQLException, IOException, SftpException;
 
@@ -60,30 +63,9 @@ public abstract class AbstractMigrationWorker {
 
   protected abstract void migrateFromTmp() throws Exception;
 
-  protected abstract int parseDataAndSaveInTmpDb(List<String> fileDirsToLoad) throws Exception;
+  protected abstract int parseDataAndSaveInTmpDb() throws Exception;
 
   protected abstract String r(String sql);
-
-  protected List<String> renameFiles(String ext) throws IOException, SftpException {
-    SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd");
-    Date nowDate = new Date();
-
-    List<String> ret = new ArrayList<>();
-    List<String> fileNames = inputFileWorker.getFileNames(ext);
-    String regexPattern = "^[a-zA-Z0-9-_]*" + ext + "$";
-    Pattern p = Pattern.compile(regexPattern);
-    String processId = RND.intStr(5);
-
-    for (String fileName : fileNames) {
-      if (p.matcher(fileName).matches()) {
-        String newName = fileName + "." + processId + "_" + sdf.format(nowDate);
-        inputFileWorker.renameFile(fileName, newName);
-        ret.add(newName);
-      }
-    }
-
-    return ret;
-  }
 
   protected void exec(String sql) throws SQLException {
     String executingSql = r(sql);

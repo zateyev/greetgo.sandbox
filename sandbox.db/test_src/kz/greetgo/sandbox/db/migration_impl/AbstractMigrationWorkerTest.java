@@ -80,59 +80,78 @@ public class AbstractMigrationWorkerTest extends ParentTestNg {
     //
     //
 
-    markTmpTablesToDrop(ciaMigrationWorker);
+//    markTmpTablesToDrop(ciaMigrationWorker);
   }
 
-  @Test
-  public void test_parsingAndInsertionIntoTmpDb() throws Exception {
-    CiaMigrationWorker ciaMigrationWorker = getCiaMigrationWorker();
-
-    GenerateInputFiles fileGenerator = prepareInputFiles(100, 0);
-
-    migrationTestDao.get().dropCiaTmpTables();
-    migrationTestDao.get().createTmpTables();
-
-    ciaMigrationWorker.tmpClientTable = "tmp_client";
-    ciaMigrationWorker.tmpAddrTable = "tmp_addr";
-    ciaMigrationWorker.tmpPhoneTable = "tmp_phone";
-
-    //
-    //
-    ciaMigrationWorker.parseDataAndSaveInTmpDb(ciaMigrationWorker.prepareInFiles());
-    //
-    //
-
-    List<Client> expectedClients = fileGenerator.getGeneratedClients();
-    List<Address> expectedAddresses = fileGenerator.getGeneratedAddresses();
-    List<PhoneNumber> expectedPhoneNumbers = fileGenerator.getGeneratedPhoneNumbers();
-
-    markTmpTablesToDrop(ciaMigrationWorker);
-
-    List<Client> actualClients = migrationTestDao.get().loadClientsList(ciaMigrationWorker.tmpClientTable);
-    List<Address> actualAddresses = migrationTestDao.get().loadAddressesList(ciaMigrationWorker.tmpAddrTable);
-    List<PhoneNumber> actualPhoneNumbers = migrationTestDao.get().loadPhoneNumbersList(ciaMigrationWorker.tmpPhoneTable);
-
-    assertThat(actualClients).isNotNull();
-    assertThat(actualClients.size()).isEqualTo(expectedClients.size());
-    for (int i = 0; i < actualClients.size(); i++) {
-      assertThatAreEqual(actualClients.get(i), expectedClients.get(i));
-    }
-
-    assertThat(actualAddresses).isNotNull();
-    assertThat(actualAddresses.size()).isEqualTo(expectedAddresses.size());
-    for (int i = 0; i < actualAddresses.size(); i++) {
-      assertThatAreEqual(actualAddresses.get(i), expectedAddresses.get(i));
-    }
-
-    assertThat(actualPhoneNumbers).isNotNull();
-    assertThat(actualPhoneNumbers.size()).isEqualTo(expectedPhoneNumbers.size());
-    // sorting because generator shuffles tags
-    actualPhoneNumbers.sort(Comparator.comparing(phoneNumber -> phoneNumber.number));
-    expectedPhoneNumbers.sort(Comparator.comparing(phoneNumber -> phoneNumber.number));
-    for (int i = 0; i < actualPhoneNumbers.size(); i++) {
-      assertThatAreEqual(actualPhoneNumbers.get(i), expectedPhoneNumbers.get(i));
-    }
+  private CiaMigrationWorker getCiaMigrationWorker() {
+    CiaMigrationWorker ciaMigrationWorker = new CiaMigrationWorker(connection);
+    ciaMigrationWorker.outErrorFile = outErrorFile;
+    ciaMigrationWorker.reportXlsx = reportXlsx;
+    ciaMigrationWorker.maxBatchSize = migrationConfig.get().maxBatchSize();
+    return ciaMigrationWorker;
   }
+
+  private GenerateInputFiles prepareInputFiles(int ciaLimit, int frsLimit) throws Exception {
+    GenerateInputFiles fileGenerator = new GenerateInputFiles(ciaLimit, frsLimit);
+    fileGenerator.setTestMode();
+    fileGenerator.execute();
+    return fileGenerator;
+//    fileGenerator = new GenerateInputFiles(1_000_000, 10_000_000);
+
+//    fileGenerator = new GenerateInputFiles(50_000, 50);
+
+//    fileGenerator = new GenerateInputFiles(500, 500);
+//    fileGenerator.setTestMode();
+//    fileGenerator.execute();
+//
+//    migration.get().setSshMode(false);
+  }
+
+//  @Test
+//  public void test_parsingAndInsertionIntoTmpDb() throws Exception {
+//    CiaMigrationWorker ciaMigrationWorker = getCiaMigrationWorker();
+//
+//    GenerateInputFiles fileGenerator = prepareInputFiles(100, 0);
+//
+//    ciaMigrationWorker.createTmpTables();
+//
+//    //
+//    //
+//    ciaMigrationWorker.parseDataAndSaveInTmpDb();
+//    //
+//    //
+//
+//    List<Client> expectedClients = fileGenerator.getGeneratedClients();
+//    List<Address> expectedAddresses = fileGenerator.getGeneratedAddresses();
+//    List<PhoneNumber> expectedPhoneNumbers = fileGenerator.getGeneratedPhoneNumbers();
+//
+////    markTmpTablesToDrop(ciaMigrationWorker);
+//
+//    List<Client> actualClients = migrationTestDao.get().loadClientsList(ciaMigrationWorker.tmpClientTable);
+//    List<Address> actualAddresses = migrationTestDao.get().loadAddressesList(ciaMigrationWorker.tmpAddrTable);
+//    List<PhoneNumber> actualPhoneNumbers = migrationTestDao.get().loadPhoneNumbersList(ciaMigrationWorker.tmpPhoneTable);
+//
+//    assertThat(actualClients).isNotNull();
+//    assertThat(actualClients.size()).isEqualTo(expectedClients.size());
+//    for (int i = 0; i < actualClients.size(); i++) {
+//      assertThatAreEqual(actualClients.get(i), expectedClients.get(i));
+//    }
+//
+//    assertThat(actualAddresses).isNotNull();
+//    assertThat(actualAddresses.size()).isEqualTo(expectedAddresses.size());
+//    for (int i = 0; i < actualAddresses.size(); i++) {
+//      assertThatAreEqual(actualAddresses.get(i), expectedAddresses.get(i));
+//    }
+//
+//    assertThat(actualPhoneNumbers).isNotNull();
+//    assertThat(actualPhoneNumbers.size()).isEqualTo(expectedPhoneNumbers.size());
+//    // sorting because generator shuffles tags
+//    actualPhoneNumbers.sort(Comparator.comparing(phoneNumber -> phoneNumber.number));
+//    expectedPhoneNumbers.sort(Comparator.comparing(phoneNumber -> phoneNumber.number));
+//    for (int i = 0; i < actualPhoneNumbers.size(); i++) {
+//      assertThatAreEqual(actualPhoneNumbers.get(i), expectedPhoneNumbers.get(i));
+//    }
+//  }
 
   @Test
   public void testCiaMigrationByGoodClientsCount() throws Exception {
@@ -334,14 +353,6 @@ public class AbstractMigrationWorkerTest extends ParentTestNg {
     return 0;
   }
 
-  private CiaMigrationWorker getCiaMigrationWorker() {
-    CiaMigrationWorker ciaMigrationWorker = new CiaMigrationWorker(connection, localFileWorker);
-    ciaMigrationWorker.outErrorFile = outErrorFile;
-    ciaMigrationWorker.reportXlsx = reportXlsx;
-    ciaMigrationWorker.maxBatchSize = migrationConfig.get().maxBatchSize();
-    return ciaMigrationWorker;
-  }
-
   private void assertThatAreEqual(ClientDetails actual, ClientDetails expected) {
     assertThat(actual.surname).isEqualTo(expected.surname);
     assertThat(actual.name).isEqualTo(expected.name);
@@ -362,49 +373,5 @@ public class AbstractMigrationWorkerTest extends ParentTestNg {
       assertThat(actual.phoneNumbers.get(i).number).isEqualTo(expected.phoneNumbers.get(i).number);
       assertThat(actual.phoneNumbers.get(i).phoneType).isEqualTo(expected.phoneNumbers.get(i).phoneType);
     }
-  }
-
-  private void assertThatAreEqual(PhoneNumber actualPhoneNumber, PhoneNumber expectedPhoneNumber) {
-    assertThat(actualPhoneNumber.type).isEqualTo(expectedPhoneNumber.type);
-    assertThat(actualPhoneNumber.number).isEqualTo(expectedPhoneNumber.number);
-  }
-
-  private void assertThatAreEqual(Address actualAddress, Address expectedAddress) {
-    assertThat(actualAddress.type).isEqualTo(expectedAddress.type);
-    assertThat(actualAddress.street).isEqualTo(expectedAddress.street);
-    assertThat(actualAddress.house).isEqualTo(expectedAddress.house);
-    assertThat(actualAddress.flat).isEqualTo(expectedAddress.flat);
-  }
-
-  private void assertThatAreEqual(Client actualClient, Client expectedClient) {
-    assertThat(actualClient.cia_id).isEqualTo(expectedClient.cia_id);
-    assertThat(actualClient.name).isEqualTo(expectedClient.name);
-    assertThat(actualClient.surname).isEqualTo(expectedClient.surname);
-    assertThat(actualClient.patronymic).isEqualTo(expectedClient.patronymic);
-    assertThat(actualClient.gender).isEqualTo(expectedClient.gender);
-    assertThat(actualClient.dateOfBirth).isEqualTo(expectedClient.dateOfBirth);
-    assertThat(actualClient.charmName).isEqualTo(expectedClient.charmName);
-  }
-
-  private GenerateInputFiles prepareInputFiles(int ciaLimit, int frsLimit) throws Exception {
-    GenerateInputFiles fileGenerator = new GenerateInputFiles(ciaLimit, frsLimit);
-    fileGenerator.setTestMode();
-    fileGenerator.execute();
-    return fileGenerator;
-//    fileGenerator = new GenerateInputFiles(1_000_000, 10_000_000);
-
-//    fileGenerator = new GenerateInputFiles(50_000, 50);
-
-//    fileGenerator = new GenerateInputFiles(500, 500);
-//    fileGenerator.setTestMode();
-//    fileGenerator.execute();
-//
-//    migration.get().setSshMode(false);
-  }
-
-  private void markTmpTablesToDrop(CiaMigrationWorker ciaMigrationWorker) {
-    tmpClientTableName = ciaMigrationWorker.tmpClientTable;
-    tmpAddrTableName = ciaMigrationWorker.tmpAddrTable;
-    tmpPhoneTableName = ciaMigrationWorker.tmpPhoneTable;
   }
 }

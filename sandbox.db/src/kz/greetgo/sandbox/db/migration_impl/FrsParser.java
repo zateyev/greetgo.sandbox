@@ -18,7 +18,7 @@ public class FrsParser {
   private InputStream inputStream;
   private FrsTableWorker frsTableWorker;
 
-  public FrsParser(TarArchiveInputStream inputStream, FrsTableWorker frsTableWorker) {
+  public FrsParser(InputStream inputStream, FrsTableWorker frsTableWorker) {
     this.inputStream = inputStream;
     this.frsTableWorker = frsTableWorker;
   }

@@ -17,22 +17,21 @@ import java.util.List;
 import static kz.greetgo.sandbox.db.util.TimeUtils.recordsPerSecond;
 import static kz.greetgo.sandbox.db.util.TimeUtils.showTime;
 
-@Bean
 public class FrsMigrationWorker extends AbstractMigrationWorker {
 
   private String tmpAccountTable;
   private String tmpTransactionTable;
 
-  public FrsMigrationWorker(Connection connection, InputFileWorker sshConnection) {
-    super(connection, sshConnection);
+  public FrsMigrationWorker(Connection connection) {
+    super(connection);
   }
 
-  @Override
-  protected List<String> prepareInFiles() throws IOException, SftpException {
-    List<String> fileDirsToLoad = renameFiles(".json_row.txt.tar.bz2");
-    fileDirsToLoad.sort(String::compareTo);
-    return fileDirsToLoad;
-  }
+//  @Override
+//  protected List<String> prepareInFiles() throws IOException, SftpException {
+//    List<String> fileDirsToLoad = renameFiles(".json_row.txt.tar.bz2");
+//    fileDirsToLoad.sort(String::compareTo);
+//    return fileDirsToLoad;
+//  }
 
   @Override
   protected void handleErrors() {
@@ -107,38 +106,39 @@ public class FrsMigrationWorker extends AbstractMigrationWorker {
   }
 
   @Override
-  protected int parseDataAndSaveInTmpDb(List<String> fileDirsToLoad) throws IOException, SQLException, SftpException {
+  protected int parseDataAndSaveInTmpDb() throws IOException, SQLException, SftpException {
 
     int recordsCount = 0;
     long downloadingStartedAt = System.nanoTime();
 
-    for (String fileName : fileDirsToLoad) {
-      TarArchiveInputStream tarInput = new TarArchiveInputStream(new BZip2CompressorInputStream(inputFileWorker.downloadFile(fileName)));
-      tarInput.getNextTarEntry();
+//    TarArchiveInputStream tarInput = new TarArchiveInputStream(new BZip2CompressorInputStream(inputFileWorker.downloadFile(fileName)));
+//    tarInput.getNextTarEntry();
 
-      long startedAt = System.nanoTime();
+    long startedAt = System.nanoTime();
 
-      connection.setAutoCommit(false);
+    connection.setAutoCommit(false);
 
-      try (FrsTableWorker frsTableWorker = new FrsTableWorker(connection, maxBatchSize, tmpAccountTable, tmpTransactionTable)) {
-        FrsParser frsParser = new FrsParser(tarInput, frsTableWorker);
-        recordsCount += frsParser.parseAndSave();
-      } finally {
-        connection.setAutoCommit(true);
-      }
-
-      {
-        long now = System.nanoTime();
-        info("TOTAL Downloaded records " + recordsCount + " for " + showTime(now, startedAt)
-          + " : " + recordsPerSecond(recordsCount, now - startedAt));
-      }
+    try (FrsTableWorker frsTableWorker = new FrsTableWorker(connection, maxBatchSize, tmpAccountTable, tmpTransactionTable)) {
+      FrsParser frsParser = new FrsParser(inputStream, frsTableWorker);
+      recordsCount += frsParser.parseAndSave();
+    } finally {
+      connection.setAutoCommit(true);
     }
 
     {
       long now = System.nanoTime();
-      info("TOTAL Downloaded records " + recordsCount + " for " + showTime(now, downloadingStartedAt)
-        + " : " + recordsPerSecond(recordsCount, now - downloadingStartedAt));
+      info("TOTAL Downloaded records " + recordsCount + " for " + showTime(now, startedAt)
+        + " : " + recordsPerSecond(recordsCount, now - startedAt));
     }
+
+//    for (String fileName : fileDirsToLoad) {
+//    }
+
+//    {
+//      long now = System.nanoTime();
+//      info("TOTAL Downloaded records " + recordsCount + " for " + showTime(now, downloadingStartedAt)
+//        + " : " + recordsPerSecond(recordsCount, now - downloadingStartedAt));
+//    }
 
     return recordsCount;
   }

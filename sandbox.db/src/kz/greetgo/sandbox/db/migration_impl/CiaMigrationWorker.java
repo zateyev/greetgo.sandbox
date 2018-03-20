@@ -22,23 +22,22 @@ import java.util.List;
 import static kz.greetgo.sandbox.db.util.TimeUtils.recordsPerSecond;
 import static kz.greetgo.sandbox.db.util.TimeUtils.showTime;
 
-@Bean
 public class CiaMigrationWorker extends AbstractMigrationWorker {
 
   public String tmpClientTable;
   public String tmpAddrTable;
   public String tmpPhoneTable;
 
-  public CiaMigrationWorker(Connection connection, InputFileWorker inputFileWorker) {
-    super(connection, inputFileWorker);
+  public CiaMigrationWorker(Connection connection) {
+    super(connection);
   }
 
-  @Override
-  protected List<String> prepareInFiles() throws IOException, SftpException {
-    List<String> fileNamesToLoad = renameFiles(".xml.tar.bz2");
-    fileNamesToLoad.sort(String::compareTo);
-    return fileNamesToLoad;
-  }
+//  @Override
+//  protected List<String> prepareInFiles() throws IOException, SftpException {
+//    List<String> fileNamesToLoad = renameFiles(".xml.tar.bz2");
+//    fileNamesToLoad.sort(String::compareTo);
+//    return fileNamesToLoad;
+//  }
 
   @Override
   protected String r(String sql) {
@@ -74,7 +73,7 @@ public class CiaMigrationWorker extends AbstractMigrationWorker {
 
   protected void uploadErrors() throws SQLException, IOException, SftpException {
 
-    OutputStream outError = new FileOutputStream(outErrorFile);
+//    OutputStream outError = new FileOutputStream(outErrorFile);
 
     try (PreparedStatement errorPs = connection.prepareStatement(r("SELECT cia_id, error FROM TMP_CLIENT WHERE error IS NOT NULL"))) {
       try (ResultSet errorRs = errorPs.executeQuery()) {
@@ -86,10 +85,10 @@ public class CiaMigrationWorker extends AbstractMigrationWorker {
           outError.write("\n".getBytes());
         }
       }
-    } finally {
+    } /*finally {
       outError.close();
       inputFileWorker.upload(outErrorFile);
-    }
+    }*/
   }
 
   protected void createTmpTables() throws SQLException {
@@ -275,46 +274,48 @@ public class CiaMigrationWorker extends AbstractMigrationWorker {
     );
   }
 
-  protected int parseDataAndSaveInTmpDb(List<String> fileNamesToLoad) throws Exception {
+  protected int parseDataAndSaveInTmpDb() throws Exception {
 
     int recordsCount = 0;
     long downloadingStartedAt = System.nanoTime();
 
-    for (String fileName : fileNamesToLoad) {
-      long startedAt = System.nanoTime();
-      connection.setAutoCommit(false);
-      try (
-        InputStream xmlTarIS = inputFileWorker.downloadFile(fileName);
-        BZip2CompressorInputStream bZip2Inp = new BZip2CompressorInputStream(xmlTarIS);
-        TarArchiveInputStream tarInput = new TarArchiveInputStream(bZip2Inp);
-        CiaTableWorker ciaTableWorker = new CiaTableWorker(connection, maxBatchSize, tmpClientTable, tmpAddrTable, tmpPhoneTable)
-        ) {
+    long startedAt = System.nanoTime();
+    connection.setAutoCommit(false);
+    try (
+//      InputStream xmlTarIS = inputFileWorker.downloadFile(fileName);
+//      BZip2CompressorInputStream bZip2Inp = new BZip2CompressorInputStream(xmlTarIS);
+//      TarArchiveInputStream tarInput = new TarArchiveInputStream(bZip2Inp);
+      CiaTableWorker ciaTableWorker = new CiaTableWorker(connection, maxBatchSize, tmpClientTable, tmpAddrTable, tmpPhoneTable)
+    ) {
 
-        tarInput.getNextTarEntry();
-        ciaTableWorker.startedAt = downloadingStartedAt;
-        CiaParser ciaParser = new CiaParser(tarInput, ciaTableWorker, recordsCount);
-        {
-          long now = System.nanoTime();
-          info("FILE Extracted for " + showTime(now, startedAt) + " sec");
-        }
-        recordsCount = ciaParser.parseAndSave();
-
-      } finally {
-        connection.setAutoCommit(true);
-      }
-
+//      tarInput.getNextTarEntry();
+      ciaTableWorker.startedAt = downloadingStartedAt;
+      CiaParser ciaParser = new CiaParser(inputStream, ciaTableWorker, recordsCount);
       {
         long now = System.nanoTime();
-        info("TOTAL Downloaded records " + recordsCount + " for " + showTime(now, startedAt)
-          + " : " + recordsPerSecond(recordsCount, now - startedAt));
+        info("FILE Extracted for " + showTime(now, startedAt) + " sec");
       }
+      recordsCount = ciaParser.parseAndSave();
+
+    } finally {
+      connection.setAutoCommit(true);
     }
 
     {
       long now = System.nanoTime();
-      info("TOTAL Downloaded records " + recordsCount + " for " + showTime(now, downloadingStartedAt)
-        + " : " + recordsPerSecond(recordsCount, now - downloadingStartedAt));
+      info("TOTAL Downloaded records " + recordsCount + " for " + showTime(now, startedAt)
+        + " : " + recordsPerSecond(recordsCount, now - startedAt));
     }
+
+//    for (String fileName : fileNamesToLoad) {
+//
+//    }
+
+//    {
+//      long now = System.nanoTime();
+//      info("TOTAL Downloaded records " + recordsCount + " for " + showTime(now, downloadingStartedAt)
+//        + " : " + recordsPerSecond(recordsCount, now - downloadingStartedAt));
+//    }
 
     return recordsCount;
   }
