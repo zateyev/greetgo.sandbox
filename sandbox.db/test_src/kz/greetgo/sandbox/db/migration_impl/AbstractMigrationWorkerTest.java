@@ -113,7 +113,7 @@ public class AbstractMigrationWorkerTest extends ParentTestNg {
     List<PhoneNumber> actualPhoneNumbers = migrationTestDao.get().loadPhoneNumbersList(ciaMigrationWorker.tmpPhoneTable);
 
     assertThat(actualClients).isNotNull();
-    assertThat(actualClients.size()).isEqualTo(expectedClients.size());
+    assertThat(actualClients).hasSameSizeAs(expectedClients);
     for (int i = 0; i < actualClients.size(); i++) {
       assertThatAreEqual(actualClients.get(i), expectedClients.get(i));
     }
