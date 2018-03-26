@@ -198,14 +198,14 @@ public class CiaMigrationWorker extends AbstractMigrationWorker {
     exec("UPDATE TMP_CLIENT SET client_id = nextval('s_client') WHERE status = 0");
   }
 
-  private void insertCharms() throws SQLException {
+  void insertCharms() throws SQLException {
     //language=PostgreSQL
     exec("INSERT INTO charm (id, name)\n" +
       "SELECT nextval('s_client'), charm_name\n" +
-      "FROM TMP_CLIENT tcl WHERE tcl.status = 0 ON CONFLICT (name) DO NOTHING");
+      "FROM TMP_CLIENT tcl WHERE tcl.status IN (0, 3) ON CONFLICT (name) DO NOTHING");
   }
 
-  private void upsertClients() throws SQLException {
+  void upsertClients() throws SQLException {
     //language=PostgreSQL
     exec("INSERT INTO client (id, cia_id, surname, name, patronymic, gender, birth_date, charm)\n" +
       "SELECT client_id, tcl.cia_id, surname, tcl.name, patronymic, gender, birth_date, ch.id\n" +

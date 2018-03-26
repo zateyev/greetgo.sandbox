@@ -241,7 +241,81 @@ public class CiaMigrationWorkerTest extends ParentTestNg {
     for (int i = 0; i < actualExistingClients.size(); i++) {
       assertThatAreEqual(actualExistingClients.get(i), expectedExistingClients.get(i));
     }
+  }
 
+  @Test
+  public void test_insertCharms() throws Exception {
+    clientTestDao.get().removeAllData();
+    charmTestDao.get().removeAllData();
+
+    GenerateInputFiles fileGenerator = prepareInputFiles(100, 0);
+
+
+    List<Client> uniqueGoodClients = new ArrayList<>(fileGenerator.getUniqueGoodClients().values());
+
+    CiaMigrationWorker ciaMigrationWorker = getCiaMigrationWorker();
+
+    ciaMigrationWorker.createTmpTables();
+    Set<String> expectedCharmNames = new HashSet<>();
+
+    for (int i = 0; i < uniqueGoodClients.size(); i++) {
+      Client uniqueGoodClient = uniqueGoodClients.get(i);
+      uniqueGoodClient.id = i;
+      migrationTestDao.get().insertClient(ciaMigrationWorker.tmpClientTable, uniqueGoodClient);
+      expectedCharmNames.add(uniqueGoodClient.charm_name);
+    }
+
+    //
+    //
+    ciaMigrationWorker.insertCharms();
+    //
+    //
+
+    Set<String> actualCharmNames = charmTestDao.get().loadCharmNamesSet();
+
+    assertThat(actualCharmNames).isEqualTo(expectedCharmNames);
+  }
+
+  @Test
+  public void test_upsertClients() throws Exception {
+    clientTestDao.get().removeAllData();
+    charmTestDao.get().removeAllData();
+
+    GenerateInputFiles fileGenerator = prepareInputFiles(100, 0);
+
+    List<Client> expectedClients = new ArrayList<>(fileGenerator.getUniqueGoodClients().values());
+
+    CiaMigrationWorker ciaMigrationWorker = getCiaMigrationWorker();
+
+    ciaMigrationWorker.createTmpTables();
+
+    for (int i = 0; i < expectedClients.size(); i++) {
+      expectedClients.get(i).id = i;
+      migrationTestDao.get().insertClient(ciaMigrationWorker.tmpClientTable, expectedClients.get(i));
+      if (i % 2 == 0) {
+        clientTestDao.get().insertClientM(expectedClients.get(i));
+      }
+    }
+
+    ciaMigrationWorker.checkForClientExistence();
+    ciaMigrationWorker.insertCharms();
+
+    //
+    //
+    ciaMigrationWorker.upsertClients();
+    //
+    //
+
+    List<Client> actualUpsertedClients = clientTestDao.get().loadClientList();
+
+    expectedClients.sort((o1, o2) -> o1.surname.compareToIgnoreCase(o2.surname));
+    actualUpsertedClients.sort((o1, o2) -> o1.surname.compareToIgnoreCase(o2.surname));
+
+    assertThat(actualUpsertedClients).isNotNull();
+    assertThat(actualUpsertedClients).hasSameSizeAs(expectedClients);
+    for (int i = 0; i < actualUpsertedClients.size(); i++) {
+      assertThatAreEqual(actualUpsertedClients.get(i), expectedClients.get(i));
+    }
 
   }
 
