@@ -188,7 +188,7 @@ public class CiaMigrationWorker extends AbstractMigrationWorker {
    * Статус = 3, если cia_id присутствует в постоянной таблице client (update)
    * Статус = 0, если отсутствует в постоянной таблице client (insert)
    */
-  private void checkForClientExistence() throws SQLException {
+  void checkForClientExistence() throws SQLException {
     //language=PostgreSQL
     exec("UPDATE TMP_CLIENT tc SET client_id = c.id, status = 3\n" +
       "  FROM client c\n" +

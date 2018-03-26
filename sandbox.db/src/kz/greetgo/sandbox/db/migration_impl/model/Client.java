@@ -11,4 +11,5 @@ public class Client {
   public String gender;
   public Date birth_date;
   public String charm_name;
+  public boolean hasError;
 }

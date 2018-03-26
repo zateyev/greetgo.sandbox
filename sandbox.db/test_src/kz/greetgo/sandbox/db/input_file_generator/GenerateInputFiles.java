@@ -14,7 +14,6 @@ import java.math.RoundingMode;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.text.SimpleDateFormat;
-import java.time.ZoneId;
 import java.util.*;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -29,7 +28,7 @@ public class GenerateInputFiles {
 
   private final int CURRENT_YEAR = Calendar.getInstance().get(Calendar.YEAR);
 
-  private Map<String, ClientDetails> lastGoodClients;
+  private Map<String, Client> uniqueGoodClients;
   private List<ClientDetails> goodClients;
   private List<Client> generatedClients;
   private List<kz.greetgo.sandbox.db.migration_impl.model.Address> generatedAddresses;
@@ -44,7 +43,7 @@ public class GenerateInputFiles {
     this.ciaLimit = ciaLimit;
     this.frsLimit = frsLimit;
 
-    lastGoodClients = new HashMap<>();
+    uniqueGoodClients = new HashMap<>();
     goodClients = new ArrayList<>();
     errorClients = new ArrayList<>();
     clientAccounts = new HashMap<>();
@@ -74,8 +73,8 @@ public class GenerateInputFiles {
     return info.goodClientIds;
   }
 
-  public Map<String, ClientDetails> getLastGoodClients() {
-    return lastGoodClients;
+  public Map<String, Client> getUniqueGoodClients() {
+    return uniqueGoodClients;
   }
 
   public long getGoodClientCount() {
@@ -754,12 +753,16 @@ public class GenerateInputFiles {
       }
 
       if (rowType == RowType.ERROR) {
-        if (testMode) errorClients.add(client);
+        if (testMode) {
+          client.hasError = true;
+          errorClients.add(client);
+        }
         info.newErrorClient();
       } else {
         if (testMode) {
           goodClients.add(goodClient);
-          if (info.goodClientIds.contains(clientId)) lastGoodClients.put(clientId, goodClient);
+//          if (info.goodClientIds.contains(clientId))
+          uniqueGoodClients.put(clientId, client);
         }
         info.appendGoodClientId(clientId);
       }

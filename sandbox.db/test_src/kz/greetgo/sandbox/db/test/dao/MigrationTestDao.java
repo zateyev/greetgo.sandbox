@@ -32,4 +32,12 @@ public interface MigrationTestDao {
   @Select("SELECT cia_id, surname, name, patronymic, gender, birth_date, charm_name FROM ${tableName}" +
     " WHERE error IS NOT NULL ORDER BY number")
   List<Client> loadErrorClientsList(@Param("tableName") String tableName);
+
+  @Select("SELECT cia_id, surname, name, patronymic, gender, birth_date, charm_name FROM ${tableName}" +
+    " WHERE status = 0 ORDER BY number")
+  List<Client> loadUniqueClientsList(@Param("tableName") String tableName);
+
+  @Select("SELECT cia_id, surname, name, patronymic, gender, birth_date, charm_name FROM ${tableName}" +
+    " WHERE status = 3 ORDER BY number")
+  List<Client> loadExistingClientsList(@Param("tableName") String tableName);
 }

@@ -1,6 +1,7 @@
 package kz.greetgo.sandbox.db.test.dao;
 
 import kz.greetgo.sandbox.controller.model.*;
+import kz.greetgo.sandbox.db.migration_impl.model.Client;
 import kz.greetgo.sandbox.db.migration_impl.model.Transaction;
 import org.apache.ibatis.annotations.*;
 
@@ -134,4 +135,6 @@ public interface ClientTestDao {
     "(SELECT id FROM client_account WHERE number = #{account_number}) AND finished_at = #{finished_at}")
   Transaction getTransactionByAccountNumber(@Param("account_number") String accountNumber,
                                             @Param("finished_at") Date finishedAt);
+
+  void insertClientM(Client client);
 }
