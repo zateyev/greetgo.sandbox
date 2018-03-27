@@ -84,6 +84,8 @@ public class FrsMigrationWorkerTest extends ParentTestNg {
   public void test_parsingAndInsertionIntoTmpDb() throws Exception {
     FrsMigrationWorker frsMigrationWorker = getFrsMigrationWorker();
 
+    fileGenerator = prepareInputFiles(0, 100);
+
     frsMigrationWorker.inputStream = new FileInputStream(fileGenerator.getOutFrsFileName());
 
     frsMigrationWorker.createTmpTables();

@@ -123,29 +123,36 @@ public class Migration {
 
   public void executeFrsMigration() throws Exception {
 
-
-
-    File outErrorFile = new File(migrationConfig.get().inFilesHomePath() + migrationConfig.get().outErrorFileName());
-    outErrorFile.getParentFile().mkdirs();
-    File file = new File(migrationConfig.get().sqlReportDir() + "sqlReportFrs.xlsx");
-    file.getParentFile().mkdirs();
-    ReportXlsx reportXlsx = new ReportXlsx(new FileOutputStream(file));
-    reportXlsx.start();
-
     try (
       Connection connection = getConnection();
-      InputFileWorker inputFileWorker = getInputFileWorker();
-      OutputStream outError = new FileOutputStream(outErrorFile);
+      InputFileWorker inputFileWorker = getInputFileWorker()
       ) {
-      FrsMigrationWorker frsMigrationWorker = new FrsMigrationWorker(connection);
-      frsMigrationWorker.inputStream = inputFileWorker.downloadFile("");
-      frsMigrationWorker.outError = outError;
-      frsMigrationWorker.outErrorFile = outErrorFile;
-      frsMigrationWorker.reportXlsx = reportXlsx;
-      frsMigrationWorker.maxBatchSize = migrationConfig.get().maxBatchSize();
-      frsMigrationWorker.migrate();
-    } finally {
-      reportXlsx.finish();
+
+      List<String> fileNamesToMigrate = inputFileWorker.getFileNamesToMigrate(".json_row.txt.tar.bz2");
+
+      for (String fileName : fileNamesToMigrate) {
+        File outErrorFile = new File(migrationConfig.get().inFilesHomePath() + "error_report_" + fileName);
+        outErrorFile.getParentFile().mkdirs();
+        File file = new File(migrationConfig.get().sqlReportDir() + fileName + "sqlReportFrs.xlsx");
+        file.getParentFile().mkdirs();
+        ReportXlsx reportXlsx = new ReportXlsx(new FileOutputStream(file));
+        reportXlsx.start();
+
+        try (
+
+          OutputStream outError = new FileOutputStream(outErrorFile);
+        ) {
+          FrsMigrationWorker frsMigrationWorker = new FrsMigrationWorker(connection);
+          frsMigrationWorker.inputStream = inputFileWorker.downloadFile(fileName);
+          frsMigrationWorker.outError = outError;
+          frsMigrationWorker.outErrorFile = outErrorFile;
+          frsMigrationWorker.reportXlsx = reportXlsx;
+          frsMigrationWorker.maxBatchSize = migrationConfig.get().maxBatchSize();
+          frsMigrationWorker.migrate();
+        } finally {
+          reportXlsx.finish();
+        }
+      }
     }
   }
 
