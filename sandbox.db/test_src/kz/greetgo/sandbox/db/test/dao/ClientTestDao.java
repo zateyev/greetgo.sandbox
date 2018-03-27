@@ -138,7 +138,7 @@ public interface ClientTestDao {
   Transaction getTransactionByAccountNumber(@Param("account_number") String accountNumber,
                                             @Param("finished_at") Date finishedAt);
 
-  void insertClientM(ClientTmp client);
+  void insertClientTmp(ClientTmp client);
 
   @Select("SELECT cia_id, surname, client.name, patronymic, gender, birth_date, charm.name AS charm_name FROM client LEFT JOIN charm" +
     " ON client.charm = charm.id ORDER BY surname")

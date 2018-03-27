@@ -10,7 +10,7 @@ import org.apache.ibatis.annotations.Param;
 public interface ClientTestDaoPostgres extends ClientTestDao {
 
   @Insert("INSERT INTO client (id, cia_id, surname, name, patronymic, gender, birth_date) VALUES" +
-    " (#{client.id}, #{client.cia_id}, #{client.surname}, #{client.name}, #{client.patronymic}," +
+    " (#{client.number}, #{client.cia_id}, #{client.surname}, #{client.name}, #{client.patronymic}," +
     " #{client.gender}, #{client.birth_date})")
-  void insertClientM(@Param("client") ClientTmp client);
+  void insertClientTmp(@Param("client") ClientTmp client);
 }

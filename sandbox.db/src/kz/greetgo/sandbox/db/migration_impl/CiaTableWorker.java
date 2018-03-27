@@ -93,7 +93,7 @@ public class CiaTableWorker implements Closeable {
 
     try {
       int ind = 1;
-      clientPS.setInt(ind++, client.id);
+      clientPS.setInt(ind++, client.number);
       clientPS.setString(ind++, client.cia_id);
       clientPS.setString(ind++, client.surname);
       clientPS.setString(ind++, client.name);
@@ -118,8 +118,8 @@ public class CiaTableWorker implements Closeable {
         showStatus.set(false);
 
         long now = System.nanoTime();
-        info(" -- downloaded records " + client.id + " for " + TimeUtils.showTime(now, startedAt)
-          + " : " + TimeUtils.recordsPerSecond(client.id, now - startedAt));
+        info(" -- downloaded records " + client.number + " for " + TimeUtils.showTime(now, startedAt)
+          + " : " + TimeUtils.recordsPerSecond(client.number, now - startedAt));
       }
 
     } catch (SQLException e) {
