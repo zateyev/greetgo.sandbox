@@ -5,7 +5,6 @@ import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonToken;
 import kz.greetgo.sandbox.db.migration_impl.model.Account;
 import kz.greetgo.sandbox.db.migration_impl.model.Transaction;
-import org.apache.commons.compress.archivers.tar.TarArchiveInputStream;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -53,8 +52,8 @@ public class FrsParser {
             break;
           case "account_number":
             jsonParser.nextToken();
-            account.accountNumber = jsonParser.getText();
-            transaction.accountNumber = jsonParser.getText();
+            account.account_number = jsonParser.getText();
+            transaction.account_number = jsonParser.getText();
             break;
           case "registered_at":
             jsonParser.nextToken();
@@ -70,7 +69,7 @@ public class FrsParser {
             break;
           case "transaction_type":
             jsonParser.nextToken();
-            transaction.transactionType = jsonParser.getText();
+            transaction.transaction_type = jsonParser.getText();
             break;
         }
       }

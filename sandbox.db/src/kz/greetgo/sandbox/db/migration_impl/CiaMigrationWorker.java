@@ -257,7 +257,7 @@ public class CiaMigrationWorker extends AbstractMigrationWorker {
       "WHERE num_ord.ord > 1 AND num_ord.number = tp.number");
   }
 
-  private void upsertPhoneNumbers() throws SQLException {
+  void upsertPhoneNumbers() throws SQLException {
     //language=PostgreSQL
     exec("INSERT INTO client_phone(client, number, type) " +
       "SELECT tc.client_id, tp.phone_number, tp.type " +
@@ -277,13 +277,8 @@ public class CiaMigrationWorker extends AbstractMigrationWorker {
     long startedAt = System.nanoTime();
     connection.setAutoCommit(false);
     try (
-//      InputStream xmlTarIS = inputFileWorker.downloadFile(fileName);
-//      BZip2CompressorInputStream bZip2Inp = new BZip2CompressorInputStream(xmlTarIS);
-//      TarArchiveInputStream tarInput = new TarArchiveInputStream(bZip2Inp);
       CiaTableWorker ciaTableWorker = new CiaTableWorker(connection, maxBatchSize, tmpClientTable, tmpAddrTable, tmpPhoneTable)
     ) {
-
-//      tarInput.getNextTarEntry();
       ciaTableWorker.startedAt = downloadingStartedAt;
       CiaParser ciaParser = new CiaParser(inputStream, ciaTableWorker, recordsCount);
       {
@@ -301,16 +296,6 @@ public class CiaMigrationWorker extends AbstractMigrationWorker {
       info("TOTAL Downloaded records " + recordsCount + " for " + showTime(now, startedAt)
         + " : " + recordsPerSecond(recordsCount, now - startedAt));
     }
-
-//    for (String fileName : fileNamesToLoad) {
-//
-//    }
-
-//    {
-//      long now = System.nanoTime();
-//      info("TOTAL Downloaded records " + recordsCount + " for " + showTime(now, downloadingStartedAt)
-//        + " : " + recordsPerSecond(recordsCount, now - downloadingStartedAt));
-//    }
 
     return recordsCount;
   }

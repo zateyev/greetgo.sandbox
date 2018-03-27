@@ -39,6 +39,9 @@ public class GenerateInputFiles {
   private boolean testMode;
   private String outCiaFileName;
   private List<Client> errorClients;
+  private String outFrsFileName;
+  private List<kz.greetgo.sandbox.db.migration_impl.model.Account> generatedAccounts;
+  private List<Transaction> generatedTransactions;
 
   public GenerateInputFiles(int ciaLimit, int frsLimit) {
     this.ciaLimit = ciaLimit;
@@ -54,13 +57,16 @@ public class GenerateInputFiles {
     generatedClients = new ArrayList<>();
     generatedAddresses = new ArrayList<>();
     generatedPhoneNumbers = new ArrayList<>();
+
+    generatedAccounts = new ArrayList<>();
+    generatedTransactions = new ArrayList<>();
   }
 
   public static void main(String[] args) throws Exception {
-    GenerateInputFiles generateInputFiles = new GenerateInputFiles(50, 0);
+    GenerateInputFiles generateInputFiles = new GenerateInputFiles(50, 50);
     generateInputFiles.setTestMode();
     generateInputFiles.execute();
-    System.out.println("Out file name " + generateInputFiles.outCiaFileName);
+    System.out.println("Out file name " + generateInputFiles.outFrsFileName);
   }
 
   private static final String ENG = "abcdefghijklmnopqrstuvwxyz";
@@ -135,6 +141,18 @@ public class GenerateInputFiles {
 
   public List<Client> getErrorClients() {
     return errorClients;
+  }
+
+  public String getOutFrsFileName() {
+    return outFrsFileName;
+  }
+
+  public List<kz.greetgo.sandbox.db.migration_impl.model.Account> getGeneratedAccounts() {
+    return generatedAccounts;
+  }
+
+  public List<Transaction> getGeneratedTransactions() {
+    return generatedTransactions;
   }
 
   private static class Info {
@@ -468,6 +486,8 @@ public class GenerateInputFiles {
     }
 
     finishPrinter(null, ".json_row.txt");
+    outFrsFileName = outFileName + '-' + currentFileRecords + ".json_row.txt";
+//    outFrsFileName = outFile.getName();
 
     working.set(false);
 
@@ -882,8 +902,8 @@ public class GenerateInputFiles {
         pairs.add("'account_number':'" + number + "'");
 
         transaction.money = money;
-        transaction.accountNumber = number;
-        transaction.transactionType = type;
+        transaction.account_number = number;
+        transaction.transaction_type = type;
         transaction.finishedAt = sdf.format(finishedAt);
 
         Collections.shuffle(pairs);
@@ -1020,22 +1040,34 @@ public class GenerateInputFiles {
     info.newAccount();
 
     kz.greetgo.sandbox.db.migration_impl.model.Account newAccount = new kz.greetgo.sandbox.db.migration_impl.model.Account();
-    newAccount.accountNumber = account.number;
+    newAccount.account_number = account.number;
 //    newAccount.registeredAt = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS").format(account.registeredAt);
     newAccount.registeredAtD = account.registeredAt;
-    if (testMode) clientAccounts.put(clientId, newAccount);
+    if (testMode) {
+      clientAccounts.put(clientId, newAccount);
+      generatedAccounts.add(newAccount);
+    }
 
 
-    Transaction transaction = new Transaction();
+    Transaction transaction;
 
     int count = 2 + random.nextInt(10);
     for (int i = 0; i < count; i++) {
+      transaction = new Transaction();
       records.add(account.addTransaction(rowIndex, false).toJson(transaction));
       info.newTransaction();
+      if (testMode) {
+        accountTransactions.put(clientId, transaction);
+        generatedTransactions.add(transaction);
+      }
     }
+    transaction = new Transaction();
     records.add(account.addTransaction(rowIndex, true).toJson(transaction));
     info.newTransaction();
-    if (testMode) accountTransactions.put(clientId, transaction);
+    if (testMode) {
+      accountTransactions.put(clientId, transaction);
+      generatedTransactions.add(transaction);
+    }
 
     Collections.shuffle(records);
 

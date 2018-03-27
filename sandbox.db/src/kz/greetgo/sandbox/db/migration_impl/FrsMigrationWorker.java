@@ -19,8 +19,8 @@ import static kz.greetgo.sandbox.db.util.TimeUtils.showTime;
 
 public class FrsMigrationWorker extends AbstractMigrationWorker {
 
-  private String tmpAccountTable;
-  private String tmpTransactionTable;
+  String tmpAccountTable;
+  String tmpTransactionTable;
 
   public FrsMigrationWorker(Connection connection) {
     super(connection);

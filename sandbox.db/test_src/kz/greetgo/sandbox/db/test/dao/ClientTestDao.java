@@ -132,7 +132,7 @@ public interface ClientTestDao {
     " client = (SELECT id FROM client WHERE cia_id = #{cia_id}) AND registered_at = #{registered_at}")
   String getClientAccountByCiaId(@Param("cia_id") String ciaId, @Param("registered_at") Date registeredAtD);
 
-  @Select("SELECT account as accountNumber, money, type as transactionType " +
+  @Select("SELECT account as account_number, money, type as transaction_type " +
     "FROM client_account_transaction WHERE account = " +
     "(SELECT id FROM client_account WHERE number = #{account_number}) AND finished_at = #{finished_at}")
   Transaction getTransactionByAccountNumber(@Param("account_number") String accountNumber,
@@ -146,4 +146,7 @@ public interface ClientTestDao {
 
   @Select("SELECT type, street, house, flat FROM client_addr ORDER BY client")
   List<kz.greetgo.sandbox.db.migration_impl.model.Address> loadAddressList();
+
+  @Select("SELECT type, number as phone_number FROM client_phone ORDER BY client")
+  List<kz.greetgo.sandbox.db.migration_impl.model.PhoneNumber> loadPhoneNumberList();
 }
