@@ -7,7 +7,7 @@ import java.util.Date;
 public class Account {
   public String type;
   public String clientId;
-  public String accountNumber;
+  public String account_number;
   public String registeredAt;
   public Date registeredAtD;
 }

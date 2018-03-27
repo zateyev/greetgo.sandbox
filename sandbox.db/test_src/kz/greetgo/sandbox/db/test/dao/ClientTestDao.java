@@ -1,7 +1,10 @@
 package kz.greetgo.sandbox.db.test.dao;
 
 import kz.greetgo.sandbox.controller.model.*;
-import kz.greetgo.sandbox.db.migration_impl.model.Transaction;
+import kz.greetgo.sandbox.controller.model.Address;
+import kz.greetgo.sandbox.controller.model.PhoneNumber;
+import kz.greetgo.sandbox.controller.model.PhoneType;
+import kz.greetgo.sandbox.db.migration_impl.model.*;
 import org.apache.ibatis.annotations.*;
 
 import java.time.OffsetDateTime;
@@ -129,9 +132,27 @@ public interface ClientTestDao {
     " client = (SELECT id FROM client WHERE cia_id = #{cia_id}) AND registered_at = #{registered_at}")
   String getClientAccountByCiaId(@Param("cia_id") String ciaId, @Param("registered_at") Date registeredAtD);
 
-  @Select("SELECT account as accountNumber, money, type as transactionType " +
+  @Select("SELECT account as account_number, money, type as transaction_type " +
     "FROM client_account_transaction WHERE account = " +
     "(SELECT id FROM client_account WHERE number = #{account_number}) AND finished_at = #{finished_at}")
   Transaction getTransactionByAccountNumber(@Param("account_number") String accountNumber,
                                             @Param("finished_at") Date finishedAt);
+
+  void insertClientM(Client client);
+
+  @Select("SELECT cia_id, surname, client.name, patronymic, gender, birth_date, charm.name AS charm_name FROM client LEFT JOIN charm" +
+    " ON client.charm = charm.id ORDER BY surname")
+  List<Client> loadClientList();
+
+  @Select("SELECT type, street, house, flat FROM client_addr ORDER BY client")
+  List<kz.greetgo.sandbox.db.migration_impl.model.Address> loadAddressList();
+
+  @Select("SELECT type, number as phone_number FROM client_phone ORDER BY client")
+  List<kz.greetgo.sandbox.db.migration_impl.model.PhoneNumber> loadPhoneNumberList();
+
+  @Select("SELECT number as account_number, registered_at as registeredAtD FROM client_account ORDER BY registered_at")
+  List<Account> loadAccountList();
+
+  @Select("SELECT money, transaction_type FROM client_account_transaction ORDER BY finished_at")
+  List<Transaction> loadTransactionList();
 }

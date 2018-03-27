@@ -43,7 +43,7 @@ public class FrsTableWorker implements Closeable {
       int ind = 1;
       accountPS.setString(ind++, account.type);
       accountPS.setString(ind++, account.clientId);
-      accountPS.setString(ind++, account.accountNumber);
+      accountPS.setString(ind++, account.account_number);
       accountPS.setTimestamp(ind, new Timestamp(SDF.parse(account.registeredAt).getTime()));
 
       accountPS.addBatch();
@@ -67,8 +67,8 @@ public class FrsTableWorker implements Closeable {
       transactionPS.setString(ind++, transaction.type);
       transactionPS.setBigDecimal(ind++, transaction.money);
       transactionPS.setTimestamp(ind++, new Timestamp(SDF.parse(transaction.finishedAt).getTime()));
-      transactionPS.setString(ind++, transaction.transactionType);
-      transactionPS.setString(ind, transaction.accountNumber);
+      transactionPS.setString(ind++, transaction.transaction_type);
+      transactionPS.setString(ind, transaction.account_number);
 
       transactionPS.addBatch();
       transactionBatchSize++;

@@ -16,6 +16,7 @@ import java.io.InputStream;
 import java.sql.SQLException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.format.DateTimeParseException;
 
 public class CiaParser extends SaxHandler {
 
@@ -67,20 +68,29 @@ public class CiaParser extends SaxHandler {
         client.gender = attributes.getValue("value");
         return;
 
+//      case "/cia/client/birth":
+//        client.birth_date = attributes.getValue("value");
+//        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+//        try {
+//          sdf.parse(client.birth_date);
+//        } catch (ParseException e) {
+//          // Проглатывание ошибки
+//          client.birth_date = null;
+//          return;
+//        }
+//        return;
       case "/cia/client/birth":
-        client.dateOfBirth = attributes.getValue("value");
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
         try {
-          sdf.parse(client.dateOfBirth);
+          SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+          client.birth_date = sdf.parse(attributes.getValue("value"));
         } catch (ParseException e) {
           // Проглатывание ошибки
-          client.dateOfBirth = null;
           return;
         }
         return;
 
       case "/cia/client/charm":
-        client.charmName = attributes.getValue("value");
+        client.charm_name = attributes.getValue("value");
         return;
 
       case "/cia/client/address/fact":
@@ -111,7 +121,7 @@ public class CiaParser extends SaxHandler {
     if (path.endsWith("Phone")) {
       PhoneNumber phoneNumber = new PhoneNumber();
       phoneNumber.client_num = recordsNum;
-      phoneNumber.number = text();
+      phoneNumber.phone_number = text();
       switch (path) {
         case "/cia/client/workPhone": {
           phoneNumber.type = PhoneType.WORK;

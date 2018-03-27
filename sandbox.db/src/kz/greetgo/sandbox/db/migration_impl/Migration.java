@@ -15,11 +15,13 @@ import kz.greetgo.sandbox.db.util.TimeUtils;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.List;
 
 @Bean
 public class Migration {
@@ -50,12 +52,12 @@ public class Migration {
     ) {
       long startedAt = System.nanoTime();
 
-      CiaMigrationWorker ciaMigrationWorker = new CiaMigrationWorker(connectionForCia, inputFileWorker);
+      CiaMigrationWorker ciaMigrationWorker = new CiaMigrationWorker(connectionForCia);
       ciaMigrationWorker.outErrorFile = outErrorFile;
       ciaMigrationWorker.reportXlsx = reportXlsx;
       ciaMigrationWorker.maxBatchSize = migrationConfig.get().maxBatchSize();
 
-      FrsMigrationWorker frsMigrationWorker = new FrsMigrationWorker(connectionForFrs, inputFileWorker);
+      FrsMigrationWorker frsMigrationWorker = new FrsMigrationWorker(connectionForFrs);
 //      frsMigrationWorker.outErrorFile = outErrorFile;
       frsMigrationWorker.reportXlsx = reportXlsxFrs;
       frsMigrationWorker.maxBatchSize = migrationConfig.get().maxBatchSize();
@@ -63,8 +65,8 @@ public class Migration {
       final Thread frsDownloading = new Thread(() -> {
         try {
           frsMigrationWorker.createTmpTables();
-          frsMigrationWorker.parseDataAndSaveInTmpDb(frsMigrationWorker.prepareInFiles());
-          frsMigrationWorker.handleErrors();
+          frsMigrationWorker.parseDataAndSaveInTmpDb();
+          frsMigrationWorker.validateErrors();
         } catch (SQLException | SftpException | IOException e) {
           e.printStackTrace();
         }
@@ -86,48 +88,71 @@ public class Migration {
 
 
   public void executeCiaMigration() throws Exception {
-
-    File outErrorFile = new File(migrationConfig.get().inFilesHomePath() + migrationConfig.get().outErrorFileName());
-    outErrorFile.getParentFile().mkdirs();
-    File file = new File(migrationConfig.get().sqlReportDir() + "sqlReportCia.xlsx");
-    file.getParentFile().mkdirs();
-    ReportXlsx reportXlsx = new ReportXlsx(new FileOutputStream( file));
-    reportXlsx.start();
-
     try (
-      Connection connection = getConnection();
-      InputFileWorker inputFileWorker = getInputFileWorker()
+      InputFileWorker inputFileWorker = getInputFileWorker();
+      Connection connection = getConnection()
       ) {
-      CiaMigrationWorker ciaMigrationWorker = new CiaMigrationWorker(connection, inputFileWorker);
-      ciaMigrationWorker.outErrorFile = outErrorFile;
-      ciaMigrationWorker.reportXlsx = reportXlsx;
-      ciaMigrationWorker.maxBatchSize = migrationConfig.get().maxBatchSize();
-      ciaMigrationWorker.migrate();
-    } finally {
-      reportXlsx.finish();
+
+      List<String> fileNamesToMigrate = inputFileWorker.getFileNamesToMigrate(".xml.tar.bz2");
+
+      for (String fileName : fileNamesToMigrate) {
+        File outErrorFile = new File(migrationConfig.get().inFilesHomePath() + "error_report_" + fileName);
+        //noinspection ResultOfMethodCallIgnored
+        outErrorFile.getParentFile().mkdirs();
+        File file = new File(migrationConfig.get().sqlReportDir() + fileName + "sqlReportCia.xlsx");
+        //noinspection ResultOfMethodCallIgnored
+        file.getParentFile().mkdirs();
+        ReportXlsx reportXlsx = new ReportXlsx(new FileOutputStream(file));
+        reportXlsx.start();
+
+        try (
+          OutputStream outError = new FileOutputStream(outErrorFile)
+        ) {
+          CiaMigrationWorker ciaMigrationWorker = new CiaMigrationWorker(connection);
+          ciaMigrationWorker.inputStream = inputFileWorker.downloadFile(fileName);
+          ciaMigrationWorker.outError = outError;
+          ciaMigrationWorker.reportXlsx = reportXlsx;
+          ciaMigrationWorker.maxBatchSize = migrationConfig.get().maxBatchSize();
+          ciaMigrationWorker.migrate();
+        } finally {
+          reportXlsx.finish();
+        }
+      }
     }
   }
 
   public void executeFrsMigration() throws Exception {
 
-    File outErrorFile = new File(migrationConfig.get().inFilesHomePath() + migrationConfig.get().outErrorFileName());
-    outErrorFile.getParentFile().mkdirs();
-    File file = new File(migrationConfig.get().sqlReportDir() + "sqlReportFrs.xlsx");
-    file.getParentFile().mkdirs();
-    ReportXlsx reportXlsx = new ReportXlsx(new FileOutputStream(file));
-    reportXlsx.start();
-
     try (
       Connection connection = getConnection();
-      InputFileWorker inputFileWorker = getInputFileWorker();
+      InputFileWorker inputFileWorker = getInputFileWorker()
       ) {
-      FrsMigrationWorker frsMigrationWorker = new FrsMigrationWorker(connection, inputFileWorker);
-      frsMigrationWorker.outErrorFile = outErrorFile;
-      frsMigrationWorker.reportXlsx = reportXlsx;
-      frsMigrationWorker.maxBatchSize = migrationConfig.get().maxBatchSize();
-      frsMigrationWorker.migrate();
-    } finally {
-      reportXlsx.finish();
+
+      List<String> fileNamesToMigrate = inputFileWorker.getFileNamesToMigrate(".json_row.txt.tar.bz2");
+
+      for (String fileName : fileNamesToMigrate) {
+        File outErrorFile = new File(migrationConfig.get().inFilesHomePath() + "error_report_" + fileName);
+        outErrorFile.getParentFile().mkdirs();
+        File file = new File(migrationConfig.get().sqlReportDir() + fileName + "sqlReportFrs.xlsx");
+        file.getParentFile().mkdirs();
+        ReportXlsx reportXlsx = new ReportXlsx(new FileOutputStream(file));
+        reportXlsx.start();
+
+        try (
+
+          OutputStream outError = new FileOutputStream(outErrorFile);
+        ) {
+          FrsMigrationWorker frsMigrationWorker = new FrsMigrationWorker(connection);
+          frsMigrationWorker.inputStream = inputFileWorker.downloadFile(fileName);
+          frsMigrationWorker.outError = outError;
+          frsMigrationWorker.outErrorFile = outErrorFile;
+          frsMigrationWorker.reportXlsx = reportXlsx;
+          frsMigrationWorker.maxBatchSize = migrationConfig.get().maxBatchSize();
+          frsMigrationWorker.migrate();
+        } finally {
+          reportXlsx.finish();
+        }
+      }
     }
   }
 

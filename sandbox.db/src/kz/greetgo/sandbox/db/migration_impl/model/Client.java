@@ -9,6 +9,7 @@ public class Client {
   public String name;
   public String patronymic;
   public String gender;
-  public String dateOfBirth;
-  public String charmName;
+  public Date birth_date;
+  public String charm_name;
+  public boolean hasError;
 }

@@ -100,8 +100,9 @@ public class CiaTableWorker implements Closeable {
 
       clientPS.setString(ind++, client.patronymic);
       clientPS.setString(ind++, client.gender);
-      clientPS.setDate(ind++, client.dateOfBirth != null ? java.sql.Date.valueOf(client.dateOfBirth) : null);
-      clientPS.setString(ind, client.charmName);
+//      clientPS.setDate(ind++, client.birth_date != null ? java.sql.Date.valueOf(client.birth_date) : null);
+      clientPS.setDate(ind++, client.birth_date != null ? new java.sql.Date(client.birth_date.getTime()) : null);
+      clientPS.setString(ind, client.charm_name);
 
       clientPS.addBatch();
       clientBatchSize++;
@@ -162,7 +163,7 @@ public class CiaTableWorker implements Closeable {
 
       int ind = 1;
       phonePS.setInt(ind++, phoneNumber.client_num);
-      phonePS.setString(ind++, phoneNumber.number);
+      phonePS.setString(ind++, phoneNumber.phone_number);
       phonePS.setString(ind, phoneNumber.type.toString());
       phonePS.addBatch();
 

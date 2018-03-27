@@ -21,61 +21,52 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import static kz.greetgo.util.RND.plusLong;
-
 public class GenerateInputFiles {
 
-  private final int CIA_LIMIT;
-  private final int FRS_LIMIT;
+  private int ciaLimit;
+  private int frsLimit;
 
   private final int CURRENT_YEAR = Calendar.getInstance().get(Calendar.YEAR);
 
-  private Map<String, ClientDetails> lastGoodClients;
-  private List<ClientDetails> goodClients;
+  private Map<String, Client> uniqueGoodClients;
+  private Map<String, ClientDetails> uniqueGoodClientDetails;
+//  private List<ClientDetails> goodClients;
   private List<Client> generatedClients;
   private List<kz.greetgo.sandbox.db.migration_impl.model.Address> generatedAddresses;
   private List<kz.greetgo.sandbox.db.migration_impl.model.PhoneNumber> generatedPhoneNumbers;
   private Map<String, kz.greetgo.sandbox.db.migration_impl.model.Account> clientAccounts;
   private Map<String, Transaction> accountTransactions;
   private boolean testMode;
+  private String outCiaFileName;
+  private List<Client> errorClients;
+  private String outFrsFileName;
+  private List<kz.greetgo.sandbox.db.migration_impl.model.Account> generatedAccounts;
+  private List<Transaction> generatedTransactions;
 
-  public GenerateInputFiles(int CIA_LIMIT, int FRS_LIMIT) {
-    this.CIA_LIMIT = CIA_LIMIT;
-    this.FRS_LIMIT = FRS_LIMIT;
+  public GenerateInputFiles(int ciaLimit, int frsLimit) {
+    this.ciaLimit = ciaLimit;
+    this.frsLimit = frsLimit;
 
-    lastGoodClients = new HashMap<>();
-    goodClients = new ArrayList<>();
+    uniqueGoodClients = new HashMap<>();
+    uniqueGoodClientDetails = new HashMap<>();
+//    goodClients = new ArrayList<>();
+    errorClients = new ArrayList<>();
     clientAccounts = new HashMap<>();
     accountTransactions = new HashMap<>();
 
     generatedClients = new ArrayList<>();
     generatedAddresses = new ArrayList<>();
     generatedPhoneNumbers = new ArrayList<>();
+
+    generatedAccounts = new ArrayList<>();
+    generatedTransactions = new ArrayList<>();
   }
 
   public static void main(String[] args) throws Exception {
-//    new GenerateInputFiles(1_000_000, 10_000_000).execute();
-
-    SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-    for (int i = 0; i < 100; i++) {
-      Calendar cal = new GregorianCalendar();
-      int yearFrom = -10;
-      int yearTo = -9;
-      cal.add(Calendar.YEAR, yearFrom);
-      long from = cal.getTimeInMillis();
-      cal.add(Calendar.YEAR, yearTo - yearFrom);
-      long to = cal.getTimeInMillis();
-      if (from > to) {
-        long tmp = from;
-        from = to;
-        to = tmp;
-      }
-      final long time = from + plusLong(to - from);
-      Date date = new Date(time);
-
-      System.out.println(sdf.format(date));
-    }
-
+    GenerateInputFiles generateInputFiles = new GenerateInputFiles(50, 50);
+    generateInputFiles.setTestMode();
+    generateInputFiles.execute();
+    System.out.println("Out file name " + generateInputFiles.outFrsFileName);
   }
 
   private static final String ENG = "abcdefghijklmnopqrstuvwxyz";
@@ -90,8 +81,12 @@ public class GenerateInputFiles {
     return info.goodClientIds;
   }
 
-  public Map<String, ClientDetails> getLastGoodClients() {
-    return lastGoodClients;
+  public Map<String, Client> getUniqueGoodClients() {
+    return uniqueGoodClients;
+  }
+
+  public Map<String, ClientDetails> getUniqueGoodClientDetails() {
+    return uniqueGoodClientDetails;
   }
 
   public long getGoodClientCount() {
@@ -111,6 +106,8 @@ public class GenerateInputFiles {
   }
 
   public void setTestMode() {
+    if (this.ciaLimit > 100) this.ciaLimit = 100;
+    if (this.frsLimit > 100) this.frsLimit = 100;
     this.testMode = true;
   }
 
@@ -122,9 +119,9 @@ public class GenerateInputFiles {
     return accountTransactions;
   }
 
-  public List<ClientDetails> getGoodClients() {
-    return goodClients;
-  }
+//  public List<ClientDetails> getGoodClients() {
+//    return goodClients;
+//  }
 
   public List<Client> getGeneratedClients() {
     return generatedClients;
@@ -136,6 +133,26 @@ public class GenerateInputFiles {
 
   public List<kz.greetgo.sandbox.db.migration_impl.model.PhoneNumber> getGeneratedPhoneNumbers() {
     return generatedPhoneNumbers;
+  }
+
+  public String getOutCiaFileName() {
+    return outCiaFileName;
+  }
+
+  public List<Client> getErrorClients() {
+    return errorClients;
+  }
+
+  public String getOutFrsFileName() {
+    return outFrsFileName;
+  }
+
+  public List<kz.greetgo.sandbox.db.migration_impl.model.Account> getGeneratedAccounts() {
+    return generatedAccounts;
+  }
+
+  public List<Transaction> getGeneratedTransactions() {
+    return generatedTransactions;
   }
 
   private static class Info {
@@ -398,7 +415,7 @@ public class GenerateInputFiles {
       currentFileRecords = 0;
 
       int fileIndex = 1;
-      for (; currentFileRecords < CIA_LIMIT && working.get(); i++) {
+      for (; currentFileRecords < ciaLimit && working.get(); i++) {
 
         printClient(i, rowTypeRnd.next());
         currentFileRecords++;
@@ -432,6 +449,7 @@ public class GenerateInputFiles {
     }
 
     finishPrinter("</cia>", ".xml");
+    outCiaFileName = outFileName + '-' + currentFileRecords + ".xml";
 
     System.out.println("Файлы CIA сформированы: приступаем к формированию файлов FRS...");
 
@@ -442,7 +460,7 @@ public class GenerateInputFiles {
       currentFileRecords = 0;
 
       int i = 1, fileIndex = 1;
-      for (; currentFileRecords < FRS_LIMIT && working.get(); i++) {
+      for (; currentFileRecords < frsLimit && working.get(); i++) {
 
         printAccountWithTransactions(i);
         currentFileRecords++;
@@ -468,10 +486,12 @@ public class GenerateInputFiles {
     }
 
     finishPrinter(null, ".json_row.txt");
+    outFrsFileName = outFileName + '-' + currentFileRecords + ".json_row.txt";
+//    outFrsFileName = outFile.getName();
 
     working.set(false);
 
-    archive();
+    if (!testMode) archive();
 
     workingFile.delete();
     newCiaFile.delete();
@@ -655,9 +675,9 @@ public class GenerateInputFiles {
         if (date == null) {
           date = RND.dateYears(-100, -18);
           goodClient.dateOfBirth = sdf.format(date);
-          client.dateOfBirth = goodClient.dateOfBirth;
+          client.birth_date = date;
         } else {
-          client.dateOfBirth = sdf.format(date);
+          client.birth_date = date;
         }
 
 
@@ -709,7 +729,7 @@ public class GenerateInputFiles {
 
     if (errorType != ErrorType.NO_CHARM) {
       goodClient.charm.name = nextCharm();
-      client.charmName = goodClient.charm.name;
+      client.charm_name = goodClient.charm.name;
       tags.add("    <charm value=\"" + goodClient.charm.name + "\"/>");
     }
 
@@ -759,11 +779,17 @@ public class GenerateInputFiles {
       }
 
       if (rowType == RowType.ERROR) {
+        if (testMode) {
+          client.hasError = true;
+          errorClients.add(client);
+        }
         info.newErrorClient();
       } else {
         if (testMode) {
-          goodClients.add(goodClient);
-          if (info.goodClientIds.contains(clientId)) lastGoodClients.put(clientId, goodClient);
+//          goodClients.add(goodClient);
+//          if (info.goodClientIds.contains(clientId))
+          uniqueGoodClients.put(clientId, client);
+          uniqueGoodClientDetails.put(clientId, goodClient);
         }
         info.appendGoodClientId(clientId);
       }
@@ -783,7 +809,7 @@ public class GenerateInputFiles {
     for (int i = 0; i < phoneNumbers.size(); i++) {
       kz.greetgo.sandbox.db.migration_impl.model.PhoneNumber pn = new kz.greetgo.sandbox.db.migration_impl.model.PhoneNumber();
       pn.type = kz.greetgo.sandbox.db.migration_impl.model.PhoneType.valueOf(phoneNumbers.get(i).phoneType.toString());
-      pn.number = phoneNumbers.get(i).number;
+      pn.phone_number = phoneNumbers.get(i).number;
       generatedPhoneNumbers.add(pn);
     }
   }
@@ -876,8 +902,8 @@ public class GenerateInputFiles {
         pairs.add("'account_number':'" + number + "'");
 
         transaction.money = money;
-        transaction.accountNumber = number;
-        transaction.transactionType = type;
+        transaction.account_number = number;
+        transaction.transaction_type = type;
         transaction.finishedAt = sdf.format(finishedAt);
 
         Collections.shuffle(pairs);
@@ -1014,22 +1040,34 @@ public class GenerateInputFiles {
     info.newAccount();
 
     kz.greetgo.sandbox.db.migration_impl.model.Account newAccount = new kz.greetgo.sandbox.db.migration_impl.model.Account();
-    newAccount.accountNumber = account.number;
+    newAccount.account_number = account.number;
 //    newAccount.registeredAt = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS").format(account.registeredAt);
     newAccount.registeredAtD = account.registeredAt;
-    if (testMode) clientAccounts.put(clientId, newAccount);
+    if (testMode) {
+      clientAccounts.put(clientId, newAccount);
+      generatedAccounts.add(newAccount);
+    }
 
 
-    Transaction transaction = new Transaction();
+    Transaction transaction;
 
     int count = 2 + random.nextInt(10);
     for (int i = 0; i < count; i++) {
+      transaction = new Transaction();
       records.add(account.addTransaction(rowIndex, false).toJson(transaction));
       info.newTransaction();
+      if (testMode) {
+        accountTransactions.put(clientId, transaction);
+        generatedTransactions.add(transaction);
+      }
     }
+    transaction = new Transaction();
     records.add(account.addTransaction(rowIndex, true).toJson(transaction));
     info.newTransaction();
-    if (testMode) accountTransactions.put(clientId, transaction);
+    if (testMode) {
+      accountTransactions.put(clientId, transaction);
+      generatedTransactions.add(transaction);
+    }
 
     Collections.shuffle(records);
 

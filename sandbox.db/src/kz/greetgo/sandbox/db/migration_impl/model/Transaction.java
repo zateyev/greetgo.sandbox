@@ -7,6 +7,7 @@ public class Transaction {
   public String type;
   public BigDecimal money;
   public String finishedAt;
-  public String transactionType;
-  public String accountNumber;
+  public Date finishedAtD;
+  public String transaction_type;
+  public String account_number;
 }
