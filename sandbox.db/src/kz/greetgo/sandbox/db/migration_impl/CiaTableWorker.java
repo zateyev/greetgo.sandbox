@@ -1,7 +1,7 @@
 package kz.greetgo.sandbox.db.migration_impl;
 
 import kz.greetgo.sandbox.db.migration_impl.model.Address;
-import kz.greetgo.sandbox.db.migration_impl.model.Client;
+import kz.greetgo.sandbox.db.migration_impl.model.ClientTmp;
 import kz.greetgo.sandbox.db.migration_impl.model.PhoneNumber;
 import kz.greetgo.sandbox.db.util.TimeUtils;
 
@@ -89,7 +89,7 @@ public class CiaTableWorker implements Closeable {
     phoneThread.start();
   }
 
-  public void addToBatch(Client client) {
+  public void addToBatch(ClientTmp client) {
 
     try {
       int ind = 1;

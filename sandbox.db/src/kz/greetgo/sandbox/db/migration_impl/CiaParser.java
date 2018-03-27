@@ -1,7 +1,7 @@
 package kz.greetgo.sandbox.db.migration_impl;
 
 import kz.greetgo.sandbox.db.migration_impl.model.Address;
-import kz.greetgo.sandbox.db.migration_impl.model.Client;
+import kz.greetgo.sandbox.db.migration_impl.model.ClientTmp;
 import kz.greetgo.sandbox.db.migration_impl.model.PhoneNumber;
 import kz.greetgo.sandbox.db.migration_impl.model.PhoneType;
 import kz.greetgo.sandbox.db.util.SaxHandler;
@@ -16,11 +16,10 @@ import java.io.InputStream;
 import java.sql.SQLException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.time.format.DateTimeParseException;
 
 public class CiaParser extends SaxHandler {
 
-  private Client client;
+  private ClientTmp client;
   private InputStream inputStream;
   private CiaTableWorker ciaTableWorker;
 
@@ -47,7 +46,7 @@ public class CiaParser extends SaxHandler {
 
     switch (path) {
       case "/cia/client":
-        client = new Client();
+        client = new ClientTmp();
         client.cia_id = attributes.getValue("id");
         client.id = ++recordsNum;
         return;

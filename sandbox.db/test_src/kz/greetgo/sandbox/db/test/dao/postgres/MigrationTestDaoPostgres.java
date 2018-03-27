@@ -16,7 +16,7 @@ public interface MigrationTestDaoPostgres extends MigrationTestDao {
     " (#{client.id}, #{client.cia_id}, #{client.surname}, #{client.name}, #{client.patronymic}," +
     " #{client.gender}, #{client.birth_date}, #{client.charm_name})")
   void insertClient(@Param("tableName") String tableName,
-                    @Param("client") Client client);
+                    @Param("client") ClientTmp client);
 
   @Insert("INSERT INTO ${tableName} (cia_id, client_num, type, street, house, flat) VALUES" +
     " (#{address.cia_id}, #{address.client_num}, #{address.type}, #{address.street}," +

@@ -1,6 +1,10 @@
 package kz.greetgo.sandbox.db.test.dao;
 
-import kz.greetgo.sandbox.db.migration_impl.model.*;
+import kz.greetgo.sandbox.db.migration_impl.model.Account;
+import kz.greetgo.sandbox.db.migration_impl.model.Address;
+import kz.greetgo.sandbox.db.migration_impl.model.ClientTmp;
+import kz.greetgo.sandbox.db.migration_impl.model.PhoneNumber;
+import kz.greetgo.sandbox.db.migration_impl.model.Transaction;
 import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
 
@@ -10,7 +14,10 @@ public interface MigrationTestDao {
   void cleanDb();
 
   @Select("SELECT cia_id, surname, name, patronymic, gender, birth_date, charm_name FROM ${tableName} ORDER BY number")
-  List<Client> loadClientsList(@Param("tableName") String tableName);
+  List<ClientTmp> loadClientsList(@Param("tableName") String tableName);
+
+  @Select("SELECT * FROM ${tableName} ORDER BY number")
+  List<ClientTmp> selectAll(@Param("tableName") String tableName);
 
   @Select("SELECT type, street, house, flat FROM ${tableName}")
   List<Address> loadAddressesList(@Param("tableName") String tableName);
@@ -23,19 +30,19 @@ public interface MigrationTestDao {
                      @Param("tmpAddrTableName") String tmpAddrTableName,
                      @Param("tmpPhoneTableName") String tmpPhoneTableName);
 
-  void insertClient(String tableName, Client client);
+  void insertClient(String tableName, ClientTmp client);
 
   @Select("SELECT cia_id, surname, name, patronymic, gender, birth_date, charm_name FROM ${tableName}" +
     " WHERE error IS NOT NULL ORDER BY number")
-  List<Client> loadErrorClientsList(@Param("tableName") String tableName);
+  List<ClientTmp> loadErrorClientsList(@Param("tableName") String tableName);
 
   @Select("SELECT cia_id, surname, name, patronymic, gender, birth_date, charm_name FROM ${tableName}" +
     " WHERE status = 0 ORDER BY number")
-  List<Client> loadUniqueClientsList(@Param("tableName") String tableName);
+  List<ClientTmp> loadUniqueClientsList(@Param("tableName") String tableName);
 
   @Select("SELECT cia_id, surname, name, patronymic, gender, birth_date, charm_name FROM ${tableName}" +
     " WHERE status = 3 ORDER BY number")
-  List<Client> loadExistingClientsList(@Param("tableName") String tableName);
+  List<ClientTmp> loadExistingClientsList(@Param("tableName") String tableName);
 
   void insertAddress(String tableName, Address address);
 

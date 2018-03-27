@@ -5,7 +5,7 @@ import kz.greetgo.sandbox.controller.model.ClientDetails;
 import kz.greetgo.sandbox.db.configs.MigrationConfig;
 import kz.greetgo.sandbox.db.input_file_generator.GenerateInputFiles;
 import kz.greetgo.sandbox.db.migration_impl.model.Address;
-import kz.greetgo.sandbox.db.migration_impl.model.Client;
+import kz.greetgo.sandbox.db.migration_impl.model.ClientTmp;
 import kz.greetgo.sandbox.db.migration_impl.model.PhoneNumber;
 import kz.greetgo.sandbox.db.migration_impl.model.PhoneType;
 import kz.greetgo.sandbox.db.migration_impl.report.ReportXlsx;
@@ -14,7 +14,10 @@ import kz.greetgo.sandbox.db.test.dao.CharmTestDao;
 import kz.greetgo.sandbox.db.test.dao.ClientTestDao;
 import kz.greetgo.sandbox.db.test.dao.MigrationTestDao;
 import kz.greetgo.sandbox.db.test.util.ParentTestNg;
-import org.testng.annotations.*;
+import kz.greetgo.util.RND;
+import org.testng.annotations.AfterClass;
+import org.testng.annotations.BeforeClass;
+import org.testng.annotations.Test;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -22,8 +25,14 @@ import java.io.FileOutputStream;
 import java.io.OutputStream;
 import java.sql.Connection;
 import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
+import static kz.greetgo.sandbox.db.migration_impl.model.ClientTmp.STATUS_NOT_DUPLICATED;
 import static org.fest.assertions.api.Assertions.assertThat;
 
 /**
@@ -96,11 +105,11 @@ public class CiaMigrationWorkerTest extends ParentTestNg {
     //
     //
 
-    List<Client> expectedClients = fileGenerator.getGeneratedClients();
+    List<ClientTmp> expectedClients = fileGenerator.getGeneratedClients();
     List<Address> expectedAddresses = fileGenerator.getGeneratedAddresses();
     List<PhoneNumber> expectedPhoneNumbers = fileGenerator.getGeneratedPhoneNumbers();
 
-    List<Client> actualClients = migrationTestDao.get().loadClientsList(ciaMigrationWorker.tmpClientTable);
+    List<ClientTmp> actualClients = migrationTestDao.get().loadClientsList(ciaMigrationWorker.tmpClientTable);
     List<Address> actualAddresses = migrationTestDao.get().loadAddressesList(ciaMigrationWorker.tmpAddrTable);
     List<PhoneNumber> actualPhoneNumbers = migrationTestDao.get().loadPhoneNumbersList(ciaMigrationWorker.tmpPhoneTable);
 
@@ -130,8 +139,8 @@ public class CiaMigrationWorkerTest extends ParentTestNg {
   public void testValidation() throws Exception {
     CiaMigrationWorker ciaMigrationWorker = getCiaMigrationWorker();
 
-    List<Client> generatedClients = fileGenerator.getGeneratedClients();
-    List<Client> expectedErrorClients = fileGenerator.getErrorClients();
+    List<ClientTmp> generatedClients = fileGenerator.getGeneratedClients();
+    List<ClientTmp> expectedErrorClients = fileGenerator.getErrorClients();
 
     ciaMigrationWorker.createTmpTables();
 
@@ -146,7 +155,7 @@ public class CiaMigrationWorkerTest extends ParentTestNg {
     //
     //
 
-    List<Client> actualErrorClients = migrationTestDao.get().loadErrorClientsList(ciaMigrationWorker.tmpClientTable);
+    List<ClientTmp> actualErrorClients = migrationTestDao.get().loadErrorClientsList(ciaMigrationWorker.tmpClientTable);
 
     assertThat(actualErrorClients).isNotNull();
     assertThat(actualErrorClients).hasSameSizeAs(expectedErrorClients);
@@ -155,11 +164,82 @@ public class CiaMigrationWorkerTest extends ParentTestNg {
     }
   }
 
+
+  @Test
+  public void validate_cia_id_is_absent() throws Exception {
+    CiaMigrationWorker ciaMigrationWorker = getCiaMigrationWorker();
+
+    ciaMigrationWorker.createTmpTables();
+
+    ClientTmp clientNoSurname = new ClientTmp();
+    migrationTestDao.get().insertClient(ciaMigrationWorker.tmpClientTable, clientNoSurname);
+
+    //
+    //
+    ciaMigrationWorker.validateErrors();
+    //
+    //
+
+    List<ClientTmp> actualList = migrationTestDao.get().selectAll(ciaMigrationWorker.tmpClientTable);
+    assertThat(actualList).hasSize(1);
+    assertThat(actualList.get(0).error).isNotNull();
+    assertThat(actualList.get(0).error).contains("cia_id");
+  }
+
+  @Test
+  public void validate_name_is_absent() throws Exception {
+    CiaMigrationWorker ciaMigrationWorker = getCiaMigrationWorker();
+
+    ciaMigrationWorker.createTmpTables();
+
+    ClientTmp clientNoSurname = new ClientTmp();
+    clientNoSurname.cia_id = RND.str(10);
+    clientNoSurname.surname = RND.str(10);
+    migrationTestDao.get().insertClient(ciaMigrationWorker.tmpClientTable, clientNoSurname);
+
+    //
+    //
+    ciaMigrationWorker.validateErrors();
+    //
+    //
+
+    List<ClientTmp> actualList = migrationTestDao.get().selectAll(ciaMigrationWorker.tmpClientTable);
+    assertThat(actualList).hasSize(1);
+    assertThat(actualList.get(0).error).isNotNull();
+    assertThat(actualList.get(0).error).contains("name");
+    assertThat(actualList.get(0).error).contains("cia_id = ");
+    assertThat(actualList.get(0).error).contains(clientNoSurname.cia_id);
+    assertThat(actualList.get(0).error).doesNotContain("surname");
+  }
+
+  @Test
+  public void validate_surname_if_client_is_empty() throws Exception {
+    CiaMigrationWorker ciaMigrationWorker = getCiaMigrationWorker();
+
+    ciaMigrationWorker.createTmpTables();
+
+    ClientTmp clientNoSurname = new ClientTmp();
+    clientNoSurname.cia_id = RND.str(10);
+    migrationTestDao.get().insertClient(ciaMigrationWorker.tmpClientTable, clientNoSurname);
+
+    //
+    //
+    ciaMigrationWorker.validateErrors();
+    //
+    //
+
+    List<ClientTmp> actualList = migrationTestDao.get().selectAll(ciaMigrationWorker.tmpClientTable);
+    assertThat(actualList).hasSize(1);
+    assertThat(actualList.get(0).error).isNotNull();
+    assertThat(actualList.get(0).error).contains("surname");
+  }
+
+
   @Test
   public void test_exclusionOfDuplicateClientRecords() throws Exception {
     CiaMigrationWorker ciaMigrationWorker = getCiaMigrationWorker();
 
-    List<Client> generatedClients = fileGenerator.getGeneratedClients();
+    List<ClientTmp> generatedClients = fileGenerator.getGeneratedClients();
 
     ciaMigrationWorker.createTmpTables();
 
@@ -170,7 +250,7 @@ public class CiaMigrationWorkerTest extends ParentTestNg {
       }
     }
 
-    Map<String, Client> uniqueGoodClients = fileGenerator.getUniqueGoodClients();
+    Map<String, ClientTmp> uniqueGoodClients = fileGenerator.getUniqueGoodClients();
 
     //
     //
@@ -178,23 +258,56 @@ public class CiaMigrationWorkerTest extends ParentTestNg {
     //
     //
 
-    List<Client> actualUniqueClients = migrationTestDao.get().loadUniqueClientsList(ciaMigrationWorker.tmpClientTable);
+    List<ClientTmp> actualUniqueClients = migrationTestDao.get().loadUniqueClientsList(ciaMigrationWorker.tmpClientTable);
 
     assertThat(actualUniqueClients).isNotNull();
     assertThat(actualUniqueClients).hasSameSizeAs(uniqueGoodClients.entrySet());
-    for (Client actualDuplicateClient : actualUniqueClients) {
+    for (ClientTmp actualDuplicateClient : actualUniqueClients) {
       assertThatAreEqual(actualDuplicateClient, uniqueGoodClients.get(actualDuplicateClient.cia_id));
     }
+  }
+
+  @Test
+  public void исключение_дубликатов() throws Exception {
+    CiaMigrationWorker ciaMigrationWorker = getCiaMigrationWorker();
+
+    ciaMigrationWorker.createTmpTables();
+
+    ClientTmp client1 = new ClientTmp();
+    client1.id = 123;
+    client1.cia_id = RND.str(10);
+    migrationTestDao.get().insertClient(ciaMigrationWorker.tmpClientTable, client1);
+
+    ClientTmp client2 = new ClientTmp();
+    client1.id = 5435;
+    client2.cia_id = client1.cia_id;
+    migrationTestDao.get().insertClient(ciaMigrationWorker.tmpClientTable, client2);
+
+    //
+    //
+    ciaMigrationWorker.markDuplicateClientRecords();
+    //
+    //
+
+    List<ClientTmp> actualList = migrationTestDao.get().selectAll(ciaMigrationWorker.tmpClientTable);
+    assertThat(actualList).hasSize(2);
+
+    assertThat(actualList.get(0).id).isEqualTo(123);
+    assertThat(actualList.get(1).id).isEqualTo(5435);
+
+    assertThat(actualList.get(0).status).isNotEqualTo(STATUS_NOT_DUPLICATED);
+    assertThat(actualList.get(1).status).isEqualTo(STATUS_NOT_DUPLICATED);
+
   }
 
   @Test
   public void test_checkingForClientExistence() throws Exception {
     clientTestDao.get().removeAllData();
 
-    Map<String, Client> uniqueGoodClients = fileGenerator.getUniqueGoodClients();
+    Map<String, ClientTmp> uniqueGoodClients = fileGenerator.getUniqueGoodClients();
 
-    List<Client> expectedClients = new ArrayList<>(uniqueGoodClients.values());
-    List<Client> expectedExistingClients = new ArrayList<>();
+    List<ClientTmp> expectedClients = new ArrayList<>(uniqueGoodClients.values());
+    List<ClientTmp> expectedExistingClients = new ArrayList<>();
 
     CiaMigrationWorker ciaMigrationWorker = getCiaMigrationWorker();
 
@@ -215,7 +328,7 @@ public class CiaMigrationWorkerTest extends ParentTestNg {
     //
     //
 
-    List<Client> actualExistingClients = migrationTestDao.get().loadExistingClientsList(ciaMigrationWorker.tmpClientTable);
+    List<ClientTmp> actualExistingClients = migrationTestDao.get().loadExistingClientsList(ciaMigrationWorker.tmpClientTable);
 
     assertThat(actualExistingClients).isNotNull();
     assertThat(actualExistingClients).hasSameSizeAs(expectedExistingClients);
@@ -229,7 +342,7 @@ public class CiaMigrationWorkerTest extends ParentTestNg {
     clientTestDao.get().removeAllData();
     charmTestDao.get().removeAllData();
 
-    List<Client> uniqueGoodClients = new ArrayList<>(fileGenerator.getUniqueGoodClients().values());
+    List<ClientTmp> uniqueGoodClients = new ArrayList<>(fileGenerator.getUniqueGoodClients().values());
 
     CiaMigrationWorker ciaMigrationWorker = getCiaMigrationWorker();
 
@@ -237,7 +350,7 @@ public class CiaMigrationWorkerTest extends ParentTestNg {
     Set<String> expectedCharmNames = new HashSet<>();
 
     for (int i = 0; i < uniqueGoodClients.size(); i++) {
-      Client uniqueGoodClient = uniqueGoodClients.get(i);
+      ClientTmp uniqueGoodClient = uniqueGoodClients.get(i);
       uniqueGoodClient.id = i;
       migrationTestDao.get().insertClient(ciaMigrationWorker.tmpClientTable, uniqueGoodClient);
       expectedCharmNames.add(uniqueGoodClient.charm_name);
@@ -259,7 +372,7 @@ public class CiaMigrationWorkerTest extends ParentTestNg {
     clientTestDao.get().removeAllData();
     charmTestDao.get().removeAllData();
 
-    List<Client> expectedClients = new ArrayList<>(fileGenerator.getUniqueGoodClients().values());
+    List<ClientTmp> expectedClients = new ArrayList<>(fileGenerator.getUniqueGoodClients().values());
 
     CiaMigrationWorker ciaMigrationWorker = getCiaMigrationWorker();
 
@@ -282,7 +395,7 @@ public class CiaMigrationWorkerTest extends ParentTestNg {
     //
     //
 
-    List<Client> actualUpsertedClients = clientTestDao.get().loadClientList();
+    List<ClientTmp> actualUpsertedClients = clientTestDao.get().loadClientList();
 
     expectedClients.sort((o1, o2) -> o1.surname.compareToIgnoreCase(o2.surname));
     actualUpsertedClients.sort((o1, o2) -> o1.surname.compareToIgnoreCase(o2.surname));
@@ -308,7 +421,7 @@ public class CiaMigrationWorkerTest extends ParentTestNg {
 
     int ind = 0;
     for (Map.Entry<String, ClientDetails> clientDetailsEntry : uniqueGoodClientDetails.entrySet()) {
-      Client client = new Client();
+      ClientTmp client = new ClientTmp();
       client.id = ind;
       client.cia_id = clientDetailsEntry.getKey();
       client.name = clientDetailsEntry.getValue().name;
@@ -419,7 +532,7 @@ public class CiaMigrationWorkerTest extends ParentTestNg {
     int client_ind = 0;
     int phone_ind = 0;
     for (Map.Entry<String, ClientDetails> clientDetailsEntry : uniqueGoodClientDetails.entrySet()) {
-      Client client = new Client();
+      ClientTmp client = new ClientTmp();
       client.id = client_ind;
       client.cia_id = clientDetailsEntry.getKey();
       client.name = clientDetailsEntry.getValue().name;
@@ -495,7 +608,7 @@ public class CiaMigrationWorkerTest extends ParentTestNg {
     assertThat(actualAddress.flat).isEqualTo(expectedAddress.flat);
   }
 
-  private void assertThatAreEqual(Client actualClient, Client expectedClient) {
+  private void assertThatAreEqual(ClientTmp actualClient, ClientTmp expectedClient) {
     assertThat(actualClient.cia_id).isEqualTo(expectedClient.cia_id);
     assertThat(actualClient.name).isEqualTo(expectedClient.name);
     assertThat(actualClient.surname).isEqualTo(expectedClient.surname);

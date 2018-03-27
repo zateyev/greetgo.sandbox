@@ -28,17 +28,17 @@ public class GenerateInputFiles {
 
   private final int CURRENT_YEAR = Calendar.getInstance().get(Calendar.YEAR);
 
-  private Map<String, Client> uniqueGoodClients;
+  private Map<String, ClientTmp> uniqueGoodClients;
   private Map<String, ClientDetails> uniqueGoodClientDetails;
 //  private List<ClientDetails> goodClients;
-  private List<Client> generatedClients;
+  private List<ClientTmp> generatedClients;
   private List<kz.greetgo.sandbox.db.migration_impl.model.Address> generatedAddresses;
   private List<kz.greetgo.sandbox.db.migration_impl.model.PhoneNumber> generatedPhoneNumbers;
   private Map<String, kz.greetgo.sandbox.db.migration_impl.model.Account> clientAccounts;
   private Map<String, Transaction> accountTransactions;
   private boolean testMode;
   private String outCiaFileName;
-  private List<Client> errorClients;
+  private List<ClientTmp> errorClients;
   private String outFrsFileName;
   private List<kz.greetgo.sandbox.db.migration_impl.model.Account> generatedAccounts;
   private List<Transaction> generatedTransactions;
@@ -81,7 +81,7 @@ public class GenerateInputFiles {
     return info.goodClientIds;
   }
 
-  public Map<String, Client> getUniqueGoodClients() {
+  public Map<String, ClientTmp> getUniqueGoodClients() {
     return uniqueGoodClients;
   }
 
@@ -123,7 +123,7 @@ public class GenerateInputFiles {
 //    return goodClients;
 //  }
 
-  public List<Client> getGeneratedClients() {
+  public List<ClientTmp> getGeneratedClients() {
     return generatedClients;
   }
 
@@ -139,7 +139,7 @@ public class GenerateInputFiles {
     return outCiaFileName;
   }
 
-  public List<Client> getErrorClients() {
+  public List<ClientTmp> getErrorClients() {
     return errorClients;
   }
 
@@ -623,7 +623,7 @@ public class GenerateInputFiles {
     goodClient.charm = new Charm();
     goodClient.phoneNumbers = new ArrayList<>();
 
-    Client client = new Client();
+    ClientTmp client = new ClientTmp();
 
     ErrorType errorType = null;
 
