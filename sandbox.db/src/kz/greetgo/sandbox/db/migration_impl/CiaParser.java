@@ -14,11 +14,8 @@ import org.xml.sax.helpers.XMLReaderFactory;
 import java.io.IOException;
 import java.io.InputStream;
 import java.sql.SQLException;
-import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.time.LocalDate;
 import java.time.format.DateTimeParseException;
-import java.util.Date;
 
 public class CiaParser extends SaxHandler {
 
@@ -123,7 +120,7 @@ public class CiaParser extends SaxHandler {
     if (path.endsWith("Phone")) {
       PhoneNumber phoneNumber = new PhoneNumber();
       phoneNumber.client_num = recordsNum;
-      phoneNumber.number = text();
+      phoneNumber.phone_number = text();
       switch (path) {
         case "/cia/client/workPhone": {
           phoneNumber.type = PhoneType.WORK;

@@ -29,7 +29,8 @@ public class GenerateInputFiles {
   private final int CURRENT_YEAR = Calendar.getInstance().get(Calendar.YEAR);
 
   private Map<String, Client> uniqueGoodClients;
-  private List<ClientDetails> goodClients;
+  private Map<String, ClientDetails> uniqueGoodClientDetails;
+//  private List<ClientDetails> goodClients;
   private List<Client> generatedClients;
   private List<kz.greetgo.sandbox.db.migration_impl.model.Address> generatedAddresses;
   private List<kz.greetgo.sandbox.db.migration_impl.model.PhoneNumber> generatedPhoneNumbers;
@@ -44,7 +45,8 @@ public class GenerateInputFiles {
     this.frsLimit = frsLimit;
 
     uniqueGoodClients = new HashMap<>();
-    goodClients = new ArrayList<>();
+    uniqueGoodClientDetails = new HashMap<>();
+//    goodClients = new ArrayList<>();
     errorClients = new ArrayList<>();
     clientAccounts = new HashMap<>();
     accountTransactions = new HashMap<>();
@@ -77,6 +79,10 @@ public class GenerateInputFiles {
     return uniqueGoodClients;
   }
 
+  public Map<String, ClientDetails> getUniqueGoodClientDetails() {
+    return uniqueGoodClientDetails;
+  }
+
   public long getGoodClientCount() {
     return info.goodClientIds.size();
   }
@@ -107,9 +113,9 @@ public class GenerateInputFiles {
     return accountTransactions;
   }
 
-  public List<ClientDetails> getGoodClients() {
-    return goodClients;
-  }
+//  public List<ClientDetails> getGoodClients() {
+//    return goodClients;
+//  }
 
   public List<Client> getGeneratedClients() {
     return generatedClients;
@@ -760,9 +766,10 @@ public class GenerateInputFiles {
         info.newErrorClient();
       } else {
         if (testMode) {
-          goodClients.add(goodClient);
+//          goodClients.add(goodClient);
 //          if (info.goodClientIds.contains(clientId))
           uniqueGoodClients.put(clientId, client);
+          uniqueGoodClientDetails.put(clientId, goodClient);
         }
         info.appendGoodClientId(clientId);
       }
@@ -782,7 +789,7 @@ public class GenerateInputFiles {
     for (int i = 0; i < phoneNumbers.size(); i++) {
       kz.greetgo.sandbox.db.migration_impl.model.PhoneNumber pn = new kz.greetgo.sandbox.db.migration_impl.model.PhoneNumber();
       pn.type = kz.greetgo.sandbox.db.migration_impl.model.PhoneType.valueOf(phoneNumbers.get(i).phoneType.toString());
-      pn.number = phoneNumbers.get(i).number;
+      pn.phone_number = phoneNumbers.get(i).number;
       generatedPhoneNumbers.add(pn);
     }
   }

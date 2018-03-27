@@ -1,8 +1,10 @@
 package kz.greetgo.sandbox.db.test.dao;
 
 import kz.greetgo.sandbox.controller.model.*;
-import kz.greetgo.sandbox.db.migration_impl.model.Client;
-import kz.greetgo.sandbox.db.migration_impl.model.Transaction;
+import kz.greetgo.sandbox.controller.model.Address;
+import kz.greetgo.sandbox.controller.model.PhoneNumber;
+import kz.greetgo.sandbox.controller.model.PhoneType;
+import kz.greetgo.sandbox.db.migration_impl.model.*;
 import org.apache.ibatis.annotations.*;
 
 import java.time.OffsetDateTime;
@@ -141,4 +143,7 @@ public interface ClientTestDao {
   @Select("SELECT cia_id, surname, client.name, patronymic, gender, birth_date, charm.name AS charm_name FROM client LEFT JOIN charm" +
     " ON client.charm = charm.id ORDER BY surname")
   List<Client> loadClientList();
+
+  @Select("SELECT type, street, house, flat FROM client_addr ORDER BY client")
+  List<kz.greetgo.sandbox.db.migration_impl.model.Address> loadAddressList();
 }

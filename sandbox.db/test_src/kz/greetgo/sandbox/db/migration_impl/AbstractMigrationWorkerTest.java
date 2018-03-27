@@ -146,8 +146,8 @@ public class AbstractMigrationWorkerTest extends ParentTestNg {
 //    assertThat(actualPhoneNumbers).isNotNull();
 //    assertThat(actualPhoneNumbers.size()).isEqualTo(expectedPhoneNumbers.size());
 //    // sorting because generator shuffles tags
-//    actualPhoneNumbers.sort(Comparator.comparing(phoneNumber -> phoneNumber.number));
-//    expectedPhoneNumbers.sort(Comparator.comparing(phoneNumber -> phoneNumber.number));
+//    actualPhoneNumbers.sort(Comparator.comparing(phoneNumber -> phoneNumber.phone_number));
+//    expectedPhoneNumbers.sort(Comparator.comparing(phoneNumber -> phoneNumber.phone_number));
 //    for (int i = 0; i < actualPhoneNumbers.size(); i++) {
 //      assertThatAreEqual(actualPhoneNumbers.get(i), expectedPhoneNumbers.get(i));
 //    }

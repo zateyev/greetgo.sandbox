@@ -1,12 +1,13 @@
 package kz.greetgo.sandbox.db.migration_impl;
 
 import kz.greetgo.depinject.core.BeanGetter;
-import kz.greetgo.sandbox.controller.model.Gender;
+import kz.greetgo.sandbox.controller.model.ClientDetails;
 import kz.greetgo.sandbox.db.configs.MigrationConfig;
 import kz.greetgo.sandbox.db.input_file_generator.GenerateInputFiles;
 import kz.greetgo.sandbox.db.migration_impl.model.Address;
 import kz.greetgo.sandbox.db.migration_impl.model.Client;
 import kz.greetgo.sandbox.db.migration_impl.model.PhoneNumber;
+import kz.greetgo.sandbox.db.migration_impl.model.PhoneType;
 import kz.greetgo.sandbox.db.migration_impl.report.ReportXlsx;
 import kz.greetgo.sandbox.db.ssh.LocalFileWorker;
 import kz.greetgo.sandbox.db.test.dao.CharmTestDao;
@@ -132,8 +133,8 @@ public class CiaMigrationWorkerTest extends ParentTestNg {
     assertThat(actualPhoneNumbers).isNotNull();
     assertThat(actualPhoneNumbers).hasSameSizeAs(expectedPhoneNumbers);
     // sorting because generator shuffles tags
-    actualPhoneNumbers.sort(Comparator.comparing(phoneNumber -> phoneNumber.number));
-    expectedPhoneNumbers.sort(Comparator.comparing(phoneNumber -> phoneNumber.number));
+    actualPhoneNumbers.sort(Comparator.comparing(phoneNumber -> phoneNumber.phone_number));
+    expectedPhoneNumbers.sort(Comparator.comparing(phoneNumber -> phoneNumber.phone_number));
     for (int i = 0; i < actualPhoneNumbers.size(); i++) {
       assertThatAreEqual(actualPhoneNumbers.get(i), expectedPhoneNumbers.get(i));
     }
@@ -171,7 +172,7 @@ public class CiaMigrationWorkerTest extends ParentTestNg {
   }
 
   @Test
-  public void test_excludingOfDuplicateClientRecords() throws Exception {
+  public void test_exclusionOfDuplicateClientRecords() throws Exception {
     CiaMigrationWorker ciaMigrationWorker = getCiaMigrationWorker();
 
     GenerateInputFiles fileGenerator = prepareInputFiles(100, 0);
@@ -195,11 +196,11 @@ public class CiaMigrationWorkerTest extends ParentTestNg {
     //
     //
 
-    List<Client> actualDuplicateClients = migrationTestDao.get().loadUniqueClientsList(ciaMigrationWorker.tmpClientTable);
+    List<Client> actualUniqueClients = migrationTestDao.get().loadUniqueClientsList(ciaMigrationWorker.tmpClientTable);
 
-    assertThat(actualDuplicateClients).isNotNull();
-    assertThat(actualDuplicateClients).hasSameSizeAs(uniqueGoodClients.entrySet());
-    for (Client actualDuplicateClient : actualDuplicateClients) {
+    assertThat(actualUniqueClients).isNotNull();
+    assertThat(actualUniqueClients).hasSameSizeAs(uniqueGoodClients.entrySet());
+    for (Client actualDuplicateClient : actualUniqueClients) {
       assertThatAreEqual(actualDuplicateClient, uniqueGoodClients.get(actualDuplicateClient.cia_id));
     }
   }
@@ -316,12 +317,126 @@ public class CiaMigrationWorkerTest extends ParentTestNg {
     for (int i = 0; i < actualUpsertedClients.size(); i++) {
       assertThatAreEqual(actualUpsertedClients.get(i), expectedClients.get(i));
     }
+  }
 
+  @Test
+  public void test_upsertClientAddress() throws Exception {
+    clientTestDao.get().removeAllData();
+    charmTestDao.get().removeAllData();
+
+    GenerateInputFiles fileGenerator = prepareInputFiles(100, 0);
+
+    List<Address> expectedAddresses = new ArrayList<>();
+    Map<String, ClientDetails> uniqueGoodClientDetails = fileGenerator.getUniqueGoodClientDetails();
+
+    CiaMigrationWorker ciaMigrationWorker = getCiaMigrationWorker();
+
+    ciaMigrationWorker.createTmpTables();
+
+    int ind = 0;
+    for (Map.Entry<String, ClientDetails> clientDetailsEntry : uniqueGoodClientDetails.entrySet()) {
+      Client client = new Client();
+      client.id = ind;
+      client.cia_id = clientDetailsEntry.getKey();
+      client.name = clientDetailsEntry.getValue().name;
+      client.surname = clientDetailsEntry.getValue().surname;
+      client.patronymic = clientDetailsEntry.getValue().patronymic;
+      client.gender = clientDetailsEntry.getValue().gender.toString();
+      client.birth_date = new SimpleDateFormat("yyyy-MM-dd").parse(clientDetailsEntry.getValue().dateOfBirth);
+      client.charm_name = clientDetailsEntry.getValue().charm.name;
+
+      migrationTestDao.get().insertClient(ciaMigrationWorker.tmpClientTable, client);
+
+      Address addressF = new Address();
+      addressF.cia_id = clientDetailsEntry.getKey();
+      addressF.client_num = ind;
+      addressF.type = clientDetailsEntry.getValue().addressF.type.toString();
+      addressF.street = clientDetailsEntry.getValue().addressF.street;
+      addressF.house = clientDetailsEntry.getValue().addressF.house;
+      addressF.flat = clientDetailsEntry.getValue().addressF.flat;
+
+      Address addressR = new Address();
+      addressR.cia_id = clientDetailsEntry.getKey();
+      addressR.client_num = ind;
+      addressR.type = clientDetailsEntry.getValue().addressR.type.toString();
+      addressR.street = clientDetailsEntry.getValue().addressR.street;
+      addressR.house = clientDetailsEntry.getValue().addressR.house;
+      addressR.flat = clientDetailsEntry.getValue().addressR.flat;
+
+      migrationTestDao.get().insertAddress(ciaMigrationWorker.tmpAddrTable, addressF);
+      migrationTestDao.get().insertAddress(ciaMigrationWorker.tmpAddrTable, addressR);
+      expectedAddresses.add(addressF);
+      expectedAddresses.add(addressR);
+
+      ind++;
+    }
+
+    ciaMigrationWorker.checkForClientExistence();
+    ciaMigrationWorker.upsertClients();
+
+    //
+    //
+    ciaMigrationWorker.upsertClientAddress();
+    //
+    //
+
+    List<Address> actualUpsertedAddresses = clientTestDao.get().loadAddressList();
+
+    assertThat(actualUpsertedAddresses).isNotNull();
+    assertThat(actualUpsertedAddresses).hasSameSizeAs(expectedAddresses);
+    for (int i = 0; i < actualUpsertedAddresses.size(); i++) {
+      assertThatAreEqual(actualUpsertedAddresses.get(i), expectedAddresses.get(i));
+    }
+  }
+
+  @Test
+  public void test_exclusionOfDuplicatePhoneNumbers() throws Exception {
+    clientTestDao.get().removeAllData();
+
+    GenerateInputFiles fileGenerator = prepareInputFiles(100, 0);
+
+    List<PhoneNumber> expectedPhoneNumbers = new ArrayList<>();
+    Map<String, ClientDetails> uniqueGoodClientDetails = fileGenerator.getUniqueGoodClientDetails();
+
+    CiaMigrationWorker ciaMigrationWorker = getCiaMigrationWorker();
+
+    ciaMigrationWorker.createTmpTables();
+
+    int client_ind = 0;
+    int phone_ind = 0;
+    for (Map.Entry<String, ClientDetails> clientDetailsEntry : uniqueGoodClientDetails.entrySet()) {
+      for (kz.greetgo.sandbox.controller.model.PhoneNumber phone : clientDetailsEntry.getValue().phoneNumbers) {
+        PhoneNumber phoneNumber = new PhoneNumber();
+        phoneNumber.id = phone_ind++;
+        phoneNumber.client_num = client_ind;
+        phoneNumber.type = PhoneType.valueOf(phone.phoneType.toString());
+        phoneNumber.phone_number = phone.number;
+        migrationTestDao.get().insertPhoneNumber(ciaMigrationWorker.tmpPhoneTable, phoneNumber);
+        phoneNumber.id = phone_ind++;
+        migrationTestDao.get().insertPhoneNumber(ciaMigrationWorker.tmpPhoneTable, phoneNumber);
+        expectedPhoneNumbers.add(phoneNumber);
+      }
+      client_ind++;
+    }
+
+    //
+    //
+    ciaMigrationWorker.markDuplicatePhoneNumbers();
+    //
+    //
+
+    List<PhoneNumber> actualUniquePhoneNumbers = migrationTestDao.get().loadUniquePhoneNumbers(ciaMigrationWorker.tmpPhoneTable);
+
+    assertThat(actualUniquePhoneNumbers).isNotNull();
+    assertThat(actualUniquePhoneNumbers).hasSameSizeAs(expectedPhoneNumbers);
+    for (int i = 0; i < actualUniquePhoneNumbers.size(); i++) {
+      assertThatAreEqual(actualUniquePhoneNumbers.get(i), expectedPhoneNumbers.get(i));
+    }
   }
 
   private void assertThatAreEqual(PhoneNumber actualPhoneNumber, PhoneNumber expectedPhoneNumber) {
     assertThat(actualPhoneNumber.type).isEqualTo(expectedPhoneNumber.type);
-    assertThat(actualPhoneNumber.number).isEqualTo(expectedPhoneNumber.number);
+    assertThat(actualPhoneNumber.phone_number).isEqualTo(expectedPhoneNumber.phone_number);
   }
 
   private void assertThatAreEqual(Address actualAddress, Address expectedAddress) {

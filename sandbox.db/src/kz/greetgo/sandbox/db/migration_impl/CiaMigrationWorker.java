@@ -233,19 +233,20 @@ public class CiaMigrationWorker extends AbstractMigrationWorker {
    * Статус = 3, если cia_id присутствует в постоянной таблице client_addr (update)
    * Статус = 0, если отсутствует в постоянной таблице client_addr (insert)
    */
-  private void upsertClientAddress() throws SQLException {
+  void upsertClientAddress() throws SQLException {
     //language=PostgreSQL
     exec("INSERT INTO client_addr(client, type, street, house, flat) " +
       "SELECT tc.client_id, ta.type, ta.street, ta.house, ta.flat " +
       "FROM TMP_CLIENT AS tc " +
       "LEFT JOIN TMP_ADDR AS ta ON tc.number = ta.client_num " +
-      "WHERE tc.status = 0 " +
+//      "WHERE tc.status = 0 " +
+      "WHERE tc.status IN (0,3) " +
       "ON CONFLICT(client, type) DO UPDATE " +
       "SET street = EXCLUDED.street, house = EXCLUDED.flat, flat = EXCLUDED.flat"
     );
   }
 
-  private void markDuplicatePhoneNumbers() throws SQLException {
+  void markDuplicatePhoneNumbers() throws SQLException {
     //language=PostgreSQL
     exec("WITH num_ord AS (\n" +
       "  SELECT number, row_number() OVER(PARTITION BY client_num, phone_number ORDER BY number DESC) AS ord \n" +
