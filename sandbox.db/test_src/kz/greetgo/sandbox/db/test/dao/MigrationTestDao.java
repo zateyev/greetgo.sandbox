@@ -49,4 +49,8 @@ public interface MigrationTestDao {
 
   @Select("SELECT money, transaction_type FROM ${tableName} WHERE status = 0 ORDER BY finished_at")
   List<Transaction> loadTransactionsList(@Param("tableName") String tableName);
+
+  void insertClientAccount(String tmpAccountTable, Account account);
+
+  void insertAccountTransaction(String tmpTransactionTable, Transaction transaction);
 }

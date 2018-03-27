@@ -149,4 +149,10 @@ public interface ClientTestDao {
 
   @Select("SELECT type, number as phone_number FROM client_phone ORDER BY client")
   List<kz.greetgo.sandbox.db.migration_impl.model.PhoneNumber> loadPhoneNumberList();
+
+  @Select("SELECT number as account_number, registered_at as registeredAtD FROM client_account ORDER BY registered_at")
+  List<Account> loadAccountList();
+
+  @Select("SELECT money, transaction_type FROM client_account_transaction ORDER BY finished_at")
+  List<Transaction> loadTransactionList();
 }

@@ -1,9 +1,7 @@
 package kz.greetgo.sandbox.db.test.dao.postgres;
 
 import kz.greetgo.depinject.core.Bean;
-import kz.greetgo.sandbox.db.migration_impl.model.Address;
-import kz.greetgo.sandbox.db.migration_impl.model.Client;
-import kz.greetgo.sandbox.db.migration_impl.model.PhoneNumber;
+import kz.greetgo.sandbox.db.migration_impl.model.*;
 import kz.greetgo.sandbox.db.test.dao.MigrationTestDao;
 import org.apache.ibatis.annotations.Insert;
 import org.apache.ibatis.annotations.Param;
@@ -30,4 +28,14 @@ public interface MigrationTestDaoPostgres extends MigrationTestDao {
     " (#{phoneNumber.id}, #{phoneNumber.client_num}, #{phoneNumber.phone_number}, #{phoneNumber.type})")
   void insertPhoneNumber(@Param("tableName") String tableName,
                      @Param("phoneNumber") PhoneNumber phoneNumber);
+
+  @Insert("INSERT INTO ${tableName} (type, client_id, account_number, registered_at) VALUES" +
+    " (#{account.type}, #{account.clientId}, #{account.account_number}, #{account.registeredAtD})")
+  void insertClientAccount(@Param("tableName") String tableName,
+                           @Param("account") Account account);
+
+  @Insert("INSERT INTO ${tableName} (type, money, finished_at, transaction_type, account_number) VALUES (#{transaction.type}," +
+    " #{transaction.money}, #{transaction.finishedAtD}, #{transaction.transaction_type}, #{transaction.account_number})")
+  void insertAccountTransaction(@Param("tableName") String tableName,
+                                @Param("transaction") Transaction transaction);
 }

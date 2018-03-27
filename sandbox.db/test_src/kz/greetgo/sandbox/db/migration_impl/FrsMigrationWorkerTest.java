@@ -18,10 +18,8 @@ import org.testng.annotations.Test;
 import java.io.*;
 import java.sql.Connection;
 import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.Comparator;
 import java.util.List;
-import java.util.Map;
 
 import static org.fest.assertions.api.Assertions.assertThat;
 
@@ -118,103 +116,147 @@ public class FrsMigrationWorkerTest extends ParentTestNg {
     }
   }
 
+//  @Test
+//  public void test_migrationFromTmpDb() throws Exception {
+//    clientTestDao.get().removeAllData();
+//
+//    List<Account> expectedAccounts = fileGenerator.getGeneratedAccounts();
+//    List<Transaction> expectedTransactions = fileGenerator.getGeneratedTransactions();
+//
+//    FrsMigrationWorker frsMigrationWorker = getFrsMigrationWorker();
+//
+//    frsMigrationWorker.createTmpTables();
+//
+//    for (Account expectedAccount : expectedAccounts) {
+//      migrationTestDao.get().insertClientAccount(frsMigrationWorker.tmpAccountTable, expectedAccount);
+//    }
+//
+//    for (Transaction expectedTransaction : expectedTransactions) {
+//      migrationTestDao.get().insertAccountTransaction(frsMigrationWorker.tmpTransactionTable, expectedTransaction);
+//    }
+//
+//    //
+//    //
+//    frsMigrationWorker.migrateFromTmp();
+//    //
+//    //
+//
+//    List<Account> actualMigratedAccounts = clientTestDao.get().loadAccountList();
+//    List<Transaction> actualMigratedTransactions = clientTestDao.get().loadTransactionList();
+//
+////    expectedAccounts.sort((o1, o2) -> o1.surname.compareToIgnoreCase(o2.surname));
+////    actualMigratedAccounts.sort((o1, o2) -> o1.surname.compareToIgnoreCase(o2.surname));
+//
+//    assertThat(actualMigratedAccounts).isNotNull();
+//    assertThat(actualMigratedAccounts).hasSameSizeAs(expectedAccounts);
+//    for (int i = 0; i < actualMigratedAccounts.size(); i++) {
+//      assertThatAreEqual(actualMigratedAccounts.get(i), expectedAccounts.get(i));
+//    }
+//
+//    assertThat(actualMigratedTransactions).isNotNull();
+//    assertThat(actualMigratedTransactions).hasSameSizeAs(expectedTransactions);
+//    for (int i = 0; i < actualMigratedTransactions.size(); i++) {
+//      assertThatAreEqual(actualMigratedTransactions.get(i), expectedTransactions.get(i));
+//    }
+//  }
+//
+//  @Test
+//  public void testFrsMigrationByRecordsCount() throws Exception {
+//    clientTestDao.get().removeAllData();
+//    charmTestDao.get().removeAllData();
+//
+//    GenerateInputFiles fileGenerator = prepareInputFiles(10, 100);
+//
+//    //
+//    //
+//    migration.get().executeFrsMigration();
+//    //
+//    //
+//
+//    long transactionCount = clientTestDao.get().getTransactionCount();
+//    long accountCount = clientTestDao.get().getAccountCount();
+//
+//    assertThat(transactionCount).isEqualTo(fileGenerator.getTransactionCount());
+//    assertThat(accountCount).isEqualTo(fileGenerator.getAccountCount());
+//  }
+//
+//  @Test
+//  public void testAccountInsertion() throws Exception {
+//    clientTestDao.get().removeAllData();
+//    charmTestDao.get().removeAllData();
+//
+//    GenerateInputFiles fileGenerator = prepareInputFiles(10, 100);
+//
+//    Map<String, Account> clientAccounts = fileGenerator.getClientAccounts();
+//
+//    //
+//    //
+//    migration.get().executeFrsMigration();
+//    //
+//    //
+//
+//
+//    int i = 0;
+//    for (Map.Entry<String, Account> accountEntry : clientAccounts.entrySet()) {
+//      String clientAccountNumber = clientTestDao.get().getClientAccountByCiaId(
+//        accountEntry.getKey(),
+//        accountEntry.getValue().registeredAtD
+//      );
+//
+//      assertThat(clientAccountNumber).isEqualTo(accountEntry.getValue().account_number);
+//      if (++i > 10) break;
+//    }
+//  }
+//
+//  @Test
+//  public void testTransactionInsertion() throws Exception {
+//    clientTestDao.get().removeAllData();
+//    charmTestDao.get().removeAllData();
+//
+//    GenerateInputFiles fileGenerator = prepareInputFiles(10, 100);
+//
+//    Map<String, Transaction> accountTransactions = fileGenerator.getAccountTransactions();
+//
+//    //
+//    //
+//    migration.get().executeFrsMigration();
+//    //
+//    //
+//
+//
+//    int i = 0;
+//    for (Map.Entry<String, Transaction> transactionEntry : accountTransactions.entrySet()) {
+//      Transaction accountTransactionActual = clientTestDao.get().getTransactionByAccountNumber(
+//        transactionEntry.getValue().account_number,
+//        new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS").parse(transactionEntry.getValue().finishedAt));
+//
+//      assertThat(accountTransactionActual).isNotNull();
+//      assertThatAreEqual(accountTransactionActual, transactionEntry.getValue());
+//      if (++i > 10) break;
+//    }
+//  }
+//
+//  @Test
+//  public void testCiaAndFrsConcurrentlyMigration() throws Exception {
+//    clientTestDao.get().removeAllData();
+//    charmTestDao.get().removeAllData();
+//
+//    GenerateInputFiles fileGenerator = prepareInputFiles(10, 100);
+//
+//    //
+//    //
+//    migration.get().executeMigration();
+//    //
+//    //
+//
+//    long clientCount = clientTestDao.get().getClientCount();
+//
+//    assertThat(clientCount).isEqualTo(fileGenerator.getGoodClientCount());
+//  }
+
   private void assertThatAreEqual(Account actual, Account expected) {
     assertThat(actual.account_number).isEqualTo(expected.account_number);
     assertThat(actual.registeredAtD).isEqualTo(expected.registeredAtD);
-  }
-
-  @Test
-  public void testFrsMigrationByRecordsCount() throws Exception {
-    clientTestDao.get().removeAllData();
-    charmTestDao.get().removeAllData();
-
-    GenerateInputFiles fileGenerator = prepareInputFiles(10, 100);
-
-    //
-    //
-    migration.get().executeFrsMigration();
-    //
-    //
-
-    long transactionCount = clientTestDao.get().getTransactionCount();
-    long accountCount = clientTestDao.get().getAccountCount();
-
-    assertThat(transactionCount).isEqualTo(fileGenerator.getTransactionCount());
-    assertThat(accountCount).isEqualTo(fileGenerator.getAccountCount());
-  }
-
-  @Test
-  public void testAccountInsertion() throws Exception {
-    clientTestDao.get().removeAllData();
-    charmTestDao.get().removeAllData();
-
-    GenerateInputFiles fileGenerator = prepareInputFiles(10, 100);
-
-    Map<String, Account> clientAccounts = fileGenerator.getClientAccounts();
-
-    //
-    //
-    migration.get().executeFrsMigration();
-    //
-    //
-
-
-    int i = 0;
-    for (Map.Entry<String, Account> accountEntry : clientAccounts.entrySet()) {
-      String clientAccountNumber = clientTestDao.get().getClientAccountByCiaId(
-        accountEntry.getKey(),
-        accountEntry.getValue().registeredAtD
-      );
-
-      assertThat(clientAccountNumber).isEqualTo(accountEntry.getValue().account_number);
-      if (++i > 10) break;
-    }
-  }
-
-  @Test
-  public void testTransactionInsertion() throws Exception {
-    clientTestDao.get().removeAllData();
-    charmTestDao.get().removeAllData();
-
-    GenerateInputFiles fileGenerator = prepareInputFiles(10, 100);
-
-    Map<String, Transaction> accountTransactions = fileGenerator.getAccountTransactions();
-
-    //
-    //
-    migration.get().executeFrsMigration();
-    //
-    //
-
-
-    int i = 0;
-    for (Map.Entry<String, Transaction> transactionEntry : accountTransactions.entrySet()) {
-      Transaction accountTransactionActual = clientTestDao.get().getTransactionByAccountNumber(
-        transactionEntry.getValue().account_number,
-        new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS").parse(transactionEntry.getValue().finishedAt));
-
-      assertThat(accountTransactionActual).isNotNull();
-      assertThatAreEqual(accountTransactionActual, transactionEntry.getValue());
-      if (++i > 10) break;
-    }
-  }
-
-  @Test
-  public void testCiaAndFrsConcurrentlyMigration() throws Exception {
-    clientTestDao.get().removeAllData();
-    charmTestDao.get().removeAllData();
-
-    GenerateInputFiles fileGenerator = prepareInputFiles(10, 100);
-
-    //
-    //
-    migration.get().executeMigration();
-    //
-    //
-
-    long clientCount = clientTestDao.get().getClientCount();
-
-    assertThat(clientCount).isEqualTo(fileGenerator.getGoodClientCount());
   }
 
   private FrsMigrationWorker getFrsMigrationWorker() {
