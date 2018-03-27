@@ -14,6 +14,7 @@ import org.xml.sax.helpers.XMLReaderFactory;
 import java.io.IOException;
 import java.io.InputStream;
 import java.sql.SQLException;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.format.DateTimeParseException;
 
@@ -82,7 +83,7 @@ public class CiaParser extends SaxHandler {
         try {
           SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
           client.birth_date = sdf.parse(attributes.getValue("value"));
-        } catch (DateTimeParseException e) {
+        } catch (ParseException e) {
           // Проглатывание ошибки
           return;
         }
