@@ -1,18 +1,13 @@
 package kz.greetgo.sandbox.db.migration_impl;
 
 import com.jcraft.jsch.SftpException;
-import kz.greetgo.depinject.core.Bean;
-import kz.greetgo.sandbox.db.ssh.InputFileWorker;
 import kz.greetgo.util.RND;
-import org.apache.commons.compress.archivers.tar.TarArchiveInputStream;
-import org.apache.commons.compress.compressors.bzip2.BZip2CompressorInputStream;
 
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.List;
 
 import static kz.greetgo.sandbox.db.util.TimeUtils.recordsPerSecond;
 import static kz.greetgo.sandbox.db.util.TimeUtils.showTime;
@@ -86,23 +81,34 @@ public class FrsMigrationWorker extends AbstractMigrationWorker {
 
   @Override
   protected void migrateFromTmp() throws SQLException {
+
+    createIdleClientsIfNotExist();
+
+    insertClientAccounts();
+
+    insertAccountTransactions();
+  }
+
+  void createIdleClientsIfNotExist() throws SQLException {
     //language=PostgreSQL
     exec("INSERT INTO client (id, cia_id)\n" +
       "SELECT nextval('s_client'), client_id\n" +
       "FROM TMP_ACCOUNT ta ON CONFLICT (cia_id) DO NOTHING");
+  }
 
+  void insertClientAccounts() throws SQLException {
     //language=PostgreSQL
     exec("INSERT INTO client_account (id, client, money, number, registered_at)\n" +
       "SELECT nextval('s_client'), c.id, tt.money, ta.account_number, ta.registered_at\n" +
       "FROM TMP_ACCOUNT ta LEFT JOIN (SELECT account_number, sum(money) money FROM TMP_TRANSACTION GROUP BY account_number) tt\n" +
       "ON tt.account_number = ta.account_number LEFT JOIN client c ON c.cia_id = ta.client_id");
+  }
 
+  void insertAccountTransactions() throws SQLException {
     //language=PostgreSQL
     exec("INSERT INTO client_account_transaction (id, account, money, finished_at, type)\n" +
       "SELECT nextval('s_client'), ca.id, tt.money, tt.finished_at, tt.transaction_type\n" +
       "FROM TMP_TRANSACTION tt LEFT JOIN client_account ca ON tt.account_number = ca.number");
-
-
   }
 
   @Override

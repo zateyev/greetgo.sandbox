@@ -1,7 +1,6 @@
 package kz.greetgo.sandbox.db.migration_impl;
 
 import kz.greetgo.depinject.core.BeanGetter;
-import kz.greetgo.sandbox.controller.model.ClientDetails;
 import kz.greetgo.sandbox.db.configs.MigrationConfig;
 import kz.greetgo.sandbox.db.input_file_generator.GenerateInputFiles;
 import kz.greetgo.sandbox.db.migration_impl.model.Address;
@@ -28,8 +27,9 @@ import java.sql.Connection;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
+import static kz.greetgo.sandbox.db.migration_impl.model.ClientTmp.STATUS_DUPLICATED;
 import static kz.greetgo.sandbox.db.migration_impl.model.ClientTmp.STATUS_EXISTS;
-import static kz.greetgo.sandbox.db.migration_impl.model.ClientTmp.STATUS_NOT_DUPLICATED;
+import static kz.greetgo.sandbox.db.migration_impl.model.PhoneNumber.STATUS_DUPLICATED_PHONE_NUMBER;
 import static org.fest.assertions.api.Assertions.assertThat;
 
 /**
@@ -49,13 +49,11 @@ public class CiaMigrationWorkerTest extends ParentTestNg {
 
   private OutputStream outError;
   private ReportXlsx reportXlsx;
-  private GenerateInputFiles fileGenerator;
 
   private static final Random random = new Random();
 
   @BeforeClass
   public void prepareResources() throws Exception {
-    fileGenerator = prepareInputFiles(100, 0);
     connection = migration.get().getConnection();
     migration.get().setSshMode(false);
     localFileWorker = (LocalFileWorker) migration.get().getInputFileWorker();
@@ -95,6 +93,7 @@ public class CiaMigrationWorkerTest extends ParentTestNg {
   public void test_parsingAndInsertionIntoTmpDb() throws Exception {
     CiaMigrationWorker ciaMigrationWorker = getCiaMigrationWorker();
 
+    GenerateInputFiles fileGenerator = prepareInputFiles(100, 0);
     ciaMigrationWorker.inputStream = new FileInputStream(fileGenerator.getOutCiaFileName());
 
     ciaMigrationWorker.createTmpTables();
@@ -341,39 +340,6 @@ public class CiaMigrationWorkerTest extends ParentTestNg {
     assertThat(actualList.get(0).error).contains("surname");
   }
 
-
-//  @Test
-//  public void test_exclusionOfDuplicateClientRecords() throws Exception {
-//    CiaMigrationWorker ciaMigrationWorker = getCiaMigrationWorker();
-//
-//    List<ClientTmp> generatedClients = fileGenerator.getGeneratedClients();
-//
-//    ciaMigrationWorker.createTmpTables();
-//
-//    for (int i = 0; i < generatedClients.size(); i++) {
-//      if (!generatedClients.get(i).hasError) {
-//        generatedClients.get(i).number = i;
-//        migrationTestDao.get().insertClient(ciaMigrationWorker.tmpClientTable, generatedClients.get(i));
-//      }
-//    }
-//
-//    Map<String, ClientTmp> uniqueGoodClients = fileGenerator.getUniqueGoodClients();
-//
-//    //
-//    //
-//    ciaMigrationWorker.markDuplicateClientRecords();
-//    //
-//    //
-//
-//    List<ClientTmp> actualUniqueClients = migrationTestDao.get().loadUniqueClientsList(ciaMigrationWorker.tmpClientTable);
-//
-//    assertThat(actualUniqueClients).isNotNull();
-//    assertThat(actualUniqueClients).hasSameSizeAs(uniqueGoodClients.entrySet());
-//    for (ClientTmp actualDuplicateClient : actualUniqueClients) {
-//      assertThatAreEqual(actualDuplicateClient, uniqueGoodClients.get(actualDuplicateClient.cia_id));
-//    }
-//  }
-
   @Test
   public void проверка_исключения_дубликатов() throws Exception {
     CiaMigrationWorker ciaMigrationWorker = getCiaMigrationWorker();
@@ -402,7 +368,7 @@ public class CiaMigrationWorkerTest extends ParentTestNg {
     assertThat(actualList.get(0).number).isEqualTo(123);
     assertThat(actualList.get(1).number).isEqualTo(5435);
 
-    assertThat(actualList.get(0).status).isEqualTo(STATUS_NOT_DUPLICATED);
+    assertThat(actualList.get(0).status).isEqualTo(STATUS_DUPLICATED);
     assertThat(actualList.get(1).status).isEqualTo(0);
   }
 
@@ -553,47 +519,28 @@ public class CiaMigrationWorkerTest extends ParentTestNg {
   }
 
   @Test
-  public void test_exclusionOfDuplicatePhoneNumbers() throws Exception {
+  public void test_exclusion_of_duplicate_phone_numbers() throws Exception {
     clientTestDao.get().removeAllData();
-
-    List<PhoneNumber> expectedPhoneNumbers = new ArrayList<>();
-    Map<String, ClientDetails> uniqueGoodClientDetails = fileGenerator.getUniqueGoodClientDetails();
 
     CiaMigrationWorker ciaMigrationWorker = getCiaMigrationWorker();
 
     ciaMigrationWorker.createTmpTables();
 
-//    int client_ind = 0;
-//    int phone_ind = 0;
-//    for (Map.Entry<String, ClientDetails> clientDetailsEntry : uniqueGoodClientDetails.entrySet()) {
-//      for (kz.greetgo.sandbox.controller.model.PhoneNumber phone : clientDetailsEntry.getValue().phoneNumbers) {
-//        PhoneNumber phoneNumber = new PhoneNumber();
-//        phoneNumber.id = phone_ind++;
-//        phoneNumber.client_num = client_ind;
-//        phoneNumber.type = PhoneType.valueOf(phone.phoneType.toString());
-//        phoneNumber.phone_number = phone.number;
-//        migrationTestDao.get().insertPhoneNumber(ciaMigrationWorker.tmpPhoneTable, phoneNumber);
-//        phoneNumber.id = phone_ind++;
-//        migrationTestDao.get().insertPhoneNumber(ciaMigrationWorker.tmpPhoneTable, phoneNumber);
-//        expectedPhoneNumbers.add(phoneNumber);
-//      }
-//      client_ind++;
-//    }
+    PhoneNumber phoneNumber = new PhoneNumber();
+    phoneNumber.number = 67;
+    phoneNumber.client_num = 47;
+    phoneNumber.type = PhoneType.MOBILE;
+    phoneNumber.phone_number = RND.str(10);
 
-    for (int client_num = 0; client_num < 8; client_num++) {
-      int phoneCount = 2 + random.nextInt(5);
-      for (int phone_ind = 0; phone_ind < phoneCount; phone_ind++) {
-        PhoneNumber phoneNumber = new PhoneNumber();
-        phoneNumber.id = phone_ind++;
-        phoneNumber.client_num = client_num;
-//        phoneNumber.type = PhoneType.valueOf(phone.phoneType.toString());
-//        phoneNumber.phone_number = phone.number;
-        migrationTestDao.get().insertPhoneNumber(ciaMigrationWorker.tmpPhoneTable, phoneNumber);
-        phoneNumber.id = phone_ind++;
-        migrationTestDao.get().insertPhoneNumber(ciaMigrationWorker.tmpPhoneTable, phoneNumber);
-        expectedPhoneNumbers.add(phoneNumber);
-      }
-    }
+    PhoneNumber phoneNumberDuplicate = new PhoneNumber();
+    phoneNumberDuplicate.number = 83;
+    phoneNumberDuplicate.client_num = phoneNumber.client_num;
+    phoneNumberDuplicate.type = PhoneType.HOME;
+    phoneNumberDuplicate.phone_number = phoneNumber.phone_number;
+
+
+    migrationTestDao.get().insertPhoneNumber(ciaMigrationWorker.tmpPhoneTable, phoneNumber);
+    migrationTestDao.get().insertPhoneNumber(ciaMigrationWorker.tmpPhoneTable, phoneNumberDuplicate);
 
     //
     //
@@ -604,10 +551,13 @@ public class CiaMigrationWorkerTest extends ParentTestNg {
     List<PhoneNumber> actualUniquePhoneNumbers = migrationTestDao.get().loadUniquePhoneNumbers(ciaMigrationWorker.tmpPhoneTable);
 
     assertThat(actualUniquePhoneNumbers).isNotNull();
-    assertThat(actualUniquePhoneNumbers).hasSameSizeAs(expectedPhoneNumbers);
-    for (int i = 0; i < actualUniquePhoneNumbers.size(); i++) {
-      assertThatAreEqual(actualUniquePhoneNumbers.get(i), expectedPhoneNumbers.get(i));
-    }
+    assertThat(actualUniquePhoneNumbers).hasSize(2);
+
+    assertThat(actualUniquePhoneNumbers.get(0).number).isEqualTo(67);
+    assertThat(actualUniquePhoneNumbers.get(1).number).isEqualTo(83);
+
+    assertThat(actualUniquePhoneNumbers.get(0).status).isEqualTo(STATUS_DUPLICATED_PHONE_NUMBER);
+    assertThat(actualUniquePhoneNumbers.get(1).status).isEqualTo(0);
   }
 
   @Test
@@ -615,42 +565,28 @@ public class CiaMigrationWorkerTest extends ParentTestNg {
     clientTestDao.get().removeAllData();
 
     List<PhoneNumber> expectedPhoneNumbers = new ArrayList<>();
-    Map<String, ClientDetails> uniqueGoodClientDetails = fileGenerator.getUniqueGoodClientDetails();
 
     CiaMigrationWorker ciaMigrationWorker = getCiaMigrationWorker();
 
     ciaMigrationWorker.createTmpTables();
 
-    int client_ind = 0;
-    int phone_ind = 0;
-    for (Map.Entry<String, ClientDetails> clientDetailsEntry : uniqueGoodClientDetails.entrySet()) {
-      ClientTmp client = new ClientTmp();
-      client.number = client_ind;
-      client.cia_id = clientDetailsEntry.getKey();
-      client.name = clientDetailsEntry.getValue().name;
-      client.surname = clientDetailsEntry.getValue().surname;
-      client.patronymic = clientDetailsEntry.getValue().patronymic;
-      client.gender = clientDetailsEntry.getValue().gender.toString();
-      client.birth_date = new SimpleDateFormat("yyyy-MM-dd").parse(clientDetailsEntry.getValue().dateOfBirth);
-      client.charm_name = clientDetailsEntry.getValue().charm.name;
-
+    int phoneOrdNum = 0;
+    for (int client_num = 0; client_num < 8; client_num++) {
+      ClientTmp client = generateGoodClient(client_num);
       migrationTestDao.get().insertClient(ciaMigrationWorker.tmpClientTable, client);
+      clientTestDao.get().insertClientTmp(client);
 
-      for (kz.greetgo.sandbox.controller.model.PhoneNumber phone : clientDetailsEntry.getValue().phoneNumbers) {
+      int phoneCount = 2 + random.nextInt(5);
+      for (int j = 0; j < phoneCount; j++) {
         PhoneNumber phoneNumber = new PhoneNumber();
-        phoneNumber.id = phone_ind++;
-        phoneNumber.client_num = client_ind;
-        phoneNumber.type = PhoneType.valueOf(phone.phoneType.toString());
-        phoneNumber.phone_number = phone.number;
+        phoneNumber.number = phoneOrdNum++;
+        phoneNumber.client_num = client_num;
+        phoneNumber.type = PhoneType.valueOf(random.nextBoolean() ? "HOME" : random.nextBoolean() ? "MOBILE" : "WORK");
+        phoneNumber.phone_number = RND.str(10);
         migrationTestDao.get().insertPhoneNumber(ciaMigrationWorker.tmpPhoneTable, phoneNumber);
         expectedPhoneNumbers.add(phoneNumber);
       }
-
-      client_ind++;
     }
-
-    ciaMigrationWorker.checkForClientExistence();
-    ciaMigrationWorker.upsertClients();
 
     //
     //
@@ -668,10 +604,11 @@ public class CiaMigrationWorkerTest extends ParentTestNg {
   }
 
   @Test
-  public void test_wholeMigration() throws Exception {
+  public void test_all_cia_migration() throws Exception {
     clientTestDao.get().removeAllData();
     charmTestDao.get().removeAllData();
 
+    GenerateInputFiles fileGenerator = prepareInputFiles(100, 0);
     Set<String> expectedClientIds = fileGenerator.getGoodClientIds();
 
     CiaMigrationWorker ciaMigrationWorker = getCiaMigrationWorker();

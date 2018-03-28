@@ -25,17 +25,17 @@ public interface MigrationTestDaoPostgres extends MigrationTestDao {
                      @Param("address") Address address);
 
   @Insert("INSERT INTO ${tableName} (number, client_num, phone_number, type) VALUES" +
-    " (#{phoneNumber.id}, #{phoneNumber.client_num}, #{phoneNumber.phone_number}, #{phoneNumber.type})")
+    " (#{phoneNumber.number}, #{phoneNumber.client_num}, #{phoneNumber.phone_number}, #{phoneNumber.type})")
   void insertPhoneNumber(@Param("tableName") String tableName,
                      @Param("phoneNumber") PhoneNumber phoneNumber);
 
   @Insert("INSERT INTO ${tableName} (type, client_id, account_number, registered_at) VALUES" +
     " (#{account.type}, #{account.clientId}, #{account.account_number}, #{account.registeredAtD})")
   void insertClientAccount(@Param("tableName") String tableName,
-                           @Param("account") Account account);
+                           @Param("account") AccountTmp account);
 
   @Insert("INSERT INTO ${tableName} (type, money, finished_at, transaction_type, account_number) VALUES (#{transaction.type}," +
     " #{transaction.money}, #{transaction.finishedAtD}, #{transaction.transaction_type}, #{transaction.account_number})")
   void insertAccountTransaction(@Param("tableName") String tableName,
-                                @Param("transaction") Transaction transaction);
+                                @Param("transaction") TransactionTmp transaction);
 }

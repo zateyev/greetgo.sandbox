@@ -3,22 +3,26 @@ package kz.greetgo.sandbox.db.migration_impl;
 import kz.greetgo.depinject.core.BeanGetter;
 import kz.greetgo.sandbox.db.configs.MigrationConfig;
 import kz.greetgo.sandbox.db.input_file_generator.GenerateInputFiles;
-import kz.greetgo.sandbox.db.migration_impl.model.Account;
-import kz.greetgo.sandbox.db.migration_impl.model.Transaction;
+import kz.greetgo.sandbox.db.migration_impl.model.AccountTmp;
+import kz.greetgo.sandbox.db.migration_impl.model.ClientTmp;
+import kz.greetgo.sandbox.db.migration_impl.model.TransactionTmp;
 import kz.greetgo.sandbox.db.migration_impl.report.ReportXlsx;
+import kz.greetgo.sandbox.db.register_impl.IdGenerator;
 import kz.greetgo.sandbox.db.ssh.LocalFileWorker;
 import kz.greetgo.sandbox.db.test.dao.CharmTestDao;
 import kz.greetgo.sandbox.db.test.dao.ClientTestDao;
 import kz.greetgo.sandbox.db.test.dao.MigrationTestDao;
 import kz.greetgo.sandbox.db.test.util.ParentTestNg;
+import kz.greetgo.util.RND;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import java.io.*;
+import java.math.BigDecimal;
 import java.sql.Connection;
 import java.text.ParseException;
-import java.util.Comparator;
+import java.text.SimpleDateFormat;
 import java.util.List;
 
 import static org.fest.assertions.api.Assertions.assertThat;
@@ -31,21 +35,18 @@ public class FrsMigrationWorkerTest extends ParentTestNg {
   public BeanGetter<MigrationConfig> migrationConfig;
   public BeanGetter<ClientTestDao> clientTestDao;
   public BeanGetter<CharmTestDao> charmTestDao;
+  public BeanGetter<IdGenerator> idGen;
 
   public BeanGetter<MigrationTestDao> migrationTestDao;
-
-//  private GenerateInputFiles fileGenerator;
 
   private Connection connection;
   private LocalFileWorker localFileWorker;
 
   private File outErrorFile;
   private ReportXlsx reportXlsx;
-  private GenerateInputFiles fileGenerator;
 
   @BeforeClass
   public void prepareResources() throws Exception {
-    fileGenerator = prepareInputFiles(0, 100);
     connection = migration.get().getConnection();
     migration.get().setSshMode(false);
     localFileWorker = (LocalFileWorker) migration.get().getInputFileWorker();
@@ -80,12 +81,26 @@ public class FrsMigrationWorkerTest extends ParentTestNg {
 
   @Test
   public void test_parsingAndInsertionIntoTmpDb() throws Exception {
+    clientTestDao.get().removeAllData();
+
+    String transactionInput = "{\"type\":\"transaction\"," +
+      "\"transaction_type\":\"Списывание с регионального бюджета Алматинской области\"," +
+      "\"account_number\":\"79482KZ058-28927-83285-8377209\",\"money\":\"+820_265.04\"," +
+      "\"finished_at\":\"2011-03-28T10:22:57.320\"}\n";
+
+    String accountInput = "{\"client_id\":\"2-9UB-27-AG-nkXCRqL7mL\",\"account_number\":\"79482KZ058-28927-83285-8377209\"," +
+      "\"type\":\"new_account\",\"registered_at\":\"2001-03-28T10:21:21.319\"}";
+
+    TransactionTmp expectedTransaction = new TransactionTmp();
+    expectedTransaction.money = BigDecimal.valueOf(820_265.04);
+    expectedTransaction.transaction_type = "Списывание с регионального бюджета Алматинской области";
+
+    AccountTmp expectedAccount = new AccountTmp();
+    expectedAccount.account_number = "79482KZ058-28927-83285-8377209";
+    expectedAccount.registeredAtD = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS").parse("2001-03-28T10:21:21.319");
+
     FrsMigrationWorker frsMigrationWorker = getFrsMigrationWorker();
-
-    fileGenerator = prepareInputFiles(0, 100);
-
-    frsMigrationWorker.inputStream = new FileInputStream(fileGenerator.getOutFrsFileName());
-
+    frsMigrationWorker.inputStream = new ByteArrayInputStream((transactionInput + accountInput).getBytes());
     frsMigrationWorker.createTmpTables();
 
     //
@@ -94,149 +109,209 @@ public class FrsMigrationWorkerTest extends ParentTestNg {
     //
     //
 
-    List<Account> expectedAccounts = fileGenerator.getGeneratedAccounts();
-    List<Transaction> expectedTransactions = fileGenerator.getGeneratedTransactions();
+    List<TransactionTmp> actualTransactionTmpList = migrationTestDao.get().loadTransactionsList(frsMigrationWorker.tmpTransactionTable);
+    List<AccountTmp> actualAccountTmpList = migrationTestDao.get().loadAccountsList(frsMigrationWorker.tmpAccountTable);
 
-    List<Account> actualAccounts = migrationTestDao.get().loadAccountsList(frsMigrationWorker.tmpAccountTable);
-    List<Transaction> actualTransactions = migrationTestDao.get().loadTransactionsList(frsMigrationWorker.tmpTransactionTable);
+    assertThat(actualTransactionTmpList).isNotNull();
+    assertThat(actualTransactionTmpList).hasSize(1);
+    assertThatAreEqual(actualTransactionTmpList.get(0), expectedTransaction);
 
-//    expectedAccounts.sort(Comparator.comparing(account -> account.account_number));
-    expectedTransactions.sort(Comparator.comparing(transaction -> transaction.finishedAt));
-
-    assertThat(actualAccounts).isNotNull();
-    assertThat(actualAccounts).hasSameSizeAs(expectedAccounts);
-    for (int i = 0; i < actualAccounts.size(); i++) {
-      assertThatAreEqual(actualAccounts.get(i), expectedAccounts.get(i));
-    }
-
-    assertThat(actualTransactions).isNotNull();
-    assertThat(actualTransactions).hasSameSizeAs(expectedTransactions);
-    for (int i = 0; i < actualTransactions.size(); i++) {
-      assertThatAreEqual(actualTransactions.get(i), expectedTransactions.get(i));
-    }
+    assertThat(actualAccountTmpList).isNotNull();
+    assertThat(actualAccountTmpList).hasSize(1);
+    assertThatAreEqual(actualAccountTmpList.get(0), expectedAccount);
   }
 
-//  @Test
-//  public void test_migrationFromTmpDb() throws Exception {
-//    clientTestDao.get().removeAllData();
-//
-//    List<Account> expectedAccounts = fileGenerator.getGeneratedAccounts();
-//    List<Transaction> expectedTransactions = fileGenerator.getGeneratedTransactions();
-//
-//    FrsMigrationWorker frsMigrationWorker = getFrsMigrationWorker();
-//
-//    frsMigrationWorker.createTmpTables();
-//
-//    for (Account expectedAccount : expectedAccounts) {
-//      migrationTestDao.get().insertClientAccount(frsMigrationWorker.tmpAccountTable, expectedAccount);
-//    }
-//
-//    for (Transaction expectedTransaction : expectedTransactions) {
-//      migrationTestDao.get().insertAccountTransaction(frsMigrationWorker.tmpTransactionTable, expectedTransaction);
-//    }
-//
-//    //
-//    //
-//    frsMigrationWorker.migrateFromTmp();
-//    //
-//    //
-//
-//    List<Account> actualMigratedAccounts = clientTestDao.get().loadAccountList();
-//    List<Transaction> actualMigratedTransactions = clientTestDao.get().loadTransactionList();
-//
-////    expectedAccounts.sort((o1, o2) -> o1.surname.compareToIgnoreCase(o2.surname));
-////    actualMigratedAccounts.sort((o1, o2) -> o1.surname.compareToIgnoreCase(o2.surname));
-//
-//    assertThat(actualMigratedAccounts).isNotNull();
-//    assertThat(actualMigratedAccounts).hasSameSizeAs(expectedAccounts);
-//    for (int i = 0; i < actualMigratedAccounts.size(); i++) {
-//      assertThatAreEqual(actualMigratedAccounts.get(i), expectedAccounts.get(i));
-//    }
-//
-//    assertThat(actualMigratedTransactions).isNotNull();
-//    assertThat(actualMigratedTransactions).hasSameSizeAs(expectedTransactions);
-//    for (int i = 0; i < actualMigratedTransactions.size(); i++) {
-//      assertThatAreEqual(actualMigratedTransactions.get(i), expectedTransactions.get(i));
-//    }
-//  }
-//
-//  @Test
-//  public void testFrsMigrationByRecordsCount() throws Exception {
-//    clientTestDao.get().removeAllData();
-//    charmTestDao.get().removeAllData();
-//
-//    GenerateInputFiles fileGenerator = prepareInputFiles(10, 100);
-//
-//    //
-//    //
-//    migration.get().executeFrsMigration();
-//    //
-//    //
-//
-//    long transactionCount = clientTestDao.get().getTransactionCount();
-//    long accountCount = clientTestDao.get().getAccountCount();
-//
-//    assertThat(transactionCount).isEqualTo(fileGenerator.getTransactionCount());
-//    assertThat(accountCount).isEqualTo(fileGenerator.getAccountCount());
-//  }
-//
-//  @Test
-//  public void testAccountInsertion() throws Exception {
-//    clientTestDao.get().removeAllData();
-//    charmTestDao.get().removeAllData();
-//
-//    GenerateInputFiles fileGenerator = prepareInputFiles(10, 100);
-//
-//    Map<String, Account> clientAccounts = fileGenerator.getClientAccounts();
-//
-//    //
-//    //
-//    migration.get().executeFrsMigration();
-//    //
-//    //
-//
-//
-//    int i = 0;
-//    for (Map.Entry<String, Account> accountEntry : clientAccounts.entrySet()) {
-//      String clientAccountNumber = clientTestDao.get().getClientAccountByCiaId(
-//        accountEntry.getKey(),
-//        accountEntry.getValue().registeredAtD
-//      );
-//
-//      assertThat(clientAccountNumber).isEqualTo(accountEntry.getValue().account_number);
-//      if (++i > 10) break;
-//    }
-//  }
-//
-//  @Test
-//  public void testTransactionInsertion() throws Exception {
-//    clientTestDao.get().removeAllData();
-//    charmTestDao.get().removeAllData();
-//
-//    GenerateInputFiles fileGenerator = prepareInputFiles(10, 100);
-//
-//    Map<String, Transaction> accountTransactions = fileGenerator.getAccountTransactions();
-//
-//    //
-//    //
-//    migration.get().executeFrsMigration();
-//    //
-//    //
-//
-//
-//    int i = 0;
-//    for (Map.Entry<String, Transaction> transactionEntry : accountTransactions.entrySet()) {
-//      Transaction accountTransactionActual = clientTestDao.get().getTransactionByAccountNumber(
-//        transactionEntry.getValue().account_number,
-//        new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS").parse(transactionEntry.getValue().finishedAt));
-//
-//      assertThat(accountTransactionActual).isNotNull();
-//      assertThatAreEqual(accountTransactionActual, transactionEntry.getValue());
-//      if (++i > 10) break;
-//    }
-//  }
-//
-//  @Test
+  @Test
+  public void test_creation_if_idle_clients_if_not_exist() throws Exception {
+    clientTestDao.get().removeAllData();
+
+    FrsMigrationWorker frsMigrationWorker = getFrsMigrationWorker();
+    frsMigrationWorker.createTmpTables();
+
+    AccountTmp account1 = new AccountTmp();
+    account1.clientId = idGen.get().newId();
+    account1.account_number = RND.intStr(5) + "KZ" + RND.intStr(3) + "-" + RND.intStr(5) + "-" + RND.intStr(5) + "-" + RND.intStr(7);
+    account1.registeredAtD = RND.dateDays(-20, 0);
+
+    AccountTmp account2 = new AccountTmp();
+    account2.clientId = idGen.get().newId();
+    account2.account_number = RND.intStr(5) + "KZ" + RND.intStr(3) + "-" + RND.intStr(5) + "-" + RND.intStr(5) + "-" + RND.intStr(7);
+    account2.registeredAtD = RND.dateDays(-20, 0);
+
+    migrationTestDao.get().insertClientAccount(frsMigrationWorker.tmpAccountTable, account1);
+    migrationTestDao.get().insertClientAccount(frsMigrationWorker.tmpAccountTable, account2);
+
+    //
+    //
+    frsMigrationWorker.createIdleClientsIfNotExist();
+    //
+    //
+
+    List<ClientTmp> actualList = clientTestDao.get().loadClientList();
+
+    assertThat(actualList).isNotNull();
+    assertThat(actualList).hasSize(2);
+    assertThat(actualList.get(0).cia_id).isNotNull();
+    assertThat(actualList.get(1).cia_id).isNotNull();
+  }
+
+  @Test
+  public void test_insertion_of_client_accounts() throws Exception {
+    clientTestDao.get().removeAllData();
+
+    FrsMigrationWorker frsMigrationWorker = getFrsMigrationWorker();
+    frsMigrationWorker.createTmpTables();
+
+    ClientTmp clientTmp1 = new ClientTmp();
+    clientTmp1.number = 0;
+    clientTmp1.cia_id = idGen.get().newId();
+
+    ClientTmp clientTmp2 = new ClientTmp();
+    clientTmp2.number = 1;
+    clientTmp2.cia_id = idGen.get().newId();
+
+    clientTestDao.get().insertClientTmp(clientTmp1);
+    clientTestDao.get().insertClientTmp(clientTmp2);
+
+    AccountTmp account1 = new AccountTmp();
+    account1.clientId = clientTmp1.cia_id;
+    account1.account_number = RND.intStr(5) + "KZ" + RND.intStr(3) + "-" + RND.intStr(5) + "-" + RND.intStr(5) + "-" + RND.intStr(7);
+    account1.registeredAtD = RND.dateDays(-20, -9);
+
+    TransactionTmp transaction1 = new TransactionTmp();
+    transaction1.account_number = account1.account_number;
+    transaction1.money = BigDecimal.valueOf(0);
+    transaction1.finishedAtD = RND.dateDays(-20, 0);
+    migrationTestDao.get().insertAccountTransaction(frsMigrationWorker.tmpTransactionTable, transaction1);
+
+    AccountTmp account2 = new AccountTmp();
+    account2.clientId = clientTmp2.cia_id;
+    account2.account_number = RND.intStr(5) + "KZ" + RND.intStr(3) + "-" + RND.intStr(5) + "-" + RND.intStr(5) + "-" + RND.intStr(7);
+    account2.registeredAtD = RND.dateDays(-10, 0);
+
+    TransactionTmp transaction2 = new TransactionTmp();
+    transaction2.account_number = account2.account_number;
+    transaction2.money = BigDecimal.valueOf(0);
+    transaction2.finishedAtD = RND.dateDays(-20, 0);
+    migrationTestDao.get().insertAccountTransaction(frsMigrationWorker.tmpTransactionTable, transaction2);
+
+    migrationTestDao.get().insertClientAccount(frsMigrationWorker.tmpAccountTable, account1);
+    migrationTestDao.get().insertClientAccount(frsMigrationWorker.tmpAccountTable, account2);
+
+    //
+    //
+    frsMigrationWorker.insertClientAccounts();
+    //
+    //
+
+    List<AccountTmp> actualAccountList = clientTestDao.get().loadAccountList();
+    assertThat(actualAccountList).isNotNull();
+    assertThat(actualAccountList).hasSize(2);
+    assertThatAreEqual(actualAccountList.get(0), account1);
+    assertThatAreEqual(actualAccountList.get(1), account2);
+  }
+
+  @Test
+  public void test_insertion_of_account_transactions() throws Exception {
+    clientTestDao.get().removeAllData();
+
+    FrsMigrationWorker frsMigrationWorker = getFrsMigrationWorker();
+    frsMigrationWorker.createTmpTables();
+
+    ClientTmp clientTmp1 = new ClientTmp();
+    clientTmp1.number = 0;
+    clientTmp1.cia_id = idGen.get().newId();
+
+    ClientTmp clientTmp2 = new ClientTmp();
+    clientTmp2.number = 1;
+    clientTmp2.cia_id = idGen.get().newId();
+
+    clientTestDao.get().insertClientTmp(clientTmp1);
+    clientTestDao.get().insertClientTmp(clientTmp2);
+
+    AccountTmp account1 = new AccountTmp();
+    account1.number = clientTmp1.number;
+    account1.clientId = String.valueOf(clientTmp1.number);
+    account1.account_number = RND.intStr(5) + "KZ" + RND.intStr(3) + "-" + RND.intStr(5) + "-" + RND.intStr(5) + "-" + RND.intStr(7);
+    account1.registeredAtD = RND.dateDays(-20, -9);
+
+    TransactionTmp transaction1 = new TransactionTmp();
+    transaction1.account_number = account1.account_number;
+    transaction1.money = BigDecimal.valueOf(0);
+    transaction1.finishedAtD = RND.dateDays(-20, -9);
+    transaction1.transaction_type = "Transfer";
+    migrationTestDao.get().insertAccountTransaction(frsMigrationWorker.tmpTransactionTable, transaction1);
+
+    AccountTmp account2 = new AccountTmp();
+    account2.number = clientTmp2.number;
+    account2.clientId = String.valueOf(clientTmp2.number);
+    account2.account_number = RND.intStr(5) + "KZ" + RND.intStr(3) + "-" + RND.intStr(5) + "-" + RND.intStr(5) + "-" + RND.intStr(7);
+    account2.registeredAtD = RND.dateDays(-10, 0);
+
+    TransactionTmp transaction2 = new TransactionTmp();
+    transaction2.account_number = account2.account_number;
+    transaction2.money = BigDecimal.valueOf(0);
+    transaction2.finishedAtD = RND.dateDays(-10, 0);
+    transaction2.transaction_type = "Offshore";
+    migrationTestDao.get().insertAccountTransaction(frsMigrationWorker.tmpTransactionTable, transaction2);
+
+    clientTestDao.get().insertAccountTmp(account1);
+    clientTestDao.get().insertAccountTmp(account2);
+
+    //
+    //
+    frsMigrationWorker.insertAccountTransactions();
+    //
+    //
+
+    List<TransactionTmp> actualTransactionList = clientTestDao.get().loadTransactionList();
+    assertThat(actualTransactionList).isNotNull();
+    assertThat(actualTransactionList).hasSize(2);
+    assertThatAreEqual(actualTransactionList.get(0), transaction1);
+    assertThatAreEqual(actualTransactionList.get(1), transaction2);
+  }
+
+  @Test
+  public void test_all_frs_migration() throws Exception {
+    clientTestDao.get().removeAllData();
+
+    String transactionInput = "{\"transaction_type\":\"Отмывание на компьютерной технике\"," +
+      "\"finished_at\":\"2011-03-28T10:21:05.320\",\"money\":\"-500.89\"," +
+      "\"account_number\":\"09256KZ233-44751-42570-8507017\",\"type\":\"transaction\"}\n";
+
+    String accountInput = "{\"type\":\"new_account\",\"account_number\":\"09256KZ233-44751-42570-8507017\"," +
+      "\"client_id\":\"2-9UB-27-AG-nkXCRqL7mL\",\"registered_at\":\"2001-03-28T10:21:09.319\"}";
+
+    TransactionTmp expectedTransaction = new TransactionTmp();
+    expectedTransaction.money = BigDecimal.valueOf(-500.89);
+    expectedTransaction.transaction_type = "Отмывание на компьютерной технике";
+
+    AccountTmp expectedAccount = new AccountTmp();
+    expectedAccount.account_number = "09256KZ233-44751-42570-8507017";
+    expectedAccount.registeredAtD = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS").parse("2001-03-28T10:21:09.319");
+
+    FrsMigrationWorker frsMigrationWorker = getFrsMigrationWorker();
+    frsMigrationWorker.inputStream = new ByteArrayInputStream((transactionInput + accountInput).getBytes());
+
+    //
+    //
+    frsMigrationWorker.migrate();
+    //
+    //
+
+    List<TransactionTmp> actualTransactionTmpList = clientTestDao.get().loadTransactionList();
+    List<AccountTmp> actualAccountTmpList = clientTestDao.get().loadAccountList();
+
+    assertThat(actualTransactionTmpList).isNotNull();
+    assertThat(actualTransactionTmpList).hasSize(1);
+    assertThatAreEqual(actualTransactionTmpList.get(0), expectedTransaction);
+
+    assertThat(actualAccountTmpList).isNotNull();
+    assertThat(actualAccountTmpList).hasSize(1);
+    assertThatAreEqual(actualAccountTmpList.get(0), expectedAccount);
+  }
+
+  //  @Test
 //  public void testCiaAndFrsConcurrentlyMigration() throws Exception {
 //    clientTestDao.get().removeAllData();
 //    charmTestDao.get().removeAllData();
@@ -254,7 +329,7 @@ public class FrsMigrationWorkerTest extends ParentTestNg {
 //    assertThat(clientCount).isEqualTo(fileGenerator.getGoodClientCount());
 //  }
 
-  private void assertThatAreEqual(Account actual, Account expected) {
+  private void assertThatAreEqual(AccountTmp actual, AccountTmp expected) {
     assertThat(actual.account_number).isEqualTo(expected.account_number);
     assertThat(actual.registeredAtD).isEqualTo(expected.registeredAtD);
   }
@@ -267,7 +342,7 @@ public class FrsMigrationWorkerTest extends ParentTestNg {
     return frsMigrationWorker;
   }
 
-  private void assertThatAreEqual(Transaction actual, Transaction expected) throws ParseException {
+  private void assertThatAreEqual(TransactionTmp actual, TransactionTmp expected) throws ParseException {
     assertThat(actual.money.compareTo(expected.money)).isEqualTo(0);
     assertThat(actual.transaction_type).isEqualTo(String.valueOf(expected.transaction_type));
   }
