@@ -311,7 +311,7 @@ public class FrsMigrationWorkerTest extends ParentTestNg {
     assertThatAreEqual(actualAccountTmpList.get(0), expectedAccount);
   }
 
-  //  @Test
+//    @Test
 //  public void testCiaAndFrsConcurrentlyMigration() throws Exception {
 //    clientTestDao.get().removeAllData();
 //    charmTestDao.get().removeAllData();
@@ -320,7 +320,7 @@ public class FrsMigrationWorkerTest extends ParentTestNg {
 //
 //    //
 //    //
-//    migration.get().executeMigration();
+//    migration.get().executeCiaFrsMigrationConcurrently();
 //    //
 //    //
 //

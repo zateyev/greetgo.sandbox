@@ -1,6 +1,7 @@
 package kz.greetgo.sandbox.db.migration_impl;
 
 import kz.greetgo.depinject.core.BeanGetter;
+import kz.greetgo.sandbox.db.configs.DbConfig;
 import kz.greetgo.sandbox.db.configs.MigrationConfig;
 import kz.greetgo.sandbox.db.input_file_generator.GenerateInputFiles;
 import kz.greetgo.sandbox.db.migration_impl.model.Address;
@@ -9,7 +10,6 @@ import kz.greetgo.sandbox.db.migration_impl.model.PhoneNumber;
 import kz.greetgo.sandbox.db.migration_impl.model.PhoneType;
 import kz.greetgo.sandbox.db.migration_impl.report.ReportXlsx;
 import kz.greetgo.sandbox.db.register_impl.IdGenerator;
-import kz.greetgo.sandbox.db.ssh.LocalFileWorker;
 import kz.greetgo.sandbox.db.test.dao.CharmTestDao;
 import kz.greetgo.sandbox.db.test.dao.ClientTestDao;
 import kz.greetgo.sandbox.db.test.dao.MigrationTestDao;
@@ -21,6 +21,7 @@ import org.testng.annotations.Test;
 
 import java.io.*;
 import java.sql.Connection;
+import java.sql.DriverManager;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
@@ -33,17 +34,15 @@ import static org.fest.assertions.api.Assertions.assertThat;
  * Набор автоматизированных тестов для тестирования методов класса {@link CiaMigrationWorker}
  */
 public class CiaMigrationWorkerTest extends ParentTestNg {
-  public BeanGetter<Migration> migration;
   public BeanGetter<MigrationConfig> migrationConfig;
   public BeanGetter<ClientTestDao> clientTestDao;
   public BeanGetter<CharmTestDao> charmTestDao;
   public BeanGetter<IdGenerator> idGen;
+  public BeanGetter<DbConfig> dbConfig;
 
   public BeanGetter<MigrationTestDao> migrationTestDao;
 
   private Connection connection;
-  private LocalFileWorker localFileWorker;
-
   private OutputStream outError;
   private ReportXlsx reportXlsx;
 
@@ -51,10 +50,11 @@ public class CiaMigrationWorkerTest extends ParentTestNg {
 
   @BeforeClass
   public void prepareResources() throws Exception {
-    connection = migration.get().getConnection();
-    migration.get().setSshMode(false);
-    localFileWorker = (LocalFileWorker) migration.get().getInputFileWorker();
-    localFileWorker.homePath = "build/out_files/";
+    connection = DriverManager.getConnection(
+      dbConfig.get().url(),
+      dbConfig.get().username(),
+      dbConfig.get().password()
+    );
 
     File file = new File(migrationConfig.get().sqlReportDir() + "sqlReportCia.xlsx");
     file.getParentFile().mkdirs();
@@ -62,7 +62,6 @@ public class CiaMigrationWorkerTest extends ParentTestNg {
     reportXlsx.start();
 
     File outErrorFile = new File("build/out_files/error_report.txt");
-    //noinspection ResultOfMethodCallIgnored
     outErrorFile.getParentFile().mkdirs();
     outError = new FileOutputStream(outErrorFile);
   }
@@ -70,9 +69,7 @@ public class CiaMigrationWorkerTest extends ParentTestNg {
   @AfterClass
   public void closeResources() throws Exception {
     connection.close();
-    localFileWorker.close();
     connection = null;
-    localFileWorker = null;
   }
 
   @Test
@@ -640,11 +637,15 @@ public class CiaMigrationWorkerTest extends ParentTestNg {
   }
 
   @Test
-  public void test_all_cia_migration() throws Exception {
+  public void test_total_cia_migration() throws Exception {
     clientTestDao.get().removeAllData();
     charmTestDao.get().removeAllData();
 
-    GenerateInputFiles fileGenerator = prepareInputFiles(100, 0);
+    GenerateInputFiles fileGenerator = new GenerateInputFiles(50, 0);
+    fileGenerator.setTestMode();
+    fileGenerator.archiveFiles = false;
+    fileGenerator.execute();
+
     Set<String> expectedClientIds = fileGenerator.getGoodClientIds();
 
     CiaMigrationWorker ciaMigrationWorker = getCiaMigrationWorker();
@@ -716,13 +717,6 @@ public class CiaMigrationWorkerTest extends ParentTestNg {
     SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
     assertThat(actualClient.birth_date != null ? sdf.format(actualClient.birth_date) : null)
       .isEqualTo(expectedClient.birth_date != null ? sdf.format(expectedClient.birth_date) : null);
-  }
-
-  private GenerateInputFiles prepareInputFiles(int ciaLimit, int frsLimit) throws Exception {
-    GenerateInputFiles fileGenerator = new GenerateInputFiles(ciaLimit, frsLimit);
-    fileGenerator.setTestMode();
-    fileGenerator.execute();
-    return fileGenerator;
   }
 
   private CiaMigrationWorker getCiaMigrationWorker() {

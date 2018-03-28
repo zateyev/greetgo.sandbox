@@ -42,6 +42,7 @@ public class GenerateInputFiles {
   private String outFrsFileName;
   private List<AccountTmp> generatedAccounts;
   private List<TransactionTmp> generatedTransactions;
+  public boolean archiveFiles = true;
 
   public GenerateInputFiles(int ciaLimit, int frsLimit) {
     this.ciaLimit = ciaLimit;
@@ -491,7 +492,8 @@ public class GenerateInputFiles {
 
     working.set(false);
 
-    if (!testMode) archive();
+    if (archiveFiles)
+      archive();
 
     workingFile.delete();
     newCiaFile.delete();
