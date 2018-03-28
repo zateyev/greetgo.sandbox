@@ -22,7 +22,7 @@ public interface MigrationTestDao {
   @Select("SELECT type, street, house, flat FROM ${tableName}")
   List<Address> loadAddressesList(@Param("tableName") String tableName);
 
-  @Select("SELECT type, phone_number as phone_number FROM ${tableName}")
+  @Select("SELECT type, phone_number FROM ${tableName} ORDER BY number")
   List<PhoneNumber> loadPhoneNumbersList(@Param("tableName") String tableName);
 
   @Select("DROP TABLE ${tmpClientTableName}, ${tmpAddrTableName}, ${tmpPhoneTableName}")

@@ -19,10 +19,7 @@ import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.OutputStream;
+import java.io.*;
 import java.sql.Connection;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -91,11 +88,57 @@ public class CiaMigrationWorkerTest extends ParentTestNg {
 
   @Test
   public void test_parsingAndInsertionIntoTmpDb() throws Exception {
+
+    List<ClientTmp> expectedClients = generateGoodUniqueClients(5);
+    List<Address> expectedAddresses = new ArrayList<>();
+    List<PhoneNumber> expectedPhoneNumbers = new ArrayList<>();
+
+    StringBuilder inputXmlSb = new StringBuilder();
+    SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+    inputXmlSb.append("<cia>\n");
+    int phoneOrdNum = 0;
+    for (ClientTmp expectedClient : expectedClients) {
+      inputXmlSb.append("<client id=\"").append(expectedClient.cia_id).append("\">\n");
+      Address expectedAddressF = generateAddress("FACT", expectedClient.number, expectedClient.cia_id);
+      Address expectedAddressR = generateAddress("REG", expectedClient.number, expectedClient.cia_id);
+      expectedAddresses.add(expectedAddressF);
+      expectedAddresses.add(expectedAddressR);
+      inputXmlSb.append("    <address>\n");
+      inputXmlSb.append("      <fact street=\"").append(expectedAddressF.street).append("\" house=\"").append(expectedAddressF.house).append("\" flat=\"").append(expectedAddressF.flat).append("\"/>\n");
+      inputXmlSb.append("      <register street=\"").append(expectedAddressR.street).append("\" house=\"").append(expectedAddressR.house).append("\" flat=\"").append(expectedAddressR.flat).append("\"/>\n");
+      inputXmlSb.append("    </address>\n");
+      int phoneCount = 2 + random.nextInt(5);
+      for (int j = 0; j < phoneCount; j++) {
+        PhoneNumber phoneNumber = new PhoneNumber();
+        phoneNumber.number = phoneOrdNum++;
+        phoneNumber.client_num = expectedClient.number;
+        phoneNumber.type = PhoneType.valueOf(random.nextBoolean() ? "HOME" : random.nextBoolean() ? "MOBILE" : "WORK");
+        phoneNumber.phone_number = RND.str(10);
+        expectedPhoneNumbers.add(phoneNumber);
+        switch (phoneNumber.type) {
+          case MOBILE:
+            inputXmlSb.append("    <mobilePhone>").append(phoneNumber.phone_number).append("</mobilePhone>\n");
+            break;
+          case WORK:
+            inputXmlSb.append("    <workPhone>").append(phoneNumber.phone_number).append("</workPhone>\n");
+            break;
+          case HOME:
+            inputXmlSb.append("    <homePhone>").append(phoneNumber.phone_number).append("</homePhone>\n");
+            break;
+        }
+        inputXmlSb.append("    <surname value=\"").append(expectedClient.surname).append("\"/>\n");
+        inputXmlSb.append("    <name value=\"").append(expectedClient.name).append("\"/>\n");
+        inputXmlSb.append("    <patronymic value=\"").append(expectedClient.patronymic).append("\"/>\n");
+        inputXmlSb.append("    <gender value=\"").append(expectedClient.gender).append("\"/>\n");
+        inputXmlSb.append("    <charm value=\"").append(expectedClient.charm_name).append("\"/>\n");
+        inputXmlSb.append("    <birth value=\"").append(sdf.format(expectedClient.birth_date)).append("\"/>\n");
+      }
+      inputXmlSb.append("</client>\n");
+    }
+    inputXmlSb.append("</cia>");
+
     CiaMigrationWorker ciaMigrationWorker = getCiaMigrationWorker();
-
-    GenerateInputFiles fileGenerator = prepareInputFiles(100, 0);
-    ciaMigrationWorker.inputStream = new FileInputStream(fileGenerator.getOutCiaFileName());
-
+    ciaMigrationWorker.inputStream = new ByteArrayInputStream(inputXmlSb.toString().getBytes());
     ciaMigrationWorker.createTmpTables();
 
     //
@@ -103,10 +146,6 @@ public class CiaMigrationWorkerTest extends ParentTestNg {
     ciaMigrationWorker.parseDataAndSaveInTmpDb();
     //
     //
-
-    List<ClientTmp> expectedClients = fileGenerator.getGeneratedClients();
-    List<Address> expectedAddresses = fileGenerator.getGeneratedAddresses();
-    List<PhoneNumber> expectedPhoneNumbers = fileGenerator.getGeneratedPhoneNumbers();
 
     List<ClientTmp> actualClients = migrationTestDao.get().loadClientsList(ciaMigrationWorker.tmpClientTable);
     List<Address> actualAddresses = migrationTestDao.get().loadAddressesList(ciaMigrationWorker.tmpAddrTable);
@@ -126,9 +165,6 @@ public class CiaMigrationWorkerTest extends ParentTestNg {
 
     assertThat(actualPhoneNumbers).isNotNull();
     assertThat(actualPhoneNumbers).hasSameSizeAs(expectedPhoneNumbers);
-    // sorting because generator shuffles tags
-    actualPhoneNumbers.sort(Comparator.comparing(phoneNumber -> phoneNumber.phone_number));
-    expectedPhoneNumbers.sort(Comparator.comparing(phoneNumber -> phoneNumber.phone_number));
     for (int i = 0; i < actualPhoneNumbers.size(); i++) {
       assertThatAreEqual(actualPhoneNumbers.get(i), expectedPhoneNumbers.get(i));
     }
