@@ -25,24 +25,7 @@ public interface MigrationTestDao {
   @Select("SELECT type, phone_number FROM ${tableName} ORDER BY number")
   List<PhoneNumber> loadPhoneNumbersList(@Param("tableName") String tableName);
 
-  @Select("DROP TABLE ${tmpClientTableName}, ${tmpAddrTableName}, ${tmpPhoneTableName}")
-  void dropTmpTables(@Param("tmpClientTableName") String tmpClientTableName,
-                     @Param("tmpAddrTableName") String tmpAddrTableName,
-                     @Param("tmpPhoneTableName") String tmpPhoneTableName);
-
   void insertClient(String tableName, ClientTmp client);
-
-  @Select("SELECT cia_id, surname, name, patronymic, gender, birth_date, charm_name FROM ${tableName}" +
-    " WHERE error IS NOT NULL ORDER BY number")
-  List<ClientTmp> loadErrorClientsList(@Param("tableName") String tableName);
-
-  @Select("SELECT cia_id, surname, name, patronymic, gender, birth_date, charm_name FROM ${tableName}" +
-    " WHERE status = 0 ORDER BY number")
-  List<ClientTmp> loadUniqueClientsList(@Param("tableName") String tableName);
-
-  @Select("SELECT cia_id, surname, name, patronymic, gender, birth_date, charm_name FROM ${tableName}" +
-    " WHERE status = 3 ORDER BY number")
-  List<ClientTmp> loadExistingClientsList(@Param("tableName") String tableName);
 
   void insertAddress(String tableName, Address address);
 
