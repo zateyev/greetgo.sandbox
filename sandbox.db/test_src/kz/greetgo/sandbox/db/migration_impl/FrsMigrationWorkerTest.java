@@ -2,7 +2,6 @@ package kz.greetgo.sandbox.db.migration_impl;
 
 import kz.greetgo.depinject.core.BeanGetter;
 import kz.greetgo.sandbox.db.configs.MigrationConfig;
-import kz.greetgo.sandbox.db.input_file_generator.GenerateInputFiles;
 import kz.greetgo.sandbox.db.migration_impl.model.AccountTmp;
 import kz.greetgo.sandbox.db.migration_impl.model.ClientTmp;
 import kz.greetgo.sandbox.db.migration_impl.model.TransactionTmp;
@@ -18,7 +17,10 @@ import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
-import java.io.*;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileOutputStream;
 import java.math.BigDecimal;
 import java.sql.Connection;
 import java.text.ParseException;
@@ -100,7 +102,7 @@ public class FrsMigrationWorkerTest extends ParentTestNg {
     expectedAccount.registeredAtD = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS").parse("2001-03-28T10:21:21.319");
 
     FrsMigrationWorker frsMigrationWorker = getFrsMigrationWorker();
-    frsMigrationWorker.inputStream = new ByteArrayInputStream((transactionInput + accountInput).getBytes());
+    frsMigrationWorker.inputStream = new ByteArrayInputStream((transactionInput + accountInput).getBytes("UTF-8"));
     frsMigrationWorker.createTmpTables();
 
     //
@@ -120,6 +122,51 @@ public class FrsMigrationWorkerTest extends ParentTestNg {
     assertThat(actualAccountTmpList).hasSize(1);
     assertThatAreEqual(actualAccountTmpList.get(0), expectedAccount);
   }
+
+  @Test
+  public void test_parseDataAndSaveInTmpDb_on_broken_json() throws Exception {
+    clientTestDao.get().removeAllData();
+
+    String transactionInput = "{\"type\":\"transaction\"," +
+      "\"transaction_type\":\"Списывание с ре" +
+      "\"" + /*Adding parse error!!!!!*/
+      "гионального бюджета Алматинской области\"," +
+      "\"account_number\":\"79482KZ058-28927-83285-8377209\",\"money\":\"+820_265.04\"," +
+      "\"finished_at\":\"2011-03-28T10:22:57.320\"}\n";
+
+    String accountInput = "{\"client_id\":\"2-9UB-27-AG-nkXCRqL7mL\",\"account_number\":\"79482KZ058-28927-83285-8377209\"," +
+      "\"type\":\"new_account\",\"registered_at\":\"2001-03-28T10:21:21.319\"}\n";
+
+    FrsMigrationWorker frsMigrationWorker = getFrsMigrationWorker();
+    frsMigrationWorker.inputStream = new ByteArrayInputStream((
+      accountInput /*line #1*/
+        + transactionInput/*line #2*/
+        + accountInput/*line #3*/
+    ).getBytes("UTF-8"));
+    ByteArrayOutputStream errorBytesOutput = new ByteArrayOutputStream();
+    frsMigrationWorker.outError = errorBytesOutput;
+    frsMigrationWorker.createTmpTables();
+
+    //
+    //
+    frsMigrationWorker.parseDataAndSaveInTmpDb();
+    frsMigrationWorker.uploadErrors();
+    //
+    //
+
+    List<TransactionTmp> actualTransactionTmpList = migrationTestDao.get().loadTransactionsList(frsMigrationWorker.tmpTransactionTable);
+    List<AccountTmp> actualAccountTmpList = migrationTestDao.get().loadAccountsList(frsMigrationWorker.tmpAccountTable);
+
+    assertThat(actualTransactionTmpList).hasSize(0);
+    assertThat(actualAccountTmpList).hasSize(2);
+
+    assertThat(errorBytesOutput.size()).isGreaterThan(0);
+
+    String errorStr = errorBytesOutput.toString("UTF-8");
+    assertThat(errorStr).contains("[line #2]");
+    assertThat(errorStr).contains("Unexpected character ('г' (code 1075 / 0x433)): was expecting comma to separate");
+  }
+
 
   @Test
   public void test_creation_if_idle_clients_if_not_exist() throws Exception {
@@ -311,24 +358,6 @@ public class FrsMigrationWorkerTest extends ParentTestNg {
     assertThatAreEqual(actualAccountTmpList.get(0), expectedAccount);
   }
 
-//    @Test
-//  public void testCiaAndFrsConcurrentlyMigration() throws Exception {
-//    clientTestDao.get().removeAllData();
-//    charmTestDao.get().removeAllData();
-//
-//    GenerateInputFiles fileGenerator = prepareInputFiles(10, 100);
-//
-//    //
-//    //
-//    migration.get().executeCiaFrsMigrationConcurrently();
-//    //
-//    //
-//
-//    long clientCount = clientTestDao.get().getClientCount();
-//
-//    assertThat(clientCount).isEqualTo(fileGenerator.getGoodClientCount());
-//  }
-
   private void assertThatAreEqual(AccountTmp actual, AccountTmp expected) {
     assertThat(actual.account_number).isEqualTo(expected.account_number);
     assertThat(actual.registeredAtD).isEqualTo(expected.registeredAtD);
@@ -347,24 +376,4 @@ public class FrsMigrationWorkerTest extends ParentTestNg {
     assertThat(actual.transaction_type).isEqualTo(String.valueOf(expected.transaction_type));
   }
 
-  private int getLineCountOfFile(String fileName) {
-    try
-      (
-        FileReader input = new FileReader(fileName);
-        LineNumberReader count = new LineNumberReader(input);
-      ) {
-      while (count.skip(Long.MAX_VALUE) > 0) {}
-      return count.getLineNumber();
-    } catch (IOException e) {
-      e.printStackTrace();
-    }
-    return 0;
-  }
-
-  private GenerateInputFiles prepareInputFiles(int ciaLimit, int frsLimit) throws Exception {
-    GenerateInputFiles fileGenerator = new GenerateInputFiles(ciaLimit, frsLimit);
-    fileGenerator.setTestMode();
-    fileGenerator.execute();
-    return fileGenerator;
-  }
 }

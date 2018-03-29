@@ -19,11 +19,19 @@ import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
-import java.io.*;
+import java.io.ByteArrayInputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.OutputStream;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Random;
+import java.util.Set;
 
 import static kz.greetgo.sandbox.db.migration_impl.model.ClientTmp.STATUS_DUPLICATED;
 import static kz.greetgo.sandbox.db.migration_impl.model.ClientTmp.STATUS_EXISTS;
@@ -447,19 +455,25 @@ public class CiaMigrationWorkerTest extends ParentTestNg {
     clientTestDao.get().removeAllData();
     charmTestDao.get().removeAllData();
 
-    List<ClientTmp> uniqueGoodClients = generateGoodUniqueClients(6);
-
     CiaMigrationWorker ciaMigrationWorker = getCiaMigrationWorker();
 
     ciaMigrationWorker.createTmpTables();
-    Set<String> expectedCharmNames = new HashSet<>();
 
-    for (int i = 0; i < uniqueGoodClients.size(); i++) {
-      ClientTmp uniqueGoodClient = uniqueGoodClients.get(i);
-      uniqueGoodClient.number = i;
-      migrationTestDao.get().insertClient(ciaMigrationWorker.tmpClientTable, uniqueGoodClient);
-      expectedCharmNames.add(uniqueGoodClient.charm_name);
-    }
+    ClientTmp c1 = new ClientTmp();
+    c1.number = 12;
+    c1.charm_name = RND.str(10);
+    migrationTestDao.get().insertClient(ciaMigrationWorker.tmpClientTable, c1);
+    charmTestDao.get().insertCharm(RND.str(10), c1.charm_name);
+
+    ClientTmp c2 = new ClientTmp();
+    c2.number = 13;
+    c2.charm_name = RND.str(10);
+    migrationTestDao.get().insertClient(ciaMigrationWorker.tmpClientTable, c2);
+
+    ClientTmp c3 = new ClientTmp();
+    c3.number = 15;
+    c3.charm_name = c2.charm_name;
+    migrationTestDao.get().insertClient(ciaMigrationWorker.tmpClientTable, c3);
 
     //
     //
@@ -467,9 +481,11 @@ public class CiaMigrationWorkerTest extends ParentTestNg {
     //
     //
 
-    Set<String> actualCharmNames = charmTestDao.get().loadCharmNamesSet();
+    List<String> actualCharmNames = charmTestDao.get().loadCharmNamesSet();
 
-    assertThat(actualCharmNames).isEqualTo(expectedCharmNames);
+    assertThat(actualCharmNames).hasSize(2);
+    assertThat(actualCharmNames).contains(c1.charm_name);
+    assertThat(actualCharmNames).contains(c2.charm_name);
   }
 
   @Test
@@ -501,8 +517,8 @@ public class CiaMigrationWorkerTest extends ParentTestNg {
 
     List<ClientTmp> actualUpsertedClients = clientTestDao.get().loadClientList();
 
-    expectedClients.sort((o1, o2) -> o1.surname.compareToIgnoreCase(o2.surname));
-    actualUpsertedClients.sort((o1, o2) -> o1.surname.compareToIgnoreCase(o2.surname));
+    expectedClients.sort(Comparator.comparing(o2 -> o2.surname));
+    actualUpsertedClients.sort(Comparator.comparing(o -> o.surname));
 
     assertThat(actualUpsertedClients).isNotNull();
     assertThat(actualUpsertedClients).hasSameSizeAs(expectedClients);

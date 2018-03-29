@@ -605,8 +605,7 @@ public class ClientRegisterImplTest extends ParentTestNg {
     ClientInfo expectingClientInfo = toClientInfo(clientDetails);
     ClientRecordsToSave clientRecordsToSave = toClientRecords(clientDetails);
 
-    charmTestDao.get().insertCharm(clientRecordsToSave.charm.id, clientRecordsToSave.charm.name,
-      clientRecordsToSave.charm.description, clientRecordsToSave.charm.energy);
+    charmTestDao.get().insertCharm(clientRecordsToSave.charm.id, clientRecordsToSave.charm.name);
 
     //
     //
@@ -633,8 +632,7 @@ public class ClientRegisterImplTest extends ParentTestNg {
 
     assertThat(client).isNotNull();
 
-    charmTestDao.get().insertCharm(client.charm.id, client.charm.name,
-      client.charm.description, client.charm.energy);
+    charmTestDao.get().insertCharm(client.charm.id, client.charm.name);
 
     clientTestDao.get().insertClient(client.id, client.surname, client.name,
       client.patronymic, client.gender, Date.valueOf(client.dateOfBirth), client.charm.id);
@@ -645,8 +643,7 @@ public class ClientRegisterImplTest extends ParentTestNg {
     ClientInfo expectingClientInfo = toClientInfo(clientDetails);
     ClientRecordsToSave clientRecordsToSave = toClientRecords(clientDetails);
 
-    charmTestDao.get().insertCharm(clientRecordsToSave.charm.id, clientRecordsToSave.charm.name,
-      clientRecordsToSave.charm.description, clientRecordsToSave.charm.energy);
+    charmTestDao.get().insertCharm(clientRecordsToSave.charm.id, clientRecordsToSave.charm.name);
 
     //
     //
@@ -671,8 +668,7 @@ public class ClientRegisterImplTest extends ParentTestNg {
 
     ClientDetails client = createRndClient();
 
-    charmTestDao.get().insertCharm(client.charm.id, client.charm.name,
-      client.charm.description, client.charm.energy);
+    charmTestDao.get().insertCharm(client.charm.id, client.charm.name);
 
     clientTestDao.get().insertClient(client.id, client.surname, client.name,
       client.patronymic, client.gender, Date.valueOf(client.dateOfBirth), client.charm.id);
@@ -697,8 +693,7 @@ public class ClientRegisterImplTest extends ParentTestNg {
 
     ClientDetails client = createRndClient();
 
-    charmTestDao.get().insertCharm(client.charm.id, client.charm.name,
-      client.charm.description, client.charm.energy);
+    charmTestDao.get().insertCharm(client.charm.id, client.charm.name);
 
     clientTestDao.get().insertClient(client.id, client.surname, client.name,
       client.patronymic, client.gender, Date.valueOf(client.dateOfBirth), client.charm.id);

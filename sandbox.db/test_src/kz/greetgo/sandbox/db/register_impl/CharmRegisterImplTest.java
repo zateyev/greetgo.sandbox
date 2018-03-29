@@ -8,8 +8,9 @@ import kz.greetgo.sandbox.db.test.util.ParentTestNg;
 import kz.greetgo.util.RND;
 import org.testng.annotations.Test;
 
-import java.text.Collator;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
 
 import static org.fest.assertions.api.Assertions.assertThat;
 
@@ -26,10 +27,10 @@ public class CharmRegisterImplTest extends ParentTestNg {
   public void getCharms_ok() {
     charmTestDao.get().removeAllData();
 
-    List<Charm> charms = new ArrayList<>( );
+    List<Charm> charms = new ArrayList<>();
     for (int i = 0; i < 500; i++) {
       Charm charm = createRndCharm();
-      charmTestDao.get().insertCharm(charm.id, charm.name, charm.description, charm.energy);
+      charmTestDao.get().insertCharm(charm.id, charm.name);
       charms.add(charm);
     }
 
@@ -43,7 +44,7 @@ public class CharmRegisterImplTest extends ParentTestNg {
 
     assertThat(result).isNotNull();
     assertThat(result.size()).isEqualTo(charms.size());
-    for (int i = 0; i < charms.size(); i+=3) {
+    for (int i = 0; i < charms.size(); i += 3) {
       assertThat(result.get(i).id).isEqualTo(charms.get(i).id);
       assertThat(result.get(i).name).isEqualTo(charms.get(i).name);
       assertThat(result.get(i).description).isEqualTo(charms.get(i).description);
