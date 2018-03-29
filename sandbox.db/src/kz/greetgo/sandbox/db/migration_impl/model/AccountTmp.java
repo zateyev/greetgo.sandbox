@@ -4,10 +4,11 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
-public class Account {
+public class AccountTmp {
   public String type;
   public String clientId;
   public String account_number;
   public String registeredAt;
   public Date registeredAtD;
+  public int number;
 }

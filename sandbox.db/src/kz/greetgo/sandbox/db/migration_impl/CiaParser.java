@@ -48,7 +48,7 @@ public class CiaParser extends SaxHandler {
       case "/cia/client":
         client = new ClientTmp();
         client.cia_id = attributes.getValue("id");
-        client.id = ++recordsNum;
+        client.number = ++recordsNum;
         return;
 
       case "/cia/client/surname":

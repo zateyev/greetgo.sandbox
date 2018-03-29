@@ -1,7 +1,7 @@
 package kz.greetgo.sandbox.db.migration_impl;
 
-import kz.greetgo.sandbox.db.migration_impl.model.Account;
-import kz.greetgo.sandbox.db.migration_impl.model.Transaction;
+import kz.greetgo.sandbox.db.migration_impl.model.AccountTmp;
+import kz.greetgo.sandbox.db.migration_impl.model.TransactionTmp;
 
 import java.io.Closeable;
 import java.io.IOException;
@@ -37,7 +37,7 @@ public class FrsTableWorker implements Closeable {
         "VALUES (?, ?, ?, ?, ?)");
   }
 
-  public void addToBatch(Account account) {
+  public void addToBatch(AccountTmp account) {
 
     try {
       int ind = 1;
@@ -60,7 +60,7 @@ public class FrsTableWorker implements Closeable {
     }
   }
 
-  public void addToBatch(Transaction transaction) {
+  public void addToBatch(TransactionTmp transaction) {
 
     try {
       int ind = 1;

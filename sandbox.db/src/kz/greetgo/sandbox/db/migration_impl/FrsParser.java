@@ -3,8 +3,8 @@ package kz.greetgo.sandbox.db.migration_impl;
 import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonToken;
-import kz.greetgo.sandbox.db.migration_impl.model.Account;
-import kz.greetgo.sandbox.db.migration_impl.model.Transaction;
+import kz.greetgo.sandbox.db.migration_impl.model.AccountTmp;
+import kz.greetgo.sandbox.db.migration_impl.model.TransactionTmp;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -27,8 +27,8 @@ public class FrsParser {
     BufferedReader br = new BufferedReader(new InputStreamReader(inputStream));
     String line;
     while ((line = br.readLine()) != null) {
-      Account account = new Account();
-      Transaction transaction = new Transaction();
+      AccountTmp account = new AccountTmp();
+      TransactionTmp transaction = new TransactionTmp();
 
       JsonParser jsonParser = new JsonFactory().createParser(line);
 

@@ -34,14 +34,15 @@ public class GenerateInputFiles {
   private List<ClientTmp> generatedClients;
   private List<kz.greetgo.sandbox.db.migration_impl.model.Address> generatedAddresses;
   private List<kz.greetgo.sandbox.db.migration_impl.model.PhoneNumber> generatedPhoneNumbers;
-  private Map<String, kz.greetgo.sandbox.db.migration_impl.model.Account> clientAccounts;
-  private Map<String, Transaction> accountTransactions;
+  private Map<String, AccountTmp> clientAccounts;
+  private Map<String, TransactionTmp> accountTransactions;
   private boolean testMode;
   private String outCiaFileName;
   private List<ClientTmp> errorClients;
   private String outFrsFileName;
-  private List<kz.greetgo.sandbox.db.migration_impl.model.Account> generatedAccounts;
-  private List<Transaction> generatedTransactions;
+  private List<AccountTmp> generatedAccounts;
+  private List<TransactionTmp> generatedTransactions;
+  public boolean archiveFiles = true;
 
   public GenerateInputFiles(int ciaLimit, int frsLimit) {
     this.ciaLimit = ciaLimit;
@@ -111,11 +112,11 @@ public class GenerateInputFiles {
     this.testMode = true;
   }
 
-  public Map<String, kz.greetgo.sandbox.db.migration_impl.model.Account> getClientAccounts() {
+  public Map<String, AccountTmp> getClientAccounts() {
     return clientAccounts;
   }
 
-  public Map<String, Transaction> getAccountTransactions() {
+  public Map<String, TransactionTmp> getAccountTransactions() {
     return accountTransactions;
   }
 
@@ -147,11 +148,11 @@ public class GenerateInputFiles {
     return outFrsFileName;
   }
 
-  public List<kz.greetgo.sandbox.db.migration_impl.model.Account> getGeneratedAccounts() {
+  public List<AccountTmp> getGeneratedAccounts() {
     return generatedAccounts;
   }
 
-  public List<Transaction> getGeneratedTransactions() {
+  public List<TransactionTmp> getGeneratedTransactions() {
     return generatedTransactions;
   }
 
@@ -183,7 +184,7 @@ public class GenerateInputFiles {
       pr.println("Unique good client count = " + goodClientIds.size());
       pr.println("Client error record count = " + clientErrorRecordCount);
       pr.println("Transaction count = " + transactionCount);
-      pr.println("Account count = " + accountCount);
+      pr.println("AccountTmp count = " + accountCount);
     }
   }
 
@@ -491,7 +492,8 @@ public class GenerateInputFiles {
 
     working.set(false);
 
-    if (!testMode) archive();
+    if (archiveFiles)
+      archive();
 
     workingFile.delete();
     newCiaFile.delete();
@@ -890,7 +892,7 @@ public class GenerateInputFiles {
       String type;
       BigDecimal money;
 
-      String toJson(kz.greetgo.sandbox.db.migration_impl.model.Transaction transaction) {
+      String toJson(TransactionTmp transaction) {
 
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS");
 
@@ -1039,7 +1041,7 @@ public class GenerateInputFiles {
     records.add(account.toJson());
     info.newAccount();
 
-    kz.greetgo.sandbox.db.migration_impl.model.Account newAccount = new kz.greetgo.sandbox.db.migration_impl.model.Account();
+    AccountTmp newAccount = new AccountTmp();
     newAccount.account_number = account.number;
 //    newAccount.registeredAt = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS").format(account.registeredAt);
     newAccount.registeredAtD = account.registeredAt;
@@ -1049,11 +1051,11 @@ public class GenerateInputFiles {
     }
 
 
-    Transaction transaction;
+    TransactionTmp transaction;
 
     int count = 2 + random.nextInt(10);
     for (int i = 0; i < count; i++) {
-      transaction = new Transaction();
+      transaction = new TransactionTmp();
       records.add(account.addTransaction(rowIndex, false).toJson(transaction));
       info.newTransaction();
       if (testMode) {
@@ -1061,7 +1063,7 @@ public class GenerateInputFiles {
         generatedTransactions.add(transaction);
       }
     }
-    transaction = new Transaction();
+    transaction = new TransactionTmp();
     records.add(account.addTransaction(rowIndex, true).toJson(transaction));
     info.newTransaction();
     if (testMode) {

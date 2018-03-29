@@ -135,10 +135,10 @@ public interface ClientTestDao {
   @Select("SELECT account as account_number, money, type as transaction_type " +
     "FROM client_account_transaction WHERE account = " +
     "(SELECT id FROM client_account WHERE number = #{account_number}) AND finished_at = #{finished_at}")
-  Transaction getTransactionByAccountNumber(@Param("account_number") String accountNumber,
-                                            @Param("finished_at") Date finishedAt);
+  TransactionTmp getTransactionByAccountNumber(@Param("account_number") String accountNumber,
+                                               @Param("finished_at") Date finishedAt);
 
-  void insertClientM(ClientTmp client);
+  void insertClientTmp(ClientTmp client);
 
   @Select("SELECT cia_id, surname, client.name, patronymic, gender, birth_date, charm.name AS charm_name FROM client LEFT JOIN charm" +
     " ON client.charm = charm.id ORDER BY surname")
@@ -151,8 +151,10 @@ public interface ClientTestDao {
   List<kz.greetgo.sandbox.db.migration_impl.model.PhoneNumber> loadPhoneNumberList();
 
   @Select("SELECT number as account_number, registered_at as registeredAtD FROM client_account ORDER BY registered_at")
-  List<Account> loadAccountList();
+  List<AccountTmp> loadAccountList();
 
-  @Select("SELECT money, transaction_type FROM client_account_transaction ORDER BY finished_at")
-  List<Transaction> loadTransactionList();
+  @Select("SELECT money, type as transaction_type FROM client_account_transaction ORDER BY finished_at")
+  List<TransactionTmp> loadTransactionList();
+
+  void insertAccountTmp(AccountTmp account);
 }

@@ -41,19 +41,22 @@ public class CiaMigrationWorker extends AbstractMigrationWorker {
 
   protected void validateErrors() throws SQLException, IOException, SftpException {
     //language=PostgreSQL
-    exec("UPDATE TMP_CLIENT SET error = 'surname is not defined' " +
+    exec("UPDATE TMP_CLIENT SET error = 'cia_id is not defined' " +
+      "WHERE error IS NULL AND (cia_id <> '') IS NOT TRUE");
+    //language=PostgreSQL
+    exec("UPDATE TMP_CLIENT SET error = 'surname is not defined, cia_id = ' || cia_id::text " +
       "WHERE error IS NULL AND (surname <> '') IS NOT TRUE");
     //language=PostgreSQL
-    exec("UPDATE TMP_CLIENT SET error = 'name is not defined'\n" +
+    exec("UPDATE TMP_CLIENT SET error = 'name is not defined, cia_id = ' || cia_id::text\n" +
       "WHERE error IS NULL AND (name <> '') IS NOT TRUE");
     //language=PostgreSQL
-    exec("UPDATE TMP_CLIENT SET error = 'birth_date is not defined'\n" +
+    exec("UPDATE TMP_CLIENT SET error = 'birth_date is not defined, cia_id = ' || cia_id::text\n" +
       "WHERE error IS NULL AND birth_date IS NULL");
     //language=PostgreSQL
-    exec("UPDATE TMP_CLIENT SET error = 'charm is not defined'\n" +
-      "WHERE error IS NULL AND charm_name IS NULL");
+    exec("UPDATE TMP_CLIENT SET error = 'charm is not defined, cia_id = ' || cia_id::text\n" +
+      "WHERE error IS NULL AND (charm_name <> '') IS NOT TRUE");
     //language=PostgreSQL
-    exec("UPDATE TMP_CLIENT SET error = 'age of the client must be between 10 and 200'\n" +
+    exec("UPDATE TMP_CLIENT SET error = 'age of the client must be between 10 and 200, cia_id = ' || cia_id::text\n" +
       "WHERE error IS NULL AND date_part('year', age(birth_date)) NOT BETWEEN 11 AND 199"); // equivalent to age <=10 or age >=200
 
     //language=PostgreSQL
@@ -72,8 +75,8 @@ public class CiaMigrationWorker extends AbstractMigrationWorker {
         while (errorRs.next()) {
           outError.write("Error: ".getBytes());
           outError.write(errorRs.getBytes("error"));
-          outError.write(". Record id: ".getBytes());
-          outError.write(errorRs.getBytes("cia_id"));
+//          outError.write(". Record id: ".getBytes());
+//          outError.write(errorRs.getBytes("cia_id"));
           outError.write("\n".getBytes());
         }
       }
